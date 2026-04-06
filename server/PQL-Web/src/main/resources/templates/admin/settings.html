@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+
+<th:block layout:fragment="title">앱 설정</th:block>
+
+<th:block layout:fragment="content">
+
+    <!-- 카테고리별 설정 -->
+    <div class="space-y-4">
+
+        <!-- 설정 목록 카드 -->
+        <div class="card bg-base-100 shadow">
+            <div class="card-body p-4">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="card-title text-base">
+                        <i data-lucide="settings-2" class="size-5"></i>
+                        앱 설정 목록
+                    </h3>
+                    <div class="flex gap-2">
+                        <!-- 카테고리 필터 -->
+                        <select class="select select-sm select-bordered" id="categoryFilter" onchange="filterByCategory(this.value)">
+                            <option value="">전체 카테고리</option>
+                            <option value="SANDBOX">SANDBOX</option>
+                            <option value="AI">AI</option>
+                            <option value="RATE_LIMIT">RATE_LIMIT</option>
+                            <option value="SYSTEM">SYSTEM</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="table table-sm" id="settingsTable">
+                        <thead>
+                        <tr>
+                            <th class="w-64">Key</th>
+                            <th class="w-24">카테고리</th>
+                            <th class="w-24">타입</th>
+                            <th>값</th>
+                            <th>설명</th>
+                            <th class="w-20">액션</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="setting : ${settings}"
+                            th:data-category="${setting.category}"
+                            class="setting-row">
+                            <td class="font-mono text-xs font-semibold" th:text="${setting.settingKey}">sql.max_length</td>
+                            <td>
+                                <span class="badge badge-outline badge-xs" th:text="${setting.category}">SANDBOX</span>
+                            </td>
+                            <td>
+                                <span class="badge badge-ghost badge-xs" th:text="${setting.valueType}">INT</span>
+                            </td>
+                            <td>
+                                <div class="flex items-center gap-2">
+                                    <input type="text"
+                                           th:id="'val_' + ${setting.settingKey}"
+                                           th:value="${setting.valueText}"
+                                           class="input input-bordered input-xs w-40 font-mono"
+                                           readonly/>
+                                    <button class="btn btn-xs btn-ghost hidden edit-actions"
+                                            th:id="'btn_save_' + ${setting.settingKey}"
+                                            th:onclick="|saveSetting('${setting.settingKey}')|">
+                                        <i data-lucide="check" class="size-3 text-success"></i>
+                                    </button>
+                                    <button class="btn btn-xs btn-ghost hidden edit-actions"
+                                            th:id="'btn_cancel_' + ${setting.settingKey}"
+                                            th:onclick="|cancelEdit('${setting.settingKey}', '${setting.valueText}')|">
+                                        <i data-lucide="x" class="size-3 text-error"></i>
+                                    </button>
+                                </div>
+                            </td>
+                            <td class="text-xs text-base-content/60" th:text="${setting.description}">SQL 최대 길이 제한</td>
+                            <td>
+                                <button class="btn btn-xs btn-ghost"
+                                        th:onclick="|startEdit('${setting.settingKey}')|">
+                                    <i data-lucide="pencil" class="size-3"></i>
+                                </button>
+                            </td>
+                        </tr>
+
+                        <!-- Placeholder settings -->
+                        <th:block th:if="${settings == null or settings.isEmpty()}">
+                            <tr class="setting-row" data-category="SANDBOX">
+                                <td class="font-mono text-xs font-semibold">sql.max_length</td>
+                                <td><span class="badge badge-outline badge-xs">SANDBOX</span></td>
+                                <td><span class="badge badge-ghost badge-xs">INT</span></td>
+                                <td>
+                                    <div class="flex items-center gap-2">
+                                        <input type="text" id="val_sql.max_length" value="2000" class="input input-bordered input-xs w-40 font-mono" readonly/>
+                                    </div>
+                                </td>
+                                <td class="text-xs text-base-content/60">SQL 최대 길이 제한 (문자 수)</td>
+                                <td><button class="btn btn-xs btn-ghost" onclick="startEdit('sql.max_length')"><i data-lucide="pencil" class="size-3"></i></button></td>
+                            </tr>
+                            <tr class="setting-row" data-category="SANDBOX">
+                                <td class="font-mono text-xs font-semibold">sql.max_rows</td>
+                                <td><span class="badge badge-outline badge-xs">SANDBOX</span></td>
+                                <td><span class="badge badge-ghost badge-xs">INT</span></td>
+                                <td>
+                                    <div class="flex items-center gap-2">
+                                        <input type="text" id="val_sql.max_rows" value="1000" class="input input-bordered input-xs w-40 font-mono" readonly/>
+                                    </div>
+                                </td>
+                                <td class="text-xs text-base-content/60">결과 최대 행 수</td>
+                                <td><button class="btn btn-xs btn-ghost" onclick="startEdit('sql.max_rows')"><i data-lucide="pencil" class="size-3"></i></button></td>
+                            </tr>
+                            <tr class="setting-row" data-category="SANDBOX">
+                                <td class="font-mono text-xs font-semibold">sql.timeout_ms</td>
+                                <td><span class="badge badge-outline badge-xs">SANDBOX</span></td>
+                                <td><span class="badge badge-ghost badge-xs">INT</span></td>
+                                <td>
+                                    <div class="flex items-center gap-2">
+                                        <input type="text" id="val_sql.timeout_ms" value="5000" class="input input-bordered input-xs w-40 font-mono" readonly/>
+                                    </div>
+                                </td>
+                                <td class="text-xs text-base-content/60">쿼리 타임아웃 (ms)</td>
+                                <td><button class="btn btn-xs btn-ghost" onclick="startEdit('sql.timeout_ms')"><i data-lucide="pencil" class="size-3"></i></button></td>
+                            </tr>
+                            <tr class="setting-row" data-category="AI">
+                                <td class="font-mono text-xs font-semibold">ai.enabled</td>
+                                <td><span class="badge badge-outline badge-xs">AI</span></td>
+                                <td><span class="badge badge-ghost badge-xs">BOOLEAN</span></td>
+                                <td>
+                                    <div class="flex items-center gap-2">
+                                        <input type="text" id="val_ai.enabled" value="true" class="input input-bordered input-xs w-40 font-mono" readonly/>
+                                    </div>
+                                </td>
+                                <td class="text-xs text-base-content/60">AI 기능 활성화 여부</td>
+                                <td><button class="btn btn-xs btn-ghost" onclick="startEdit('ai.enabled')"><i data-lucide="pencil" class="size-3"></i></button></td>
+                            </tr>
+                            <tr class="setting-row" data-category="RATE_LIMIT">
+                                <td class="font-mono text-xs font-semibold">rate.execute_per_min</td>
+                                <td><span class="badge badge-outline badge-xs">RATE_LIMIT</span></td>
+                                <td><span class="badge badge-ghost badge-xs">INT</span></td>
+                                <td>
+                                    <div class="flex items-center gap-2">
+                                        <input type="text" id="val_rate.execute_per_min" value="30" class="input input-bordered input-xs w-40 font-mono" readonly/>
+                                    </div>
+                                </td>
+                                <td class="text-xs text-base-content/60">분당 SQL 실행 횟수 제한</td>
+                                <td><button class="btn btn-xs btn-ghost" onclick="startEdit('rate.execute_per_min')"><i data-lucide="pencil" class="size-3"></i></button></td>
+                            </tr>
+                        </th:block>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</th:block>
+
+<th:block layout:fragment="js">
+    <script>
+        lucide.createIcons();
+
+        function startEdit(key) {
+            const input = document.getElementById('val_' + key);
+            input.removeAttribute('readonly');
+            input.focus();
+            input.select();
+
+            // save/cancel 버튼 표시
+            const saveBtn = document.getElementById('btn_save_' + key);
+            const cancelBtn = document.getElementById('btn_cancel_' + key);
+            if (saveBtn) {
+                saveBtn.classList.remove('hidden');
+                cancelBtn.classList.remove('hidden');
+            }
+        }
+
+        function saveSetting(key) {
+            const input = document.getElementById('val_' + key);
+            const value = input.value;
+            fetch('/admin/settings/' + encodeURIComponent(key), {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({value: value})
+            }).then(r => {
+                if (r.ok) {
+                    input.setAttribute('readonly', true);
+                    document.getElementById('btn_save_' + key)?.classList.add('hidden');
+                    document.getElementById('btn_cancel_' + key)?.classList.add('hidden');
+                } else {
+                    alert('저장 실패');
+                }
+            });
+        }
+
+        function cancelEdit(key, originalValue) {
+            const input = document.getElementById('val_' + key);
+            input.value = originalValue;
+            input.setAttribute('readonly', true);
+            document.getElementById('btn_save_' + key)?.classList.add('hidden');
+            document.getElementById('btn_cancel_' + key)?.classList.add('hidden');
+        }
+
+        function filterByCategory(category) {
+            document.querySelectorAll('.setting-row').forEach(row => {
+                if (!category || row.dataset.category === category) {
+                    row.style.display = '';
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+        }
+    </script>
+</th:block>
+</html>

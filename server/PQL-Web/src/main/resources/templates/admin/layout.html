@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      data-theme="light">
+<head>
+    <meta charset="utf-8"/>
+    <title>passQL Admin | <th:block layout:fragment="title">Dashboard</th:block></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes"/>
+
+    <!-- Tailwind CSS 4 -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+
+    <!-- DaisyUI 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css"/>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Additional CSS -->
+    <th:block layout:fragment="css"></th:block>
+</head>
+<body class="min-h-screen bg-base-200">
+
+<!-- Drawer Layout -->
+<div class="drawer lg:drawer-open">
+    <input id="drawer-toggle" type="checkbox" class="drawer-toggle"/>
+
+    <!-- Main Content -->
+    <div class="drawer-content flex flex-col">
+        <!-- Navbar -->
+        <div class="navbar bg-base-100 shadow-sm sticky top-0 z-30">
+            <!-- Mobile menu button -->
+            <div class="flex-none lg:hidden">
+                <label for="drawer-toggle" class="btn btn-square btn-ghost">
+                    <i data-lucide="menu" class="size-5"></i>
+                </label>
+            </div>
+
+            <!-- Page title -->
+            <div class="flex-1">
+                <h1 class="text-lg font-bold px-2" th:text="${pageTitle}">Dashboard</h1>
+            </div>
+
+            <!-- Right side -->
+            <div class="flex-none flex items-center gap-2">
+                <!-- Dark mode toggle -->
+                <label class="swap swap-rotate btn btn-ghost btn-circle">
+                    <input type="checkbox" id="themeToggle"/>
+                    <i data-lucide="sun" class="swap-off size-5"></i>
+                    <i data-lucide="moon" class="swap-on size-5"></i>
+                </label>
+            </div>
+        </div>
+
+        <!-- Page Content -->
+        <main class="p-4 lg:p-6 flex-1">
+            <th:block layout:fragment="content"></th:block>
+        </main>
+
+        <!-- Footer -->
+        <footer class="footer footer-center p-4 bg-base-100 text-base-content border-t border-base-300">
+            <aside>
+                <p>&copy; 2026 passQL. All rights reserved.</p>
+            </aside>
+        </footer>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="drawer-side z-40">
+        <label for="drawer-toggle" aria-label="close sidebar" class="drawer-overlay"></label>
+        <aside class="bg-base-100 min-h-full w-64 border-r border-base-300">
+            <!-- Logo -->
+            <div class="flex items-center gap-3 px-4 py-5 border-b border-base-300">
+                <span class="text-xl font-bold">passQL</span>
+                <span class="badge badge-primary badge-sm">Admin</span>
+            </div>
+
+            <!-- Menu -->
+            <ul class="menu p-4 gap-1" id="sidebarMenu">
+                <li>
+                    <a th:href="@{/admin}" th:classappend="${currentMenu == 'dashboard'} ? 'active'">
+                        <i data-lucide="layout-dashboard" class="size-5"></i>
+                        대시보드
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/admin/questions}" th:classappend="${currentMenu == 'questions'} ? 'active'">
+                        <i data-lucide="book-open" class="size-5"></i>
+                        문제 관리
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/admin/prompts}" th:classappend="${currentMenu == 'prompts'} ? 'active'">
+                        <i data-lucide="message-square-code" class="size-5"></i>
+                        프롬프트 관리
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/admin/topics}" th:classappend="${currentMenu == 'topics'} ? 'active'">
+                        <i data-lucide="tags" class="size-5"></i>
+                        토픽/태그 관리
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/admin/concepts}" th:classappend="${currentMenu == 'concepts'} ? 'active'">
+                        <i data-lucide="book" class="size-5"></i>
+                        개념 문서 관리
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/admin/settings}" th:classappend="${currentMenu == 'settings'} ? 'active'">
+                        <i data-lucide="settings" class="size-5"></i>
+                        앱 설정
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/admin/monitor}" th:classappend="${currentMenu == 'monitor'} ? 'active'">
+                        <i data-lucide="activity" class="size-5"></i>
+                        모니터링
+                    </a>
+                </li>
+            </ul>
+        </aside>
+    </div>
+</div>
+
+<!-- Initialize Lucide Icons -->
+<script>
+    lucide.createIcons();
+
+    // Theme toggle
+    const themeToggle = document.getElementById('themeToggle');
+    const html = document.documentElement;
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    html.setAttribute('data-theme', savedTheme);
+    themeToggle.checked = savedTheme === 'dark';
+    themeToggle.addEventListener('change', () => {
+        const theme = themeToggle.checked ? 'dark' : 'light';
+        html.setAttribute('data-theme', theme);
+        localStorage.setItem('theme', theme);
+    });
+</script>
+
+<!-- Additional JS -->
+<th:block layout:fragment="js"></th:block>
+</body>
+</html>

@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+
+<th:block layout:fragment="title">개념 문서 관리</th:block>
+
+<th:block layout:fragment="content">
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+
+        <!-- 개념 태그 목록 -->
+        <div class="card bg-base-100 shadow xl:col-span-1">
+            <div class="card-body p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="card-title text-base">
+                        <i data-lucide="tag" class="size-5"></i>
+                        개념 태그
+                    </h3>
+                </div>
+
+                <div class="space-y-1">
+                    <a th:each="tag : ${conceptTags}"
+                       th:href="@{/admin/concepts}?tagKey=${tag.tagKey}"
+                       th:classappend="${selectedTagKey == tag.tagKey} ? 'bg-primary/10 border-primary' : 'border-base-300'"
+                       class="flex items-center justify-between border rounded-lg px-3 py-2 cursor-pointer hover:bg-base-200 transition-colors">
+                        <div class="min-w-0">
+                            <p class="font-medium text-sm" th:text="${tag.labelKo}">GROUP BY</p>
+                            <p class="font-mono text-xs text-base-content/50" th:text="${tag.tagKey}">group_by</p>
+                        </div>
+                        <div class="flex items-center gap-2 shrink-0">
+                            <span class="badge badge-outline badge-xs" th:text="${tag.category}">aggregation</span>
+                            <span th:classappend="${tag.isActive} ? 'badge-success' : 'badge-ghost'"
+                                  class="badge badge-xs"
+                                  th:text="${tag.isActive} ? '활성' : '비활성'">활성</span>
+                        </div>
+                    </a>
+
+                    <!-- Placeholder -->
+                    <th:block th:if="${conceptTags == null or conceptTags.isEmpty()}">
+                        <div class="flex items-center justify-between border border-primary/30 bg-primary/5 rounded-lg px-3 py-2">
+                            <div>
+                                <p class="font-medium text-sm">GROUP BY</p>
+                                <p class="font-mono text-xs text-base-content/50">group_by</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="badge badge-outline badge-xs">aggregation</span>
+                                <span class="badge badge-xs badge-success">활성</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border border-base-300 rounded-lg px-3 py-2">
+                            <div>
+                                <p class="font-medium text-sm">JOIN 개념</p>
+                                <p class="font-mono text-xs text-base-content/50">join_concept</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="badge badge-outline badge-xs">join</span>
+                                <span class="badge badge-xs badge-success">활성</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between border border-base-300 rounded-lg px-3 py-2">
+                            <div>
+                                <p class="font-medium text-sm">윈도우 함수</p>
+                                <p class="font-mono text-xs text-base-content/50">window_func</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <span class="badge badge-outline badge-xs">advanced</span>
+                                <span class="badge badge-xs badge-ghost">비활성</span>
+                            </div>
+                        </div>
+                    </th:block>
+                </div>
+            </div>
+        </div>
+
+        <!-- 개념 문서 편집 -->
+        <div class="card bg-base-100 shadow xl:col-span-2">
+            <div class="card-body p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="card-title text-base">
+                        <i data-lucide="file-text" class="size-5"></i>
+                        개념 문서
+                        <span class="badge badge-outline badge-sm" th:if="${selectedTagKey}"
+                              th:text="${selectedTagKey}">group_by</span>
+                    </h3>
+                    <button class="btn btn-sm btn-success" th:if="${selectedTagKey}"
+                            onclick="document.getElementById('newDocModal').showModal()">
+                        <i data-lucide="plus" class="size-4"></i>
+                        문서 추가
+                    </button>
+                </div>
+
+                <!-- 문서 목록 -->
+                <div th:if="${conceptDocs != null and !conceptDocs.isEmpty()}" class="space-y-4">
+                    <div th:each="doc : ${conceptDocs}"
+                         class="border border-base-300 rounded-lg overflow-hidden">
+                        <div class="flex items-center justify-between bg-base-200 px-4 py-2">
+                            <div>
+                                <span class="font-medium text-sm" th:text="${doc.title}">GROUP BY 기본 개념</span>
+                                <span class="text-xs text-base-content/50 ml-2"
+                                      th:text="'v' + ${doc.embeddingVersion} + ' · ' + ${#temporals.format(doc.updatedAt, 'yyyy-MM-dd')}">v1 · 2026-04-01</span>
+                            </div>
+                            <div class="flex gap-1">
+                                <span th:classappend="${doc.isActive} ? 'badge-success' : 'badge-ghost'"
+                                      class="badge badge-xs"
+                                      th:text="${doc.isActive} ? '활성' : '비활성'">활성</span>
+                                <button class="btn btn-xs btn-ghost">
+                                    <i data-lucide="pencil" class="size-3"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="p-4">
+                            <textarea class="textarea textarea-bordered w-full font-mono text-sm"
+                                      rows="8"
+                                      th:name="'doc_' + ${doc.id}"
+                                      th:text="${doc.bodyMd}"></textarea>
+                            <div class="flex justify-end mt-2">
+                                <button type="button" class="btn btn-sm btn-primary"
+                                        th:onclick="|saveDoc(${doc.id})|">
+                                    <i data-lucide="save" class="size-4"></i>
+                                    저장
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Empty / placeholder -->
+                <div th:if="${conceptDocs == null or conceptDocs.isEmpty()}">
+                    <div th:if="${selectedTagKey == null}" class="text-center text-base-content/40 py-16">
+                        <i data-lucide="book" class="size-12 mx-auto mb-3 opacity-30"></i>
+                        <p>좌측에서 태그를 선택하면<br/>개념 문서가 표시됩니다.</p>
+                    </div>
+                    <div th:if="${selectedTagKey != null}" class="space-y-4">
+                        <!-- Placeholder document -->
+                        <div class="border border-base-300 rounded-lg overflow-hidden">
+                            <div class="flex items-center justify-between bg-base-200 px-4 py-2">
+                                <div>
+                                    <span class="font-medium text-sm">GROUP BY 기본 개념</span>
+                                    <span class="text-xs text-base-content/50 ml-2">v1 · 2026-04-01</span>
+                                </div>
+                                <div class="flex gap-1">
+                                    <span class="badge badge-xs badge-success">활성</span>
+                                    <button class="btn btn-xs btn-ghost"><i data-lucide="pencil" class="size-3"></i></button>
+                                </div>
+                            </div>
+                            <div class="p-4">
+                                <textarea class="textarea textarea-bordered w-full font-mono text-sm" rows="8">## GROUP BY란?
+
+GROUP BY 절은 SELECT 문에서 집계 함수와 함께 사용하여
+특정 컬럼의 값을 기준으로 행을 그룹화합니다.
+
+### 기본 구문
+```sql
+SELECT department_id, AVG(salary)
+FROM employees
+GROUP BY department_id;
+```
+
+### 주의사항
+- SELECT 절에는 GROUP BY 컬럼 또는 집계 함수만 사용 가능
+- HAVING 절로 그룹에 조건 부여 가능</textarea>
+                                <div class="flex justify-end mt-2">
+                                    <button type="button" class="btn btn-sm btn-primary">
+                                        <i data-lucide="save" class="size-4"></i>
+                                        저장
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 문서 추가 모달 -->
+    <dialog id="newDocModal" class="modal">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg mb-4">개념 문서 추가</h3>
+            <form th:action="@{/admin/concepts}" method="post" class="space-y-3">
+                <input type="hidden" name="tagKey" th:value="${selectedTagKey}"/>
+                <div class="form-control">
+                    <label class="label"><span class="label-text">제목</span></label>
+                    <input type="text" name="title" class="input input-bordered"
+                           placeholder="GROUP BY 기본 개념" required/>
+                </div>
+                <div class="form-control">
+                    <label class="label"><span class="label-text">본문 (Markdown)</span></label>
+                    <textarea name="bodyMd" rows="8" class="textarea textarea-bordered font-mono text-sm"
+                              placeholder="## 개념 설명..."></textarea>
+                </div>
+                <div class="modal-action">
+                    <button type="button" class="btn btn-ghost" onclick="document.getElementById('newDocModal').close()">취소</button>
+                    <button type="submit" class="btn btn-primary">추가</button>
+                </div>
+            </form>
+        </div>
+        <form method="dialog" class="modal-backdrop"><button>close</button></form>
+    </dialog>
+
+</th:block>
+
+<th:block layout:fragment="js">
+    <script>
+        lucide.createIcons();
+
+        function saveDoc(docId) {
+            const body = document.querySelector(`textarea[name="doc_${docId}"]`).value;
+            fetch(`/admin/concepts/${docId}`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({bodyMd: body})
+            }).then(r => {
+                if (r.ok) {
+                    alert('저장되었습니다.');
+                } else {
+                    alert('저장 실패');
+                }
+            });
+        }
+    </script>
+</th:block>
+</html>

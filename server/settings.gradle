@@ -1,0 +1,13 @@
+plugins {
+    id 'org.gradle.toolchains.foojay-resolver-convention' version '0.9.0'
+}
+
+rootProject.name = 'passql'
+
+include 'PQL-Common'
+include 'PQL-Domain-Question'
+include 'PQL-Domain-Submission'
+include 'PQL-Domain-AI'
+include 'PQL-Domain-Meta'
+include 'PQL-Application'
+include 'PQL-Web'

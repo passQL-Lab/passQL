@@ -1,0 +1,68 @@
+# ===================================================================
+# passQL AI Server 빌드 검증 워크플로우 (CI Only)
+# ===================================================================
+#
+# 설명:
+# - main 브랜치 push / PR 시 Docker 빌드가 정상적으로 되는지만 검증
+# - 배포는 수행하지 않음 (deploy 브랜치에서만 배포)
+# - ai/ 디렉토리 변경 시에만 실행
+#
+# ===================================================================
+
+name: PROJECT-PYTHON-AI-CI
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'ai/**'
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'ai/**'
+  workflow_dispatch:
+
+env:
+  PROJECT_NAME: "passql-ai"
+  PYTHON_VERSION: "3.13"
+
+jobs:
+  build-check:
+    name: passQL AI 빌드 검증
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: .env 파일 생성
+        run: |
+          cat > ai/.env << 'EOF'
+          ${{ secrets.AI_ENV_FILE }}
+          EOF
+          echo "✅ .env 파일이 생성되었습니다"
+
+      - name: Docker 빌드환경 설정
+        uses: docker/setup-buildx-action@v3
+
+      - name: Docker 이미지 빌드 검증 (push 없음)
+        uses: docker/build-push-action@v5
+        with:
+          context: ./ai
+          file: ./ai/Dockerfile
+          push: false
+          tags: ${{ env.PROJECT_NAME }}:build-check
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: 빌드 검증 완료
+        run: |
+          echo "✅ Docker 빌드 검증이 성공적으로 완료되었습니다!"
+          echo ""
+          echo "📋 빌드 정보:"
+          echo "  🎯 프로젝트: ${{ env.PROJECT_NAME }}"
+          echo "  🌿 브랜치: ${{ github.ref_name }}"
+          echo "  📝 커밋: ${{ github.sha }}"
+          echo "  ⏰ 검증 시간: $(date '+%Y-%m-%d %H:%M:%S')"

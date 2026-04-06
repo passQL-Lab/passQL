@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+
+<th:block layout:fragment="title">문제 관리</th:block>
+
+<th:block layout:fragment="content">
+
+    <!-- 필터 & 액션 바 -->
+    <div class="card bg-base-100 shadow mb-4">
+        <div class="card-body p-4">
+            <form th:action="@{/admin/questions}" method="get" class="flex flex-wrap gap-3 items-end">
+                <!-- 토픽 필터 -->
+                <div class="form-control">
+                    <label class="label label-text text-xs">토픽</label>
+                    <select name="topic" class="select select-sm select-bordered w-40">
+                        <option value="">전체</option>
+                        <option th:each="topic : ${topics}"
+                                th:value="${topic.code}"
+                                th:text="${topic.displayName}"
+                                th:selected="${param.topic == topic.code}">SELECT</option>
+                    </select>
+                </div>
+
+                <!-- 난이도 필터 -->
+                <div class="form-control">
+                    <label class="label label-text text-xs">난이도</label>
+                    <select name="difficulty" class="select select-sm select-bordered w-32">
+                        <option value="">전체</option>
+                        <option th:each="d : ${#numbers.sequence(1, 5)}"
+                                th:value="${d}"
+                                th:text="'Lv.' + ${d}"
+                                th:selected="${param.difficulty == d}">Lv.1</option>
+                    </select>
+                </div>
+
+                <!-- 실행모드 필터 -->
+                <div class="form-control">
+                    <label class="label label-text text-xs">실행 모드</label>
+                    <select name="executionMode" class="select select-sm select-bordered w-40">
+                        <option value="">전체</option>
+                        <option value="EXECUTABLE" th:selected="${param.executionMode == 'EXECUTABLE'}">실행형</option>
+                        <option value="CONCEPT_ONLY" th:selected="${param.executionMode == 'CONCEPT_ONLY'}">개념형</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-sm btn-primary">
+                    <i data-lucide="search" class="size-4"></i>
+                    검색
+                </button>
+                <a th:href="@{/admin/questions}" class="btn btn-sm btn-ghost">초기화</a>
+
+                <div class="ml-auto">
+                    <a th:href="@{/admin/questions/new}" class="btn btn-sm btn-success">
+                        <i data-lucide="plus" class="size-4"></i>
+                        문제 등록
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 문제 목록 테이블 -->
+    <div class="card bg-base-100 shadow">
+        <div class="card-body p-0">
+            <div class="overflow-x-auto">
+                <table class="table table-sm">
+                    <thead>
+                    <tr>
+                        <th class="w-16">ID</th>
+                        <th>지문 (50자)</th>
+                        <th class="w-28">토픽</th>
+                        <th class="w-20">난이도</th>
+                        <th class="w-28">실행 모드</th>
+                        <th class="w-32">생성일</th>
+                        <th class="w-24">액션</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="q : ${questions}" th:if="${questions != null and !questions.isEmpty()}">
+                        <td class="font-mono text-xs" th:text="${q.id}">1</td>
+                        <td class="max-w-xs truncate text-sm"
+                            th:text="${#strings.length(q.stem) > 50 ? #strings.substring(q.stem, 0, 50) + '...' : q.stem}">
+                            다음 중 employees 테이블에서 부서별 평균 급여를...
+                        </td>
+                        <td>
+                            <span class="badge badge-outline badge-sm" th:text="${q.topicCode}">SELECT</span>
+                        </td>
+                        <td>
+                            <span th:classappend="${q.difficulty == 1} ? 'badge-success' :
+                                                  ${q.difficulty == 2} ? 'badge-info' :
+                                                  ${q.difficulty == 3} ? 'badge-warning' :
+                                                  ${q.difficulty >= 4} ? 'badge-error' : ''"
+                                  class="badge badge-sm"
+                                  th:text="'Lv.' + ${q.difficulty}">Lv.3</span>
+                        </td>
+                        <td>
+                            <span th:classappend="${q.executionMode?.name() == 'EXECUTABLE'} ? 'badge-primary' : 'badge-ghost'"
+                                  class="badge badge-sm"
+                                  th:text="${q.executionMode?.name() == 'EXECUTABLE'} ? '실행형' : '개념형'">실행형</span>
+                        </td>
+                        <td class="text-xs" th:text="${q.createdAt != null ? #temporals.format(q.createdAt, 'yyyy-MM-dd') : '-'}">2026-04-01</td>
+                        <td>
+                            <div class="flex gap-1">
+                                <a th:href="@{/admin/questions/{id}(id=${q.id})}"
+                                   class="btn btn-xs btn-ghost" title="상세">
+                                    <i data-lucide="eye" class="size-3"></i>
+                                </a>
+                                <a th:href="@{/admin/questions/{id}/edit(id=${q.id})}"
+                                   class="btn btn-xs btn-ghost" title="편집">
+                                    <i data-lucide="pencil" class="size-3"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Empty state -->
+                    <tr th:if="${questions == null or questions.isEmpty()}">
+                        <td colspan="7" class="text-center text-base-content/50 py-12">
+                            <i data-lucide="file-x" class="size-10 mx-auto mb-2 opacity-40"></i>
+                            <p>문제가 없습니다.</p>
+                        </td>
+                    </tr>
+
+                    <!-- Placeholder data -->
+                    <tr th:if="${questions == null}">
+                        <td class="font-mono text-xs">1</td>
+                        <td class="text-sm">다음 중 employees 테이블에서 부서별 평균 급여를 구하는...</td>
+                        <td><span class="badge badge-outline badge-sm">SELECT</span></td>
+                        <td><span class="badge badge-sm badge-warning">Lv.3</span></td>
+                        <td><span class="badge badge-sm badge-primary">실행형</span></td>
+                        <td class="text-xs">2026-04-01</td>
+                        <td>
+                            <div class="flex gap-1">
+                                <button class="btn btn-xs btn-ghost"><i data-lucide="eye" class="size-3"></i></button>
+                                <button class="btn btn-xs btn-ghost"><i data-lucide="pencil" class="size-3"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr th:if="${questions == null}">
+                        <td class="font-mono text-xs">2</td>
+                        <td class="text-sm">GROUP BY와 HAVING을 사용하여 조건을 만족하는 그룹만...</td>
+                        <td><span class="badge badge-outline badge-sm">GROUP_BY</span></td>
+                        <td><span class="badge badge-sm badge-info">Lv.2</span></td>
+                        <td><span class="badge badge-sm badge-ghost">개념형</span></td>
+                        <td class="text-xs">2026-04-02</td>
+                        <td>
+                            <div class="flex gap-1">
+                                <button class="btn btn-xs btn-ghost"><i data-lucide="eye" class="size-3"></i></button>
+                                <button class="btn btn-xs btn-ghost"><i data-lucide="pencil" class="size-3"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            <div class="flex justify-center p-4" th:if="${questions != null and questions.totalPages > 1}">
+                <div class="join">
+                    <a th:href="@{/admin/questions(page=${questions.number - 1}, topic=${param.topic}, difficulty=${param.difficulty})}"
+                       class="join-item btn btn-sm"
+                       th:classappend="${questions.first} ? 'btn-disabled'">«</a>
+                    <button class="join-item btn btn-sm btn-active"
+                            th:text="${questions.number + 1} + ' / ' + ${questions.totalPages}">1 / 10</button>
+                    <a th:href="@{/admin/questions(page=${questions.number + 1}, topic=${param.topic}, difficulty=${param.difficulty})}"
+                       class="join-item btn btn-sm"
+                       th:classappend="${questions.last} ? 'btn-disabled'">»</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</th:block>
+
+<th:block layout:fragment="js">
+    <script>lucide.createIcons();</script>
+</th:block>
+</html>

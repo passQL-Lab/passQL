@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: passql
+  profiles:
+    active: prod
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    locations: classpath:db/migration
+
+server:
+  port: 8080
+
+springdoc:
+  swagger-ui:
+    path: /docs/swagger
+  api-docs:
+    path: /docs/api-docs
+  packages-to-scan: com.passql
+  paths-to-match: /api/**

@@ -1,12 +1,10 @@
 # ===================================================================
-# PROJECT-COMMON-README-VERSION-UPDATE.yaml
 # README 파일 버전 자동 업데이트 워크플로우
 # ===================================================================
 #
 # 이 워크플로우는 deploy 브랜치로 푸시가 발생할 때 README.md 파일의
 # 버전 정보를 version_manager.sh를 통해 가져와 자동으로 업데이트합니다.
 #
-# ===================================================================
 # 작동 방식:
 # 1. deploy 브랜치 푸시 시 트리거
 # 2. version_manager.sh를 통해 최신 버전 정보 추출
@@ -37,6 +35,7 @@
 # - SHOW_DATE: 버전에 날짜 표시 여부 (true/false, 기본값: true)
 #   * true: v1.0.0 (2025-08-16) 형식
 #   * false: v1.0.0 형식
+#
 # ===================================================================
 
 name: README VERSION UPDATE
@@ -60,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: 저장소 체크아웃
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0

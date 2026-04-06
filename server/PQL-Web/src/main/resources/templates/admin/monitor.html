@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+
+<th:block layout:fragment="title">모니터링</th:block>
+
+<th:block layout:fragment="content">
+
+    <!-- 요약 카드 -->
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        <div class="stat bg-base-100 shadow rounded-box">
+            <div class="stat-figure text-primary">
+                <i data-lucide="check-circle-2" class="size-8"></i>
+            </div>
+            <div class="stat-title text-xs">성공 실행</div>
+            <div class="stat-value text-primary text-2xl" th:text="${monitorStats?.successCount ?: 0}">0</div>
+            <div class="stat-desc">최근 24시간</div>
+        </div>
+        <div class="stat bg-base-100 shadow rounded-box">
+            <div class="stat-figure text-error">
+                <i data-lucide="x-circle" class="size-8"></i>
+            </div>
+            <div class="stat-title text-xs">실패 실행</div>
+            <div class="stat-value text-error text-2xl" th:text="${monitorStats?.failCount ?: 0}">0</div>
+            <div class="stat-desc">최근 24시간</div>
+        </div>
+        <div class="stat bg-base-100 shadow rounded-box">
+            <div class="stat-figure text-warning">
+                <i data-lucide="timer" class="size-8"></i>
+            </div>
+            <div class="stat-title text-xs">평균 응답시간</div>
+            <div class="stat-value text-warning text-2xl">
+                <span th:text="${monitorStats?.avgElapsedMs != null ? #numbers.formatDecimal(monitorStats.avgElapsedMs, 1, 0) : 0}">0</span>
+                <span class="text-sm">ms</span>
+            </div>
+            <div class="stat-desc">최근 24시간</div>
+        </div>
+        <div class="stat bg-base-100 shadow rounded-box">
+            <div class="stat-figure text-info">
+                <i data-lucide="bot" class="size-8"></i>
+            </div>
+            <div class="stat-title text-xs">AI 호출</div>
+            <div class="stat-value text-info text-2xl" th:text="${monitorStats?.aiCallCount ?: 0}">0</div>
+            <div class="stat-desc">최근 24시간</div>
+        </div>
+    </div>
+
+    <!-- 최근 실행 로그 -->
+    <div class="card bg-base-100 shadow mb-4">
+        <div class="card-body p-4">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="card-title text-base">
+                    <i data-lucide="terminal" class="size-5"></i>
+                    실행 로그 (최근 20건)
+                </h3>
+                <div class="flex gap-2">
+                    <button class="btn btn-sm btn-ghost" onclick="window.location.reload()">
+                        <i data-lucide="refresh-cw" class="size-4"></i>
+                        새로고침
+                    </button>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="table table-xs">
+                    <thead>
+                    <tr>
+                        <th>User UUID</th>
+                        <th>문제 ID</th>
+                        <th>선택지</th>
+                        <th>상태</th>
+                        <th>에러 코드</th>
+                        <th>소요(ms)</th>
+                        <th>실행일시</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="log : ${executionLogs}" th:if="${executionLogs != null and !executionLogs.isEmpty()}">
+                        <td class="font-mono text-xs" th:text="${#strings.substring(log.userUuid, 0, 8) + '...'}">a1b2c3d4...</td>
+                        <td class="font-mono" th:text="${log.questionId}">42</td>
+                        <td class="font-mono font-bold" th:text="${log.choiceKey ?: '-'}">A</td>
+                        <td>
+                            <span th:classappend="${log.status == 'OK'} ? 'badge-success' :
+                                                  ${log.status == 'ERROR'} ? 'badge-error' :
+                                                  ${log.status == 'TIMEOUT'} ? 'badge-warning' : 'badge-ghost'"
+                                  class="badge badge-xs"
+                                  th:text="${log.status}">OK</span>
+                        </td>
+                        <td class="font-mono text-xs" th:text="${log.errorCode ?: '-'}">-</td>
+                        <td th:classappend="${log.elapsedMs != null and log.elapsedMs > 3000} ? 'text-warning font-bold' : ''"
+                            th:text="${log.elapsedMs ?: '-'}">234</td>
+                        <td class="text-xs whitespace-nowrap"
+                            th:text="${#temporals.format(log.executedAt, 'MM-dd HH:mm:ss')}">04-06 12:00:00</td>
+                    </tr>
+
+                    <!-- Empty state -->
+                    <tr th:if="${executionLogs == null or executionLogs.isEmpty()}">
+                        <td colspan="7" class="text-center text-base-content/50 py-8">
+                            <i data-lucide="inbox" class="size-8 mx-auto mb-2"></i>
+                            <p>실행 로그가 없습니다.</p>
+                        </td>
+                    </tr>
+
+                    <!-- Placeholder -->
+                    <th:block th:if="${executionLogs == null}">
+                        <tr>
+                            <td class="font-mono text-xs">a1b2c3d4...</td>
+                            <td class="font-mono">42</td>
+                            <td class="font-mono font-bold">C</td>
+                            <td><span class="badge badge-xs badge-success">OK</span></td>
+                            <td class="font-mono text-xs">-</td>
+                            <td>234</td>
+                            <td class="text-xs">04-06 12:05:33</td>
+                        </tr>
+                        <tr>
+                            <td class="font-mono text-xs">e5f6g7h8...</td>
+                            <td class="font-mono">17</td>
+                            <td class="font-mono font-bold">A</td>
+                            <td><span class="badge badge-xs badge-error">ERROR</span></td>
+                            <td class="font-mono text-xs">SQL_SYNTAX</td>
+                            <td class="text-warning font-bold">4523</td>
+                            <td class="text-xs">04-06 12:03:11</td>
+                        </tr>
+                        <tr>
+                            <td class="font-mono text-xs">i9j0k1l2...</td>
+                            <td class="font-mono">5</td>
+                            <td class="font-mono font-bold">B</td>
+                            <td><span class="badge badge-xs badge-success">OK</span></td>
+                            <td class="font-mono text-xs">-</td>
+                            <td>89</td>
+                            <td class="text-xs">04-06 12:00:44</td>
+                        </tr>
+                        <tr>
+                            <td class="font-mono text-xs">m3n4o5p6...</td>
+                            <td class="font-mono">99</td>
+                            <td class="font-mono font-bold">D</td>
+                            <td><span class="badge badge-xs badge-warning">TIMEOUT</span></td>
+                            <td class="font-mono text-xs">SANDBOX_TIMEOUT</td>
+                            <td class="text-warning font-bold">5001</td>
+                            <td class="text-xs">04-06 11:58:02</td>
+                        </tr>
+                        <tr>
+                            <td class="font-mono text-xs">q7r8s9t0...</td>
+                            <td class="font-mono">33</td>
+                            <td class="font-mono font-bold">E</td>
+                            <td><span class="badge badge-xs badge-success">OK</span></td>
+                            <td class="font-mono text-xs">-</td>
+                            <td>156</td>
+                            <td class="text-xs">04-06 11:55:19</td>
+                        </tr>
+                    </th:block>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI 호출 현황 -->
+    <div class="card bg-base-100 shadow">
+        <div class="card-body p-4">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="card-title text-base">
+                    <i data-lucide="bot" class="size-5"></i>
+                    AI 호출 현황
+                </h3>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- explain_error -->
+                <div class="border border-base-300 rounded-lg p-4">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i data-lucide="alert-circle" class="size-4 text-error"></i>
+                        <span class="font-medium text-sm">explain_error</span>
+                    </div>
+                    <p class="text-2xl font-bold" th:text="${aiStats?.explainErrorCount ?: 0}">0</p>
+                    <p class="text-xs text-base-content/50 mt-1">오늘 호출 수</p>
+                    <div class="mt-3 flex items-center gap-2">
+                        <span class="text-xs text-base-content/60">성공률:</span>
+                        <span class="badge badge-success badge-sm" th:text="${aiStats?.explainSuccessRate != null ? aiStats.explainSuccessRate + '%' : 'N/A'}">N/A</span>
+                    </div>
+                </div>
+
+                <!-- diff_explain -->
+                <div class="border border-base-300 rounded-lg p-4">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i data-lucide="git-compare" class="size-4 text-warning"></i>
+                        <span class="font-medium text-sm">diff_explain</span>
+                    </div>
+                    <p class="text-2xl font-bold" th:text="${aiStats?.diffExplainCount ?: 0}">0</p>
+                    <p class="text-xs text-base-content/50 mt-1">오늘 호출 수</p>
+                    <div class="mt-3 flex items-center gap-2">
+                        <span class="text-xs text-base-content/60">성공률:</span>
+                        <span class="badge badge-success badge-sm" th:text="${aiStats?.diffSuccessRate != null ? aiStats.diffSuccessRate + '%' : 'N/A'}">N/A</span>
+                    </div>
+                </div>
+
+                <!-- similar (Qdrant) -->
+                <div class="border border-base-300 rounded-lg p-4">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i data-lucide="search" class="size-4 text-info"></i>
+                        <span class="font-medium text-sm">similar (Qdrant)</span>
+                    </div>
+                    <p class="text-2xl font-bold" th:text="${aiStats?.similarCount ?: 0}">0</p>
+                    <p class="text-xs text-base-content/50 mt-1">오늘 호출 수</p>
+                    <div class="mt-3 flex items-center gap-2">
+                        <span class="text-xs text-base-content/60">평균 k:</span>
+                        <span class="badge badge-info badge-sm" th:text="${aiStats?.avgTopK != null ? aiStats.avgTopK : 'N/A'}">N/A</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 p-3 bg-base-200 rounded-lg text-sm text-base-content/60">
+                <i data-lucide="info" class="size-4 inline mr-1"></i>
+                AI 상세 메트릭은 추후 구현 예정입니다. (Resilience4j CircuitBreaker 상태, 평균 응답시간 등)
+            </div>
+        </div>
+    </div>
+
+</th:block>
+
+<th:block layout:fragment="js">
+    <script>
+        lucide.createIcons();
+
+        // 30초마다 자동 새로고침 (선택적)
+        // setTimeout(() => window.location.reload(), 30000);
+    </script>
+</th:block>
+</html>

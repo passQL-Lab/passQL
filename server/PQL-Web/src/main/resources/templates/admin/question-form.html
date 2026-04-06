@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+
+<th:block layout:fragment="title" th:text="${question?.id != null} ? '문제 편집' : '문제 등록'">문제 등록</th:block>
+
+<th:block layout:fragment="content">
+
+    <div class="mb-4 flex items-center gap-2">
+        <a th:href="@{/admin/questions}" class="btn btn-sm btn-ghost">
+            <i data-lucide="arrow-left" class="size-4"></i>
+            목록으로
+        </a>
+        <h2 class="text-lg font-bold" th:text="${question?.id != null} ? '문제 편집' : '새 문제 등록'">새 문제 등록</h2>
+    </div>
+
+    <form th:action="${question?.id != null} ? @{/admin/questions/{id}(id=${question.id})} : @{/admin/questions}"
+          th:method="${question?.id != null} ? 'put' : 'post'"
+          class="space-y-4">
+
+        <!-- 기본 정보 -->
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <h3 class="card-title text-base mb-4">
+                    <i data-lucide="info" class="size-5"></i>
+                    기본 정보
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- 토픽 -->
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium">토픽 <span class="text-error">*</span></span></label>
+                        <select name="topicCode" class="select select-bordered" required id="topicSelect">
+                            <option value="">토픽 선택</option>
+                            <option th:each="topic : ${topics}"
+                                    th:value="${topic.code}"
+                                    th:text="${topic.displayName}"
+                                    th:selected="${question?.topicCode == topic.code}">SELECT</option>
+                        </select>
+                    </div>
+
+                    <!-- 서브토픽 -->
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium">서브토픽</span></label>
+                        <select name="subtopicCode" class="select select-bordered" id="subtopicSelect">
+                            <option value="">서브토픽 선택</option>
+                            <option th:each="sub : ${subtopics}"
+                                    th:value="${sub.code}"
+                                    th:text="${sub.displayName}"
+                                    th:selected="${question?.subtopicCode == sub.code}">기본 SELECT</option>
+                        </select>
+                    </div>
+
+                    <!-- 난이도 -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">난이도 <span class="text-error">*</span></span>
+                            <span class="label-text-alt" id="difficultyValue">
+                                Lv.<span th:text="${question?.difficulty ?: 1}">1</span>
+                            </span>
+                        </label>
+                        <input type="range" name="difficulty" min="1" max="5"
+                               th:value="${question?.difficulty ?: 1}"
+                               class="range range-primary range-sm"
+                               id="difficultyRange"
+                               oninput="document.getElementById('difficultyValue').innerHTML='Lv.' + this.value"/>
+                        <div class="flex justify-between text-xs px-1 mt-1">
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                        </div>
+                    </div>
+
+                    <!-- 실행 모드 -->
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium">실행 모드 <span class="text-error">*</span></span></label>
+                        <div class="flex flex-col gap-2 mt-1">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="executionMode" value="EXECUTABLE" class="radio radio-primary radio-sm"
+                                       th:checked="${question?.executionMode?.name() == 'EXECUTABLE' or question == null}"/>
+                                <span class="text-sm">실행형 (SQL 직접 실행)</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="executionMode" value="CONCEPT_ONLY" class="radio radio-primary radio-sm"
+                                       th:checked="${question?.executionMode?.name() == 'CONCEPT_ONLY'}"/>
+                                <span class="text-sm">개념형 (보기 선택)</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 문제 내용 -->
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <h3 class="card-title text-base mb-4">
+                    <i data-lucide="file-text" class="size-5"></i>
+                    문제 내용
+                </h3>
+
+                <div class="space-y-4">
+                    <!-- 지문 -->
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium">지문 <span class="text-error">*</span></span></label>
+                        <textarea name="stem" rows="4" required
+                                  class="textarea textarea-bordered w-full"
+                                  placeholder="문제 지문을 입력하세요."
+                                  th:text="${question?.stem}"></textarea>
+                    </div>
+
+                    <!-- 스키마 표시 -->
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium">스키마 표시 (사용자에게 보여줄 내용)</span></label>
+                        <textarea name="schemaDisplay" rows="5"
+                                  class="textarea textarea-bordered w-full"
+                                  placeholder="예) employees (id, name, department_id, salary)"
+                                  th:text="${question?.schemaDisplay}"></textarea>
+                    </div>
+
+                    <!-- 스키마 DDL -->
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium">스키마 DDL (샌드박스 생성용)</span></label>
+                        <textarea name="schemaDdl" rows="8"
+                                  class="textarea textarea-bordered w-full font-mono text-sm"
+                                  placeholder="CREATE TABLE employees (&#10;  id INT PRIMARY KEY,&#10;  name VARCHAR(100),&#10;  ...);"
+                                  th:text="${question?.schemaDdl}"></textarea>
+                    </div>
+
+                    <!-- 해설 -->
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium">해설 요약</span></label>
+                        <textarea name="explanationSummary" rows="3"
+                                  class="textarea textarea-bordered w-full"
+                                  placeholder="문제 해설을 간략히 작성하세요."
+                                  th:text="${question?.explanationSummary}"></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 선택지 -->
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <h3 class="card-title text-base mb-4">
+                    <i data-lucide="list" class="size-5"></i>
+                    선택지 (A ~ E)
+                </h3>
+
+                <div class="space-y-6">
+                    <th:block th:each="key, stat : ${ {'A','B','C','D','E'} }">
+                        <div class="border border-base-300 rounded-lg p-4">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div class="badge badge-primary badge-lg font-bold" th:text="${key}">A</div>
+                                <span class="font-medium text-sm">선택지</span>
+                                <label class="flex items-center gap-2 ml-auto cursor-pointer">
+                                    <span class="text-sm text-base-content/70">정답</span>
+                                    <input type="checkbox"
+                                           th:name="'choices[' + ${stat.index} + '].isCorrect'"
+                                           class="checkbox checkbox-success checkbox-sm"
+                                           th:checked="${choices != null and choices[__${stat.index}__]?.isCorrect}"/>
+                                </label>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                                <!-- Kind -->
+                                <div class="form-control">
+                                    <label class="label"><span class="label-text text-xs">종류</span></label>
+                                    <select th:name="'choices[' + ${stat.index} + '].kind'" class="select select-bordered select-sm">
+                                        <option value="SQL"
+                                                th:selected="${choices == null or choices[__${stat.index}__]?.kind?.name() == 'SQL'}">SQL</option>
+                                        <option value="TEXT"
+                                                th:selected="${choices != null and choices[__${stat.index}__]?.kind?.name() == 'TEXT'}">TEXT</option>
+                                    </select>
+                                </div>
+
+                                <!-- choiceKey (hidden) -->
+                                <input type="hidden"
+                                       th:name="'choices[' + ${stat.index} + '].choiceKey'"
+                                       th:value="${key}"/>
+
+                                <!-- sortOrder (hidden) -->
+                                <input type="hidden"
+                                       th:name="'choices[' + ${stat.index} + '].sortOrder'"
+                                       th:value="${stat.index + 1}"/>
+
+                                <!-- Body -->
+                                <div class="form-control md:col-span-3">
+                                    <label class="label"><span class="label-text text-xs">본문</span></label>
+                                    <textarea th:name="'choices[' + ${stat.index} + '].body'"
+                                              rows="3"
+                                              class="textarea textarea-bordered textarea-sm w-full font-mono text-sm"
+                                              placeholder="SELECT * FROM employees WHERE..."
+                                              th:text="${choices != null ? choices[__${stat.index}__]?.body : ''}"></textarea>
+                                </div>
+                            </div>
+
+                            <!-- 해설 -->
+                            <div class="form-control mt-3">
+                                <label class="label"><span class="label-text text-xs">해설 (오답 시 표시)</span></label>
+                                <textarea th:name="'choices[' + ${stat.index} + '].rationale'"
+                                          rows="2"
+                                          class="textarea textarea-bordered textarea-sm w-full"
+                                          placeholder="이 선택지가 틀린/맞는 이유를 설명하세요."
+                                          th:text="${choices != null ? choices[__${stat.index}__]?.rationale : ''}"></textarea>
+                            </div>
+                        </div>
+                    </th:block>
+                </div>
+            </div>
+        </div>
+
+        <!-- 제출 버튼 -->
+        <div class="flex justify-end gap-2">
+            <a th:href="@{/admin/questions}" class="btn btn-ghost">취소</a>
+            <button type="submit" class="btn btn-primary">
+                <i data-lucide="save" class="size-4"></i>
+                <span th:text="${question?.id != null} ? '수정 저장' : '문제 등록'">문제 등록</span>
+            </button>
+        </div>
+    </form>
+
+</th:block>
+
+<th:block layout:fragment="js">
+    <script>
+        lucide.createIcons();
+
+        // 토픽 변경 시 서브토픽 동적 로드
+        document.getElementById('topicSelect').addEventListener('change', function () {
+            const topicCode = this.value;
+            const subtopicSelect = document.getElementById('subtopicSelect');
+            subtopicSelect.innerHTML = '<option value="">서브토픽 선택</option>';
+            if (!topicCode) return;
+            fetch('/admin/api/subtopics?topicCode=' + topicCode)
+                .then(r => r.json())
+                .then(data => {
+                    data.forEach(sub => {
+                        const opt = document.createElement('option');
+                        opt.value = sub.code;
+                        opt.textContent = sub.displayName;
+                        subtopicSelect.appendChild(opt);
+                    });
+                });
+        });
+    </script>
+</th:block>
+</html>

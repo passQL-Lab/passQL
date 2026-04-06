@@ -1,0 +1,202 @@
+# ===================================================================
+# passQL AI Server CI/CD 배포 워크플로우
+# ===================================================================
+#
+# 📋 필수 GitHub Secrets 설정 가이드
+# (Settings > Secrets and variables > Actions)
+#
+# ┌─────────────────────────────┬────────────────────────────────────┐
+# │ Secret 이름                 │ 설명                               │
+# ├─────────────────────────────┼────────────────────────────────────┤
+# │ DOCKERHUB_USERNAME          │ DockerHub 사용자명                 │
+# │ DOCKERHUB_TOKEN             │ DockerHub 액세스 토큰              │
+# │ SERVER_HOST                 │ 시놀로지 NAS IP/도메인             │
+# │ SERVER_USER                 │ SSH 접속 사용자명                  │
+# │ SERVER_PASSWORD             │ SSH 접속 비밀번호                  │
+# │ AI_ENV_FILE                 │ ai/.env 파일 전체 내용             │
+# └─────────────────────────────┴────────────────────────────────────┘
+#
+# ===================================================================
+
+name: PROJECT-PYTHON-AI-CICD
+
+on:
+  push:
+    branches:
+      - deploy
+    paths:
+      - 'ai/**'
+  workflow_dispatch:
+
+env:
+  PROJECT_NAME: "passql-ai"
+  PROJECT_MAIN_PORT: "8093"
+  PYTHON_VERSION: "3.13"
+
+jobs:
+  # ===================================================================
+  # 빌드 작업
+  # ===================================================================
+  build:
+    name: passQL AI 빌드
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 코드 체크아웃
+        uses: actions/checkout@v4
+
+      - name: 디스크 공간 확보
+        run: |
+          echo "📊 빌드 전 디스크 사용량:"
+          df -h
+          sudo rm -rf /usr/share/dotnet || true
+          sudo rm -rf /opt/ghc || true
+          sudo rm -rf /usr/local/share/boost || true
+          sudo rm -rf "$AGENT_TOOLSDIRECTORY" || true
+          docker system prune -af --volumes || true
+          echo "📊 정리 후 디스크 사용량:"
+          df -h
+
+      - name: .env 파일 생성
+        run: |
+          cat > ai/.env << 'EOF'
+          ${{ secrets.AI_ENV_FILE }}
+          EOF
+          echo "✅ .env 파일이 생성되었습니다"
+
+      - name: Docker 빌드환경 설정
+        uses: docker/setup-buildx-action@v3
+
+      - name: DockerHub 로그인
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Docker 이미지 빌드 및 푸시
+        uses: docker/build-push-action@v5
+        with:
+          context: ./ai
+          file: ./ai/Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.PROJECT_NAME }}:${{ github.ref_name }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: 빌드 후 정리
+        if: always()
+        run: |
+          docker system prune -f || true
+          echo "📊 최종 디스크 사용량:"
+          df -h
+
+  # ===================================================================
+  # 배포 작업
+  # ===================================================================
+  deploy:
+    name: 원격 서버 배포
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          username: ${{ secrets.SERVER_USER }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          port: 2022
+          command_timeout: 600s
+          timeout: 60s
+          script: |
+            set -e
+
+            echo "🔧 환경변수 설정.."
+            export PATH=$PATH:/usr/local/bin
+            export PW=${{ secrets.SERVER_PASSWORD }}
+
+            BRANCH=${{ github.ref_name }}
+            PROJECT_NAME="${{ env.PROJECT_NAME }}"
+
+            # ============================================================
+            # 브랜치별 포트 및 컨테이너명 설정
+            # ============================================================
+            if [ "$BRANCH" == "deploy" ]; then
+              PORT=${{ env.PROJECT_MAIN_PORT }}
+              CONTAINER_NAME="${PROJECT_NAME}"
+              echo "🏭 프로덕션 환경으로 배포합니다"
+
+            else
+              echo "⚠️ 지원하지 않는 브랜치입니다: $BRANCH"
+              exit 1
+            fi
+
+            echo "📋 배포 설정 정보:"
+            echo "  - 브랜치: $BRANCH"
+            echo "  - 프로젝트: $PROJECT_NAME"
+            echo "  - 컨테이너 이름: $CONTAINER_NAME"
+            echo "  - 포트: $PORT"
+            echo "  - Docker 이미지: ${{ secrets.DOCKERHUB_USERNAME }}/${PROJECT_NAME}:${BRANCH}"
+
+            # ============================================================
+            # Docker 이미지 풀
+            # ============================================================
+            echo "⬇️ Docker 이미지 풀 중..."
+            echo $PW | sudo -S docker pull ${{ secrets.DOCKERHUB_USERNAME }}/${PROJECT_NAME}:${BRANCH}
+
+            # ============================================================
+            # 기존 컨테이너 정리
+            # ============================================================
+            echo "🧹 기존 컨테이너 확인 중..."
+            if echo $PW | sudo -S docker ps -a --format '{{.Names}}' | grep -Eq "^${CONTAINER_NAME}\$"; then
+              echo "⚠️ 컨테이너 $CONTAINER_NAME 존재 → 삭제 중..."
+              echo $PW | sudo -S docker rm -f $CONTAINER_NAME
+              echo "✅ 컨테이너 삭제 완료"
+            else
+              echo "ℹ️ 기존 컨테이너 없음"
+            fi
+
+            # ============================================================
+            # 새 컨테이너 실행
+            # ============================================================
+            echo "🚀 새로운 컨테이너 $CONTAINER_NAME 실행 중..."
+            echo $PW | sudo -S mkdir -p /volume1/projects/passql/ai
+
+            echo $PW | sudo -S docker run -d \
+              --restart unless-stopped \
+              -p ${PORT}:8093 \
+              --name $CONTAINER_NAME \
+              -e TZ=Asia/Seoul \
+              -v /etc/localtime:/etc/localtime:ro \
+              -v /volume1/projects/passql/ai:/mnt/passql-ai \
+              ${{ secrets.DOCKERHUB_USERNAME }}/${PROJECT_NAME}:${BRANCH}
+
+            # ============================================================
+            # 헬스체크
+            # ============================================================
+            echo "⏳ 컨테이너 초기화 대기 중... (10초)"
+            sleep 10
+
+            echo "🏥 컨테이너 헬스체크 중..."
+            if echo $PW | sudo -S docker ps --format '{{.Names}}' | grep -Eq "^${CONTAINER_NAME}\$"; then
+              echo "✅ 컨테이너 $CONTAINER_NAME 정상 실행 중"
+            else
+              echo "❌ 컨테이너 $CONTAINER_NAME 실행 실패"
+              echo "📋 컨테이너 로그:"
+              echo $PW | sudo -S docker logs $CONTAINER_NAME || true
+              exit 1
+            fi
+
+            # ============================================================
+            # 배포 완료
+            # ============================================================
+            echo "✅ 배포가 성공적으로 완료되었습니다!"
+            echo ""
+            echo "📋 배포 결과 요약:"
+            echo "  🎯 프로젝트: $PROJECT_NAME"
+            echo "  🌿 브랜치: $BRANCH"
+            echo "  🐳 컨테이너: $CONTAINER_NAME"
+            echo "  🌐 포트: $PORT"
+            echo "  ⏰ 배포 시간: $(date '+%Y-%m-%d %H:%M:%S')"
+            echo ""
+            echo "🔗 접속 URL: http://${{ secrets.SERVER_HOST }}:${PORT}/docs"

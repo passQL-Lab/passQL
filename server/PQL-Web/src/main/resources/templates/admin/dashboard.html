@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+
+<th:block layout:fragment="title">대시보드</th:block>
+
+<th:block layout:fragment="content">
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+
+        <!-- 전체 문제 수 -->
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-base-content/60">전체 문제 수</p>
+                        <p class="text-3xl font-bold text-primary mt-1" th:text="${stats?.totalQuestions ?: 0}">0</p>
+                    </div>
+                    <div class="p-3 bg-primary/10 rounded-full">
+                        <i data-lucide="book-open" class="size-6 text-primary"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-base-content/50 mt-2">활성 문제 기준</p>
+            </div>
+        </div>
+
+        <!-- 오늘 제출 수 -->
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-base-content/60">오늘 제출 수</p>
+                        <p class="text-3xl font-bold text-success mt-1" th:text="${stats?.todaySubmissions ?: 0}">0</p>
+                    </div>
+                    <div class="p-3 bg-success/10 rounded-full">
+                        <i data-lucide="send" class="size-6 text-success"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-base-content/50 mt-2">오늘 00:00 기준</p>
+            </div>
+        </div>
+
+        <!-- AI 호출 수 -->
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-base-content/60">AI 호출 수</p>
+                        <p class="text-3xl font-bold text-warning mt-1" th:text="${stats?.aiCallCount ?: 0}">0</p>
+                    </div>
+                    <div class="p-3 bg-warning/10 rounded-full">
+                        <i data-lucide="bot" class="size-6 text-warning"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-base-content/50 mt-2">오늘 Ollama 호출</p>
+            </div>
+        </div>
+
+        <!-- 에러율 -->
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-base-content/60">에러율</p>
+                        <p class="text-3xl font-bold text-error mt-1">
+                            <span th:text="${stats?.errorRate != null ? #numbers.formatDecimal(stats.errorRate, 1, 1) : '0.0'}">0.0</span>%
+                        </p>
+                    </div>
+                    <div class="p-3 bg-error/10 rounded-full">
+                        <i data-lucide="alert-triangle" class="size-6 text-error"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-base-content/50 mt-2">오늘 SQL 실행 실패율</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 최근 실행 로그 -->
+    <div class="card bg-base-100 shadow">
+        <div class="card-body">
+            <div class="flex items-center justify-between mb-4">
+                <h2 class="card-title text-base">
+                    <i data-lucide="terminal" class="size-5"></i>
+                    최근 실행 로그
+                </h2>
+                <a th:href="@{/admin/monitor}" class="btn btn-sm btn-ghost">
+                    전체 보기
+                    <i data-lucide="arrow-right" class="size-4"></i>
+                </a>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="table table-sm">
+                    <thead>
+                    <tr>
+                        <th>User UUID</th>
+                        <th>문제 ID</th>
+                        <th>상태</th>
+                        <th>소요시간(ms)</th>
+                        <th>실행일시</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="log : ${recentLogs}">
+                        <td class="font-mono text-xs" th:text="${#strings.substring(log.userUuid, 0, 8) + '...'}">uuid1234...</td>
+                        <td th:text="${log.questionId}">1</td>
+                        <td>
+                            <span th:classappend="${log.status == 'OK'} ? 'badge-success' : 'badge-error'"
+                                  class="badge badge-sm"
+                                  th:text="${log.status}">OK</span>
+                        </td>
+                        <td th:text="${log.elapsedMs}">123</td>
+                        <td class="text-xs" th:text="${#temporals.format(log.executedAt, 'MM-dd HH:mm:ss')}">04-06 12:00:00</td>
+                    </tr>
+                    <tr th:if="${recentLogs == null or #lists.isEmpty(recentLogs)}">
+                        <td colspan="5" class="text-center text-base-content/50 py-8">
+                            <i data-lucide="inbox" class="size-8 mx-auto mb-2"></i>
+                            <p>실행 로그가 없습니다.</p>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</th:block>
+
+<th:block layout:fragment="js">
+    <script>lucide.createIcons();</script>
+</th:block>
+</html>

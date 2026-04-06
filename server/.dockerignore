@@ -1,0 +1,31 @@
+# Git
+.git
+.gitignore
+
+# IDE
+.idea
+*.iml
+.vscode
+
+# Build (JAR만 필요)
+build/
+!build/libs/app.jar
+bin/
+out/
+
+# Gradle
+.gradle
+gradle/wrapper/*.jar
+
+# Logs & Temp
+*.log
+logs/
+*.tmp
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Source (JAR에 포함됨)
+src/
