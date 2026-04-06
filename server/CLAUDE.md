@@ -25,6 +25,7 @@
 | 버전 | 파일 | 내용 |
 |------|------|------|
 | V0_0_11 | `V0_0_11__init_schema.sql` | 초기 스키마 전체 생성 (topic, subtopic, concept_tag, concept_doc, prompt_template, app_setting, question, question_choice) |
+| V0_0_12 | `V0_0_12__add_submission_tables.sql` | submission, execution_log 테이블 추가 |
 
 ## 모듈 구조
 
