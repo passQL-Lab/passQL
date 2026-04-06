@@ -120,7 +120,6 @@ jobs:
 
             echo "🚀 컨테이너 실행 중..."
             echo $PW | sudo -S docker run -d \
-              --restart unless-stopped \
               -p ${PORT}:8080 \
               --name $CONTAINER_NAME \
               -e TZ=Asia/Seoul \
