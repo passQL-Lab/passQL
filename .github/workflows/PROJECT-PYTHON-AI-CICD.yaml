@@ -121,7 +121,7 @@ jobs:
             # ============================================================
             # 브랜치별 포트 및 컨테이너명 설정
             # ============================================================
-            if [ "$BRANCH" == "deploy" ]; then
+            if [ "$BRANCH" == "deploy" ] || [ "$BRANCH" == "main" ]; then
               PORT=${{ env.PROJECT_MAIN_PORT }}
               CONTAINER_NAME="${PROJECT_NAME}"
               echo "🏭 프로덕션 환경으로 배포합니다"
