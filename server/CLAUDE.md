@@ -22,7 +22,7 @@
 
 | 버전 | 파일 | 내용 |
 |------|------|------|
-| V1 | `V1__init_schema.sql` | 초기 스키마 전체 생성 (topic, subtopic, concept_tag, concept_doc, prompt_template, app_setting, question, question_choice) |
+| V11 | `V11__init_schema.sql` | 초기 스키마 전체 생성 (topic, subtopic, concept_tag, concept_doc, prompt_template, app_setting, question, question_choice) |
 
 ## 모듈 구조
 
