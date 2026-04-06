@@ -1,2 +1,86 @@
 ./.idea
 /.idea/
+
+# ===========================
+# Spring Boot
+# ===========================
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+target/
+build/
+out/
+.gradle/
+gradle-app.setting
+!gradle-wrapper.jar
+.springBeans
+spring-shell.log
+HELP.md
+
+# ===========================
+# React
+# ===========================
+node_modules/
+dist/
+.next/
+.nuxt/
+.cache/
+.parcel-cache/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp/
+.pnp.js
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# ===========================
+# Flask (AI Server)
+# ===========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+ENV/
+.venv/
+*.egg-info/
+dist/
+*.egg
+pip-log.txt
+pip-delete-this-directory.txt
+.pytest_cache/
+.mypy_cache/
+instance/
+.webassets-cache
+flask_session/
+*.db
+*.sqlite3
+
+# ===========================
+# OS / IDE
+# ===========================
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+out/
+.idea_modules/
+
+# VS Code
+.vscode/
+*.code-workspace
+.history/
