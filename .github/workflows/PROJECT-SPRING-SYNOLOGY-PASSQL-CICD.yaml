@@ -45,9 +45,7 @@ jobs:
       - name: application-prod.yml 생성
         run: |
           mkdir -p ${{ env.APPLICATION_YML_DIR }}
-          cat > ./${{ env.APPLICATION_YML_DIR }}/application-prod.yml << 'EOF'
-${{ secrets.APPLICATION_PROD_YML }}
-EOF
+          echo "${{ secrets.APPLICATION_PROD_YML }}" > ./${{ env.APPLICATION_YML_DIR }}/application-prod.yml
           echo "✅ application-prod.yml 파일 생성 완료"
 
       - name: Build with Gradle
