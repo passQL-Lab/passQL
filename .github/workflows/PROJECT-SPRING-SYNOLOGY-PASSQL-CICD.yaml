@@ -19,7 +19,7 @@ env:
   JAVA_VERSION: "21"
   GRADLE_OPTS: "-Dspring.profiles.active=prod"
   APPLICATION_YML_DIR: "server/PQL-Web/src/main/resources"
-  DEPLOY_PORT: "8094"
+  DEPLOY_PORT: "8097"
   VOLUME_HOST_PATH: "/volume1/projects/passql/backend"
   VOLUME_CONTAINER_PATH: "/mnt"
 

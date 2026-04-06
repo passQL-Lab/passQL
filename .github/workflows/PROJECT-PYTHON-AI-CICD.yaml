@@ -30,7 +30,7 @@ on:
 
 env:
   PROJECT_NAME: "passql-ai"
-  PROJECT_MAIN_PORT: "8093"
+  PROJECT_MAIN_PORT: "8098"
   PYTHON_VERSION: "3.13"
 
 jobs:
