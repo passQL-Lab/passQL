@@ -39,9 +39,7 @@ jobs:
 
       - name: .env 파일 생성
         run: |
-          cat > ai/.env << 'EOF'
-          ${{ secrets.AI_ENV_FILE }}
-          EOF
+          echo "${{ secrets.AI_ENV_FILE }}" > ai/.env
           echo "✅ .env 파일이 생성되었습니다"
 
       - name: Docker 빌드환경 설정
