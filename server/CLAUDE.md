@@ -15,7 +15,7 @@
 - 마이그레이션 파일 위치: `PQL-Web/src/main/resources/db/migration/`
 - 파일 네이밍: `V{version.yml의 version값}__{설명}.sql` — 점(.)은 언더스코어(_)로 치환
   - 예: `version: "0.0.11"` → `V0_0_11__add_user_table.sql`
-- `hibernate.ddl-auto`는 `validate` 모드 — Hibernate가 스키마를 자동 생성/수정하지 않음
+- `hibernate.ddl-auto`는 `update` 모드 — Flyway는 보조 수단, Hibernate가 실제 스키마를 관리함
 - **Entity를 추가/변경하면 반드시 대응하는 마이그레이션 파일을 함께 작성해야 한다**
 - 기존 마이그레이션 파일은 절대 수정하지 말 것 (새 버전 파일로 추가)
 - SQL 작성 시 테이블/컬럼 생성은 반드시 `IF NOT EXISTS` 사용, 삭제는 `IF EXISTS` 사용
