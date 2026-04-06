@@ -13,9 +13,8 @@
 **Flyway 마이그레이션으로만 스키마를 변경한다.**
 
 - 마이그레이션 파일 위치: `PQL-Web/src/main/resources/db/migration/`
-- 파일 네이밍: **`V{version.yml의 version값}__{설명}.sql`** — 점(.)은 언더스코어(_)로 치환
-  - 예: `version.yml`의 `version: "0.0.11"` → `V0_0_11__add_user_table.sql`
-  - **마이그레이션 파일을 새로 만들기 전에 반드시 루트의 `version.yml`을 먼저 읽어 현재 버전을 확인할 것**
+- 파일 네이밍: `V{version.yml의 version값}__{설명}.sql` — 점(.)은 언더스코어(_)로 치환
+  - 예: `version: "0.0.11"` → `V0_0_11__add_user_table.sql`
 - `hibernate.ddl-auto`는 `validate` 모드 — Hibernate가 스키마를 자동 생성/수정하지 않음
 - **Entity를 추가/변경하면 반드시 대응하는 마이그레이션 파일을 함께 작성해야 한다**
 - 기존 마이그레이션 파일은 절대 수정하지 말 것 (새 버전 파일로 추가)
