@@ -115,7 +115,7 @@ jobs:
             export PATH=$PATH:/usr/local/bin
             export PW=${{ secrets.SERVER_PASSWORD }}
 
-            BRANCH=${{ github.ref_name }}
+            BRANCH=$(echo "${{ github.ref_name }}" | sed 's|refs/heads/||')
             PROJECT_NAME="${{ env.PROJECT_NAME }}"
 
             # ============================================================
