@@ -28,7 +28,7 @@ VALUES
     ('exam.time_limit_minutes',       'INT',    '90',           'exam',      '시험 시간(분)'),
     ('ratelimit.execute.per_minute',  'INT',    '90',           'ratelimit', 'SQL 실행 API 분당 최대 요청 수'),
     ('ratelimit.submit.per_minute',   'INT',    '30',           'ratelimit', '문제 제출 API 분당 최대 요청 수'),
-    ('ai.default_model',              'STRING', 'gemma3:4b',    'ai',        'AI 기본 모델 (로컬 Ollama)'),
+    ('ai.default_model',              'STRING', 'gemini-2.0-flash-lite', 'ai', 'AI 기본 모델 (Gemini Flash-Lite, fallback: Ollama)'),
     ('ai.default_temperature',        'FLOAT',  '0.7',          'ai',        'AI 기본 temperature'),
     ('ai.default_max_tokens',         'INT',    '1024',         'ai',        'AI 기본 최대 토큰'),
     ('question.default_page_size',    'INT',    '20',           'question',  '문제 목록 기본 페이지 크기'),
@@ -44,21 +44,21 @@ ON DUPLICATE KEY UPDATE
 -- PK가 AUTO_INCREMENT id이므로 INSERT ... SELECT WHERE NOT EXISTS 패턴으로 중복 방지
 -- ---------------------------------------------------------------------------
 INSERT INTO prompt_template (key_name, version, is_active, model, system_prompt, user_template, temperature, max_tokens, note)
-SELECT 'explain_error', 1, 1, 'gemma3:4b',
+SELECT 'explain_error', 1, 1, 'gemini-2.0-flash-lite',
        '당신은 SQL 학습을 도와주는 전문 튜터입니다. 학습자가 SQL 문제를 틀렸을 때 오류 원인을 친절하고 명확하게 설명해 주세요. SQLD 시험 기준으로 설명하며, 핵심 개념(NULL 처리, 연산자 우선순위, 실행 순서 등)을 짚어주세요.',
        '문제: {{question_stem}}\n정답: {{correct_answer}}\n학습자 선택: {{selected_answer}}\n\n왜 틀렸는지 설명해 주세요.',
        0.5, 512, 'SQLD 오답 해설 프롬프트 v1'
 WHERE NOT EXISTS (SELECT 1 FROM prompt_template WHERE key_name = 'explain_error' AND version = 1);
 
 INSERT INTO prompt_template (key_name, version, is_active, model, system_prompt, user_template, temperature, max_tokens, note)
-SELECT 'diff_explain', 1, 1, 'gemma3:4b',
+SELECT 'diff_explain', 1, 1, 'gemini-2.0-flash-lite',
        '당신은 SQL 학습을 도와주는 전문 튜터입니다. 두 SQL 쿼리의 차이점을 비교 설명해 주세요. SQLD 시험에서 자주 출제되는 함정(RANK vs DENSE_RANK, UNION vs UNION ALL, LEFT/RIGHT OUTER JOIN 차이 등)을 중심으로 설명하세요.',
        '쿼리 A:\n{{query_a}}\n\n쿼리 B:\n{{query_b}}\n\n두 쿼리의 차이점과 각각의 실행 결과를 비교 설명해 주세요.',
        0.5, 768, 'SQL 쿼리 비교 설명 프롬프트 v1'
 WHERE NOT EXISTS (SELECT 1 FROM prompt_template WHERE key_name = 'diff_explain' AND version = 1);
 
 INSERT INTO prompt_template (key_name, version, is_active, model, system_prompt, user_template, temperature, max_tokens, note)
-SELECT 'similar', 1, 1, 'gemma3:4b',
+SELECT 'similar', 1, 1, 'gemini-2.0-flash-lite',
        '당신은 SQLD 시험 문제를 출제하는 전문가입니다. 주어진 문제와 유사한 난이도와 유형의 새로운 연습 문제를 생성해 주세요. 실제 SQLD 기출 스타일(함정 포함)로 작성하세요.',
        '다음 문제와 유사한 연습 문제를 1개 생성해 주세요.\n\n원본 문제:\n{{question_stem}}\n\n선택지:\n{{choices}}\n\n같은 개념을 다른 각도로 묻는 문제를 만들어 주세요.',
        0.8, 1024, '유사 문제 생성 프롬프트 v1'

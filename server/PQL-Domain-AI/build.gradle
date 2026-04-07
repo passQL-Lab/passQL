@@ -10,4 +10,5 @@ jar { enabled = true; archiveClassifier = '' }
 dependencies {
     api project(':PQL-Common')
     api project(':PQL-Domain-Meta')
+
 }
