@@ -1,7 +1,7 @@
 package com.passql.common.util;
 
 import lombok.RequiredArgsConstructor;
-import me.suhsaechan.suhrandomengine.SuhRandomKit;
+import me.suhsaechan.suhnicknamegenerator.core.SuhRandomKit;
 
 import java.util.function.Predicate;
 

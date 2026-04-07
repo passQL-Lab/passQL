@@ -1,7 +1,7 @@
 package com.passql.web.config;
 
 import com.passql.common.util.NicknameGenerator;
-import me.suhsaechan.suhrandomengine.SuhRandomKit;
+import me.suhsaechan.suhnicknamegenerator.core.SuhRandomKit;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
