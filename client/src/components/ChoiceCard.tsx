@@ -10,10 +10,11 @@ interface ChoiceCardProps {
   readonly isExecuting: boolean;
   readonly onSelect: (key: string, sql: string) => void;
   readonly onExecute: (key: string, sql: string) => void;
+  readonly onAskAi?: (choiceKey: string, errorCode: string, errorMessage: string) => void;
 }
 
 export const ChoiceCard = memo(function ChoiceCard({
-  choice, isSelected, cached, isExecutable, isExecuting, onSelect, onExecute,
+  choice, isSelected, cached, isExecutable, isExecuting, onSelect, onExecute, onAskAi,
 }: ChoiceCardProps) {
   const borderClass = isSelected ? "border-brand border-2" : "border-border";
   return (
@@ -50,7 +51,13 @@ export const ChoiceCard = memo(function ChoiceCard({
           </span>
           <p className="text-secondary mt-1">{cached.errorMessage}</p>
           <div className="flex justify-end mt-2">
-            <button className="text-brand text-sm font-medium" type="button">AI에게 물어보기</button>
+            <button
+              className="text-brand text-sm font-medium"
+              type="button"
+              onClick={() => onAskAi?.(choice.key, cached?.errorCode ?? "", cached?.errorMessage ?? "")}
+            >
+              AI에게 물어보기
+            </button>
           </div>
         </div>
       )}

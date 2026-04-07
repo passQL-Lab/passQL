@@ -1,9 +1,12 @@
 import { useState, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { useMutation } from "@tanstack/react-query";
 import { ArrowLeft, ChevronUp, ChevronDown } from "lucide-react";
 import { StarRating } from "../components/StarRating";
 import { ChoiceCard } from "../components/ChoiceCard";
+import AiExplanationSheet from "../components/AiExplanationSheet";
 import { useQuestionDetail, useExecuteChoice, useSubmitAnswer } from "../hooks/useQuestionDetail";
+import { explainError } from "../api/ai";
 import type { ExecuteResult } from "../types/api";
 
 export default function QuestionDetail() {
@@ -18,6 +21,12 @@ export default function QuestionDetail() {
   const [executeCache, setExecuteCache] = useState<Record<string, ExecuteResult>>({});
   const executeCacheRef = useRef(executeCache);
   executeCacheRef.current = executeCache;
+  const [aiSheetOpen, setAiSheetOpen] = useState(false);
+  const [aiText, setAiText] = useState("");
+  const explainMutation = useMutation({
+    mutationFn: explainError,
+    onSuccess: (result) => setAiText(result.text),
+  });
 
   const handleExecute = useCallback((choiceKey: string, sql: string) => {
     if (executeCacheRef.current[choiceKey]) return;
@@ -47,6 +56,17 @@ export default function QuestionDetail() {
       },
     });
   }, [selectedKey, submitMutation, question, questionId, navigate]);
+
+  const handleAskAi = useCallback((choiceKey: string, _errorCode: string, errorMessage: string) => {
+    setAiSheetOpen(true);
+    setAiText("");
+    const choice = question?.choices.find((c) => c.key === choiceKey);
+    explainMutation.mutate({
+      questionId,
+      sql: choice?.body ?? "",
+      errorMessage,
+    });
+  }, [question, questionId, explainMutation]);
 
   if (isLoading || !question) {
     return (
@@ -90,9 +110,16 @@ export default function QuestionDetail() {
             isExecuting={executeMutation.isPending && executeMutation.variables === choice.body}
             onSelect={handleSelect}
             onExecute={handleExecute}
+            onAskAi={handleAskAi}
           />
         ))}
       </section>
+      <AiExplanationSheet
+        isOpen={aiSheetOpen}
+        isLoading={explainMutation.isPending}
+        text={aiText}
+        onClose={() => setAiSheetOpen(false)}
+      />
       <div className="fixed bottom-0 inset-x-0 lg:left-55 bg-surface-card border-t border-border p-4 z-20">
         <div className="mx-auto max-w-180">
           <button
