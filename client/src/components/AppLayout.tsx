@@ -11,7 +11,7 @@ const NAV_ITEMS: readonly { readonly to: string; readonly label: string; readonl
 
 function SidebarNav() {
   return (
-    <aside className="hidden lg:flex flex-col w-[220px] border-r border-border bg-surface-card h-screen sticky top-0 py-6 px-3 gap-1">
+    <aside className="hidden lg:flex flex-col w-55 border-r border-border bg-surface-card h-screen sticky top-0 py-6 px-3 gap-1">
       <div className="text-h2 px-4 mb-8 text-brand">passQL</div>
       {NAV_ITEMS.map((item) => (
         <NavLink
@@ -55,7 +55,7 @@ export default function AppLayout() {
     <div className="flex min-h-screen bg-surface">
       <SidebarNav />
       <main className="flex-1 lg:py-8 pb-16 lg:pb-8">
-        <div className="mx-auto max-w-[720px] px-4 lg:px-0">
+        <div className="mx-auto max-w-180 px-4 lg:px-0">
           <Outlet />
         </div>
       </main>
