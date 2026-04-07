@@ -86,3 +86,5 @@ out/
 .history/
 /.report/
 /.issue/
+/github-issues/github-issues-hash.json
+/github-issues/github-issues.json

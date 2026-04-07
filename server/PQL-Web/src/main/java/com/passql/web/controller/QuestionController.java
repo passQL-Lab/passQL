@@ -18,7 +18,7 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/questions")
 @RequiredArgsConstructor
-public class QuestionController {
+public class QuestionController implements QuestionControllerDocs {
 
     private final QuestionService questionService;
     private final SandboxExecutor sandboxExecutor;

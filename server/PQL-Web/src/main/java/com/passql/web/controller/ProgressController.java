@@ -12,7 +12,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/progress")
 @RequiredArgsConstructor
-public class ProgressController {
+public class ProgressController implements ProgressControllerDocs {
 
     private final ProgressService progressService;
 

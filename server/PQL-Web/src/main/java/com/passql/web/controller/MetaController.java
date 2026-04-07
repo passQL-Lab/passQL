@@ -14,7 +14,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/meta")
 @RequiredArgsConstructor
-public class MetaController {
+public class MetaController implements MetaControllerDocs {
 
     private final MetaService metaService;
 
