@@ -6,7 +6,9 @@ import { useMemberStore } from "../stores/memberStore";
 export default function Home() {
   const { data: progress, isLoading } = useProgress();
   const uuid = useMemberStore((s) => s.uuid);
-  const initials = uuid.slice(0, 2).toUpperCase();
+  const nickname = useMemberStore((s) => s.nickname);
+  const displayName = nickname || uuid.slice(0, 8);
+  const initials = displayName.slice(0, 2);
 
   if (isLoading) {
     return (
@@ -34,7 +36,7 @@ export default function Home() {
         >
           {initials}
         </div>
-        <h1 className="text-h2">안녕하세요, {uuid.slice(0, 8)}</h1>
+        <h1 className="text-h2">안녕하세요, {displayName}</h1>
       </section>
 
       {streak > 0 && (
@@ -68,15 +70,11 @@ export default function Home() {
           <span className="text-h1 text-brand">{solved}</span>
           <span className="text-secondary mt-1">푼 문제</span>
         </div>
-
         <div className="card-base flex flex-col items-start">
           <span className="text-h1 text-brand">{Math.round(correctRate)}%</span>
           <span className="text-secondary mt-1">정답률</span>
           <div className="w-full mt-2 h-1 rounded-full bg-border">
-            <div
-              className="h-full rounded-full bg-brand"
-              style={{ width: `${correctRate}%` }}
-            />
+            <div className="h-full rounded-full bg-brand" style={{ width: `${correctRate}%` }} />
           </div>
         </div>
       </section>

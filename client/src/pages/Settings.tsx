@@ -1,12 +1,19 @@
 import { Copy, RefreshCw } from "lucide-react";
 import { useMemberStore } from "../stores/memberStore";
+import { useRegenerateNickname } from "../hooks/useMember";
 
 export default function Settings() {
   const uuid = useMemberStore((s) => s.uuid);
+  const nickname = useMemberStore((s) => s.nickname);
   const truncatedUuid = uuid.slice(0, 20) + "...";
+  const regenerateMutation = useRegenerateNickname();
 
   const handleCopy = () => {
     navigator.clipboard.writeText(uuid);
+  };
+
+  const handleRegenerate = () => {
+    regenerateMutation.mutate();
   };
 
   return (
@@ -30,13 +37,18 @@ export default function Settings() {
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <div>
             <p className="text-secondary text-sm">닉네임</p>
-            <p className="text-body font-bold mt-1">{uuid.slice(0, 8)}</p>
+            <p className="text-body font-bold mt-1">{nickname || uuid.slice(0, 8)}</p>
           </div>
           <button
             type="button"
-            className="w-8 h-8 flex items-center justify-center text-text-caption opacity-50 cursor-not-allowed"
-            title="재생성 (미구현)"
-            disabled
+            className={`w-8 h-8 flex items-center justify-center transition-colors ${
+              regenerateMutation.isPending
+                ? "text-text-caption animate-spin"
+                : "text-text-caption hover:text-brand"
+            }`}
+            title="닉네임 재생성"
+            onClick={handleRegenerate}
+            disabled={regenerateMutation.isPending}
           >
             <RefreshCw size={16} />
           </button>
