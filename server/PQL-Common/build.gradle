@@ -24,4 +24,5 @@ dependencies {
     api 'org.flywaydb:flyway-mysql'
     api 'io.github.resilience4j:resilience4j-spring-boot3:2.3.0'
     api 'io.qdrant:client:1.13.0'
+    api 'me.suhsaechan:suh-random-engine:1.1.0'
 }

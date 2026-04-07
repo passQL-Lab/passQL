@@ -4,6 +4,7 @@ import io.swagger.v3.oas.annotations.Hidden;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -107,6 +108,18 @@ public class GlobalExceptionHandler {
             .message(String.format("요청하신 리소스를 찾을 수 없습니다: %s %s", e.getHttpMethod(), e.getRequestURL()))
             .build();
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorResponse);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolationException(
+        DataIntegrityViolationException e, HttpServletRequest request) {
+        log.error("[예외 처리] DataIntegrityViolationException 발생: path={}, method={}",
+            request.getRequestURI(), request.getMethod(), e);
+        ErrorResponse errorResponse = ErrorResponse.builder()
+            .errorCode("DATA_INTEGRITY_VIOLATION")
+            .message("데이터 무결성 제약을 위반했습니다")
+            .build();
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(errorResponse);
     }
 
     @ExceptionHandler(Exception.class)

@@ -9,9 +9,6 @@ jar { enabled = true; archiveClassifier = '' }
 
 dependencies {
     api project(':PQL-Common')
-    api project(':PQL-Domain-Member')
-    api project(':PQL-Domain-Question')
-    api project(':PQL-Domain-Submission')
-    api project(':PQL-Domain-AI')
-    api project(':PQL-Domain-Meta')
+    api 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'me.suhsaechan:suh-random-engine:1.1.0'
 }

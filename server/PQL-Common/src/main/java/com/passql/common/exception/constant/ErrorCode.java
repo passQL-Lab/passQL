@@ -41,7 +41,13 @@ public enum ErrorCode {
     SANDBOX_DB_NOT_FOUND(HttpStatus.NOT_FOUND, "샌드박스 DB를 찾을 수 없습니다."),
     SETTING_NOT_FOUND(HttpStatus.NOT_FOUND, "설정값을 찾을 수 없습니다."),
     PROMPT_NOT_FOUND(HttpStatus.NOT_FOUND, "프롬프트 템플릿을 찾을 수 없습니다."),
-    TOPIC_NOT_FOUND(HttpStatus.NOT_FOUND, "토픽을 찾을 수 없습니다.");
+    TOPIC_NOT_FOUND(HttpStatus.NOT_FOUND, "토픽을 찾을 수 없습니다."),
+
+    // Member
+    MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "회원을 찾을 수 없습니다."),
+    MEMBER_ALREADY_WITHDRAWN(HttpStatus.GONE, "이미 탈퇴한 회원입니다."),
+    NICKNAME_DUPLICATE(HttpStatus.CONFLICT, "이미 사용 중인 닉네임입니다."),
+    NICKNAME_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "닉네임 생성에 실패했습니다.");
 
     private final HttpStatus status;
     private final String message;
