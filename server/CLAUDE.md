@@ -15,10 +15,14 @@
 - 마이그레이션 파일 위치: `PQL-Web/src/main/resources/db/migration/`
 - 파일 네이밍: `V{version.yml의 version값}__{설명}.sql` — 점(.)은 언더스코어(_)로 치환
   - 예: `version: "0.0.11"` → `V0_0_11__add_user_table.sql`
+- **마이그레이션 파일 작성 전 반드시 프로젝트 루트 `version.yml`을 먼저 읽어 현재 버전을 확인한다**
+- **하나의 version.yml 버전당 마이그레이션 파일은 반드시 1개만 작성한다** — DDL과 DML을 분리하고 싶어도 하나의 파일에 통합할 것. Flyway는 같은 버전 prefix 파일 2개를 허용하지 않는다
+- 이미 구현된 마이그레이션이 있으면 다시 만들지 않는다 — 이력 표를 먼저 확인한 뒤 누락된 것만 추가
 - `hibernate.ddl-auto`는 `update` 모드 — Flyway는 보조 수단, Hibernate가 실제 스키마를 관리함
 - **Entity를 추가/변경하면 반드시 대응하는 마이그레이션 파일을 함께 작성해야 한다**
 - 기존 마이그레이션 파일은 절대 수정하지 말 것 (새 버전 파일로 추가)
 - SQL 작성 시 테이블/컬럼 생성은 반드시 `IF NOT EXISTS` 사용, 삭제는 `IF EXISTS` 사용
+- 시드 INSERT는 `ON DUPLICATE KEY UPDATE`로 멱등성을 보장한다
 
 ### 현재 마이그레이션 이력
 
@@ -26,6 +30,8 @@
 |------|------|------|
 | V0_0_11 | `V0_0_11__init_schema.sql` | 초기 스키마 전체 생성 (topic, subtopic, concept_tag, concept_doc, prompt_template, app_setting, question, question_choice) |
 | V0_0_12 | `V0_0_12__add_submission_tables.sql` | submission, execution_log 테이블 추가 |
+| V0_0_16 | `V0_0_16__add_member_table.sql` | member 테이블 추가 |
+| V0_0_21 | `V0_0_21__add_concept_tag_table.sql` | question_concept_tag 매핑 테이블 추가 + 초기 시드 데이터 적재 (app_setting 13개, prompt_template 3종, topic 9개) |
 
 ## 모듈 구조
 
@@ -163,3 +169,6 @@ private boolean isTestAccount;
 - [ ] `@Column(name = ...)`를 붙이지 않고 Hibernate 기본 naming strategy에 맡겼는가?
 - [ ] Boolean 필드는 `Boolean` 래퍼 타입인가? (primitive `boolean` 금지)
 - [ ] Entity 추가/변경 시 Flyway 마이그레이션 파일도 함께 작성했는가?
+- [ ] 마이그레이션 파일 작성 전 `version.yml`을 읽어 현재 버전을 확인했는가?
+- [ ] 동일 버전으로 파일이 2개 이상 생성되지 않았는가? (버전당 파일 1개 원칙)
+- [ ] 이미 존재하는 마이그레이션을 중복 생성하지 않았는가? (이력 표 먼저 확인)
