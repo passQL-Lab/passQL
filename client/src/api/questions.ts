@@ -49,10 +49,10 @@ export function submitAnswer(
 
 export function executeChoice(
   id: number,
-  choiceKey: string,
+  sql: string,
 ): Promise<ExecuteResult> {
   return apiFetch(`/questions/${id}/execute`, {
     method: "POST",
-    body: JSON.stringify({ choiceKey }),
+    body: JSON.stringify({ sql }),
   });
 }

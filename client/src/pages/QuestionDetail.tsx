@@ -19,19 +19,19 @@ export default function QuestionDetail() {
   const executeCacheRef = useRef(executeCache);
   executeCacheRef.current = executeCache;
 
-  const handleExecute = useCallback((choiceKey: string) => {
+  const handleExecute = useCallback((choiceKey: string, sql: string) => {
     if (executeCacheRef.current[choiceKey]) return;
-    executeMutation.mutate(choiceKey, {
+    executeMutation.mutate(sql, {
       onSuccess: (result) => {
         setExecuteCache((prev) => ({ ...prev, [choiceKey]: result }));
       },
     });
   }, [executeMutation]);
 
-  const handleSelect = useCallback((choiceKey: string) => {
+  const handleSelect = useCallback((choiceKey: string, sql: string) => {
     setSelectedKey(choiceKey);
     if (!executeCacheRef.current[choiceKey]) {
-      handleExecute(choiceKey);
+      handleExecute(choiceKey, sql);
     }
   }, [handleExecute]);
 
@@ -87,7 +87,7 @@ export default function QuestionDetail() {
             isSelected={selectedKey === choice.key}
             cached={executeCache[choice.key]}
             isExecutable={question.executionMode === "EXECUTABLE"}
-            isExecuting={executeMutation.isPending && executeMutation.variables === choice.key}
+            isExecuting={executeMutation.isPending && executeMutation.variables === choice.body}
             onSelect={handleSelect}
             onExecute={handleExecute}
           />

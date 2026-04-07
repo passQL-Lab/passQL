@@ -1,8 +1,8 @@
 import { apiFetch } from "./client";
 import { getMemberUuid } from "../stores/memberStore";
-import type { AiResult, SimilarQuestion } from "../types/api";
+import type { AiResult, SimilarQuestion, ExplainErrorPayload, DiffExplainPayload } from "../types/api";
 
-export function explainError(payload: Record<string, unknown>): Promise<AiResult> {
+export function explainError(payload: ExplainErrorPayload): Promise<AiResult> {
   return apiFetch("/ai/explain-error", {
     method: "POST",
     headers: { "X-User-UUID": getMemberUuid() },
@@ -10,7 +10,7 @@ export function explainError(payload: Record<string, unknown>): Promise<AiResult
   });
 }
 
-export function diffExplain(payload: Record<string, unknown>): Promise<AiResult> {
+export function diffExplain(payload: DiffExplainPayload): Promise<AiResult> {
   return apiFetch("/ai/diff-explain", {
     method: "POST",
     headers: { "X-User-UUID": getMemberUuid() },

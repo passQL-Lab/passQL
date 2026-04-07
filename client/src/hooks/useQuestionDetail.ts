@@ -11,7 +11,7 @@ export function useQuestionDetail(id: number) {
 
 export function useExecuteChoice(questionId: number) {
   return useMutation({
-    mutationFn: (choiceKey: string) => executeChoice(questionId, choiceKey),
+    mutationFn: (sql: string) => executeChoice(questionId, sql),
   });
 }
 

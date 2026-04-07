@@ -8,8 +8,8 @@ interface ChoiceCardProps {
   readonly cached: ExecuteResult | undefined;
   readonly isExecutable: boolean;
   readonly isExecuting: boolean;
-  readonly onSelect: (key: string) => void;
-  readonly onExecute: (key: string) => void;
+  readonly onSelect: (key: string, sql: string) => void;
+  readonly onExecute: (key: string, sql: string) => void;
 }
 
 export const ChoiceCard = memo(function ChoiceCard({
@@ -19,13 +19,13 @@ export const ChoiceCard = memo(function ChoiceCard({
   return (
     <div className={`card-base ${borderClass}`}>
       <div className="flex items-center gap-3 mb-3">
-        <button type="button" className={`radio-custom ${isSelected ? "radio-custom--selected" : ""}`} onClick={() => onSelect(choice.key)} aria-label={`선택지 ${choice.key}`} />
+        <button type="button" className={`radio-custom ${isSelected ? "radio-custom--selected" : ""}`} onClick={() => onSelect(choice.key, choice.body)} aria-label={`선택지 ${choice.key}`} />
         <span className="text-body font-bold">{choice.key}</span>
       </div>
       <pre className="code-block text-sm"><code>{choice.body}</code></pre>
       {isExecutable && (
         <div className="flex justify-end mt-2">
-          <button className="btn-compact" type="button" onClick={() => onExecute(choice.key)} disabled={!!cached || isExecuting}>
+          <button className="btn-compact" type="button" onClick={() => onExecute(choice.key, choice.body)} disabled={!!cached || isExecuting}>
             {isExecuting ? "실행 중..." : "실행"}
           </button>
         </div>
