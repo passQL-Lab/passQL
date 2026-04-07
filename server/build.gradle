@@ -9,7 +9,13 @@ bootJar { enabled = false }
 allprojects {
     group = 'com.passql'
     version = '0.0.3'
-    repositories { mavenCentral() }
+    repositories {
+        mavenCentral()
+        maven {
+            url 'http://suh-project.synology.me:9999/repository/maven-releases/'
+            allowInsecureProtocol = true
+        }
+    }
 }
 
 subprojects {
