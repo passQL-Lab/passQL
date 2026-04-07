@@ -1,42 +1,52 @@
 @theme {
   /* ── Fonts ── */
-  --font-display: "Manrope", sans-serif;
-  --font-body: "Pretendard Variable", "Pretendard", sans-serif;
+  --font-ui: "Pretendard Variable", "Pretendard", sans-serif;
   --font-mono: "JetBrains Mono", monospace;
 
-  /* ── Surface Colors (bg-surface, bg-surface-card, etc.) ── */
-  --color-surface: oklch(97.8% 0 0);            /* #f9f9f9 */
-  --color-surface-card: oklch(100% 0 0);         /* #ffffff */
-  --color-surface-muted: oklch(95.7% 0 0);       /* #f3f3f3 */
-  --color-surface-active: oklch(92.2% 0 0);      /* #e8e8e8 */
+  /* ── Page & Surface ── */
+  --color-surface: #FAFAFA;
+  --color-surface-card: #FFFFFF;
+  --color-surface-code: #F3F4F6;
+  --color-surface-zebra: #FAFAFA;
 
-  /* ── Text Colors ── */
-  --color-text-primary: oklch(17.1% 0.02 256);   /* #111827 */
-  --color-text-secondary: oklch(40% 0.02 256);
-  --color-text-muted: oklch(55% 0.01 256);
+  /* ── Brand ── */
+  --color-brand: #4F46E5;
+  --color-brand-light: #EEF2FF;
+  --color-brand-medium: #818CF8;
 
-  /* ── Indigo Palette ── */
-  --color-indigo: oklch(44.9% 0.26 277);         /* #3525cd */
-  --color-indigo-light: oklch(50.6% 0.23 277);   /* #4f46e5 */
+  /* ── Text ── */
+  --color-text-primary: #111827;
+  --color-text-secondary: #6B7280;
+  --color-text-caption: #9CA3AF;
+
+  /* ── Border ── */
+  --color-border: #E5E7EB;
+  --color-border-muted: #D1D5DB;
 
   /* ── Semantic ── */
-  --color-sem-success: oklch(62.7% 0.19 145);    /* #22c55e */
-  --color-sem-error: oklch(57.7% 0.24 27);       /* #ef4444 */
-
-  /* ── Code Block ── */
-  --color-code-bg: oklch(96.7% 0.003 250);       /* #f3f4f6 */
-
-  /* ── Ghost Border (15% opacity outline-variant) ── */
-  --color-ghost-border: oklch(70% 0 0 / 15%);
+  --color-sem-success: #22C55E;
+  --color-sem-success-light: #F0FDF4;
+  --color-sem-success-text: #16A34A;
+  --color-sem-error: #EF4444;
+  --color-sem-error-light: #FEF2F2;
+  --color-sem-error-text: #DC2626;
+  --color-sem-warning: #F59E0B;
+  --color-sem-warning-light: #FEF3C7;
+  --color-sem-warning-text: #D97706;
 
   /* ── Toast ── */
-  --color-toast-bg: oklch(24.7% 0.02 256);       /* #1f2937 */
+  --color-toast-bg: #1F2937;
 
-  /* ── Ambient Shadow (Tonal Lift) ── */
-  --shadow-ambient: 0 12px 40px oklch(17.1% 0.02 256 / 6%);
+  /* ── Heatmap (5 levels) ── */
+  --color-heat-0: #F5F5F5;
+  --color-heat-1: #EEF2FF;
+  --color-heat-2: #C7D2FE;
+  --color-heat-3: #818CF8;
+  --color-heat-4: #4F46E5;
 
-  /* ── Spacing (generous margins) ── */
-  --spacing-module: 2rem;   /* 32px between content modules */
+  /* ── Spacing ── */
+  --spacing-section: 1.5rem;
+  --spacing-module: 2rem;
 
   /* ── Transitions ── */
   --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
