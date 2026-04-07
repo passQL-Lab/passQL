@@ -1,64 +1,8 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Star, ArrowLeft, Check, AlertTriangle, ChevronUp, ChevronDown } from "lucide-react";
-
-// ── Mock Data ──
-const MOCK = {
-  id: 1,
-  topic: "JOIN",
-  difficulty: 2,
-  stem: "다음 SQL 중 고객별 주문 수를 올바르게 구하는 것은?",
-  schema: `CUSTOMER (id INT PK, name VARCHAR, email VARCHAR)
-ORDERS (id INT PK, customer_id INT FK, amount INT, order_date DATE)`,
-  choices: [
-    {
-      key: "A",
-      sql: `SELECT c.name, COUNT(*) AS cnt
-FROM CUSTOMER c
-JOIN ORDERS o ON c.id = o.customer_id
-GROUP BY c.name`,
-      status: "success" as const,
-      result: {
-        rows: 3,
-        ms: 34,
-        columns: ["name", "cnt"],
-        data: [
-          ["홍길동", "2"],
-          ["김영희", "3"],
-          ["이철수", "1"],
-        ],
-      },
-    },
-    {
-      key: "B",
-      sql: `SELECT c.name, COUNT(*) AS cnt
-FROM CUSTOMER c
-JOIN ORDERS o ON c.id = o.cust_id
-GROUP BY c.name`,
-      status: "error" as const,
-      error: {
-        code: "SQL_SYNTAX",
-        message: "Unknown column 'o.cust_id' in 'on clause'",
-      },
-    },
-    {
-      key: "C",
-      sql: `SELECT name, COUNT(*) AS cnt
-FROM CUSTOMER c
-JOIN ORDERS o ON c.id = o.customer_id
-GROUP BY name`,
-      status: "idle" as const,
-    },
-    {
-      key: "D",
-      sql: `SELECT c.name, SUM(o.amount) AS total
-FROM CUSTOMER c
-JOIN ORDERS o ON c.id = o.customer_id
-GROUP BY c.name`,
-      status: "idle" as const,
-    },
-  ],
-} as const;
+import { useQuestionDetail, useExecuteChoice, useSubmitAnswer } from "../hooks/useQuestionDetail";
+import type { ExecuteResult } from "../types/api";
 
 function StarRating({ level }: { readonly level: number }) {
   return (
@@ -75,113 +19,170 @@ function StarRating({ level }: { readonly level: number }) {
 }
 
 export default function QuestionDetail() {
-  const { id: _id } = useParams<{ id: string }>();
+  const { id } = useParams<{ id: string }>();
+  const questionId = Number(id);
   const navigate = useNavigate();
-  const [selectedKey, setSelectedKey] = useState<string | null>("C");
+
+  const { data: question, isLoading } = useQuestionDetail(questionId);
+  const executeMutation = useExecuteChoice(questionId);
+  const submitMutation = useSubmitAnswer(questionId);
+
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [schemaOpen, setSchemaOpen] = useState(false);
+  const [executeCache, setExecuteCache] = useState<Record<string, ExecuteResult>>({});
+
+  const handleExecute = useCallback((choiceKey: string) => {
+    if (executeCache[choiceKey]) return;
+    executeMutation.mutate(choiceKey, {
+      onSuccess: (result) => {
+        setExecuteCache((prev) => ({ ...prev, [choiceKey]: result }));
+      },
+    });
+  }, [executeCache, executeMutation]);
+
+  const handleSelect = useCallback((choiceKey: string) => {
+    setSelectedKey(choiceKey);
+    if (!executeCache[choiceKey]) {
+      handleExecute(choiceKey);
+    }
+  }, [executeCache, handleExecute]);
+
+  const handleSubmit = useCallback(() => {
+    if (!selectedKey) return;
+    submitMutation.mutate(selectedKey, {
+      onSuccess: (result) => {
+        const selectedChoice = question?.choices.find((c) => c.key === selectedKey);
+        const correctChoice = question?.choices.find((c) => c.key === result.correctKey);
+        navigate(`/questions/${questionId}/result`, {
+          state: {
+            ...result,
+            selectedKey,
+            selectedSql: selectedChoice?.body,
+            correctSql: correctChoice?.body,
+            questionId,
+          },
+        });
+      },
+    });
+  }, [selectedKey, submitMutation, question, questionId, navigate]);
+
+  if (isLoading || !question) {
+    return (
+      <div className="py-6 space-y-4">
+        <div className="h-14 bg-border animate-pulse rounded" />
+        <div className="h-24 bg-border animate-pulse rounded-xl" />
+        <div className="space-y-3">
+          {Array.from({ length: 4 }, (_, i) => (
+            <div key={i} className="h-40 bg-border animate-pulse rounded-xl" />
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="pb-24">
-      {/* ── 1. Sticky Header ── */}
       <header className="sticky top-0 z-20 flex items-center justify-between h-14 bg-surface-card border-b border-border px-4 -mx-4 lg:-mx-0">
-        <button
-          type="button"
-          className="text-text-primary text-lg"
-          onClick={() => navigate(-1)}
-        >
+        <button type="button" className="text-text-primary" onClick={() => navigate(-1)}>
           <ArrowLeft size={20} />
         </button>
         <div className="flex items-center gap-2">
-          <span className="badge-topic">{MOCK.topic}</span>
-          <StarRating level={MOCK.difficulty} />
+          <span className="badge-topic">{question.topicCode}</span>
+          <StarRating level={question.difficulty} />
         </div>
       </header>
 
-      {/* ── 2. Stem Card ── */}
       <section className="card-base mt-4">
-        <p className="text-body">{MOCK.stem}</p>
+        <p className="text-body">{question.stem}</p>
       </section>
 
-      {/* ── 3. Schema Card (collapsible) ── */}
-      <section className="mt-3">
-        <button
-          type="button"
-          className="flex items-center gap-2 text-secondary text-sm w-full"
-          onClick={() => setSchemaOpen((prev) => !prev)}
-        >
-          <span>스키마 보기</span>
-          {schemaOpen ? <ChevronUp size={16} className="text-text-caption" /> : <ChevronDown size={16} className="text-text-caption" />}
-        </button>
-        {schemaOpen && (
-          <pre className="code-block mt-2">
-            <code>{MOCK.schema}</code>
-          </pre>
-        )}
-      </section>
+      {question.schemaDisplay && (
+        <section className="mt-3">
+          <button
+            type="button"
+            className="flex items-center gap-2 text-secondary text-sm w-full"
+            onClick={() => setSchemaOpen((prev) => !prev)}
+          >
+            <span>스키마 보기</span>
+            {schemaOpen ? <ChevronUp size={16} className="text-text-caption" /> : <ChevronDown size={16} className="text-text-caption" />}
+          </button>
+          {schemaOpen && (
+            <pre className="code-block mt-2">
+              <code>{question.schemaDisplay}</code>
+            </pre>
+          )}
+        </section>
+      )}
 
-      {/* ── 4. Choice Cards ── */}
       <section className="mt-4 space-y-3">
-        {MOCK.choices.map((choice) => {
+        {question.choices.map((choice) => {
           const isSelected = selectedKey === choice.key;
           const borderClass = isSelected ? "border-brand border-2" : "border-border";
+          const cached = executeCache[choice.key];
 
           return (
             <div key={choice.key} className={`card-base ${borderClass}`}>
-              {/* Choice header: Radio + Key */}
               <div className="flex items-center gap-3 mb-3">
                 <button
                   type="button"
                   className={`radio-custom ${isSelected ? "radio-custom--selected" : ""}`}
-                  onClick={() => setSelectedKey(choice.key)}
+                  onClick={() => handleSelect(choice.key)}
                   aria-label={`선택지 ${choice.key}`}
                 />
                 <span className="text-body font-bold">{choice.key}</span>
               </div>
 
-              {/* SQL code block */}
               <pre className="code-block text-sm">
-                <code>{choice.sql}</code>
+                <code>{choice.body}</code>
               </pre>
 
-              {/* Execute button */}
-              <div className="flex justify-end mt-2">
-                <button className="btn-compact" type="button">실행</button>
-              </div>
-
-              {/* Result: SUCCESS */}
-              {choice.status === "success" && (
-                <div className="success-card mt-3">
-                  <p className="text-sm font-medium" style={{ color: "var(--color-sem-success-text)" }}>
-                    <Check size={14} className="inline" /> {choice.result.rows}행 · {choice.result.ms}ms
-                  </p>
-                  <table className="data-table mt-2">
-                    <thead>
-                      <tr>
-                        {choice.result.columns.map((col) => (
-                          <th key={col}>{col}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {choice.result.data.map((row, i) => (
-                        <tr key={i}>
-                          {row.map((cell, j) => (
-                            <td key={j}>{cell}</td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+              {question.executionMode === "EXECUTABLE" && (
+                <div className="flex justify-end mt-2">
+                  <button
+                    className="btn-compact"
+                    type="button"
+                    onClick={() => handleExecute(choice.key)}
+                    disabled={!!cached || executeMutation.isPending}
+                  >
+                    {executeMutation.isPending && executeMutation.variables === choice.key ? "실행 중..." : "실행"}
+                  </button>
                 </div>
               )}
 
-              {/* Result: ERROR */}
-              {choice.status === "error" && (
+              {cached && !cached.errorCode && (
+                <div className="success-card mt-3">
+                  <p className="text-sm font-medium" style={{ color: "var(--color-sem-success-text)" }}>
+                    <Check size={14} className="inline" /> {cached.rowCount}행 · {cached.elapsedMs}ms
+                  </p>
+                  {cached.columns.length > 0 && (
+                    <table className="data-table mt-2">
+                      <thead>
+                        <tr>
+                          {cached.columns.map((col) => (
+                            <th key={col}>{col}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {cached.rows.map((row, i) => (
+                          <tr key={i}>
+                            {(row as unknown[]).map((cell, j) => (
+                              <td key={j}>{String(cell)}</td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )}
+                </div>
+              )}
+
+              {cached?.errorCode && (
                 <div className="error-card mt-3">
                   <span className="text-code font-bold" style={{ color: "var(--color-sem-error)" }}>
-                    <AlertTriangle size={14} className="inline" /> {choice.error.code}
+                    <AlertTriangle size={14} className="inline" /> {cached.errorCode}
                   </span>
-                  <p className="text-secondary mt-1">{choice.error.message}</p>
+                  <p className="text-secondary mt-1">{cached.errorMessage}</p>
                   <div className="flex justify-end mt-2">
                     <button className="text-brand text-sm font-medium" type="button">
                       AI에게 물어보기
@@ -194,19 +195,19 @@ export default function QuestionDetail() {
         })}
       </section>
 
-      {/* ── 5. Sticky Submit Button ── */}
-      <div className="fixed bottom-0 inset-x-0 lg:left-[220px] bg-surface-card border-t border-border p-4 z-20">
-        <div className="mx-auto max-w-[720px]">
+      <div className="fixed bottom-0 inset-x-0 lg:left-55 bg-surface-card border-t border-border p-4 z-20">
+        <div className="mx-auto max-w-180">
           <button
             type="button"
             className={`w-full h-12 rounded-lg text-body font-bold ${
-              selectedKey
+              selectedKey && !submitMutation.isPending
                 ? "bg-brand text-white"
                 : "bg-border text-text-caption cursor-not-allowed"
             }`}
-            disabled={!selectedKey}
+            disabled={!selectedKey || submitMutation.isPending}
+            onClick={handleSubmit}
           >
-            제출
+            {submitMutation.isPending ? "제출 중..." : "제출"}
           </button>
         </div>
       </div>
