@@ -1,12 +1,8 @@
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Star, ChevronRight, ChevronDown } from "lucide-react";
-
-const MOCK_QUESTIONS = [
-  { id: "Q001", topic: "JOIN", stem: "고객별 주문 수를 구하는 올바른 SQL은?", difficulty: 2 },
-  { id: "Q002", topic: "서브쿼리", stem: "서브쿼리를 사용하여 평균 이상 주문한 고객을 조회하는 SQL은?", difficulty: 3 },
-  { id: "Q003", topic: "GROUP BY", stem: "부서별 평균 급여가 500만원 이상인 부서를 구하는 SQL은?", difficulty: 2 },
-  { id: "Q004", topic: "DDL", stem: "외래키 제약조건을 포함한 테이블 생성 SQL로 올바른 것은?", difficulty: 1 },
-  { id: "Q005", topic: "제약조건", stem: "NOT NULL과 UNIQUE 제약조건의 차이를 올바르게 설명한 것은?", difficulty: 3 },
-] as const;
+import { useQuestions } from "../hooks/useQuestions";
+import { useTopics } from "../hooks/useTopics";
 
 function StarRating({ level }: { readonly level: number }) {
   return (
@@ -23,52 +19,126 @@ function StarRating({ level }: { readonly level: number }) {
 }
 
 export default function Questions() {
+  const [page, setPage] = useState(0);
+  const [topic, setTopic] = useState<string | undefined>();
+  const [difficulty, setDifficulty] = useState<number | undefined>();
+  const [topicOpen, setTopicOpen] = useState(false);
+  const [diffOpen, setDiffOpen] = useState(false);
+
+  const { data: topics } = useTopics();
+  const { data, isLoading } = useQuestions({ page, size: 10, topic, difficulty });
+
   return (
     <div className="py-6 space-y-0">
       {/* 1. Filter bar */}
-      <section className="flex gap-3 mb-4">
-        <button className="filter-dropdown" type="button">
-          토픽 <ChevronDown size={14} className="text-text-caption inline" />
-        </button>
-        <button className="filter-dropdown" type="button">
-          난이도 <ChevronDown size={14} className="text-text-caption inline" />
-        </button>
+      <section className="flex gap-3 mb-4 relative">
+        <div className="relative">
+          <button
+            className={`filter-dropdown ${topic ? "filter-dropdown--active" : ""}`}
+            type="button"
+            onClick={() => { setTopicOpen(!topicOpen); setDiffOpen(false); }}
+          >
+            {topics?.find((t) => t.code === topic)?.displayName ?? "토픽"} <ChevronDown size={14} className="text-text-caption inline" />
+          </button>
+          {topicOpen && (
+            <div className="absolute top-full mt-1 left-0 bg-surface-card border border-border rounded-lg shadow-lg z-10 py-1 min-w-[140px]">
+              <button
+                type="button"
+                className="w-full text-left px-4 py-2 text-sm hover:bg-surface"
+                onClick={() => { setTopic(undefined); setTopicOpen(false); setPage(0); }}
+              >
+                전체
+              </button>
+              {topics?.map((t) => (
+                <button
+                  key={t.code}
+                  type="button"
+                  className="w-full text-left px-4 py-2 text-sm hover:bg-surface"
+                  onClick={() => { setTopic(t.code); setTopicOpen(false); setPage(0); }}
+                >
+                  {t.displayName}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div className="relative">
+          <button
+            className={`filter-dropdown ${difficulty ? "filter-dropdown--active" : ""}`}
+            type="button"
+            onClick={() => { setDiffOpen(!diffOpen); setTopicOpen(false); }}
+          >
+            {difficulty ? `난이도 ${difficulty}` : "난이도"} <ChevronDown size={14} className="text-text-caption inline" />
+          </button>
+          {diffOpen && (
+            <div className="absolute top-full mt-1 left-0 bg-surface-card border border-border rounded-lg shadow-lg z-10 py-1 min-w-[120px]">
+              <button
+                type="button"
+                className="w-full text-left px-4 py-2 text-sm hover:bg-surface"
+                onClick={() => { setDifficulty(undefined); setDiffOpen(false); setPage(0); }}
+              >
+                전체
+              </button>
+              {[1, 2, 3].map((d) => (
+                <button
+                  key={d}
+                  type="button"
+                  className="w-full text-left px-4 py-2 text-sm hover:bg-surface"
+                  onClick={() => { setDifficulty(d); setDiffOpen(false); setPage(0); }}
+                >
+                  {"★".repeat(d)}{"☆".repeat(3 - d)}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </section>
 
       {/* 2. Result count */}
-      <p className="text-secondary mb-4">{MOCK_QUESTIONS.length}문제</p>
+      <p className="text-secondary mb-4">
+        {isLoading ? "로딩 중..." : `${data?.totalElements ?? 0}문제`}
+      </p>
 
       {/* 3. Question card list */}
-      <section className="space-y-3">
-        {MOCK_QUESTIONS.map((q) => (
-          <div
-            key={q.id}
-            className="card-base flex flex-col gap-2 cursor-pointer hover:bg-surface transition-colors"
-          >
-            {/* Top row: Q번호 + 토픽 pill */}
-            <div className="flex items-center justify-between">
-              <span className="font-mono text-xs text-text-caption">{q.id}</span>
-              <span className="badge-topic">{q.topic}</span>
-            </div>
-
-            {/* Middle: stem preview */}
-            <p className="text-body truncate">{q.stem}</p>
-
-            {/* Bottom row: difficulty + chevron */}
-            <div className="flex items-center justify-between">
-              <StarRating level={q.difficulty} />
-              <ChevronRight size={16} className="text-text-caption" />
-            </div>
-          </div>
-        ))}
-      </section>
+      {isLoading ? (
+        <div className="space-y-3">
+          {Array.from({ length: 3 }, (_, i) => (
+            <div key={i} className="card-base h-24 animate-pulse bg-border" />
+          ))}
+        </div>
+      ) : (
+        <section className="space-y-3">
+          {data?.content.map((q) => (
+            <Link key={q.id} to={`/questions/${q.id}`}>
+              <div className="card-base flex flex-col gap-2 cursor-pointer hover:bg-surface transition-colors">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-xs text-text-caption">Q{String(q.id).padStart(3, "0")}</span>
+                  <span className="badge-topic">{q.topicCode}</span>
+                </div>
+                <p className="text-body truncate">{q.stemPreview}</p>
+                <div className="flex items-center justify-between">
+                  <StarRating level={q.difficulty} />
+                  <ChevronRight size={16} className="text-text-caption" />
+                </div>
+              </div>
+            </Link>
+          ))}
+        </section>
+      )}
 
       {/* 4. Pagination */}
-      <div className="flex justify-center pt-6">
-        <button className="text-brand text-sm font-medium hover:underline" type="button">
-          더 보기
-        </button>
-      </div>
+      {data && !data.last && (
+        <div className="flex justify-center pt-6">
+          <button
+            className="text-brand text-sm font-medium hover:underline"
+            type="button"
+            onClick={() => setPage((p) => p + 1)}
+          >
+            더 보기
+          </button>
+        </div>
+      )}
     </div>
   );
 }
