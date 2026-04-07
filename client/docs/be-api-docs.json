@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "http://api.passql.suhsaechan.kr",
+      "url": "백엔드주소",
       "description": "Generated server url"
     }
   ],
