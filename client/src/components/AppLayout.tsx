@@ -1,10 +1,12 @@
 import { NavLink, Outlet } from "react-router-dom";
+import { Home, FileText, BarChart3, Settings } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
-const NAV_ITEMS = [
-  { to: "/", label: "홈", icon: "🏠" },
-  { to: "/questions", label: "문제", icon: "📝" },
-  { to: "/stats", label: "통계", icon: "📊" },
-  { to: "/settings", label: "설정", icon: "⚙️" },
+const NAV_ITEMS: readonly { readonly to: string; readonly label: string; readonly icon: LucideIcon }[] = [
+  { to: "/", label: "홈", icon: Home },
+  { to: "/questions", label: "문제", icon: FileText },
+  { to: "/stats", label: "통계", icon: BarChart3 },
+  { to: "/settings", label: "설정", icon: Settings },
 ] as const;
 
 function SidebarNav() {
@@ -20,7 +22,7 @@ function SidebarNav() {
             `nav-sidebar-item ${isActive ? "nav-sidebar-item--active" : ""}`
           }
         >
-          <span>{item.icon}</span>
+          <item.icon size={20} />
           <span>{item.label}</span>
         </NavLink>
       ))}
@@ -40,7 +42,7 @@ function BottomTabNav() {
             `nav-tab ${isActive ? "nav-tab--active" : "nav-tab--inactive"}`
           }
         >
-          <span className="text-lg">{item.icon}</span>
+          <item.icon size={20} />
           <span>{item.label}</span>
         </NavLink>
       ))}

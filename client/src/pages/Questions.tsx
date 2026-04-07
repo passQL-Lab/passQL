@@ -1,3 +1,5 @@
+import { Star } from "lucide-react";
+
 const MOCK_QUESTIONS = [
   { id: "Q001", topic: "JOIN", stem: "고객별 주문 수를 구하는 올바른 SQL은?", difficulty: 2 },
   { id: "Q002", topic: "서브쿼리", stem: "서브쿼리를 사용하여 평균 이상 주문한 고객을 조회하는 SQL은?", difficulty: 3 },
@@ -8,9 +10,14 @@ const MOCK_QUESTIONS = [
 
 function StarRating({ level }: { readonly level: number }) {
   return (
-    <span className="text-sm tracking-wide" style={{ color: "var(--color-sem-warning)" }}>
-      {"★".repeat(level)}
-      {"☆".repeat(3 - level)}
+    <span className="flex gap-0.5">
+      {Array.from({ length: 3 }, (_, i) => (
+        <Star
+          key={i}
+          size={14}
+          className={i < level ? "fill-[var(--color-sem-warning)] text-[var(--color-sem-warning)]" : "text-border"}
+        />
+      ))}
     </span>
   );
 }

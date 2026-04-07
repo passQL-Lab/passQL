@@ -1,3 +1,5 @@
+import { Flame } from "lucide-react";
+
 // Mock data — API 연동 시 교체
 const MOCK_NICKNAME = "용감한 판다";
 const MOCK_INITIALS = "용판";
@@ -40,7 +42,7 @@ export default function Home() {
             color: "var(--color-sem-warning-text)",
           }}
         >
-          🔥 연속 {MOCK_STREAK}일
+          <Flame size={16} className="inline" /> 연속 {MOCK_STREAK}일
         </span>
       </section>
 
