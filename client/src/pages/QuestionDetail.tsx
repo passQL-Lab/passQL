@@ -1,22 +1,9 @@
 import { useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Star, ArrowLeft, Check, AlertTriangle, ChevronUp, ChevronDown } from "lucide-react";
+import { ArrowLeft, Check, AlertTriangle, ChevronUp, ChevronDown } from "lucide-react";
 import { useQuestionDetail, useExecuteChoice, useSubmitAnswer } from "../hooks/useQuestionDetail";
 import type { ExecuteResult } from "../types/api";
-
-function StarRating({ level }: { readonly level: number }) {
-  return (
-    <span className="flex gap-0.5">
-      {Array.from({ length: 3 }, (_, i) => (
-        <Star
-          key={i}
-          size={14}
-          className={i < level ? "fill-[var(--color-sem-warning)] text-[var(--color-sem-warning)]" : "text-border"}
-        />
-      ))}
-    </span>
-  );
-}
+import { StarRating } from "../components/StarRating";
 
 export default function QuestionDetail() {
   const { id } = useParams<{ id: string }>();
