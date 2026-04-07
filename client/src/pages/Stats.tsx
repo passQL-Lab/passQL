@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useProgress, useHeatmap } from "../hooks/useProgress";
 
 function getHeatmapStyle(rate: number): { bg: string; text: string } {
@@ -11,6 +12,30 @@ function getHeatmapStyle(rate: number): { bg: string; text: string } {
 export default function Stats() {
   const { data: progress, isLoading: progressLoading } = useProgress();
   const { data: heatmap, isLoading: heatmapLoading } = useHeatmap();
+
+  const heatmapGrid = useMemo(() => {
+    if (heatmapLoading || !heatmap || heatmap.length === 0) return null;
+    return (
+      <section>
+        <h2 className="text-h2 mb-4">토픽별 숙련도</h2>
+        <div className="grid grid-cols-3 lg:grid-cols-4 gap-2">
+          {heatmap.map((t) => {
+            const style = getHeatmapStyle(t.correctRate);
+            return (
+              <div
+                key={t.topicCode}
+                className="rounded-lg min-h-[48px] flex flex-col items-center justify-center py-2 px-1"
+                style={{ backgroundColor: style.bg, color: style.text }}
+              >
+                <span className="text-[13px] font-bold">{t.topicName}</span>
+                <span className="text-xs">{Math.round(t.correctRate)}%</span>
+              </div>
+            );
+          })}
+        </div>
+      </section>
+    );
+  }, [heatmap, heatmapLoading]);
 
   if (progressLoading) {
     return (
@@ -35,27 +60,7 @@ export default function Stats() {
           </div>
         ))}
       </div>
-
-      {!heatmapLoading && heatmap && heatmap.length > 0 && (
-        <section>
-          <h2 className="text-h2 mb-4">토픽별 숙련도</h2>
-          <div className="grid grid-cols-3 lg:grid-cols-4 gap-2">
-            {heatmap.map((t) => {
-              const style = getHeatmapStyle(t.correctRate);
-              return (
-                <div
-                  key={t.topicCode}
-                  className="rounded-lg min-h-[48px] flex flex-col items-center justify-center py-2 px-1"
-                  style={{ backgroundColor: style.bg, color: style.text }}
-                >
-                  <span className="text-[13px] font-bold">{t.topicName}</span>
-                  <span className="text-xs">{Math.round(t.correctRate)}%</span>
-                </div>
-              );
-            })}
-          </div>
-        </section>
-      )}
+      {heatmapGrid}
     </div>
   );
 }
