@@ -1,33 +1,12 @@
-import { useState, useEffect, useMemo } from "react";
+import { useMemo } from "react";
+import { X } from "lucide-react";
 
 interface AiExplanationSheetProps {
   readonly isOpen: boolean;
+  readonly isLoading: boolean;
+  readonly text: string;
   readonly onClose: () => void;
 }
-
-const MOCK_EXPLANATION = `선택지 C가 오답인 이유를 분석해 보겠습니다.
-
-**문제점: GROUP BY 절의 컬럼 참조 오류**
-
-선택지 C의 SQL에서는 \`GROUP BY c.name\` 대신 \`GROUP BY name\`을 사용했습니다. 표준 SQL에서는 SELECT 절의 별칭이나 비한정 컬럼명을 GROUP BY에서 사용할 경우, DBMS에 따라 다르게 해석될 수 있습니다.
-
-**올바른 SQL:**
-\`\`\`sql
-SELECT c.name, COUNT(*) AS cnt
-FROM CUSTOMER c
-JOIN ORDERS o ON c.id = o.customer_id
-GROUP BY c.name
-\`\`\`
-
-**잘못된 SQL:**
-\`\`\`sql
-SELECT name, COUNT(*) AS cnt
-FROM CUSTOMER c
-JOIN ORDERS o ON c.id = o.customer_id
-GROUP BY name
-\`\`\`
-
-테이블 별칭을 명시적으로 사용하는 것이 안전하며, 특히 여러 테이블을 조인할 때 컬럼의 출처를 명확히 해야 합니다.`;
 
 function renderMarkdown(text: string) {
   const parts: Array<{ readonly type: string; readonly content: string }> = [];
@@ -37,10 +16,10 @@ function renderMarkdown(text: string) {
   while (i < lines.length) {
     const line = lines[i];
 
-    if (line.startsWith("\`\`\`")) {
+    if (line.startsWith("```")) {
       const codeLines: string[] = [];
       i++;
-      while (i < lines.length && !lines[i].startsWith("\`\`\`")) {
+      while (i < lines.length && !lines[i].startsWith("```")) {
         codeLines.push(lines[i]);
         i++;
       }
@@ -107,20 +86,10 @@ function LoadingSkeleton() {
   );
 }
 
-export default function AiExplanationSheet({ isOpen, onClose }: AiExplanationSheetProps) {
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    if (isOpen) {
-      setLoading(true);
-      const timer = setTimeout(() => setLoading(false), 1500);
-      return () => clearTimeout(timer);
-    }
-  }, [isOpen]);
-
+export default function AiExplanationSheet({ isOpen, isLoading, text, onClose }: AiExplanationSheetProps) {
   const renderedContent = useMemo(
-    () => (loading ? null : renderMarkdown(MOCK_EXPLANATION)),
-    [loading],
+    () => (isLoading || !text ? null : renderMarkdown(text)),
+    [isLoading, text],
   );
 
   if (!isOpen) return null;
@@ -128,13 +97,11 @@ export default function AiExplanationSheet({ isOpen, onClose }: AiExplanationShe
   return (
     <>
       <div className="dialog-overlay" onClick={onClose} />
-
       <div className="fixed inset-x-0 bottom-0 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[520px] md:max-h-[80vh] z-50">
         <div className="bg-surface-card rounded-t-2xl md:rounded-2xl max-h-[90vh] md:max-h-[80vh] overflow-y-auto">
           <div className="md:hidden flex justify-center pt-3">
             <div className="w-10 h-1 rounded-full bg-border-muted" />
           </div>
-
           <div className="sticky top-0 bg-surface-card flex items-center justify-between px-4 py-3 border-b border-border z-10">
             <h2 className="text-lg font-bold text-text-primary">AI 해설</h2>
             <button
@@ -142,15 +109,13 @@ export default function AiExplanationSheet({ isOpen, onClose }: AiExplanationShe
               className="w-8 h-8 flex items-center justify-center text-text-secondary hover:text-text-primary transition-colors"
               onClick={onClose}
             >
-              ✕
+              <X size={16} />
             </button>
           </div>
-
           <div className="px-5 py-4">
-            {loading ? <LoadingSkeleton /> : renderedContent}
+            {isLoading ? <LoadingSkeleton /> : renderedContent}
           </div>
-
-          {!loading && (
+          {!isLoading && text && (
             <div className="px-5 pb-4 text-right">
               <span className="text-caption text-xs">프롬프트 v1 · qwen2.5:7b</span>
             </div>
