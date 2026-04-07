@@ -46,47 +46,45 @@ public class Member extends SoftDeletableBaseEntity {
     // === 식별 (코어) ===
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "member_uuid", columnDefinition = "CHAR(36)", updatable = false, nullable = false)
+    @Column(columnDefinition = "CHAR(36)", updatable = false, nullable = false)
     private UUID memberUuid;
 
-    @Column(name = "nickname", length = 50, nullable = false)
+    @Column(length = 50, nullable = false)
     private String nickname;
 
     // === 권한 / 상태 ===
     @Enumerated(EnumType.STRING)
-    @Column(name = "role", length = 30, nullable = false)
+    @Column(length = 30, nullable = false)
     private MemberRole role;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", length = 20, nullable = false)
+    @Column(length = 20, nullable = false)
     private MemberStatus status;
 
-    @Column(name = "is_test_account", nullable = false)
+    @Column(nullable = false)
     private Boolean isTestAccount;
 
     // === 인증 연동 (향후 member_auth 테이블 분리 후보) ===
     @Enumerated(EnumType.STRING)
-    @Column(name = "auth_provider", length = 30, nullable = false)
+    @Column(length = 30, nullable = false)
     private AuthProvider authProvider;
 
-    @Column(name = "provider_user_id", length = 255)
+    @Column(length = 255)
     private String providerUserId;
 
-    @Column(name = "email", length = 255)
+    @Column(length = 255)
     private String email;
 
-    @Column(name = "email_verified", nullable = false)
+    @Column(nullable = false)
     private Boolean emailVerified;
 
     // === 라이프사이클 ===
-    @Column(name = "withdrawn_at")
     private LocalDateTime withdrawnAt;
 
     // === 행동 추적 (향후 member_activity 테이블 분리 후보) ===
-    @Column(name = "last_seen_at")
     private LocalDateTime lastSeenAt;
 
-    @Column(name = "last_login_ip", length = 45)
+    @Column(length = 45)
     private String lastLoginIp;
 
     // === 정적 팩토리 ===

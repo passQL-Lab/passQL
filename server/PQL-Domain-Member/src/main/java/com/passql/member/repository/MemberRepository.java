@@ -16,7 +16,4 @@ public interface MemberRepository extends JpaRepository<Member, UUID> {
 
     Optional<Member> findByAuthProviderAndProviderUserIdAndIsDeletedFalse(
         AuthProvider authProvider, String providerUserId);
-
-    // === 관리자/통계용 (소프트 딜리트 포함) ===
-    Optional<Member> findByMemberUuid(UUID memberUuid);
 }

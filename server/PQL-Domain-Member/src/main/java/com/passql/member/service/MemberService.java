@@ -10,6 +10,7 @@ import com.passql.member.entity.Member;
 import com.passql.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,17 +26,31 @@ public class MemberService {
     /** last_seen_at throttle 간격 (분) — 5분 이내 재호출은 UPDATE 스킵 */
     private static final long LAST_SEEN_THROTTLE_MINUTES = 5L;
 
+    /** UNIQUE 충돌(nickname race) 재시도 횟수. */
+    private static final int UNIQUE_CONFLICT_RETRY = 3;
+
     private final MemberRepository memberRepository;
     private final NicknameGenerator nicknameGenerator;
 
     /** 익명 회원 등록. UUID와 닉네임을 자동 발급한다. */
     @Transactional
     public MemberRegisterResponse register() {
-        String nickname = generateUniqueNicknameOrThrow();
-        Member member = Member.createAnonymous(nickname);
-        Member saved = memberRepository.save(member);
-        log.info("Member registered: uuid={}, nickname={}", saved.getMemberUuid(), saved.getNickname());
-        return new MemberRegisterResponse(saved.getMemberUuid(), saved.getNickname());
+        for (int attempt = 1; attempt <= UNIQUE_CONFLICT_RETRY; attempt++) {
+            String nickname = generateUniqueNicknameOrThrow();
+            Member member = Member.createAnonymous(nickname);
+            try {
+                Member saved = memberRepository.saveAndFlush(member);
+                log.info("Member registered: uuid={}, nickname={}", saved.getMemberUuid(), saved.getNickname());
+                return new MemberRegisterResponse(saved.getMemberUuid(), saved.getNickname());
+            } catch (DataIntegrityViolationException e) {
+                log.warn("Nickname UNIQUE conflict on register (attempt {}/{}): nickname={}",
+                    attempt, UNIQUE_CONFLICT_RETRY, nickname);
+                if (attempt == UNIQUE_CONFLICT_RETRY) {
+                    throw new CustomException(ErrorCode.NICKNAME_GENERATION_FAILED, e);
+                }
+            }
+        }
+        throw new CustomException(ErrorCode.NICKNAME_GENERATION_FAILED);
     }
 
     /** 본인 정보 조회 + last_seen_at throttled 갱신. */
@@ -50,17 +65,32 @@ public class MemberService {
     @Transactional
     public NicknameRegenerateResponse regenerateNickname(UUID memberUuid) {
         Member member = findActiveMember(memberUuid);
-        String newNickname = generateUniqueNicknameOrThrow();
-        member.setNickname(newNickname);
-        log.info("Nickname regenerated: uuid={}, nickname={}", memberUuid, newNickname);
-        return new NicknameRegenerateResponse(newNickname);
+        for (int attempt = 1; attempt <= UNIQUE_CONFLICT_RETRY; attempt++) {
+            String newNickname = generateUniqueNicknameOrThrow();
+            member.setNickname(newNickname);
+            try {
+                memberRepository.saveAndFlush(member);
+                log.info("Nickname regenerated: uuid={}, nickname={}", memberUuid, newNickname);
+                return new NicknameRegenerateResponse(newNickname);
+            } catch (DataIntegrityViolationException e) {
+                log.warn("Nickname UNIQUE conflict on regenerate (attempt {}/{}): uuid={}, nickname={}",
+                    attempt, UNIQUE_CONFLICT_RETRY, memberUuid, newNickname);
+                if (attempt == UNIQUE_CONFLICT_RETRY) {
+                    throw new CustomException(ErrorCode.NICKNAME_GENERATION_FAILED, e);
+                }
+            }
+        }
+        throw new CustomException(ErrorCode.NICKNAME_GENERATION_FAILED);
     }
 
     // === 내부 헬퍼 ===
 
     private Member findActiveMember(UUID memberUuid) {
         return memberRepository.findByMemberUuidAndIsDeletedFalse(memberUuid)
-            .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND, "memberUuid=" + memberUuid));
+            .orElseThrow(() -> {
+                log.warn("Member not found: uuid={}", memberUuid);
+                return new CustomException(ErrorCode.MEMBER_NOT_FOUND);
+            });
     }
 
     private String generateUniqueNicknameOrThrow() {
@@ -69,7 +99,8 @@ public class MemberService {
                 memberRepository::existsByNicknameAndIsDeletedFalse
             );
         } catch (IllegalStateException e) {
-            throw new CustomException(ErrorCode.NICKNAME_GENERATION_FAILED, e.getMessage());
+            log.error("Nickname generation failed after all fallbacks", e);
+            throw new CustomException(ErrorCode.NICKNAME_GENERATION_FAILED, e);
         }
     }
 

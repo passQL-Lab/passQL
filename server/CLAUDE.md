@@ -71,6 +71,33 @@ private UUID memberUuid;
 - Enum은 `constant/` 패키지에 분리한다.
 - DB 매핑은 `@Enumerated(EnumType.STRING)` 고정 (ORDINAL 금지).
 
+### 컬럼 네이밍 — `@Column(name = ...)` 금지
+
+- **`@Column(name = "snake_case")` 같이 컬럼명을 수동으로 지정하지 않는다.**
+- Hibernate의 기본 Physical Naming Strategy(`SpringPhysicalNamingStrategy`)가 camelCase Java 필드명을 자동으로 snake_case로 변환한다. 그걸 그대로 믿는다.
+  - `memberUuid` → `member_uuid`
+  - `isTestAccount` → `is_test_account`
+  - `lastSeenAt` → `last_seen_at`
+- `@Column`은 **제약 속성(`length`, `nullable`, `columnDefinition`, `updatable` 등)이 필요할 때만** 사용한다. `name` 속성은 붙이지 않는다.
+- `@Table(indexes = @Index(columnList = "..."))`의 `columnList`에 컬럼명을 적을 때도 Hibernate가 변환할 snake_case 이름을 그대로 문자열로 쓴다 (예: `"is_test_account"`).
+- Flyway 마이그레이션 SQL의 컬럼명도 동일한 snake_case 규칙을 따른다 (Entity ↔ SQL 정합성 유지).
+
+### Boolean 필드는 `Boolean` 래퍼로, `is` 접두사 허용
+
+- **Boolean 필드는 primitive `boolean`이 아니라 래퍼 `Boolean`을 사용한다.**
+- Lombok `@Getter`는 primitive `boolean`에 대해 `isXxx()` 형태 getter를 생성하는데, 이 규칙이 필드명이 `is`로 시작하면 getter 이름을 덮어쓰는 등 혼동을 유발한다. `Boolean` 래퍼를 사용하면 `getIsXxx()` 로 getter가 명확히 생성된다.
+- **필드명에 `is` 접두사를 붙이는 것은 허용한다.** (`isTestAccount`, `isDeleted`, `emailVerified` 등) — 단, 위 이유로 타입은 반드시 `Boolean`이어야 한다.
+- DTO에서도 동일 규칙. NPE가 걱정되면 생성 시점에 기본값을 주되, 타입 자체는 `Boolean`을 유지한다.
+
+```java
+// OK
+@Column(nullable = false)
+private Boolean isTestAccount;
+
+// 금지: primitive boolean + is 접두사
+private boolean isTestAccount;
+```
+
 ### 인덱스 / 제약
 
 - `@Table(indexes = ..., uniqueConstraints = ...)`로 명시한다.
@@ -133,4 +160,6 @@ private UUID memberUuid;
 - [ ] 순수 유틸이 `PQL-Common/util`에 있는가?
 - [ ] Controller가 `PQL-Web/controller`에 있는가?
 - [ ] Enum이 `constant/`에 있고 `EnumType.STRING`인가?
+- [ ] `@Column(name = ...)`를 붙이지 않고 Hibernate 기본 naming strategy에 맡겼는가?
+- [ ] Boolean 필드는 `Boolean` 래퍼 타입인가? (primitive `boolean` 금지)
 - [ ] Entity 추가/변경 시 Flyway 마이그레이션 파일도 함께 작성했는가?

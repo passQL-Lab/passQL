@@ -12,8 +12,14 @@ public enum MemberRole {
     ADMIN,          // 관리자
     SUPER_ADMIN;    // 슈퍼 관리자 (시스템 설정 변경 권한)
 
-    /** Spring Security GrantedAuthority 표준 형식. */
+    /**
+     * Spring Security GrantedAuthority 표준 형식.
+     * TEST는 권한상 USER와 동일하게 취급(집계 분리는 is_test_account 플래그로).
+     */
     public String getAuthority() {
+        if (this == TEST) {
+            return "ROLE_USER";
+        }
         return "ROLE_" + name();
     }
 

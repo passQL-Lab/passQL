@@ -37,11 +37,10 @@ CREATE TABLE IF NOT EXISTS member (
     updated_by        VARCHAR(255) NULL,
 
     PRIMARY KEY (member_uuid),
-    CONSTRAINT uk_member_nickname UNIQUE (nickname)
+    CONSTRAINT uk_member_nickname UNIQUE (nickname),
+    INDEX idx_member_auth_provider (auth_provider, provider_user_id),
+    INDEX idx_member_status        (status),
+    INDEX idx_member_role          (role),
+    INDEX idx_member_is_test       (is_test_account),
+    INDEX idx_member_is_deleted    (is_deleted)
 );
-
-CREATE INDEX idx_member_auth_provider ON member (auth_provider, provider_user_id);
-CREATE INDEX idx_member_status        ON member (status);
-CREATE INDEX idx_member_role          ON member (role);
-CREATE INDEX idx_member_is_test       ON member (is_test_account);
-CREATE INDEX idx_member_is_deleted    ON member (is_deleted);

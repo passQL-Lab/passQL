@@ -12,7 +12,6 @@ public class ExecutionLog {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String userUuid;
-    @Column(name = "question_id")
     private Long questionId;
     private String choiceKey;
     @Column(columnDefinition = "TEXT") private String sqlText;
