@@ -8,7 +8,7 @@
 > 선택지를 직접 실행하고, 틀리면 AI가 설명해줍니다.
 
 <!-- AUTO-VERSION-SECTION: DO NOT EDIT MANUALLY -->
-## 최신 버전 : v0.0.9 (2026-04-06)
+## 최신 버전 : v0.0.20 (2026-04-07)
 
 [전체 버전 기록 보기](CHANGELOG.md)
 
