@@ -4,50 +4,47 @@
   prefersdark: false;
   color-scheme: light;
 
-  /* Surface Hierarchy (Paper-on-Desk) */
-  --color-base-100: oklch(97.8% 0 0);       /* #f9f9f9 - Base Layer */
-  --color-base-200: oklch(95.7% 0 0);       /* #f3f3f3 - surface-container-low */
-  --color-base-300: oklch(92.2% 0 0);       /* #e8e8e8 - surface-container-high */
-  --color-base-content: oklch(17.1% 0.02 256); /* #111827 - primary-text */
+  /* Surface */
+  --color-base-100: oklch(98.2% 0 0);       /* #FAFAFA - page background */
+  --color-base-200: oklch(96.2% 0.001 247);  /* #F3F4F6 - code bg */
+  --color-base-300: oklch(92.1% 0.003 247);  /* #E5E7EB - borders */
+  --color-base-content: oklch(17.1% 0.02 256); /* #111827 - primary text */
 
-  /* The Indigo Pulse */
-  --color-primary: oklch(44.9% 0.26 277);   /* #3525cd */
-  --color-primary-content: oklch(100% 0 0);  /* #ffffff */
+  /* Primary: Deep Indigo */
+  --color-primary: oklch(50.6% 0.23 277);    /* #4F46E5 */
+  --color-primary-content: oklch(100% 0 0);  /* #FFFFFF */
 
-  /* Secondary (Indigo variant) */
-  --color-secondary: oklch(50.6% 0.23 277);  /* #4f46e5 - primary-container */
+  /* Secondary */
+  --color-secondary: oklch(65.1% 0.18 277);  /* #818CF8 - accent medium */
   --color-secondary-content: oklch(100% 0 0);
 
   /* Accent */
-  --color-accent: oklch(50.6% 0.23 277);
-  --color-accent-content: oklch(100% 0 0);
+  --color-accent: oklch(95.4% 0.03 277);     /* #EEF2FF - accent light */
+  --color-accent-content: oklch(50.6% 0.23 277); /* #4F46E5 */
 
   /* Neutral */
-  --color-neutral: oklch(24.7% 0.02 256);   /* #1f2937 - toast bg */
+  --color-neutral: oklch(24.7% 0.02 256);    /* #1F2937 - toast bg */
   --color-neutral-content: oklch(100% 0 0);
 
   /* Semantic */
   --color-info: oklch(62.3% 0.18 249);
   --color-info-content: oklch(100% 0 0);
-  --color-success: oklch(62.7% 0.19 145);   /* #22c55e */
+  --color-success: oklch(62.7% 0.19 145);    /* #22C55E */
   --color-success-content: oklch(100% 0 0);
-  --color-warning: oklch(79.5% 0.18 86);
+  --color-warning: oklch(79.5% 0.18 86);     /* #F59E0B */
   --color-warning-content: oklch(17.1% 0.02 256);
-  --color-error: oklch(57.7% 0.24 27);      /* #ef4444 */
+  --color-error: oklch(57.7% 0.24 27);       /* #EF4444 */
   --color-error-content: oklch(100% 0 0);
 
-  /* Geometry: soft-geometric (12px system standard) */
-  --radius-selector: 1rem;
-  --radius-field: 0.75rem;
-  --radius-box: 0.75rem;
+  /* Geometry */
+  --radius-selector: 999px;
+  --radius-field: 0.5rem;   /* 8px - buttons */
+  --radius-box: 0.75rem;    /* 12px - cards */
 
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
 
-  /* No-Line Rule: minimal borders */
   --border: 1px;
-
-  /* Tonal Lift: no heavy shadows */
   --depth: 0;
   --noise: 0;
 }
