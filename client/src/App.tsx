@@ -1,14 +1,15 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import BottomTabLayout from "./components/BottomTabLayout";
+import AppLayout from "./components/AppLayout";
 import Home from "./pages/Home";
 import Questions from "./pages/Questions";
 import QuestionDetail from "./pages/QuestionDetail";
+import AnswerFeedback from "./pages/AnswerFeedback";
 import Stats from "./pages/Stats";
 import Settings from "./pages/Settings";
 
 const router = createBrowserRouter([
   {
-    element: <BottomTabLayout />,
+    element: <AppLayout />,
     children: [
       { index: true, element: <Home /> },
       { path: "questions", element: <Questions /> },
@@ -16,6 +17,10 @@ const router = createBrowserRouter([
       { path: "stats", element: <Stats /> },
       { path: "settings", element: <Settings /> },
     ],
+  },
+  {
+    path: "questions/:id/result",
+    element: <AnswerFeedback />,
   },
 ]);
 

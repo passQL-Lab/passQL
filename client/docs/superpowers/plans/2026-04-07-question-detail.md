@@ -1,6 +1,33 @@
+# Question Detail Page Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Prompt3_QuestionDetail.md 스펙대로 문제 상세 화면 UI를 mock 데이터 기반으로 구현한다. 선택지 4종 상태(default, selected, success, error)를 모두 시각적으로 보여준다.
+
+**Architecture:** QuestionDetail.tsx 단일 파일에 모든 UI를 구현한다. 선택지 A~D는 각각 다른 상태를 mock으로 하드코딩하여 4가지 상태를 동시에 확인할 수 있게 한다. useState로 선택/접기 토글만 구현하고, API 호출은 하지 않는다.
+
+**Tech Stack:** React 19, Tailwind CSS 4 tokens, 기존 디자인 시스템 CSS 클래스, react-router-dom useParams
+
+---
+
+## File Structure
+
+| Action | Path | Responsibility |
+|--------|------|---------------|
+| Rewrite | `src/pages/QuestionDetail.tsx` | 문제 상세 화면 전체 |
+
+---
+
+### Task 1: QuestionDetail 페이지 구현
+
+**Files:**
+- Rewrite: `src/pages/QuestionDetail.tsx`
+
+- [ ] **Step 1: QuestionDetail.tsx 전체 교체**
+
+```tsx
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Star, ArrowLeft, Check, AlertTriangle, ChevronUp, ChevronDown } from "lucide-react";
 
 // ── Mock Data ──
 const MOCK = {
@@ -62,20 +89,14 @@ GROUP BY c.name`,
 
 function StarRating({ level }: { readonly level: number }) {
   return (
-    <span className="flex gap-0.5">
-      {Array.from({ length: 3 }, (_, i) => (
-        <Star
-          key={i}
-          size={14}
-          className={i < level ? "fill-[var(--color-sem-warning)] text-[var(--color-sem-warning)]" : "text-border"}
-        />
-      ))}
+    <span className="text-sm" style={{ color: "var(--color-sem-warning)" }}>
+      {"★".repeat(level)}{"☆".repeat(3 - level)}
     </span>
   );
 }
 
 export default function QuestionDetail() {
-  const { id: _id } = useParams<{ id: string }>();
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [selectedKey, setSelectedKey] = useState<string | null>("C");
   const [schemaOpen, setSchemaOpen] = useState(false);
@@ -89,7 +110,7 @@ export default function QuestionDetail() {
           className="text-text-primary text-lg"
           onClick={() => navigate(-1)}
         >
-          <ArrowLeft size={20} />
+          ←
         </button>
         <div className="flex items-center gap-2">
           <span className="badge-topic">{MOCK.topic}</span>
@@ -110,7 +131,7 @@ export default function QuestionDetail() {
           onClick={() => setSchemaOpen((prev) => !prev)}
         >
           <span>스키마 보기</span>
-          {schemaOpen ? <ChevronUp size={16} className="text-text-caption" /> : <ChevronDown size={16} className="text-text-caption" />}
+          <span className="text-text-caption">{schemaOpen ? "▲" : "▼"}</span>
         </button>
         {schemaOpen && (
           <pre className="code-block mt-2">
@@ -152,7 +173,7 @@ export default function QuestionDetail() {
               {choice.status === "success" && (
                 <div className="success-card mt-3">
                   <p className="text-sm font-medium" style={{ color: "var(--color-sem-success-text)" }}>
-                    <Check size={14} className="inline" /> {choice.result.rows}행 · {choice.result.ms}ms
+                    ✓ {choice.result.rows}행 · {choice.result.ms}ms
                   </p>
                   <table className="data-table mt-2">
                     <thead>
@@ -179,7 +200,7 @@ export default function QuestionDetail() {
               {choice.status === "error" && (
                 <div className="error-card mt-3">
                   <span className="text-code font-bold" style={{ color: "var(--color-sem-error)" }}>
-                    <AlertTriangle size={14} className="inline" /> {choice.error.code}
+                    ⚠ {choice.error.code}
                   </span>
                   <p className="text-secondary mt-1">{choice.error.message}</p>
                   <div className="flex justify-end mt-2">
@@ -213,3 +234,26 @@ export default function QuestionDetail() {
     </div>
   );
 }
+```
+
+**스펙 체크리스트:**
+- ✅ Sticky header: 56px, white bg, bottom 1px #E5E7EB border, ← back, topic pill + difficulty stars
+- ✅ Stem card: white card, 12px radius, 16px #111827
+- ✅ Schema card: collapsible "스키마 보기" + ▼ toggle, JetBrains Mono 14px, #F3F4F6 bg, 4px #4F46E5 left border
+- ✅ Choice A (SUCCESS): radio unselected + "A" bold, SQL code block, "실행" compact button, #F0FDF4 bg + 4px #22C55E border, "✓ 3행 · 34ms" #16A34A, zebra table
+- ✅ Choice B (ERROR): radio unselected + "B" bold, SQL, "실행", #FEF2F2 bg + 4px #EF4444 border, "⚠ SQL_SYNTAX" JetBrains Mono bold #EF4444, error message, "AI에게 물어보기" link #4F46E5
+- ✅ Choice C (SELECTED, idle): radio SELECTED (#4F46E5 filled, white dot) + "C" bold, SQL, "실행", no result
+- ✅ Choice D (DEFAULT): radio unselected + "D" bold, SQL, "실행"
+- ✅ Submit button: sticky bottom, full-width, 48px height, 8px radius, active (#4F46E5 bg, white text) vs disabled (#E5E7EB bg, #9CA3AF text)
+- ✅ Korean text throughout
+
+- [ ] **Step 2: 빌드 확인**
+
+Run: `npm run build`
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add src/pages/QuestionDetail.tsx
+git commit -m "feat: 문제 상세 화면 UI 구현 (4종 선택지 상태, mock 데이터) #9"
+```
