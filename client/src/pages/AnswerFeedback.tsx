@@ -1,5 +1,9 @@
+import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Check, X } from "lucide-react";
+import { useMutation } from "@tanstack/react-query";
+import { diffExplain } from "../api/ai";
+import AiExplanationSheet from "../components/AiExplanationSheet";
 
 interface FeedbackState {
   readonly isCorrect: boolean;
@@ -15,6 +19,23 @@ export default function AnswerFeedback() {
   const navigate = useNavigate();
   const location = useLocation();
   const state = location.state as FeedbackState | null;
+
+  const [aiSheetOpen, setAiSheetOpen] = useState(false);
+  const [aiText, setAiText] = useState("");
+  const diffMutation = useMutation({
+    mutationFn: diffExplain,
+    onSuccess: (result) => setAiText(result.text),
+  });
+
+  const handleAskAi = () => {
+    if (!state) return;
+    setAiSheetOpen(true);
+    setAiText("");
+    diffMutation.mutate({
+      questionId: state.questionId,
+      selectedKey: state.selectedKey,
+    });
+  };
 
   if (!state) {
     navigate("/questions", { replace: true });
@@ -128,10 +149,20 @@ export default function AnswerFeedback() {
               <p className="text-body leading-relaxed mt-4" style={{ color: "#374151" }}>
                 {rationale}
               </p>
+              <button className="btn-primary w-full mt-4" type="button" onClick={handleAskAi}>
+                AI에게 자세히 물어보기
+              </button>
             </div>
           </>
         )}
       </div>
+
+      <AiExplanationSheet
+        isOpen={aiSheetOpen}
+        isLoading={diffMutation.isPending}
+        text={aiText}
+        onClose={() => setAiSheetOpen(false)}
+      />
 
       <div
         className="fixed bottom-0 inset-x-0 p-4 z-20"
