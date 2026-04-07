@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 interface AiExplanationSheetProps {
   readonly isOpen: boolean;
@@ -118,6 +118,11 @@ export default function AiExplanationSheet({ isOpen, onClose }: AiExplanationShe
     }
   }, [isOpen]);
 
+  const renderedContent = useMemo(
+    () => (loading ? null : renderMarkdown(MOCK_EXPLANATION)),
+    [loading],
+  );
+
   if (!isOpen) return null;
 
   return (
@@ -142,7 +147,7 @@ export default function AiExplanationSheet({ isOpen, onClose }: AiExplanationShe
           </div>
 
           <div className="px-5 py-4">
-            {loading ? <LoadingSkeleton /> : renderMarkdown(MOCK_EXPLANATION)}
+            {loading ? <LoadingSkeleton /> : renderedContent}
           </div>
 
           {!loading && (
