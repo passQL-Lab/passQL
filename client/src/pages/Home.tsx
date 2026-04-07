@@ -1,4 +1,4 @@
-import { Flame } from "lucide-react";
+import { Flame, ChevronRight } from "lucide-react";
 
 // Mock data — API 연동 시 교체
 const MOCK_NICKNAME = "용감한 판다";
@@ -29,7 +29,7 @@ export default function Home() {
             <p className="text-secondary mb-1">오늘의 문제</p>
             <p className="text-body truncate">{MOCK_TODAY_QUESTION}</p>
           </div>
-          <span className="text-text-caption text-lg flex-shrink-0">›</span>
+          <ChevronRight size={20} className="text-text-caption flex-shrink-0" />
         </div>
       </section>
 

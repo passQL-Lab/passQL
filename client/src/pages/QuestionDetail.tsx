@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { Star, ArrowLeft, Check, AlertTriangle, ChevronUp, ChevronDown } from "lucide-react";
 
 // ── Mock Data ──
 const MOCK = {
@@ -61,8 +62,14 @@ GROUP BY c.name`,
 
 function StarRating({ level }: { readonly level: number }) {
   return (
-    <span className="text-sm" style={{ color: "var(--color-sem-warning)" }}>
-      {"★".repeat(level)}{"☆".repeat(3 - level)}
+    <span className="flex gap-0.5">
+      {Array.from({ length: 3 }, (_, i) => (
+        <Star
+          key={i}
+          size={14}
+          className={i < level ? "fill-[var(--color-sem-warning)] text-[var(--color-sem-warning)]" : "text-border"}
+        />
+      ))}
     </span>
   );
 }
@@ -82,7 +89,7 @@ export default function QuestionDetail() {
           className="text-text-primary text-lg"
           onClick={() => navigate(-1)}
         >
-          ←
+          <ArrowLeft size={20} />
         </button>
         <div className="flex items-center gap-2">
           <span className="badge-topic">{MOCK.topic}</span>
@@ -103,7 +110,7 @@ export default function QuestionDetail() {
           onClick={() => setSchemaOpen((prev) => !prev)}
         >
           <span>스키마 보기</span>
-          <span className="text-text-caption">{schemaOpen ? "▲" : "▼"}</span>
+          {schemaOpen ? <ChevronUp size={16} className="text-text-caption" /> : <ChevronDown size={16} className="text-text-caption" />}
         </button>
         {schemaOpen && (
           <pre className="code-block mt-2">
@@ -145,7 +152,7 @@ export default function QuestionDetail() {
               {choice.status === "success" && (
                 <div className="success-card mt-3">
                   <p className="text-sm font-medium" style={{ color: "var(--color-sem-success-text)" }}>
-                    ✓ {choice.result.rows}행 · {choice.result.ms}ms
+                    <Check size={14} className="inline" /> {choice.result.rows}행 · {choice.result.ms}ms
                   </p>
                   <table className="data-table mt-2">
                     <thead>
@@ -172,7 +179,7 @@ export default function QuestionDetail() {
               {choice.status === "error" && (
                 <div className="error-card mt-3">
                   <span className="text-code font-bold" style={{ color: "var(--color-sem-error)" }}>
-                    ⚠ {choice.error.code}
+                    <AlertTriangle size={14} className="inline" /> {choice.error.code}
                   </span>
                   <p className="text-secondary mt-1">{choice.error.message}</p>
                   <div className="flex justify-end mt-2">

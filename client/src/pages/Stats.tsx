@@ -1,3 +1,5 @@
+import { ChevronRight } from "lucide-react";
+
 const MOCK_TOPICS = [
   { name: "JOIN", rate: 85 },
   { name: "서브쿼리", rate: 42 },
@@ -79,7 +81,7 @@ export default function Stats() {
               </div>
               <div className="flex items-center gap-2 flex-shrink-0">
                 <span className="text-caption text-xs">{q.ago}</span>
-                <span className="text-text-caption">›</span>
+                <ChevronRight size={16} className="text-text-caption" />
               </div>
             </div>
           ))}

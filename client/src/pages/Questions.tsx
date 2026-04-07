@@ -1,4 +1,4 @@
-import { Star } from "lucide-react";
+import { Star, ChevronRight, ChevronDown } from "lucide-react";
 
 const MOCK_QUESTIONS = [
   { id: "Q001", topic: "JOIN", stem: "고객별 주문 수를 구하는 올바른 SQL은?", difficulty: 2 },
@@ -28,10 +28,10 @@ export default function Questions() {
       {/* 1. Filter bar */}
       <section className="flex gap-3 mb-4">
         <button className="filter-dropdown" type="button">
-          토픽 <span className="text-text-caption">▼</span>
+          토픽 <ChevronDown size={14} className="text-text-caption inline" />
         </button>
         <button className="filter-dropdown" type="button">
-          난이도 <span className="text-text-caption">▼</span>
+          난이도 <ChevronDown size={14} className="text-text-caption inline" />
         </button>
       </section>
 
@@ -57,7 +57,7 @@ export default function Questions() {
             {/* Bottom row: difficulty + chevron */}
             <div className="flex items-center justify-between">
               <StarRating level={q.difficulty} />
-              <span className="text-text-caption">›</span>
+              <ChevronRight size={16} className="text-text-caption" />
             </div>
           </div>
         ))}

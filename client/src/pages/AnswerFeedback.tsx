@@ -1,4 +1,5 @@
 import { useParams, useNavigate, useSearchParams } from "react-router-dom";
+import { Check, X } from "lucide-react";
 
 const MOCK_CORRECT = {
   selectedKey: "A",
@@ -36,7 +37,7 @@ function CorrectVersion() {
           className="mx-auto w-20 h-20 rounded-full flex items-center justify-center text-4xl mb-4"
           style={{ backgroundColor: "#DCFCE7" }}
         >
-          ✓
+          <Check size={36} style={{ color: "var(--color-sem-success-text)" }} />
         </div>
         <h1 className="text-2xl font-bold" style={{ color: "var(--color-sem-success-text)" }}>
           정답입니다!
@@ -92,7 +93,7 @@ function WrongVersion() {
           className="mx-auto w-20 h-20 rounded-full flex items-center justify-center text-4xl mb-4"
           style={{ backgroundColor: "#FEE2E2" }}
         >
-          ✗
+          <X size={36} style={{ color: "var(--color-sem-error-text)" }} />
         </div>
         <h1 className="text-2xl font-bold" style={{ color: "var(--color-sem-error-text)" }}>
           오답입니다
