@@ -1,22 +1,9 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Star, ChevronRight, ChevronDown } from "lucide-react";
+import { ChevronRight, ChevronDown } from "lucide-react";
 import { useQuestions } from "../hooks/useQuestions";
 import { useTopics } from "../hooks/useTopics";
-
-function StarRating({ level }: { readonly level: number }) {
-  return (
-    <span className="flex gap-0.5">
-      {Array.from({ length: 3 }, (_, i) => (
-        <Star
-          key={i}
-          size={14}
-          className={i < level ? "fill-[var(--color-sem-warning)] text-[var(--color-sem-warning)]" : "text-border"}
-        />
-      ))}
-    </span>
-  );
-}
+import { StarRating } from "../components/StarRating";
 
 export default function Questions() {
   const [page, setPage] = useState(0);
