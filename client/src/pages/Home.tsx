@@ -1,10 +1,12 @@
 import { Flame, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useProgress } from "../hooks/useProgress";
+import { useMember } from "../hooks/useMember";
 import { useMemberStore } from "../stores/memberStore";
 
 export default function Home() {
   const { data: progress, isLoading } = useProgress();
+  useMember();
   const uuid = useMemberStore((s) => s.uuid);
   const nickname = useMemberStore((s) => s.nickname);
   const displayName = nickname || uuid.slice(0, 8);
