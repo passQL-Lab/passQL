@@ -90,3 +90,5 @@ out/
 /github-issues/github-issues.json
 /server/github-issues/github-issues.json
 /server/github-issues/github-issues-hash.json
+.vercel
+coverage/
