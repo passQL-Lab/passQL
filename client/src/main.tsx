@@ -9,7 +9,14 @@ const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       staleTime: 1000 * 60 * 5,
-      retry: 1,
+      retry: (failureCount, error) => {
+        if (error instanceof Error && "status" in error) {
+          const status = (error as { status: number }).status;
+          if (status >= 500) return false;
+        }
+        return failureCount < 1;
+      },
+      refetchOnWindowFocus: false,
     },
   },
 });

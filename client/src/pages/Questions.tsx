@@ -4,6 +4,7 @@ import { ChevronRight, ChevronDown } from "lucide-react";
 import { useQuestions } from "../hooks/useQuestions";
 import { useTopics } from "../hooks/useTopics";
 import { StarRating } from "../components/StarRating";
+import ErrorFallback from "../components/ErrorFallback";
 
 export default function Questions() {
   const [page, setPage] = useState(0);
@@ -13,7 +14,7 @@ export default function Questions() {
   const [diffOpen, setDiffOpen] = useState(false);
 
   const { data: topics } = useTopics();
-  const { data, isLoading } = useQuestions({ page, size: 10, topic, difficulty });
+  const { data, isLoading, isError, refetch } = useQuestions({ page, size: 10, topic, difficulty });
 
   return (
     <div className="py-6 space-y-0">
@@ -88,7 +89,9 @@ export default function Questions() {
       </p>
 
       {/* 3. Question card list */}
-      {isLoading ? (
+      {isError ? (
+        <ErrorFallback onRetry={() => refetch()} />
+      ) : isLoading ? (
         <div className="space-y-3">
           {Array.from({ length: 3 }, (_, i) => (
             <div key={i} className="card-base h-24 animate-pulse bg-border" />

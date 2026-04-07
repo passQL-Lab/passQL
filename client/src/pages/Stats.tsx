@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { useProgress, useHeatmap } from "../hooks/useProgress";
+import ErrorFallback from "../components/ErrorFallback";
 
 function getHeatmapStyle(rate: number): { bg: string; text: string } {
   if (rate >= 86) return { bg: "#4F46E5", text: "#FFFFFF" };
@@ -10,7 +11,7 @@ function getHeatmapStyle(rate: number): { bg: string; text: string } {
 }
 
 export default function Stats() {
-  const { data: progress, isLoading: progressLoading } = useProgress();
+  const { data: progress, isLoading: progressLoading, isError, refetch } = useProgress();
   const { data: heatmap, isLoading: heatmapLoading } = useHeatmap();
 
   const heatmapGrid = useMemo(() => {
@@ -44,6 +45,10 @@ export default function Stats() {
         <div className="h-48 rounded-xl bg-border animate-pulse" />
       </div>
     );
+  }
+
+  if (isError) {
+    return <ErrorFallback onRetry={() => refetch()} />;
   }
 
   return (

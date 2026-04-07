@@ -3,9 +3,10 @@ import { Link } from "react-router-dom";
 import { useProgress } from "../hooks/useProgress";
 import { useMember } from "../hooks/useMember";
 import { useMemberStore } from "../stores/memberStore";
+import ErrorFallback from "../components/ErrorFallback";
 
 export default function Home() {
-  const { data: progress, isLoading } = useProgress();
+  const { data: progress, isLoading, isError, refetch } = useProgress();
   useMember();
   const uuid = useMemberStore((s) => s.uuid);
   const nickname = useMemberStore((s) => s.nickname);
@@ -23,6 +24,10 @@ export default function Home() {
         </div>
       </div>
     );
+  }
+
+  if (isError) {
+    return <ErrorFallback onRetry={() => refetch()} />;
   }
 
   const solved = progress?.solved ?? 0;
