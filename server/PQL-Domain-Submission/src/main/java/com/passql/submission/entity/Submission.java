@@ -12,7 +12,6 @@ public class Submission {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String userUuid;
-    @Column(name = "question_id")
     private Long questionId;
     private String selectedKey;
     private Boolean isCorrect;

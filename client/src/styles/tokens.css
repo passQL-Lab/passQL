@@ -1,0 +1,53 @@
+@theme {
+  /* ── Fonts ── */
+  --font-ui: "Pretendard Variable", "Pretendard", sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  /* ── Page & Surface ── */
+  --color-surface: #FAFAFA;
+  --color-surface-card: #FFFFFF;
+  --color-surface-code: #F3F4F6;
+  --color-surface-zebra: #FAFAFA;
+
+  /* ── Brand ── */
+  --color-brand: #4F46E5;
+  --color-brand-light: #EEF2FF;
+  --color-brand-medium: #818CF8;
+
+  /* ── Text ── */
+  --color-text-primary: #111827;
+  --color-text-secondary: #6B7280;
+  --color-text-caption: #9CA3AF;
+
+  /* ── Border ── */
+  --color-border: #E5E7EB;
+  --color-border-muted: #D1D5DB;
+
+  /* ── Semantic ── */
+  --color-sem-success: #22C55E;
+  --color-sem-success-light: #F0FDF4;
+  --color-sem-success-text: #16A34A;
+  --color-sem-error: #EF4444;
+  --color-sem-error-light: #FEF2F2;
+  --color-sem-error-text: #DC2626;
+  --color-sem-warning: #F59E0B;
+  --color-sem-warning-light: #FEF3C7;
+  --color-sem-warning-text: #D97706;
+
+  /* ── Toast ── */
+  --color-toast-bg: #1F2937;
+
+  /* ── Heatmap (5 levels) ── */
+  --color-heat-0: #F5F5F5;
+  --color-heat-1: #EEF2FF;
+  --color-heat-2: #C7D2FE;
+  --color-heat-3: #818CF8;
+  --color-heat-4: #4F46E5;
+
+  /* ── Spacing ── */
+  --spacing-section: 1.5rem;
+  --spacing-module: 2rem;
+
+  /* ── Transitions ── */
+  --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
+}

@@ -30,7 +30,7 @@ on:
 
 env:
   PROJECT_NAME: "passql-ai"
-  PROJECT_MAIN_PORT: "8093"
+  PROJECT_MAIN_PORT: "8098"
   PYTHON_VERSION: "3.13"
 
 jobs:
@@ -115,13 +115,13 @@ jobs:
             export PATH=$PATH:/usr/local/bin
             export PW=${{ secrets.SERVER_PASSWORD }}
 
-            BRANCH=${{ github.ref_name }}
+            BRANCH=$(echo "${{ github.ref_name }}" | sed 's|refs/heads/||')
             PROJECT_NAME="${{ env.PROJECT_NAME }}"
 
             # ============================================================
             # 브랜치별 포트 및 컨테이너명 설정
             # ============================================================
-            if [ "$BRANCH" == "deploy" ]; then
+            if [ "$BRANCH" == "deploy" ] || [ "$BRANCH" == "main" ]; then
               PORT=${{ env.PROJECT_MAIN_PORT }}
               CONTAINER_NAME="${PROJECT_NAME}"
               echo "🏭 프로덕션 환경으로 배포합니다"

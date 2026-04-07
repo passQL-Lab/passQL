@@ -84,3 +84,5 @@ out/
 .vscode/
 *.code-workspace
 .history/
+/.report/
+/.issue/

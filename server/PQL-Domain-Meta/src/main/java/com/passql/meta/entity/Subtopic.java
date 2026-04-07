@@ -10,7 +10,6 @@ import lombok.*;
 public class Subtopic {
     @Id
     private String code;
-    @Column(name = "topic_code")
     private String topicCode;
     private String displayName;
     private Integer sortOrder;

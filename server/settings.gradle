@@ -5,6 +5,7 @@ plugins {
 rootProject.name = 'passql'
 
 include 'PQL-Common'
+include 'PQL-Domain-Member'
 include 'PQL-Domain-Question'
 include 'PQL-Domain-Submission'
 include 'PQL-Domain-AI'

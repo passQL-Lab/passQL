@@ -1,0 +1,781 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "passQL API",
+    "description": "SQL 학습 플랫폼 passQL 백엔드 API 문서",
+    "version": "v0.0.3"
+  },
+  "servers": [
+    {
+      "url": "백엔드주소",
+      "description": "Generated server url"
+    }
+  ],
+  "paths": {
+    "/api/questions/{id}/submit": {
+      "post": {
+        "tags": ["question-controller"],
+        "operationId": "submit",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "X-User-UUID",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/SubmitResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/questions/{id}/execute": {
+      "post": {
+        "tags": ["question-controller"],
+        "operationId": "executeChoice",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExecuteResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ai/explain-error": {
+      "post": {
+        "tags": ["ai-controller"],
+        "operationId": "explainError",
+        "parameters": [
+          {
+            "name": "X-User-UUID",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ai/diff-explain": {
+      "post": {
+        "tags": ["ai-controller"],
+        "operationId": "diffExplain",
+        "parameters": [
+          {
+            "name": "X-User-UUID",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": {
+                  "type": "object"
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiResult"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/questions": {
+      "get": {
+        "tags": ["question-controller"],
+        "operationId": "getQuestions",
+        "parameters": [
+          {
+            "name": "topic",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "subtopic",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "difficulty",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "mode",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "pageable",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Pageable"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/PageQuestionSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/questions/{id}": {
+      "get": {
+        "tags": ["question-controller"],
+        "operationId": "getQuestion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestionDetail"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/progress": {
+      "get": {
+        "tags": ["progress-controller"],
+        "operationId": "getSummary",
+        "parameters": [
+          {
+            "name": "X-User-UUID",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProgressSummary"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/progress/heatmap": {
+      "get": {
+        "tags": ["progress-controller"],
+        "operationId": "getHeatmap",
+        "parameters": [
+          {
+            "name": "X-User-UUID",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HeatmapEntry"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/meta/topics": {
+      "get": {
+        "tags": ["meta-controller"],
+        "operationId": "getTopics",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TopicTree"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/meta/tags": {
+      "get": {
+        "tags": ["meta-controller"],
+        "operationId": "getTags",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ConceptTag"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ai/similar/{questionId}": {
+      "get": {
+        "tags": ["ai-controller"],
+        "operationId": "getSimilar",
+        "parameters": [
+          {
+            "name": "questionId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "k",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32",
+              "default": 5
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/SimilarQuestion"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "SubmitResult": {
+        "type": "object",
+        "properties": {
+          "isCorrect": {
+            "type": "boolean"
+          },
+          "correctKey": {
+            "type": "string"
+          },
+          "rationale": {
+            "type": "string"
+          }
+        }
+      },
+      "ExecuteResult": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "columns": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "rows": {
+            "type": "array",
+            "items": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            }
+          },
+          "rowCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "elapsedMs": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "errorCode": {
+            "type": "string"
+          },
+          "errorMessage": {
+            "type": "string"
+          }
+        }
+      },
+      "AiResult": {
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "promptVersion": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "Pageable": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 0
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32",
+            "minimum": 1
+          },
+          "sort": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "PageQuestionSummary": {
+        "type": "object",
+        "properties": {
+          "totalPages": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "totalElements": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
+          "numberOfElements": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "size": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "content": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionSummary"
+            }
+          },
+          "number": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortObject"
+          },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      },
+      "PageableObject": {
+        "type": "object",
+        "properties": {
+          "paged": {
+            "type": "boolean"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "unpaged": {
+            "type": "boolean"
+          },
+          "offset": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "sort": {
+            "$ref": "#/components/schemas/SortObject"
+          }
+        }
+      },
+      "QuestionSummary": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "topicCode": {
+            "type": "string"
+          },
+          "difficulty": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "stemPreview": {
+            "type": "string"
+          },
+          "executionMode": {
+            "type": "string",
+            "enum": ["EXECUTABLE", "CONCEPT_ONLY"]
+          }
+        }
+      },
+      "SortObject": {
+        "type": "object",
+        "properties": {
+          "sorted": {
+            "type": "boolean"
+          },
+          "unsorted": {
+            "type": "boolean"
+          },
+          "empty": {
+            "type": "boolean"
+          }
+        }
+      },
+      "ChoiceItem": {
+        "type": "object",
+        "properties": {
+          "key": {
+            "type": "string"
+          },
+          "kind": {
+            "type": "string",
+            "enum": ["SQL", "TEXT"]
+          },
+          "body": {
+            "type": "string"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "QuestionDetail": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "topicCode": {
+            "type": "string"
+          },
+          "subtopicCode": {
+            "type": "string"
+          },
+          "difficulty": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "executionMode": {
+            "type": "string",
+            "enum": ["EXECUTABLE", "CONCEPT_ONLY"]
+          },
+          "stem": {
+            "type": "string"
+          },
+          "schemaDisplay": {
+            "type": "string"
+          },
+          "choices": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChoiceItem"
+            }
+          }
+        }
+      },
+      "ProgressSummary": {
+        "type": "object",
+        "properties": {
+          "solved": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "correctRate": {
+            "type": "number",
+            "format": "double"
+          },
+          "streakDays": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "HeatmapEntry": {
+        "type": "object",
+        "properties": {
+          "topicCode": {
+            "type": "string"
+          },
+          "topicName": {
+            "type": "string"
+          },
+          "solved": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "correctRate": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      },
+      "SubtopicItem": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          }
+        }
+      },
+      "TopicTree": {
+        "type": "object",
+        "properties": {
+          "code": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "subtopics": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/SubtopicItem"
+            }
+          }
+        }
+      },
+      "ConceptTag": {
+        "type": "object",
+        "properties": {
+          "tagKey": {
+            "type": "string"
+          },
+          "labelKo": {
+            "type": "string"
+          },
+          "category": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "SimilarQuestion": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "stem": {
+            "type": "string"
+          },
+          "topicCode": {
+            "type": "string"
+          },
+          "score": {
+            "type": "number",
+            "format": "double"
+          }
+        }
+      }
+    }
+  }
+}

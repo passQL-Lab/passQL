@@ -1,0 +1,355 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "passQL AI Server",
+    "description": "passQL의 SQL 오류 설명, diff 해설, 유사 문제 검색 AI 서버입니다.",
+    "version": "0.0.1"
+  },
+  "paths": {
+    "/api/ai/explain-error": {
+      "post": {
+        "tags": ["AI"],
+        "summary": "Explain Error",
+        "description": "SQL 오류 설명\n\n사용자가 작성한 SQL과 발생한 오류 메시지를 기반으로\n오류 원인과 수정 방법을 AI가 한국어로 설명합니다.\n\n- POST /api/ai/explain-error\n- Header: X-API-Key: {AI_SERVER_API_KEY}\n- Body: ExplainErrorRequest\n- 성공: 200 + AiResponse\n- 인증 실패: 401\n- 서버 오류: 500",
+        "operationId": "explain_error_api_ai_explain_error_post",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ExplainErrorRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ai/diff-explain": {
+      "post": {
+        "tags": ["AI"],
+        "summary": "Diff Explain",
+        "description": "선택지 diff 해설\n\n사용자가 선택한 오답과 정답을 비교하여\n왜 틀렸는지, 정답이 왜 맞는지를 AI가 한국어로 설명합니다.\n\n- POST /api/ai/diff-explain\n- Header: X-API-Key: {AI_SERVER_API_KEY}\n- Body: DiffExplainRequest\n- 성공: 200 + AiResponse\n- 인증 실패: 401\n- 서버 오류: 500",
+        "operationId": "diff_explain_api_ai_diff_explain_post",
+        "parameters": [
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DiffExplainRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ai/similar/{question_id}": {
+      "get": {
+        "tags": ["AI"],
+        "summary": "Similar",
+        "description": "유사 문제 검색 (Qdrant 벡터 검색)\n\nquestion_id에 해당하는 문제와 가장 유사한 k개의 문제를 반환합니다.\nQdrant에 저장된 bge-m3 임베딩 벡터를 기반으로 검색합니다.\n\n- GET /api/ai/similar/{question_id}?k=3\n- Header: X-API-Key: {AI_SERVER_API_KEY}\n- 성공: 200 + SimilarResponse\n- 인증 실패: 401\n- 서버 오류: 500",
+        "operationId": "similar_api_ai_similar__question_id__get",
+        "parameters": [
+          {
+            "name": "question_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "title": "Question Id"
+            }
+          },
+          {
+            "name": "k",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 3,
+              "title": "K"
+            }
+          },
+          {
+            "name": "x-api-key",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "title": "X-Api-Key"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SimilarResponse"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": ["Health"],
+        "summary": "Health Check",
+        "description": "서버 상태 확인\n\n- GET /health\n- 성공: 200 + {\"status\": \"ok\"}",
+        "operationId": "health_check_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AiResponse": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "prompt_version": {
+            "type": "integer",
+            "title": "Prompt Version",
+            "default": 0
+          }
+        },
+        "type": "object",
+        "required": ["text"],
+        "title": "AiResponse",
+        "description": "일반 AI 텍스트 응답"
+      },
+      "DiffExplainRequest": {
+        "properties": {
+          "user_uuid": {
+            "type": "string",
+            "title": "User Uuid"
+          },
+          "question_id": {
+            "type": "integer",
+            "title": "Question Id"
+          },
+          "selected_key": {
+            "type": "string",
+            "title": "Selected Key"
+          },
+          "correct_key": {
+            "type": "string",
+            "title": "Correct Key"
+          },
+          "question_stem": {
+            "type": "string",
+            "title": "Question Stem"
+          },
+          "choice_bodies": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Choice Bodies"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_uuid",
+          "question_id",
+          "selected_key",
+          "correct_key",
+          "question_stem",
+          "choice_bodies"
+        ],
+        "title": "DiffExplainRequest",
+        "description": "선택지 diff 해설 요청"
+      },
+      "ExplainErrorRequest": {
+        "properties": {
+          "user_uuid": {
+            "type": "string",
+            "title": "User Uuid"
+          },
+          "question_id": {
+            "type": "integer",
+            "title": "Question Id"
+          },
+          "sql": {
+            "type": "string",
+            "title": "Sql"
+          },
+          "error_message": {
+            "type": "string",
+            "title": "Error Message"
+          }
+        },
+        "type": "object",
+        "required": ["user_uuid", "question_id", "sql", "error_message"],
+        "title": "ExplainErrorRequest",
+        "description": "SQL 오류 설명 요청"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "SimilarItem": {
+        "properties": {
+          "question_id": {
+            "type": "integer",
+            "title": "Question Id"
+          },
+          "score": {
+            "type": "number",
+            "title": "Score"
+          }
+        },
+        "type": "object",
+        "required": ["question_id", "score"],
+        "title": "SimilarItem",
+        "description": "유사 문제 단일 항목"
+      },
+      "SimilarResponse": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/SimilarItem"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": ["items"],
+        "title": "SimilarResponse",
+        "description": "유사 문제 검색 응답"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": ["loc", "msg", "type"],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
