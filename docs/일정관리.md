@@ -1,0 +1,295 @@
+📋 [Docs][Roadmap] passQL 5일 개발 로드맵 및 일정 관리
+
+## 📝 현재 문제점
+
+- 코드 프리즈까지 5일 남은 상황에서 FE/BE/AI 3개 트랙의 작업 우선순위와 의존성이 명문화되어 있지 않습니다.
+- 백엔드는 멀티모듈 스켈레톤이 어느 정도 잡혀있으나 빈 메서드와 미작성 영역이 혼재되어 있고, 프론트엔드는 디자인 시안만 존재하며 코드는 비어있는 상태입니다.
+- BE/AI 배포(api.passql.suhsaechan.kr, ai.passql.suhsaechan.kr)는 완료되었으나 실제 동작 검증은 이루어지지 않았습니다.
+- 어떤 작업을 어느 날에 끝내야 다음 트랙이 막히지 않는지 동기화 포인트가 불명확합니다.
+- 데모 시연을 위한 스코프와 컷오프 기준이 정해져 있지 않아 작업이 무한히 늘어날 위험이 있습니다.
+
+## 🛠️ 해결 방안 / 제안 기능
+
+- D2(오늘)부터 D6까지 5일 일정을 BE / AI / FE 3개 트랙으로 분리하여 일별 산출물을 명확히 합니다.
+- 각 트랙의 종료 시점에 다른 트랙에 넘겨야 하는 산출물(API 계약, 응답 예시 등)을 동기화 포인트로 정의합니다.
+- 데모 필수 항목과 컷오프 가능 항목을 우선순위로 분리하여 시간이 부족할 때 즉시 잘라낼 수 있도록 합니다.
+- 코드 프리즈 이후 어드민 UI를 통한 콘텐츠 운영이 가능하도록 모든 튜닝 파라미터를 `app_setting` 경유로 통일합니다.
+- 인원 배분은 BE/AI 1명(`@SUH SAECHAN`), FE 1명을 전제로 하며, 트랙 간 의존성을 최소화하여 병렬 작업을 극대화합니다.
+
+## ⚙️ 작업 내용
+
+### 📌 전제 조건 / 컨텍스트
+
+- [ ] 데드라인: D+6 코드 프리즈 (오늘 D2 기준 5일 남음)
+- [ ] 인원: BE/AI 1명, FE 1명 (총 2명)
+- [ ] 배포 완료: `api.passql.suhsaechan.kr`, `ai.passql.suhsaechan.kr` (Synology NAS)
+- [ ] 데모 핵심 시나리오: 문제 리스트 → 상세 → 선택지 실행 → 제출 → AI 해설 → 유사 문제 → 통계
+- [ ] 코드 프리즈 원칙: 모든 튜닝/콘텐츠 변경은 어드민 UI(Thymeleaf) 또는 DB에서 수행
+- [ ] **프론트 비즈니스 로직 제로 원칙**: 날짜 계산, D-day, 정답 판정, 닉네임 생성 등 모든 비즈니스 로직은 백엔드 책임. 프론트는 응답을 그대로 렌더링만 한다
+- [ ] **선택지 SQL 실행 정책 (확정)**: 사용자가 선택지 라디오 클릭 시 자동 execute 호출. 동일 선택지 재클릭은 클라 캐시로 재호출 방지
+
+---
+
+### 🗓️ D2 (오늘) — 토대 검증 + 첫 통신
+
+#### BE 트랙
+
+- [ ] 백엔드 멀티모듈 현 상태 점검 (빈 메서드 / 채워진 메서드 파악)
+- [ ] `application.yml` 환경 변수 점검 (DB / Qdrant / Ollama / Redis URL)
+- [ ] 서버 부팅 검증 (로컬 또는 prod)
+- [ ] `/api/health` 엔드포인트 추가 (DB / Qdrant / Ollama 상태 포함)
+- [ ] Flyway V1 작성 (전체 테이블)
+  - member, nickname_word
+  - question, question_choice, question_concept_tag
+  - topic, subtopic, concept_tag, concept_doc
+  - prompt_template, app_setting
+  - submission, execution_log
+- [ ] Flyway V2 시드 데이터
+  - app_setting 13개 (PRD 3.3절 기본값)
+  - **app_setting 추가 키**: `exam.target_date` (SQLD 시험일, 예: `2026-05-31`)
+  - **app_setting 조정**: `ratelimit.execute.per_minute` 기본값 60 → 90 (선택지 자동 실행 부하 대응)
+  - prompt_template 3종 v1 (explain_error, diff_explain, similar)
+  - topic 8~10개 (SQLD 시험 범위)
+  - nickname_word 형용사 30+, 명사 30+
+- [ ] Member 도메인 구현 (별도 이슈 참고)
+  - `POST /api/members/register`
+  - `GET /api/members/me?memberUuid=`
+  - `POST /api/members/me/regenerate-nickname`
+- [ ] curl 동작 검증 및 응답 예시 기록 (FE 전달용)
+
+#### AI 트랙
+
+- [ ] OllamaClient `chat()` 동작 검증 (qwen2.5:7b)
+- [ ] OllamaClient `embed()` 동작 검증 (bge-m3, 1024dim 확인)
+- [ ] Ollama 응답 시간 측정 (25초 이내 가능 여부 — Vercel 30초 제한 대비)
+- [ ] Qdrant 컬렉션 생성: `concept_doc` (1024dim), `question` (1024dim)
+- [ ] QdrantSearchClient 호출 검증 (빈 컬렉션 검색 200 응답)
+
+#### FE 트랙
+
+- [ ] Vite + React 18 + TypeScript 부트스트랩 (별도 이슈 참고)
+- [ ] 의존성 설치 (`react-router-dom`, `@tanstack/react-query`, `zustand`, `tailwindcss` v4, `daisyui` v5)
+- [ ] Tailwind v4 + daisyUI 5 설정 (`light` 테마)
+- [ ] 라우팅 구조 (`/`, `/questions`, `/questions/:id`, `/stats`, `/settings`)
+- [ ] 하단 탭 레이아웃 (홈 / 문제 / 통계 / 설정 4탭 — 디자인 통s일)
+- [ ] 빈 페이지 컴포넌트 5개
+- [ ] `api/client.ts` fetch wrapper (25초 timeout)
+- [ ] `stores/memberStore.ts` (첫 진입 register, 재진입 me 호출)
+- [ ] 홈 화면 정적 마크업 (디자인대로, 데이터는 mock)
+- [ ] BE Member API 연동 → 통신 1회 성공
+
+#### 동기화 포인트 (D2 EOD)
+
+- [ ] BE → FE: Member API 3종 prod URL + curl 응답 예시 공유
+- [ ] BE → FE: 헬스체크 URL 공유
+
+---
+
+### 🗓️ D3 — 문제 도메인 + 캐시 + AI 준비
+
+#### BE 트랙
+
+- [ ] `AppSettingService` (Caffeine 5초 TTL, 타입 안전 메서드)
+- [ ] `PromptService` (Caffeine 5초 TTL, active 템플릿 조회)
+- [ ] `MetaController`
+  - `GET /api/meta/topics` (topic + subtopic 트리)
+  - `GET /api/meta/tags` (활성 concept_tag)
+- [ ] `QuestionService.list()` + `GET /api/questions` (필터: topic, subtopic, difficulty, mode, page)
+- [ ] `QuestionService.getDetail()` + `GET /api/questions/{id}`
+- [ ] `GET /api/questions/today` 신설 — 응답 `{ question: QuestionSummary, dDay: number }`
+  - 백엔드에서 `app_setting.exam.target_date` 기반 D-day 계산
+  - 오늘의 문제 선정 로직 (날짜 시드 또는 admin 지정)
+  - 프론트는 응답을 그대로 렌더링만 함
+- [ ] `SqlSafetyValidator` (PRD 6.1 검증 5단계)
+- [ ] `SqlSafetyValidator` 단위 테스트 10케이스 (보안 직결, 테스트 필수)
+- [ ] `SandboxDataSourceConfig` (lazy `sqld_q###` HikariCP 풀)
+- [ ] `SandboxExecutor` (`SET SESSION max_statement_time` + SELECT → ExecuteResult)
+- [ ] `POST /api/questions/{id}/execute`
+- [ ] 테스트 문제 1개 수동 입력 (sqld_q1 DB + DDL/INSERT + question 1 + choice 4)
+- [ ] 4개 선택지 execute curl 검증 (ok 1+, error 1+)
+
+#### AI 트랙
+
+- [ ] `PromptService` Caffeine 캐시 동작 확인
+- [ ] `QdrantSearchClient` 검색 함수 구현
+- [ ] Resilience4j 설정 (CircuitBreaker, TimeLimiter — `ai` 인스턴스)
+
+#### FE 트랙
+
+- [ ] `api/questions.ts` (list, detail, execute, submit 함수)
+- [ ] `hooks/useQuestions.ts` TanStack Query 훅
+- [ ] 문제 목록 화면 (디자인 9 — 필터 칩, 카드 리스트, 더보기)
+- [ ] 문제 상세 화면 (디자인 7 — 지문, 스키마 카드, 선택지 4개)
+- [ ] 선택지 [실행] → execute mutation → 결과 인라인 표시
+- [ ] SQL 코드 표시 (D3은 `<pre><code>`, D5에 CodeMirror 검토)
+- [ ] 홈 화면 mock → 진짜 데이터 연결 준비
+
+#### 동기화 포인트 (D3 EOD)
+
+- [ ] BE → FE: Meta / Question / Execute API 응답 예시 공유
+- [ ] BE → FE: `/api/questions/today` 응답 예시 공유 (`question`, `dDay`)
+- [ ] BE → FE: 테스트 문제 ID 공유
+
+---
+
+### 🗓️ D4 — 제출 + 진도 + AI 3종 (가장 빡센 날)
+
+#### BE 트랙
+
+- [ ] `POST /api/questions/{id}/submit` (정/오답 판정, rationale, submission insert)
+- [ ] `ProgressService` (solved, correctRate, **streakDays 계산**)
+- [ ] `GET /api/progress?memberUuid=`
+- [ ] `GET /api/progress/heatmap?memberUuid=` (토픽별 정답률)
+- [ ] `GET /api/progress/recent-wrong?memberUuid=&limit=` (통계 화면용)
+
+#### AI 트랙
+
+- [ ] `AiService.explainError()` + Resilience4j CB/TL + 폴백
+- [ ] `POST /api/ai/explain-error`
+- [ ] concept_doc 10개 SQL INSERT + 임베딩 트리거 메서드 작성
+- [ ] Qdrant `concept_doc` 컬렉션 upsert 검증
+- [ ] `AiService.diffExplain()` (RAG: 오답/정답 태그 차집합 → Qdrant 검색 → 컨텍스트 주입)
+- [ ] `POST /api/ai/diff-explain`
+- [ ] 문제 등록 시 stem+schema 임베딩 → `question` 컬렉션 upsert
+- [ ] `AiService.similar()` (Qdrant 유사도 검색)
+- [ ] `GET /api/ai/similar/{questionId}?k=`
+- [ ] Ollama 다운 시뮬레이션 → `errorCode: AI_UNAVAILABLE` 폴백 검증
+
+#### FE 트랙
+
+- [ ] 결과 풀스크린 화면 (디자인 11/14 — 정/오답, 내가 선택한 답 vs 정답, 학습 포인트)
+- [ ] [AI에게 물어보기] → `/api/ai/diff-explain` + react-markdown 렌더링
+- [ ] 선택지 실행 에러 시 [에러 설명받기] → `/api/ai/explain-error`
+- [ ] [유사 문제 보기] → `/api/ai/similar/{id}` (모달 또는 리스트)
+- [ ] 홈 화면 진짜 데이터 (`/api/progress`, 오늘의 문제)
+- [ ] react-markdown 추가
+
+#### 동기화 포인트 (D4 EOD)
+
+- [ ] BE → FE: Submit / Progress / AI 3종 API 응답 예시 공유
+- [ ] 데모 핵심 흐름 풀 통신 1회 성공 (FE에서 문제 1개 끝까지 풀이)
+
+---
+
+### 🗓️ D5 — 어드민 + 콘텐츠 입력 + 배포
+
+#### BE 트랙
+
+- [ ] Thymeleaf 어드민 최소 3화면
+  - `/admin/questions` (목록/생성/수정/삭제 + 선택지 편집 + 샌드박스 재프로비저닝)
+  - `/admin/prompts` (템플릿 CRUD, 버전 리스트, 활성 전환, 테스트 실행)
+  - `/admin/settings` (app_setting K-V 편집)
+- [ ] (컷오프 가능) `/admin/concepts`, `/admin/tags`, `/admin/topics`, `/admin/monitor`
+
+#### AI 트랙
+
+- [ ] concept_doc 10개 본문 작성 (어드민 또는 SQL)
+- [ ] concept_doc 임베딩 일괄 처리 + Qdrant upsert 검증
+- [ ] 임베딩 실패 시 admin 재시도 동작 확인 (구현 시 유지)
+
+#### 콘텐츠 트랙 (BE 작업과 병행)
+
+- [ ] 문제 15~20개 입력
+  - JOIN 5, GROUP BY 3, 서브쿼리 3, DDL 2, DML 2, 제약조건 2, 인덱스 1, 윈도우 1
+- [ ] 각 문제별 sandbox DB 생성 + DDL/INSERT 검증
+- [ ] 각 문제별 4~5개 선택지 (정답 1, 오답 3~4) + rationale + concept_tag 매핑
+
+#### FE 트랙
+
+- [ ] 통계 화면 (디자인 12)
+  - 푼문제/정답률/연속 학습
+  - 학습 추이 차트 (`<div>` 막대 또는 Recharts)
+  - 토픽별 숙련도 그리드
+  - 최근 틀린 문제 리스트
+- [ ] 설정 화면 (디자인 13)
+  - 디바이스 ID 표시 + 복사
+  - 닉네임 + 재생성 버튼 → `regenerate-nickname` 호출
+  - 버전 표시
+- [ ] Vercel 배포
+- [ ] `vercel.json` (`/api/*` → `https://api.passql.suhsaechan.kr/api/*` 리라이트, SPA fallback)
+- [ ] prod URL E2E 1회
+
+#### 동기화 포인트 (D5 EOD)
+
+- [ ] DB에 문제 15개+ 입력 완료 → FE에 mock 제거 가능 통보
+- [ ] Vercel prod URL 공유 → 데모 환경 확정
+
+---
+
+### 🗓️ D6 — 리허설 + 폴리싱 + 코드 프리즈
+
+#### 통합 트랙
+
+- [ ] 데모 시나리오 작성 (PRD 5.7절 기반)
+- [ ] E2E 데모 시나리오 3회 리허설
+- [ ] 발견되는 버그 픽스
+- [ ] AI 응답 속도 재측정 → 25초 초과 시 prompt 단축
+- [ ] 코드 프리즈 직전 점검 체크리스트
+  - 모든 tunable이 `app_setting` 경유 (yml 하드코딩 없음)
+  - 어드민에서 prompt 수정 → 5초 내 반영 확인
+  - 레이트리밋 동작 확인 (execute 60/min, ai 20/min)
+  - 샌드박스 SqlSafetyValidator 우회 시도 (블랙리스트, 주석, 멀티 statement)
+  - Ollama 다운 폴백 정상 동작
+- [ ] 최종 데모 환경 동결 → 코드 프리즈 선언
+
+#### FE 트랙
+
+- [ ] 디자인 디테일 보정 (색상, 간격, 폰트)
+- [ ] 에러 toast, 로딩 스피너
+- [ ] CodeMirror 6 도입 검토 (시간 남으면)
+
+---
+
+### 🎯 컷오프 가능 항목 (시간 부족 시 즉시 잘라냄)
+
+- [ ] 어드민 monitor 화면 → SQL 직접 조회로 대체
+- [ ] 어드민 concepts/topics/tags CRUD → SQL INSERT로 대체
+- [ ] 통계 학습 추이 차트 Recharts → 단순 div 막대로 대체
+- [ ] CodeMirror 6 → `<pre><code>` 유지
+- [ ] 유사 문제 (`/api/ai/similar`) → diff-explain만 사수
+- [ ] 닉네임 재생성 기능
+- [ ] PRD Open Questions의 ai_call_log 테이블
+
+---
+
+### 🚧 리스크 및 대응
+
+- [ ] **Ollama 응답 25초 초과**: prompt 단축, max_tokens 축소, 더 작은 모델 검토
+- [ ] **bge-m3 차원 미스매치**: 컬렉션 생성 전 차원 확인
+- [ ] **샌드박스 오염**: sqld_runner SELECT-only, DDL 전용 계정 분리
+- [ ] **D4 작업량 과다**: similar API를 D5로 미룸
+- [ ] **콘텐츠 입력 부족**: 최소 10문제로도 데모 성립
+- [ ] **Qdrant 임베딩 실패**: 동기 호출 + 어드민 재시도 버튼
+- [ ] **Vercel 30초 제한**: 백엔드 timeout 25초 고정
+- [ ] **NAS HTTPS 인증서 갱신 누락**: D2에 인증서 만료일 확인
+
+---
+
+### 🔄 트랙 간 동기화 포인트 요약
+
+| 시점   | BE → FE 산출물                                 |
+| ------ | ---------------------------------------------- |
+| D2 EOD | Member API 3종 + 헬스체크 + 응답 예시          |
+| D3 EOD | Meta / Question / Execute API + 테스트 문제 ID |
+| D4 EOD | Submit / Progress / AI 3종 + 폴백 동작         |
+| D5 EOD | 문제 15+ 입력된 prod DB 상태, 어드민 URL       |
+| D6 EOD | 코드 프리즈 선언                               |
+
+---
+
+### 📦 별도 이슈로 분리된 항목
+
+- [ ] FE: React Client 초기 프로젝트 구성 → `.issue/React_Client_초기_프로젝트_구성.md`
+- [ ] BE: Member 도메인 및 API 구현 → `.issue/Member_도메인_및_API_구현.md`
+- [ ] (예정) BE: Flyway V1/V2 스키마 및 시드 데이터 작성
+- [ ] (예정) BE: Question 도메인 + Sandbox 실행 API
+- [ ] (예정) BE: Submission / Progress API
+- [ ] (예정) BE: AI 3종 API + Resilience4j
+- [ ] (예정) BE: Thymeleaf 어드민 (questions / prompts / settings)
+- [ ] (예정) Content: SQLD 문제 15~20개 + concept_doc 10개
+- [ ] (예정) Infra: Vercel 배포 + `/api` 리라이트
+
+## 🙋‍♂️ 담당자
+
+- 백엔드 / AI: @Cassiiopeia
+- 프론트엔드: @EM-H20
