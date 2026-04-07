@@ -25,4 +25,11 @@ dependencies {
     api 'io.github.resilience4j:resilience4j-spring-boot3:2.3.0'
     api 'io.qdrant:client:1.13.0'
     api 'me.suhsaechan:suh-random-engine:1.1.0'
+    api 'kr.suhsaechan:suh-logger:2.0.1'
+    api 'kr.suhsaechan:suh-api-log:2.0.1'
+
+    // Google Gemini Java SDK
+    api('com.google.genai:google-genai:1.46.0') {
+        exclude group: 'org.slf4j'
+    }
 }
