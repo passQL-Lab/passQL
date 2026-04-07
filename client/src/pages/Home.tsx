@@ -1,67 +1,69 @@
+// Mock data — API 연동 시 교체
+const MOCK_NICKNAME = "용감한 판다";
+const MOCK_INITIALS = "용판";
+const MOCK_TODAY_QUESTION = "고객별 주문 수를 구하는 올바른 SQL은?";
+const MOCK_STREAK = 3;
+const MOCK_SOLVED = 42;
+const MOCK_CORRECT_RATE = 68;
+
 export default function Home() {
   return (
-    <div className="py-6 space-y-6">
-      {/* Typography */}
-      <h1 className="text-h1">passQL</h1>
-      <h2 className="text-h2 mt-4">SQL 자격증 학습</h2>
-      <p className="text-body">논리적 사고로 SQL을 마스터하세요.</p>
-      <span className="text-caption block">난이도: 중급</span>
-
-      {/* Card */}
-      <div className="card-base">
-        <h3 className="text-h2">Card Component</h3>
-        <p className="text-secondary mt-2">12px radius, 1px #E5E7EB border, white bg</p>
-      </div>
-
-      {/* Code Block */}
-      <pre className="code-block">
-        <code>{"SELECT c.name, COUNT(*) AS cnt\nFROM CUSTOMER c\nJOIN ORDERS o ON c.id = o.customer_id\nGROUP BY c.name;"}</code>
-      </pre>
-
-      {/* Badges */}
-      <div className="flex gap-2">
-        <span className="badge-topic">JOIN</span>
-        <span className="badge-topic">GROUP BY</span>
-        <span className="badge-topic">서브쿼리</span>
-      </div>
-
-      {/* Semantic Cards */}
-      <div className="space-y-3">
-        <div className="success-card">
-          <span className="text-secondary" style={{ color: "var(--color-sem-success-text)" }}>✓ 3행 · 34ms</span>
+    <div className="py-6 space-y-0">
+      {/* 1. Greeting */}
+      <section className="flex items-center gap-3 mb-8">
+        <div
+          className="flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm"
+          style={{ backgroundColor: "var(--color-brand)" }}
+        >
+          {MOCK_INITIALS}
         </div>
-        <div className="error-card">
-          <span className="text-code font-bold" style={{ color: "var(--color-sem-error)" }}>⚠ SQL_SYNTAX</span>
-          <p className="text-secondary mt-1">Unknown column 'o.cust_id' in 'on clause'</p>
+        <h1 className="text-h2">안녕하세요, {MOCK_NICKNAME}</h1>
+      </section>
+
+      {/* 2. 오늘의 문제 */}
+      <section className="mb-4">
+        <div className="card-base flex items-center gap-4 border-l-4 border-l-brand cursor-pointer hover:bg-surface transition-colors">
+          <div className="flex-1 min-w-0">
+            <p className="text-secondary mb-1">오늘의 문제</p>
+            <p className="text-body truncate">{MOCK_TODAY_QUESTION}</p>
+          </div>
+          <span className="text-text-caption text-lg flex-shrink-0">›</span>
         </div>
-      </div>
+      </section>
 
-      {/* Filter Dropdowns */}
-      <div className="flex gap-3">
-        <button className="filter-dropdown filter-dropdown--active" type="button">토픽 ▼</button>
-        <button className="filter-dropdown" type="button">난이도 ▼</button>
-      </div>
+      {/* 3. 스트릭 뱃지 */}
+      <section className="mb-6">
+        <span
+          className="inline-flex items-center rounded-full px-3 py-1 text-sm font-bold"
+          style={{
+            backgroundColor: "var(--color-sem-warning-light)",
+            color: "var(--color-sem-warning-text)",
+          }}
+        >
+          🔥 연속 {MOCK_STREAK}일
+        </span>
+      </section>
 
-      {/* Buttons */}
-      <div className="flex gap-3 flex-wrap">
-        <button className="btn-primary" type="button">제출하기</button>
-        <button className="btn-secondary" type="button">다음 문제</button>
-        <button className="btn-compact" type="button">실행</button>
-        <button className="btn-primary" type="button" disabled>비활성</button>
-      </div>
+      {/* 4. 통계 카드 2개 */}
+      <section className="grid grid-cols-2 gap-3">
+        {/* 푼 문제 */}
+        <div className="card-base flex flex-col items-start">
+          <span className="text-h1 text-brand">{MOCK_SOLVED}</span>
+          <span className="text-secondary mt-1">푼 문제</span>
+        </div>
 
-      {/* Radio */}
-      <div className="flex gap-4 items-center">
-        <div className="radio-custom radio-custom--selected" />
-        <span className="text-body">선택됨</span>
-        <div className="radio-custom" />
-        <span className="text-body">미선택</span>
-      </div>
-
-      {/* Toast Preview */}
-      <div className="relative">
-        <div className="toast-passql static transform-none inline-block">답안이 저장되었습니다.</div>
-      </div>
+        {/* 정답률 */}
+        <div className="card-base flex flex-col items-start">
+          <span className="text-h1 text-brand">{MOCK_CORRECT_RATE}%</span>
+          <span className="text-secondary mt-1">정답률</span>
+          <div className="w-full mt-2 h-1 rounded-full bg-border">
+            <div
+              className="h-full rounded-full bg-brand"
+              style={{ width: `${MOCK_CORRECT_RATE}%` }}
+            />
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
