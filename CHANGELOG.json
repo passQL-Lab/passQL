@@ -1,11 +1,39 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-06T17:06:25Z",
-    "currentVersion": "0.0.9",
+    "lastUpdated": "2026-04-07T14:03:14Z",
+    "currentVersion": "0.0.22",
     "projectType": "basic",
-    "totalReleases": 1
+    "totalReleases": 2
   },
   "releases": [
+    {
+      "version": "0.0.22",
+      "project_type": "basic",
+      "date": "2026-04-07",
+      "pr_number": 18,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **New Features**\n  * AI 기반 SQL 오류 설명 기능 추가\n  * SQL 차이 비교 설명 기능 추가\n  * 유사 문제 추천 기능 추가\n  * 회원 가입 및 프로필 관리 기능 추가\n  * 학습 진도 조회 및 히트맵 시각화 기능 추가\n\n* **Chores**\n  * 프로젝트 버전을 0.0.22로 업데이트\n  * API 문서화 개선\n  * 데이터베이스 스키마 확장 및 메타데이터 설정 추가",
+      "parsed_changes": {
+        "new_features": {
+          "title": "New Features",
+          "items": [
+            "AI 기반 SQL 오류 설명 기능 추가",
+            "SQL 차이 비교 설명 기능 추가",
+            "유사 문제 추천 기능 추가",
+            "회원 가입 및 프로필 관리 기능 추가",
+            "학습 진도 조회 및 히트맵 시각화 기능 추가"
+          ]
+        },
+        "chores": {
+          "title": "Chores",
+          "items": [
+            "프로젝트 버전을 0.0.22로 업데이트",
+            "API 문서화 개선",
+            "데이터베이스 스키마 확장 및 메타데이터 설정 추가"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.9",
       "project_type": "basic",
