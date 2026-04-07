@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import AppLayout from "./components/AppLayout";
 import Home from "./pages/Home";
@@ -6,6 +7,7 @@ import QuestionDetail from "./pages/QuestionDetail";
 import AnswerFeedback from "./pages/AnswerFeedback";
 import Stats from "./pages/Stats";
 import Settings from "./pages/Settings";
+import { ensureRegistered } from "./stores/memberStore";
 
 const router = createBrowserRouter([
   {
@@ -25,5 +27,9 @@ const router = createBrowserRouter([
 ]);
 
 export default function App() {
+  useEffect(() => {
+    ensureRegistered();
+  }, []);
+
   return <RouterProvider router={router} />;
 }
