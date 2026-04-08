@@ -10,12 +10,11 @@ import { explainError } from "../api/ai";
 import type { ExecuteResult } from "../types/api";
 
 export default function QuestionDetail() {
-  const { id } = useParams<{ id: string }>();
-  const questionId = Number(id);
+  const { questionUuid } = useParams<{ questionUuid: string }>();
   const navigate = useNavigate();
-  const { data: question, isLoading } = useQuestionDetail(questionId);
-  const executeMutation = useExecuteChoice(questionId);
-  const submitMutation = useSubmitAnswer(questionId);
+  const { data: question, isLoading } = useQuestionDetail(questionUuid!);
+  const executeMutation = useExecuteChoice(questionUuid!);
+  const submitMutation = useSubmitAnswer(questionUuid!);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [schemaOpen, setSchemaOpen] = useState(false);
   const [executeCache, setExecuteCache] = useState<Record<string, ExecuteResult>>({});
@@ -50,23 +49,23 @@ export default function QuestionDetail() {
       onSuccess: (result) => {
         const selectedChoice = question.choices.find((c) => c.key === selectedKey);
         const correctChoice = question.choices.find((c) => c.key === result.correctKey);
-        navigate(`/questions/${questionId}/result`, {
-          state: { ...result, selectedKey, selectedSql: selectedChoice?.body, correctSql: correctChoice?.body, questionId },
+        navigate(`/questions/${questionUuid}/result`, {
+          state: { ...result, selectedKey, selectedSql: selectedChoice?.body, correctSql: correctChoice?.body, questionUuid },
         });
       },
     });
-  }, [selectedKey, submitMutation, question, questionId, navigate]);
+  }, [selectedKey, submitMutation, question, questionUuid, navigate]);
 
   const handleAskAi = useCallback((choiceKey: string, _errorCode: string, errorMessage: string) => {
     setAiSheetOpen(true);
     setAiText("");
     const choice = question?.choices.find((c) => c.key === choiceKey);
     explainMutation.mutate({
-      questionId,
+      questionUuid: questionUuid!,
       sql: choice?.body ?? "",
-      errorMessage,
+      error_message: errorMessage,
     });
-  }, [question, questionId, explainMutation]);
+  }, [question, questionUuid, explainMutation]);
 
   if (isLoading || !question) {
     return (
@@ -85,8 +84,8 @@ export default function QuestionDetail() {
       <header className="sticky top-0 z-20 flex items-center justify-between h-14 bg-surface-card border-b border-border px-4 -mx-4 lg:-mx-0">
         <button type="button" className="text-text-primary" onClick={() => navigate(-1)}><ArrowLeft size={20} /></button>
         <div className="flex items-center gap-2">
-          <span className="font-mono text-xs text-text-caption">Q{String(questionId).padStart(3, "0")}</span>
-          <span className="badge-topic">{question.topicCode}</span>
+          <span className="font-mono text-xs text-text-caption">{questionUuid?.slice(0, 8)}</span>
+          <span className="badge-topic">{question.topicName}</span>
           <StarRating level={question.difficulty} />
         </div>
       </header>

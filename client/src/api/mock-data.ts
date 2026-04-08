@@ -4,8 +4,7 @@ import type {
   QuestionDetail,
   SubmitResult,
   ExecuteResult,
-  ProgressSummary,
-  HeatmapEntry,
+  ProgressResponse,
   TopicTree,
   ConceptTag,
   AiResult,
@@ -13,6 +12,10 @@ import type {
   MemberRegisterResponse,
   MemberMeResponse,
   NicknameRegenerateResponse,
+  TodayQuestionResponse,
+  RecommendationsResponse,
+  GreetingResponse,
+  ExamScheduleResponse,
 } from "../types/api";
 
 const MOCK_TOPICS: readonly TopicTree[] = [
@@ -24,20 +27,20 @@ const MOCK_TOPICS: readonly TopicTree[] = [
 ];
 
 const MOCK_QUESTIONS: readonly QuestionSummary[] = [
-  { id: 1, topicCode: "JOIN", difficulty: 2, stemPreview: "고객별 주문 수를 구하는 올바른 SQL은?", executionMode: "EXECUTABLE" },
-  { id: 2, topicCode: "SUBQUERY", difficulty: 3, stemPreview: "서브쿼리를 사용하여 평균 이상 주문한 고객을 조회하는 SQL은?", executionMode: "EXECUTABLE" },
-  { id: 3, topicCode: "GROUP_BY", difficulty: 2, stemPreview: "부서별 평균 급여가 500만원 이상인 부서를 구하는 SQL은?", executionMode: "EXECUTABLE" },
-  { id: 4, topicCode: "DDL", difficulty: 1, stemPreview: "외래키 제약조건을 포함한 테이블 생성 SQL로 올바른 것은?", executionMode: "CONCEPT_ONLY" },
-  { id: 5, topicCode: "CONSTRAINT", difficulty: 3, stemPreview: "NOT NULL과 UNIQUE 제약조건의 차이를 올바르게 설명한 것은?", executionMode: "CONCEPT_ONLY" },
-  { id: 6, topicCode: "JOIN", difficulty: 3, stemPreview: "LEFT JOIN과 INNER JOIN의 결과 차이를 올바르게 설명한 것은?", executionMode: "EXECUTABLE" },
-  { id: 7, topicCode: "GROUP_BY", difficulty: 1, stemPreview: "GROUP BY와 HAVING의 실행 순서로 올바른 것은?", executionMode: "CONCEPT_ONLY" },
-  { id: 8, topicCode: "DDL", difficulty: 2, stemPreview: "CREATE TABLE 시 DEFAULT 제약조건 문법은?", executionMode: "CONCEPT_ONLY" },
+  { questionUuid: "q-uuid-0001", topicName: "JOIN", difficulty: 2, stemPreview: "고객별 주문 수를 구하는 올바른 SQL은?" },
+  { questionUuid: "q-uuid-0002", topicName: "서브쿼리", difficulty: 3, stemPreview: "서브쿼리를 사용하여 평균 이상 주문한 고객을 조회하는 SQL은?" },
+  { questionUuid: "q-uuid-0003", topicName: "GROUP BY", difficulty: 2, stemPreview: "부서별 평균 급여가 500만원 이상인 부서를 구하는 SQL은?" },
+  { questionUuid: "q-uuid-0004", topicName: "DDL", difficulty: 1, stemPreview: "외래키 제약조건을 포함한 테이블 생성 SQL로 올바른 것은?" },
+  { questionUuid: "q-uuid-0005", topicName: "제약조건", difficulty: 3, stemPreview: "NOT NULL과 UNIQUE 제약조건의 차이를 올바르게 설명한 것은?" },
+  { questionUuid: "q-uuid-0006", topicName: "JOIN", difficulty: 3, stemPreview: "LEFT JOIN과 INNER JOIN의 결과 차이를 올바르게 설명한 것은?" },
+  { questionUuid: "q-uuid-0007", topicName: "GROUP BY", difficulty: 1, stemPreview: "GROUP BY와 HAVING의 실행 순서로 올바른 것은?" },
+  { questionUuid: "q-uuid-0008", topicName: "DDL", difficulty: 2, stemPreview: "CREATE TABLE 시 DEFAULT 제약조건 문법은?" },
 ];
 
 const MOCK_QUESTION_DETAIL: QuestionDetail = {
-  id: 1,
-  topicCode: "JOIN",
-  subtopicCode: "INNER_JOIN",
+  questionUuid: "q-uuid-0001",
+  topicName: "JOIN",
+  subtopicName: "INNER JOIN",
   difficulty: 2,
   executionMode: "EXECUTABLE",
   stem: "다음 SQL 중 고객별 주문 수를 올바르게 구하는 것은?",
@@ -50,24 +53,11 @@ const MOCK_QUESTION_DETAIL: QuestionDetail = {
   ],
 };
 
-const MOCK_PROGRESS: ProgressSummary = {
-  solved: 42,
-  correctRate: 68.5,
+const MOCK_PROGRESS: ProgressResponse = {
+  solvedCount: 42,
+  correctRate: 0.685,
   streakDays: 3,
 };
-
-const MOCK_HEATMAP: readonly HeatmapEntry[] = [
-  { topicCode: "JOIN", topicName: "JOIN", solved: 12, correctRate: 85 },
-  { topicCode: "SUBQUERY", topicName: "서브쿼리", solved: 8, correctRate: 42 },
-  { topicCode: "GROUP_BY", topicName: "GROUP BY", solved: 10, correctRate: 91 },
-  { topicCode: "DDL", topicName: "DDL", solved: 5, correctRate: 35 },
-  { topicCode: "DML", topicName: "DML", solved: 7, correctRate: 68 },
-  { topicCode: "CONSTRAINT", topicName: "제약조건", solved: 6, correctRate: 55 },
-  { topicCode: "INDEX", topicName: "인덱스", solved: 3, correctRate: 28 },
-  { topicCode: "WINDOW", topicName: "윈도우함수", solved: 2, correctRate: 12 },
-  { topicCode: "WHERE", topicName: "WHERE", solved: 9, correctRate: 78 },
-  { topicCode: "ORDER_BY", topicName: "ORDER BY", solved: 11, correctRate: 95 },
-];
 
 const MOCK_TAGS: readonly ConceptTag[] = [
   { tagKey: "join", labelKo: "JOIN", category: "SQL", description: "테이블 결합", isActive: true, sortOrder: 1 },
@@ -75,15 +65,44 @@ const MOCK_TAGS: readonly ConceptTag[] = [
   { tagKey: "aggregate", labelKo: "집계함수", category: "SQL", description: "COUNT, SUM 등", isActive: true, sortOrder: 3 },
 ];
 
+const MOCK_TODAY: TodayQuestionResponse = {
+  question: MOCK_QUESTIONS[0],
+  alreadySolvedToday: false,
+};
+
+const MOCK_RECOMMENDATIONS: RecommendationsResponse = {
+  questions: MOCK_QUESTIONS.slice(0, 3),
+};
+
+const MOCK_GREETING: GreetingResponse = {
+  message: "SQLD 시험까지 D-14! 오늘도 화이팅하세요",
+};
+
+const MOCK_EXAM_SCHEDULES: readonly ExamScheduleResponse[] = [
+  { examScheduleUuid: "es-uuid-0001", certType: "SQLD", round: 1, examDate: "2026-05-10", isSelected: true },
+  { examScheduleUuid: "es-uuid-0002", certType: "SQLD", round: 2, examDate: "2026-09-13", isSelected: false },
+  { examScheduleUuid: "es-uuid-0003", certType: "SQLP", round: 1, examDate: "2026-06-21", isSelected: false },
+];
+
 /** path + method → mock response 매핑 */
 export function getMockResponse(path: string, method: string, body?: string): unknown {
-  // GET /questions?...
+  // GET /questions/today  (specific before generic /questions/:uuid)
+  if (method === "GET" && path.startsWith("/questions/today")) {
+    return MOCK_TODAY satisfies TodayQuestionResponse;
+  }
+
+  // GET /questions/recommendations  (specific before generic /questions/:uuid)
+  if (method === "GET" && path.startsWith("/questions/recommendations")) {
+    return MOCK_RECOMMENDATIONS satisfies RecommendationsResponse;
+  }
+
+  // GET /questions?...  (list — no second path segment)
   if (method === "GET" && path.startsWith("/questions") && !path.includes("/questions/")) {
     const url = new URLSearchParams(path.split("?")[1] ?? "");
     const page = Number(url.get("page") ?? 0);
     const size = Number(url.get("size") ?? 10);
     const topic = url.get("topic");
-    const filtered = topic ? MOCK_QUESTIONS.filter((q) => q.topicCode === topic) : MOCK_QUESTIONS;
+    const filtered = topic ? MOCK_QUESTIONS.filter((q) => q.topicName === topic) : MOCK_QUESTIONS;
     const start = page * size;
     const content = filtered.slice(start, start + size);
     return {
@@ -98,12 +117,12 @@ export function getMockResponse(path: string, method: string, body?: string): un
     } satisfies Page<QuestionSummary>;
   }
 
-  // GET /questions/:id
-  if (method === "GET" && /^\/questions\/\d+$/.test(path)) {
-    return { ...MOCK_QUESTION_DETAIL, id: Number(path.split("/")[2]) } satisfies QuestionDetail;
+  // GET /questions/:uuid  (detail)
+  if (method === "GET" && /^\/questions\/[^/?]+$/.test(path)) {
+    return { ...MOCK_QUESTION_DETAIL, questionUuid: path.split("/")[2] } satisfies QuestionDetail;
   }
 
-  // POST /questions/:id/execute
+  // POST /questions/:uuid/execute
   if (method === "POST" && path.includes("/execute")) {
     const sql = body ? JSON.parse(body).sql as string : "";
     const hasError = sql.includes("cust_id");
@@ -115,21 +134,32 @@ export function getMockResponse(path: string, method: string, body?: string): un
     } satisfies ExecuteResult;
   }
 
-  // POST /questions/:id/submit
+  // POST /questions/:uuid/submit
   if (method === "POST" && path.includes("/submit")) {
-    const selectedKey = body ? JSON.parse(body).selectedKey as string : "A";
+    const parsed = body ? JSON.parse(body) : {};
+    const selectedKey = (parsed.selectedChoiceKey ?? parsed.selectedKey ?? "A") as string;
     const isCorrect = selectedKey === "A";
     return { isCorrect, correctKey: "A", rationale: "CUSTOMER와 ORDERS를 customer_id로 JOIN한 후 c.name으로 GROUP BY하면 고객별 주문 수를 정확히 구할 수 있습니다." } satisfies SubmitResult;
   }
 
   // GET /progress
   if (method === "GET" && path === "/progress") {
-    return MOCK_PROGRESS satisfies ProgressSummary;
+    return MOCK_PROGRESS satisfies ProgressResponse;
   }
 
-  // GET /progress/heatmap
-  if (method === "GET" && path === "/progress/heatmap") {
-    return MOCK_HEATMAP;
+  // GET /home/greeting
+  if (method === "GET" && path.startsWith("/home/greeting")) {
+    return MOCK_GREETING satisfies GreetingResponse;
+  }
+
+  // GET /exam-schedules/selected  (specific before /exam-schedules)
+  if (method === "GET" && path.startsWith("/exam-schedules/selected")) {
+    return MOCK_EXAM_SCHEDULES.find((s) => s.isSelected) ?? null;
+  }
+
+  // GET /exam-schedules
+  if (method === "GET" && path.startsWith("/exam-schedules")) {
+    return MOCK_EXAM_SCHEDULES;
   }
 
   // GET /meta/topics
@@ -167,11 +197,11 @@ export function getMockResponse(path: string, method: string, body?: string): un
     return { text: "선택지 C가 오답인 이유를 분석해 보겠습니다.\n\n**문제점: GROUP BY 절의 컬럼 참조 오류**\n\n`GROUP BY name`은 표준 SQL에서 모호한 참조입니다. 여러 테이블을 조인할 때는 반드시 테이블 별칭을 명시해야 합니다.\n\n```sql\n-- 올바른 SQL\nGROUP BY c.name\n```", promptVersion: 1 } satisfies AiResult;
   }
 
-  // GET /ai/similar/:id
+  // GET /ai/similar/:uuid
   if (method === "GET" && path.includes("/ai/similar/")) {
     return [
-      { id: 6, stem: "LEFT JOIN과 INNER JOIN의 결과 차이는?", topicCode: "JOIN", score: 0.92 },
-      { id: 7, stem: "GROUP BY와 HAVING의 실행 순서는?", topicCode: "GROUP_BY", score: 0.85 },
+      { questionUuid: "q-uuid-0006", stem: "LEFT JOIN과 INNER JOIN의 결과 차이는?", topicName: "JOIN", score: 0.92 },
+      { questionUuid: "q-uuid-0007", stem: "GROUP BY와 HAVING의 실행 순서는?", topicName: "GROUP BY", score: 0.85 },
     ] satisfies SimilarQuestion[];
   }
 

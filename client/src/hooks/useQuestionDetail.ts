@@ -1,22 +1,22 @@
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { fetchQuestion, executeChoice, submitAnswer } from "../api/questions";
 
-export function useQuestionDetail(id: number) {
+export function useQuestionDetail(questionUuid: string) {
   return useQuery({
-    queryKey: ["question", id],
-    queryFn: () => fetchQuestion(id),
+    queryKey: ["question", questionUuid],
+    queryFn: () => fetchQuestion(questionUuid),
     staleTime: 0,
   });
 }
 
-export function useExecuteChoice(questionId: number) {
+export function useExecuteChoice(questionUuid: string) {
   return useMutation({
-    mutationFn: (sql: string) => executeChoice(questionId, sql),
+    mutationFn: (sql: string) => executeChoice(questionUuid, sql),
   });
 }
 
-export function useSubmitAnswer(questionId: number) {
+export function useSubmitAnswer(questionUuid: string) {
   return useMutation({
-    mutationFn: (selectedKey: string) => submitAnswer(questionId, selectedKey),
+    mutationFn: (selectedChoiceKey: string) => submitAnswer(questionUuid, selectedChoiceKey),
   });
 }

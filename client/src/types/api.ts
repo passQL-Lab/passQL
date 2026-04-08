@@ -3,11 +3,10 @@ export type ExecutionMode = "EXECUTABLE" | "CONCEPT_ONLY";
 export type ChoiceKind = "SQL" | "TEXT";
 
 export interface QuestionSummary {
-  readonly id: number;
-  readonly topicCode: string;
+  readonly questionUuid: string;
+  readonly topicName: string;
   readonly difficulty: number;
   readonly stemPreview: string;
-  readonly executionMode: ExecutionMode;
 }
 
 export interface ChoiceItem {
@@ -18,9 +17,9 @@ export interface ChoiceItem {
 }
 
 export interface QuestionDetail {
-  readonly id: number;
-  readonly topicCode: string;
-  readonly subtopicCode: string;
+  readonly questionUuid: string;
+  readonly topicName: string;
+  readonly subtopicName: string;
   readonly difficulty: number;
   readonly executionMode: ExecutionMode;
   readonly stem: string;
@@ -57,17 +56,10 @@ export interface Page<T> {
 }
 
 // === Progress ===
-export interface ProgressSummary {
-  readonly solved: number;
+export interface ProgressResponse {
+  readonly solvedCount: number;
   readonly correctRate: number;
   readonly streakDays: number;
-}
-
-export interface HeatmapEntry {
-  readonly topicCode: string;
-  readonly topicName: string;
-  readonly solved: number;
-  readonly correctRate: number;
 }
 
 // === Meta ===
@@ -98,9 +90,9 @@ export interface AiResult {
 }
 
 export interface SimilarQuestion {
-  readonly id: number;
+  readonly questionUuid: string;
   readonly stem: string;
-  readonly topicCode: string;
+  readonly topicName: string;
   readonly score: number;
 }
 
@@ -126,12 +118,36 @@ export interface NicknameRegenerateResponse {
 
 // === AI Payloads ===
 export interface ExplainErrorPayload {
-  readonly questionId: number;
+  readonly questionUuid: string;
   readonly sql: string;
-  readonly errorMessage: string;
+  readonly error_message: string;
 }
 
 export interface DiffExplainPayload {
-  readonly questionId: number;
-  readonly selectedKey: string;
+  readonly question_id: number;
+  readonly selected_key: string;
+}
+
+// === Today / Recommendations ===
+export interface TodayQuestionResponse {
+  readonly question: QuestionSummary | null;
+  readonly alreadySolvedToday: boolean;
+}
+
+export interface RecommendationsResponse {
+  readonly questions: readonly QuestionSummary[];
+}
+
+// === Home ===
+export interface GreetingResponse {
+  readonly message: string;
+}
+
+// === ExamSchedule ===
+export interface ExamScheduleResponse {
+  readonly examScheduleUuid: string;
+  readonly certType: string;
+  readonly round: number;
+  readonly examDate: string;
+  readonly isSelected: boolean;
 }

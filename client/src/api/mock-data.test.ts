@@ -6,13 +6,16 @@ import type {
   QuestionDetail,
   ExecuteResult,
   SubmitResult,
-  ProgressSummary,
-  HeatmapEntry,
+  ProgressResponse,
   TopicTree,
   AiResult,
   MemberRegisterResponse,
   MemberMeResponse,
   NicknameRegenerateResponse,
+  TodayQuestionResponse,
+  RecommendationsResponse,
+  GreetingResponse,
+  ExamScheduleResponse,
 } from "../types/api";
 
 describe("getMockResponse", () => {
@@ -27,7 +30,7 @@ describe("getMockResponse", () => {
 
     it("filters by topic", () => {
       const result = getMockResponse("/questions?page=0&size=10&topic=JOIN", "GET") as Page<QuestionSummary>;
-      expect(result.content.every((q) => q.topicCode === "JOIN")).toBe(true);
+      expect(result.content.every((q) => q.topicName === "JOIN")).toBe(true);
     });
 
     it("returns empty page for non-existent topic", () => {
@@ -36,16 +39,16 @@ describe("getMockResponse", () => {
       expect(result.empty).toBe(true);
     });
 
-    it("returns question detail for GET /questions/:id", () => {
-      const result = getMockResponse("/questions/1", "GET") as QuestionDetail;
-      expect(result.id).toBe(1);
+    it("returns question detail for GET /questions/:uuid", () => {
+      const result = getMockResponse("/questions/q-uuid-0001", "GET") as QuestionDetail;
+      expect(result.questionUuid).toBe("q-uuid-0001");
       expect(result.stem).toBeTruthy();
       expect(result.choices).toHaveLength(4);
     });
 
-    it("returns correct id for any question detail", () => {
-      const result = getMockResponse("/questions/42", "GET") as QuestionDetail;
-      expect(result.id).toBe(42);
+    it("returns correct uuid for any question detail", () => {
+      const result = getMockResponse("/questions/q-uuid-0042", "GET") as QuestionDetail;
+      expect(result.questionUuid).toBe("q-uuid-0042");
     });
   });
 
@@ -98,18 +101,40 @@ describe("getMockResponse", () => {
   });
 
   describe("Progress", () => {
-    it("returns progress summary", () => {
-      const result = getMockResponse("/progress", "GET") as ProgressSummary;
-      expect(result.solved).toBe(42);
-      expect(result.correctRate).toBeCloseTo(68.5);
+    it("returns progress response", () => {
+      const result = getMockResponse("/progress", "GET") as ProgressResponse;
+      expect(result.solvedCount).toBe(42);
+      expect(result.correctRate).toBeCloseTo(0.685);
       expect(result.streakDays).toBe(3);
     });
+  });
 
-    it("returns heatmap entries", () => {
-      const result = getMockResponse("/progress/heatmap", "GET") as HeatmapEntry[];
+  describe("New APIs", () => {
+    it("returns today question", () => {
+      const result = getMockResponse("/questions/today", "GET") as TodayQuestionResponse;
+      expect(result.question).not.toBeNull();
+      expect(result.alreadySolvedToday).toBe(false);
+    });
+
+    it("returns recommendations", () => {
+      const result = getMockResponse("/questions/recommendations", "GET") as RecommendationsResponse;
+      expect(result.questions.length).toBeGreaterThan(0);
+    });
+
+    it("returns greeting", () => {
+      const result = getMockResponse("/home/greeting?memberUuid=abc", "GET") as GreetingResponse;
+      expect(result.message).toBeTruthy();
+    });
+
+    it("returns exam schedules", () => {
+      const result = getMockResponse("/exam-schedules", "GET") as ExamScheduleResponse[];
       expect(result.length).toBeGreaterThan(0);
-      expect(result[0]).toHaveProperty("topicCode");
-      expect(result[0]).toHaveProperty("correctRate");
+      expect(result[0]).toHaveProperty("certType");
+    });
+
+    it("returns selected exam schedule", () => {
+      const result = getMockResponse("/exam-schedules/selected", "GET") as ExamScheduleResponse;
+      expect(result.isSelected).toBe(true);
     });
   });
 
