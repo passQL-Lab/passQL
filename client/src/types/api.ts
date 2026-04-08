@@ -103,3 +103,35 @@ export interface SimilarQuestion {
   readonly topicCode: string;
   readonly score: number;
 }
+
+// === Member ===
+export interface MemberRegisterResponse {
+  readonly memberUuid: string;
+  readonly nickname: string;
+}
+
+export interface MemberMeResponse {
+  readonly memberUuid: string;
+  readonly nickname: string;
+  readonly role: string;
+  readonly status: string;
+  readonly isTestAccount: boolean;
+  readonly createdAt: string;
+  readonly lastSeenAt: string;
+}
+
+export interface NicknameRegenerateResponse {
+  readonly nickname: string;
+}
+
+// === AI Payloads ===
+export interface ExplainErrorPayload {
+  readonly questionId: number;
+  readonly sql: string;
+  readonly errorMessage: string;
+}
+
+export interface DiffExplainPayload {
+  readonly questionId: number;
+  readonly selectedKey: string;
+}

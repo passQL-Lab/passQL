@@ -16,13 +16,13 @@ Frontend ──(/api)──> Backend(Spring) ──(x-api-key)──> AI Server(
 
 > 구현 상태: [O] = be-api-docs.json에 정의됨, [미구현] = 화면 명세에 필요하나 백엔드 미구현
 
-### Members (`src/api/members.ts`) [미구현]
+### Members (`src/api/members.ts`)
 
 | 함수 | 메서드 | 경로 | 인증 | 응답 타입 | 상태 |
 |------|--------|------|:----:|-----------|:----:|
-| `register()` | POST | `/members/register` | - | `Member` | 미구현 |
-| `fetchMe()` | GET | `/members/me` | O | `Member` | 미구현 |
-| `regenerateNickname()` | POST | `/members/me/regenerate-nickname` | O | `Member` | 미구현 |
+| `register()` | POST | `/members/register` | - | `MemberRegisterResponse` | O |
+| `fetchMe()` | GET | `/members/me` | O (query param) | `MemberMeResponse` | O |
+| `regenerateNickname()` | POST | `/members/me/regenerate-nickname` | O (query param) | `NicknameRegenerateResponse` | O |
 
 - 첫 진입 시 `register` → UUID 발급 → memberStore에 저장.
 - `fetchMe`로 닉네임 조회 (홈, 설정 화면).
@@ -35,7 +35,7 @@ Frontend ──(/api)──> Backend(Spring) ──(x-api-key)──> AI Server(
 | `fetchQuestion(id)` | GET | `/questions/{id}` | - | `QuestionDetail` | O |
 | `fetchTodayQuestion()` | GET | `/questions/today` | O | `TodayQuestion` | 미구현 |
 | `submitAnswer(id, selectedKey)` | POST | `/questions/{id}/submit` | O | `SubmitResult` | O |
-| `executeChoice(id, choiceKey)` | POST | `/questions/{id}/execute` | - | `ExecuteResult` | O |
+| `executeChoice(id, sql)` | POST | `/questions/{id}/execute` | - | `ExecuteResult` | O |
 
 - `fetchTodayQuestion`: 오늘의 문제 + D-day (백엔드가 계산). 홈 화면에서 사용.
 
@@ -60,12 +60,10 @@ Frontend ──(/api)──> Backend(Spring) ──(x-api-key)──> AI Server(
 `diffExplain`:
 | 필드 | 타입 | 필수 | 설명 |
 |------|------|:----:|------|
-| `user_uuid` | string | O | 사용자 UUID |
 | `question_id` | integer | O | 문제 ID |
 | `selected_key` | string | O | 사용자가 선택한 답 키 |
-| `correct_key` | string | O | 정답 키 |
-| `question_stem` | string | O | 문제 지문 |
-| `choice_bodies` | object | O | 선택지 본문 맵 (`{ "A": "...", "B": "..." }`) |
+
+(프론트는 위 2개만 전달. 백엔드가 나머지 필드 `user_uuid`, `correct_key`, `question_stem`, `choice_bodies`를 자동으로 조회하여 AI 서버로 프록시)
 
 **참고**: 백엔드가 AI 서버 응답을 camelCase로 변환하여 내려줌 (`prompt_version` → `promptVersion`).
 `fetchSimilar`는 백엔드가 AI 결과를 보강 (`SimilarQuestion`에 `stem`, `topicCode` 추가).
@@ -93,7 +91,7 @@ Frontend ──(/api)──> Backend(Spring) ──(x-api-key)──> AI Server(
 
 ```
 1. 화면 진입 → GET /questions/{id}
-2. 선택지 클릭 → POST /questions/{id}/execute (자동 호출)
+2. 선택지 클릭 → POST /questions/{id}/execute (body: `{ sql: "..." }`) (자동 호출)
    - SUCCESS → 결과 테이블 인라인 표시
    - ERROR  → 에러 코드/메시지 표시 + [AI에게 물어보기] 버튼
 3. 같은 선택지 재클릭 → 클라이언트 캐시에서 재표시 (재호출 금지)
@@ -102,7 +100,7 @@ Frontend ──(/api)──> Backend(Spring) ──(x-api-key)──> AI Server(
 6. 오답이면 [AI 해설 받기] → POST /ai/diff-explain
 ```
 
-**선택지 자동 실행 캐시 정책**: 선택지별 실행 결과를 `Record<choiceKey, ExecuteResult>`로 로컬 state에 보관. 동일 choiceKey 재클릭 시 API 재호출하지 않고 캐시 결과 표시. rate limit 소진 방지 목적.
+**선택지 자동 실행 캐시 정책**: 선택지별 실행 결과를 `Record<sql, ExecuteResult>`로 로컬 state에 보관. 동일 sql 재클릭 시 API 재호출하지 않고 캐시 결과 표시. rate limit 소진 방지 목적.
 
 ### 홈 화면 (병렬 호출)
 
