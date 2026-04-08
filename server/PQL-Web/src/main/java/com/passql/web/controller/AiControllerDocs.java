@@ -22,6 +22,7 @@ public interface AiControllerDocs {
 
   @ApiLogs({
       @ApiLog(date = "2026.04.07", author = Author.SUHSAECHAN, issueNumber = 1, description = "SQL 에러 AI 해설 API 추가"),
+      @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 22, description = "Header: X-User-UUID(String) → X-Member-UUID(UUID). Body 내 questionId(Long) → questionUuid(UUID)"),
   })
   @Operation(summary = "SQL 에러 해설")
   ResponseEntity<AiResult> explainError(
@@ -31,6 +32,7 @@ public interface AiControllerDocs {
 
   @ApiLogs({
       @ApiLog(date = "2026.04.07", author = Author.SUHSAECHAN, issueNumber = 1, description = "SQL 차이 AI 해설 API 추가"),
+      @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 22, description = "Header: X-User-UUID(String) → X-Member-UUID(UUID)"),
   })
   @Operation(summary = "SQL 차이 해설")
   ResponseEntity<AiResult> diffExplain(
@@ -40,6 +42,7 @@ public interface AiControllerDocs {
 
   @ApiLogs({
       @ApiLog(date = "2026.04.07", author = Author.SUHSAECHAN, issueNumber = 1, description = "유사 문제 조회 API 추가"),
+      @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 22, description = "PathVariable: Long id → UUID questionUuid. 응답 DTO SimilarQuestion{questionUuid, stem, topicName, score}"),
   })
   @Operation(summary = "유사 문제 조회")
   ResponseEntity<List<SimilarQuestion>> getSimilar(

@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+
+<th:block layout:fragment="title">시험 일정 관리</th:block>
+
+<th:block layout:fragment="content">
+
+    <!-- 회차 추가 폼 -->
+    <div class="card bg-base-100 shadow mb-4">
+        <div class="card-body p-4">
+            <h3 class="card-title text-base mb-3">
+                <i data-lucide="plus-circle" class="size-5"></i>
+                회차 추가
+            </h3>
+            <form th:action="@{/admin/exam-schedules}" method="post" class="flex flex-wrap items-end gap-3">
+                <div class="form-control">
+                    <label class="label"><span class="label-text">자격증</span></label>
+                    <select name="certType" class="select select-bordered select-sm" required>
+                        <option th:each="ct : ${certTypes}" th:value="${ct.name()}" th:text="${ct.name()}">SQLD</option>
+                    </select>
+                </div>
+                <div class="form-control">
+                    <label class="label"><span class="label-text">회차</span></label>
+                    <input type="number" name="round" class="input input-bordered input-sm w-24" min="1" required/>
+                </div>
+                <div class="form-control">
+                    <label class="label"><span class="label-text">시험일</span></label>
+                    <input type="date" name="examDate" class="input input-bordered input-sm" required/>
+                </div>
+                <button type="submit" class="btn btn-sm btn-primary">
+                    <i data-lucide="plus" class="size-4"></i>
+                    추가
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- 필터 + 목록 -->
+    <div class="card bg-base-100 shadow">
+        <div class="card-body p-4">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="card-title text-base">
+                    <i data-lucide="calendar-days" class="size-5"></i>
+                    시험 일정 목록
+                </h3>
+                <form th:action="@{/admin/exam-schedules}" method="get" class="flex items-center gap-2">
+                    <select name="certType" class="select select-bordered select-sm"
+                            onchange="this.form.submit()">
+                        <option value="">전체</option>
+                        <option th:each="ct : ${certTypes}" th:value="${ct.name()}" th:text="${ct.name()}"
+                                th:selected="${selectedCertType == ct.name()}">SQLD</option>
+                    </select>
+                </form>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="table table-sm">
+                    <thead>
+                    <tr>
+                        <th>자격증</th>
+                        <th>회차</th>
+                        <th>시험일</th>
+                        <th class="w-20">선택</th>
+                        <th class="w-20">액션</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="s : ${schedules}"
+                        th:classappend="${s.isSelected} ? 'bg-primary/10'">
+                        <td>
+                            <span class="badge badge-sm"
+                                  th:classappend="${s.certType == 'SQLD'} ? 'badge-info' : 'badge-warning'"
+                                  th:text="${s.certType}">SQLD</span>
+                        </td>
+                        <td th:text="'제' + ${s.round} + '회'">제61회</td>
+                        <td th:text="${s.examDate}">2026-05-31</td>
+                        <td>
+                            <input type="radio" name="selected" class="radio radio-primary radio-sm"
+                                   th:checked="${s.isSelected}"
+                                   th:onclick="|selectSchedule('${s.examScheduleUuid}')|"/>
+                        </td>
+                        <td>
+                            <button class="btn btn-xs btn-ghost text-error"
+                                    th:onclick="|deleteSchedule('${s.examScheduleUuid}')|">
+                                <i data-lucide="trash-2" class="size-4"></i>
+                            </button>
+                        </td>
+                    </tr>
+
+                    <tr th:if="${schedules == null or schedules.isEmpty()}">
+                        <td colspan="5" class="text-center text-base-content/40 py-8">
+                            <i data-lucide="calendar-x" class="size-8 mx-auto mb-2 opacity-30"></i>
+                            <p class="text-sm">등록된 시험 일정이 없습니다.</p>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</th:block>
+
+<th:block layout:fragment="js">
+    <script>
+        lucide.createIcons();
+
+        function selectSchedule(uuid) {
+            fetch('/admin/exam-schedules/' + uuid + '/select', { method: 'PUT' })
+                .then(res => {
+                    if (res.ok) location.reload();
+                    else alert('선택 변경에 실패했습니다.');
+                });
+        }
+
+        function deleteSchedule(uuid) {
+            if (!confirm('정말 삭제하시겠습니까?')) return;
+            fetch('/admin/exam-schedules/' + uuid, { method: 'DELETE' })
+                .then(res => {
+                    if (res.ok) location.reload();
+                    else alert('삭제에 실패했습니다.');
+                });
+        }
+    </script>
+</th:block>
+</html>

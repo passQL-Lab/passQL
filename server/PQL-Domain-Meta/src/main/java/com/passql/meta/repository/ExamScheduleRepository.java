@@ -13,4 +13,5 @@ public interface ExamScheduleRepository extends JpaRepository<ExamSchedule, UUID
     List<ExamSchedule> findByCertTypeOrderByRoundAsc(CertType certType);
     Optional<ExamSchedule> findFirstByIsSelectedTrue();
     Optional<ExamSchedule> findByCertTypeAndRound(CertType certType, Integer round);
+    boolean existsByCertTypeAndRound(CertType certType, Integer round);
 }
