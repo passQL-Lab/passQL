@@ -16,7 +16,6 @@ import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
-import java.util.Random;
 import java.util.UUID;
 
 @Service
@@ -26,8 +25,6 @@ public class GreetingService {
 
     private final MemberRepository memberRepository;
     private final ExamScheduleRepository examScheduleRepository;
-
-    private static final Random RANDOM = new Random();
 
     public GreetingResponse getGreeting(UUID memberUuid) {
         Member member = memberRepository.findByMemberUuidAndIsDeletedFalse(memberUuid)
@@ -57,6 +54,7 @@ public class GreetingService {
         } else if (dDay >= 8 && dDay <= 30) {
             return randomFrom(countdownMessages(nickname, certType, dDay));
         } else {
+            // dDay > 30 또는 dDay < 0(시험 종료): 일반 인사 (D-day 숫자 노출 안 함)
             return randomFrom(generalMessages(nickname, now));
         }
     }
@@ -117,6 +115,6 @@ public class GreetingService {
     }
 
     private String randomFrom(List<String> pool) {
-        return pool.get(RANDOM.nextInt(pool.size()));
+        return pool.get(java.util.concurrent.ThreadLocalRandom.current().nextInt(pool.size()));
     }
 }
