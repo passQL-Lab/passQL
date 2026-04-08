@@ -12,11 +12,9 @@ public final class StreakCalculator {
      * 제출 날짜 목록(내림차순)으로 연속 학습 일수를 계산한다.
      * 하루 그레이스 정책: 오늘 미제출이어도 어제까지 연속이면 streak 유지.
      *
-     * @param dates 제출 날짜 목록 (DESC 정렬, distinct)
+     * @param dates DESC 정렬된 distinct 날짜 목록 (findSubmissionDatesByMemberUuid 쿼리가 보장)
      * @return 연속 학습 일수
      */
-    // 전제: dates는 DESC 정렬된 distinct 날짜 목록이어야 한다.
-    // findSubmissionDatesByMemberUuid 쿼리가 이를 보장한다.
     public static int calculate(List<Date> dates) {
         if (dates == null || dates.isEmpty()) {
             return 0;
