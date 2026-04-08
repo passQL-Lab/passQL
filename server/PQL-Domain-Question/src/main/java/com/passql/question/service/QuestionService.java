@@ -2,9 +2,18 @@ package com.passql.question.service;
 
 import com.passql.common.exception.CustomException;
 import com.passql.common.exception.constant.ErrorCode;
+import com.passql.meta.entity.Subtopic;
+import com.passql.meta.entity.Topic;
+import com.passql.meta.repository.SubtopicRepository;
+import com.passql.meta.repository.TopicRepository;
 import com.passql.question.dto.QuestionDetail;
 import com.passql.question.dto.QuestionSummary;
+import com.passql.question.dto.RecommendationsResponse;
+import com.passql.question.dto.TodayQuestionResponse;
+import com.passql.question.entity.DailyChallenge;
 import com.passql.question.entity.Question;
+import com.passql.question.entity.QuestionChoice;
+import com.passql.question.repository.DailyChallengeRepository;
 import com.passql.question.repository.QuestionChoiceRepository;
 import com.passql.question.repository.QuestionRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,23 +22,109 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.UUID;
+
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class QuestionService {
     private final QuestionRepository questionRepository;
     private final QuestionChoiceRepository questionChoiceRepository;
+    private final DailyChallengeRepository dailyChallengeRepository;
+    private final TopicRepository topicRepository;
+    private final SubtopicRepository subtopicRepository;
 
     public Page<QuestionSummary> getQuestions(String topic, String subtopic, Integer difficulty, String mode, Pageable pageable) {
-        throw new UnsupportedOperationException("TODO");
+        return questionRepository.findByIsActiveTrue(pageable).map(this::toSummary);
     }
 
-    public QuestionDetail getQuestion(Long id) {
-        throw new UnsupportedOperationException("TODO");
-    }
-
-    public Question getQuestionEntity(Long id) {
-        return questionRepository.findById(id)
+    public QuestionDetail getQuestion(UUID questionUuid) {
+        Question q = questionRepository.findById(questionUuid)
                 .orElseThrow(() -> new CustomException(ErrorCode.QUESTION_NOT_FOUND));
+        List<QuestionChoice> choices = questionChoiceRepository.findByQuestionUuidOrderBySortOrderAsc(questionUuid);
+        List<QuestionDetail.ChoiceItem> items = choices.stream()
+                .map(c -> new QuestionDetail.ChoiceItem(c.getChoiceKey(), c.getKind(), c.getBody(), c.getSortOrder()))
+                .toList();
+        String topicName = topicName(q.getTopicUuid());
+        String subtopicName = subtopicName(q.getSubtopicUuid());
+        return new QuestionDetail(
+                q.getQuestionUuid(),
+                topicName,
+                subtopicName,
+                q.getDifficulty(),
+                q.getExecutionMode(),
+                q.getStem(),
+                q.getSchemaDisplay(),
+                items
+        );
+    }
+
+    public Question getQuestionEntity(UUID questionUuid) {
+        return questionRepository.findById(questionUuid)
+                .orElseThrow(() -> new CustomException(ErrorCode.QUESTION_NOT_FOUND));
+    }
+
+    /**
+     * Resolve today's question (from DailyChallenge or deterministic fallback).
+     * Returns null if no active questions exist.
+     */
+    public Question resolveTodayQuestion() {
+        DailyChallenge dc = dailyChallengeRepository.findByChallengeDate(LocalDate.now()).orElse(null);
+        if (dc != null) {
+            return questionRepository.findById(dc.getQuestionUuid()).orElse(null);
+        }
+        List<UUID> active = questionRepository.findActiveUuidsOrderedByCreatedAt();
+        if (active.isEmpty()) {
+            return null;
+        }
+        long seed = LocalDate.now().toEpochDay();
+        UUID pick = active.get((int) Math.floorMod(seed, active.size()));
+        return questionRepository.findById(pick).orElse(null);
+    }
+
+    public TodayQuestionResponse getTodayResponse(boolean alreadySolved) {
+        Question question = resolveTodayQuestion();
+        if (question == null) {
+            return new TodayQuestionResponse(null, false);
+        }
+        return new TodayQuestionResponse(toSummary(question), alreadySolved);
+    }
+
+    public RecommendationsResponse getRecommendations(int size, UUID excludeQuestionUuid) {
+        int clamped = Math.max(1, Math.min(size, 5));
+        UUID exclude = excludeQuestionUuid;
+        if (exclude == null) {
+            DailyChallenge dc = dailyChallengeRepository.findByChallengeDate(LocalDate.now()).orElse(null);
+            if (dc != null) {
+                exclude = dc.getQuestionUuid();
+            }
+        }
+        List<Question> list = (exclude != null)
+                ? questionRepository.findRandomActiveExcluding(clamped, exclude.toString())
+                : questionRepository.findRandomActive(clamped);
+        return new RecommendationsResponse(list.stream().map(this::toSummary).toList());
+    }
+
+    public QuestionSummary toSummary(Question q) {
+        String stem = q.getStem();
+        String preview = stem == null ? "" : (stem.length() > 100 ? stem.substring(0, 100) : stem);
+        return new QuestionSummary(
+                q.getQuestionUuid(),
+                topicName(q.getTopicUuid()),
+                q.getDifficulty(),
+                preview
+        );
+    }
+
+    private String topicName(UUID topicUuid) {
+        if (topicUuid == null) return null;
+        return topicRepository.findById(topicUuid).map(Topic::getDisplayName).orElse(null);
+    }
+
+    private String subtopicName(UUID subtopicUuid) {
+        if (subtopicUuid == null) return null;
+        return subtopicRepository.findById(subtopicUuid).map(Subtopic::getDisplayName).orElse(null);
     }
 }

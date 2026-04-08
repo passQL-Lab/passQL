@@ -42,6 +42,7 @@ public enum ErrorCode {
     SETTING_NOT_FOUND(HttpStatus.NOT_FOUND, "설정값을 찾을 수 없습니다."),
     PROMPT_NOT_FOUND(HttpStatus.NOT_FOUND, "프롬프트 템플릿을 찾을 수 없습니다."),
     TOPIC_NOT_FOUND(HttpStatus.NOT_FOUND, "토픽을 찾을 수 없습니다."),
+    EXAM_SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, "시험 일정을 찾을 수 없습니다."),
 
     // Member
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "회원을 찾을 수 없습니다."),

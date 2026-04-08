@@ -15,7 +15,7 @@ public class AppSettingService {
 
     @Cacheable(value = "appSettings", key = "#key")
     public String getString(String key) {
-        return appSettingRepository.findById(key)
+        return appSettingRepository.findBySettingKey(key)
                 .map(s -> s.getValueText())
                 .orElseThrow(() -> new CustomException(ErrorCode.SETTING_NOT_FOUND));
     }

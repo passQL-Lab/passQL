@@ -15,7 +15,7 @@ public class PromptService {
 
     @Cacheable(value = "prompts", key = "#keyName")
     public PromptTemplate getActivePrompt(String keyName) {
-        return promptTemplateRepository.findByKeyNameAndIsActiveTrue(keyName)
+        return promptTemplateRepository.findFirstByKeyNameAndIsActiveTrueOrderByVersionDesc(keyName)
                 .orElseThrow(() -> new CustomException(ErrorCode.PROMPT_NOT_FOUND));
     }
 }

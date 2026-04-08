@@ -9,6 +9,8 @@ import com.passql.submission.service.SubmissionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.UUID;
+
 /**
  * 크로스 도메인 서비스 - 문제 실행 흐름 (Question + Sandbox + AI + Submission)
  */
@@ -21,7 +23,7 @@ public class QuestionExecutionService {
     private final AiService aiService;
     private final SubmissionService submissionService;
 
-    public ExecuteResult executeChoice(Long questionId, String choiceKey, String userUuid) {
+    public ExecuteResult executeChoice(UUID questionUuid, String choiceKey, UUID memberUuid) {
         // TODO: 1. SQL 안전성 검증 2. sandbox 실행 3. 로그 저장
         throw new UnsupportedOperationException("TODO");
     }
