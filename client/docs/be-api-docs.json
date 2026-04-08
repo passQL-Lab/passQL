@@ -17,6 +17,10 @@
       "description": "문제 조회 / SQL 실행 / 제출"
     },
     {
+      "name": "ExamSchedule",
+      "description": "시험 일정 조회"
+    },
+    {
       "name": "Meta",
       "description": "주제 트리 / 개념 태그 조회"
     },
@@ -34,28 +38,29 @@
     }
   ],
   "paths": {
-    "/api/questions/{id}/submit": {
+    "/api/questions/{questionUuid}/submit": {
       "post": {
         "tags": ["Question"],
         "summary": "문제 제출",
-        "description": "## 인증(JWT): **불필요**\n\n## 요청 헤더\n- **`X-User-UUID`**: 회원 UUID\n\n## 요청 파라미터\n- **`id`**: 문제 ID (path variable)\n\n## 요청 바디\n- **`selectedKey`**: 선택한 선택지 키 (String)\n\n## 반환값 (SubmitResult)\n- 정답 여부, 정답 선택지, AI 해설 여부 등\n\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.07\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/1\" target=\"_blank\"\u003E#1\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EAI 서버 및 Spring 서버 초기 프로젝트 구성\u003C/td\u003E\u003Ctd\u003E문제 제출 API 추가\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
+        "description": "선택지 제출 후 정답 여부 반환. 헤더 X-Member-UUID(UUID) 필수. Body: { \"selectedChoiceKey\": \"A\" } (구 필드명 selectedKey 도 한시적으로 수용).\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.07\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/1\" target=\"_blank\"\u003E#1\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EAI 서버 및 Spring 서버 초기 프로젝트 구성\u003C/td\u003E\u003Ctd\u003E문제 제출 API 추가\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.08\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/22\" target=\"_blank\"\u003E#22\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EEntity 스키마 보강 submission 테이블 및 question.is_active 컬럼 추가\u003C/td\u003E\u003Ctd\u003EPathVariable: Long id → UUID questionUuid. Header: X-User-UUID(String) → X-Member-UUID(UUID). Body: selectedKey → selectedChoiceKey (구 selectedKey 한시적 fallback 지원)\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
         "operationId": "submit",
         "parameters": [
           {
-            "name": "id",
+            "name": "questionUuid",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
-            "name": "X-User-UUID",
+            "name": "X-Member-UUID",
             "in": "header",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -86,20 +91,20 @@
         }
       }
     },
-    "/api/questions/{id}/execute": {
+    "/api/questions/{questionUuid}/execute": {
       "post": {
         "tags": ["Question"],
         "summary": "SQL 실행 (테스트)",
-        "description": "## 인증(JWT): **불필요**\n\n## 요청 파라미터\n- **`id`**: 문제 ID (path variable)\n\n## 요청 바디\n- **`sql`**: 실행할 SQL (String)\n\n## 반환값 (ExecuteResult)\n- SQL 실행 결과 (컬럼, 행 데이터)\n- 제출이 아닌 테스트 실행이므로 채점하지 않음\n\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.07\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/1\" target=\"_blank\"\u003E#1\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EAI 서버 및 Spring 서버 초기 프로젝트 구성\u003C/td\u003E\u003Ctd\u003ESQL 실행(테스트) API 추가\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
+        "description": "\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.07\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/1\" target=\"_blank\"\u003E#1\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EAI 서버 및 Spring 서버 초기 프로젝트 구성\u003C/td\u003E\u003Ctd\u003ESQL 실행(테스트) API 추가\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.08\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/22\" target=\"_blank\"\u003E#22\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EEntity 스키마 보강 submission 테이블 및 question.is_active 컬럼 추가\u003C/td\u003E\u003Ctd\u003EPathVariable: Long id → UUID questionUuid\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
         "operationId": "executeChoice",
         "parameters": [
           {
-            "name": "id",
+            "name": "questionUuid",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -185,15 +190,16 @@
       "post": {
         "tags": ["AI"],
         "summary": "SQL 에러 해설",
-        "description": "## 인증(JWT): **불필요**\n\n## 요청 헤더\n- **`X-User-UUID`**: 회원 UUID\n\n## 요청 바디\n- **`questionId`**: 문제 ID (Long)\n- **`sql`**: 실행한 SQL (String)\n- **`errorMessage`**: 발생한 에러 메시지 (String)\n\n## 반환값 (AiResult)\n- AI가 생성한 에러 해설\n\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.07\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/1\" target=\"_blank\"\u003E#1\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EAI 서버 및 Spring 서버 초기 프로젝트 구성\u003C/td\u003E\u003Ctd\u003ESQL 에러 AI 해설 API 추가\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
+        "description": "\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.07\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/1\" target=\"_blank\"\u003E#1\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EAI 서버 및 Spring 서버 초기 프로젝트 구성\u003C/td\u003E\u003Ctd\u003ESQL 에러 AI 해설 API 추가\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.08\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/22\" target=\"_blank\"\u003E#22\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EEntity 스키마 보강 submission 테이블 및 question.is_active 컬럼 추가\u003C/td\u003E\u003Ctd\u003EHeader: X-User-UUID(String) → X-Member-UUID(UUID). Body 내 questionId(Long) → questionUuid(UUID)\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
         "operationId": "explainError",
         "parameters": [
           {
-            "name": "X-User-UUID",
+            "name": "X-Member-UUID",
             "in": "header",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -228,15 +234,16 @@
       "post": {
         "tags": ["AI"],
         "summary": "SQL 차이 해설",
-        "description": "## 인증(JWT): **불필요**\n\n## 요청 헤더\n- **`X-User-UUID`**: 회원 UUID\n\n## 요청 바디\n- **`questionId`**: 문제 ID (Long)\n- **`selectedKey`**: 선택한 선택지 키 (String)\n\n## 반환값 (AiResult)\n- 정답과 선택한 답의 차이에 대한 AI 해설\n\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.07\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/1\" target=\"_blank\"\u003E#1\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EAI 서버 및 Spring 서버 초기 프로젝트 구성\u003C/td\u003E\u003Ctd\u003ESQL 차이 AI 해설 API 추가\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
+        "description": "\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.07\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/1\" target=\"_blank\"\u003E#1\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EAI 서버 및 Spring 서버 초기 프로젝트 구성\u003C/td\u003E\u003Ctd\u003ESQL 차이 AI 해설 API 추가\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.08\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/22\" target=\"_blank\"\u003E#22\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EEntity 스키마 보강 submission 테이블 및 question.is_active 컬럼 추가\u003C/td\u003E\u003Ctd\u003EHeader: X-User-UUID(String) → X-Member-UUID(UUID)\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
         "operationId": "diffExplain",
         "parameters": [
           {
-            "name": "X-User-UUID",
+            "name": "X-Member-UUID",
             "in": "header",
             "required": true,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -271,7 +278,7 @@
       "get": {
         "tags": ["Question"],
         "summary": "문제 목록 조회",
-        "description": "## 인증(JWT): **불필요**\n\n## 요청 파라미터\n- **`topic`**: 주제 필터 (optional)\n- **`subtopic`**: 세부 주제 필터 (optional)\n- **`difficulty`**: 난이도 필터 (optional)\n- **`mode`**: 모드 필터 (optional)\n- Pageable 파라미터 (page, size, sort)\n\n## 반환값 (Page\u003CQuestionSummary\u003E)\n- 페이징된 문제 요약 목록\n\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.07\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/1\" target=\"_blank\"\u003E#1\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EAI 서버 및 Spring 서버 초기 프로젝트 구성\u003C/td\u003E\u003Ctd\u003E문제 목록 조회 API 추가\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
+        "description": "\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.07\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/1\" target=\"_blank\"\u003E#1\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EAI 서버 및 Spring 서버 초기 프로젝트 구성\u003C/td\u003E\u003Ctd\u003E문제 목록 조회 API 추가\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.08\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/22\" target=\"_blank\"\u003E#22\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EEntity 스키마 보강 submission 테이블 및 question.is_active 컬럼 추가\u003C/td\u003E\u003Ctd\u003EEntity UUID 통일 재작성: questionUuid/topicUuid 기반으로 응답 전환 (Long id → UUID)\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
         "operationId": "getQuestions",
         "parameters": [
           {
@@ -330,20 +337,20 @@
         }
       }
     },
-    "/api/questions/{id}": {
+    "/api/questions/{questionUuid}": {
       "get": {
         "tags": ["Question"],
         "summary": "문제 상세 조회",
-        "description": "## 인증(JWT): **불필요**\n\n## 요청 파라미터\n- **`id`**: 문제 ID (path variable)\n\n## 반환값 (QuestionDetail)\n- 문제 상세 정보 (본문, 선택지, 스키마 등)\n\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.07\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/1\" target=\"_blank\"\u003E#1\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EAI 서버 및 Spring 서버 초기 프로젝트 구성\u003C/td\u003E\u003Ctd\u003E문제 상세 조회 API 추가\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
+        "description": "\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.07\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/1\" target=\"_blank\"\u003E#1\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EAI 서버 및 Spring 서버 초기 프로젝트 구성\u003C/td\u003E\u003Ctd\u003E문제 상세 조회 API 추가\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.08\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/22\" target=\"_blank\"\u003E#22\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EEntity 스키마 보강 submission 테이블 및 question.is_active 컬럼 추가\u003C/td\u003E\u003Ctd\u003EPathVariable: Long id → UUID questionUuid. 응답 DTO(topicName/subtopicName) UUID 기반으로 변경\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
         "operationId": "getQuestion",
         "parameters": [
           {
-            "name": "id",
+            "name": "questionUuid",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -361,19 +368,20 @@
         }
       }
     },
-    "/api/progress": {
+    "/api/questions/today": {
       "get": {
-        "tags": ["Progress"],
-        "summary": "진도 요약 조회",
-        "description": "## 인증(JWT): **불필요**\n\n## 요청 헤더\n- **`X-User-UUID`**: 회원 UUID\n\n## 반환값 (ProgressSummary)\n- 총 제출 수, 정답 수, 정답률, 난이도별 통계 등\n\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.07\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/1\" target=\"_blank\"\u003E#1\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EAI 서버 및 Spring 서버 초기 프로젝트 구성\u003C/td\u003E\u003Ctd\u003E진도 요약 조회 API 추가\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
-        "operationId": "getSummary",
+        "tags": ["Question"],
+        "summary": "오늘의 문제 조회",
+        "description": "오늘의 데일리 챌린지 문제를 반환. 큐레이션 행(daily_challenge)이 있으면 그 문제, 없으면 활성 문제 풀에서 날짜 시드 기반 결정적 폴백. memberUuid 가 주어지면 오늘(00:00~24:00) 해당 문제 제출 여부를 alreadySolvedToday 로 함께 반환. 활성 문제가 0개면 { question: null, alreadySolvedToday: false }.\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.08\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/5\" target=\"_blank\"\u003E#5\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EReact Client 초기 프로젝트 구성\u003C/td\u003E\u003Ctd\u003E오늘의 문제 조회 API 추가\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.08\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/22\" target=\"_blank\"\u003E#22\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EEntity 스키마 보강 submission 테이블 및 question.is_active 컬럼 추가\u003C/td\u003E\u003Ctd\u003EHomeService Facade 로 이동 (Controller 직접 의존 제거, 응답 스키마 동일)\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
+        "operationId": "getToday",
         "parameters": [
           {
-            "name": "X-User-UUID",
-            "in": "header",
-            "required": true,
+            "name": "memberUuid",
+            "in": "query",
+            "required": false,
             "schema": {
-              "type": "string"
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -383,7 +391,7 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "$ref": "#/components/schemas/ProgressSummary"
+                  "$ref": "#/components/schemas/TodayQuestionResponse"
                 }
               }
             }
@@ -391,19 +399,30 @@
         }
       }
     },
-    "/api/progress/heatmap": {
+    "/api/questions/recommendations": {
       "get": {
-        "tags": ["Progress"],
-        "summary": "히트맵 조회",
-        "description": "## 인증(JWT): **불필요**\n\n## 요청 헤더\n- **`X-User-UUID`**: 회원 UUID\n\n## 반환값 (List\u003CHeatmapEntry\u003E)\n- 날짜별 제출 횟수 (GitHub 잔디 형태)\n\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.07\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/1\" target=\"_blank\"\u003E#1\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EAI 서버 및 Spring 서버 초기 프로젝트 구성\u003C/td\u003E\u003Ctd\u003E히트맵 조회 API 추가\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
-        "operationId": "getHeatmap",
+        "tags": ["Question"],
+        "summary": "추천 문제 조회 (랜덤 활성 문제)",
+        "description": "활성 문제 풀에서 랜덤 N개 반환. size 기본 3, 최대 5 (초과 시 5로 clamp, 1 미만은 1). excludeQuestionUuid 미지정 시 오늘의 데일리 챌린지 문제를 자동 제외. 활성 문제가 size 보다 적으면 가능한 만큼만 반환. 캐싱 없음 (매 호출 새로 섞임).\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.08\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/6\" target=\"_blank\"\u003E#6\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EMember 도메인 모듈 신규 생성 및 확장성 있는 Entity 설계 필요\u003C/td\u003E\u003Ctd\u003E추천 문제 조회 API 추가\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.08\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/22\" target=\"_blank\"\u003E#22\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EEntity 스키마 보강 submission 테이블 및 question.is_active 컬럼 추가\u003C/td\u003E\u003Ctd\u003E네이티브 쿼리를 exclude 유무 기준 2분기로 분리하여 UUID 바인딩 타입 안전성 확보\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
+        "operationId": "getRecommendations",
         "parameters": [
           {
-            "name": "X-User-UUID",
-            "in": "header",
-            "required": true,
+            "name": "size",
+            "in": "query",
+            "required": false,
             "schema": {
-              "type": "string"
+              "type": "integer",
+              "format": "int32",
+              "default": 3
+            }
+          },
+          {
+            "name": "excludeQuestionUuid",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
             }
           }
         ],
@@ -413,10 +432,38 @@
             "content": {
               "*/*": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/HeatmapEntry"
-                  }
+                  "$ref": "#/components/schemas/RecommendationsResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/progress": {
+      "get": {
+        "tags": ["Progress"],
+        "summary": "진도 요약 조회",
+        "description": "## 인증(JWT): **불필요** (추후 헤더 전환 예정)\n\n## 요청 파라미터\n- memberUuid (UUID, required): 회원 식별자\n\n## 반환값 (ProgressResponse)\n- solvedCount: 푼 문제 수 (distinct questionUuid 기준)\n- correctRate: 정답률 (0.0~1.0, 마지막 시도 기준, 소수 둘째자리 반올림)\n- streakDays: 연속 학습 일수 (하루 그레이스 — 오늘 미제출이어도 어제까지 연속이면 유지)\n- 제출 이력 0건이면 {0, 0.0, 0}\n\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.08\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/4\" target=\"_blank\"\u003E#4\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EDeploy 20260406-v0.0.9 by Cassiiopeia · Pull Request #4 · passQL-Lab/passQL · GitHub\u003C/td\u003E\u003Ctd\u003E진도 요약 조회 API\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.08\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/22\" target=\"_blank\"\u003E#22\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EEntity 스키마 보강 submission 테이블 및 question.is_active 컬럼 추가\u003C/td\u003E\u003Ctd\u003ESubmission PK 를 UUID 로 재작성. memberUuid(UUID) 기준 집계. 응답 DTO: ProgressResponse{solvedCount, correctRate(0.0~1.0 둘째자리 반올림), streakDays(하루 그레이스)}\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
+        "operationId": "getProgress",
+        "parameters": [
+          {
+            "name": "memberUuid",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProgressResponse"
                 }
               }
             }
@@ -428,7 +475,7 @@
       "get": {
         "tags": ["Meta"],
         "summary": "주제 트리 조회",
-        "description": "## 인증(JWT): **불필요**\n\n## 요청 파라미터\n- 없음\n\n## 반환값 (List\u003CTopicTree\u003E)\n- topic \u003E subtopic 계층 구조의 전체 트리\n\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.07\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/1\" target=\"_blank\"\u003E#1\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EAI 서버 및 Spring 서버 초기 프로젝트 구성\u003C/td\u003E\u003Ctd\u003E주제 트리 조회 API 추가\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
+        "description": "## 인증(JWT): **불필요**\n\n## 요청 파라미터\n- 없음\n\n## 반환값 (List\u003CTopicTree\u003E)\n- topic \u003E subtopic 계층 구조의 전체 트리\n- 각 노드 식별자는 UUID (topicUuid / subtopicUuid)\n\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.07\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/1\" target=\"_blank\"\u003E#1\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EAI 서버 및 Spring 서버 초기 프로젝트 구성\u003C/td\u003E\u003Ctd\u003E주제 트리 조회 API 추가\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.08\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/22\" target=\"_blank\"\u003E#22\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EEntity 스키마 보강 submission 테이블 및 question.is_active 컬럼 추가\u003C/td\u003E\u003Ctd\u003ETopic/Subtopic PK 를 UUID 로 재작성. TopicTree 내부 식별자(topicUuid/subtopicUuid) UUID 기반으로 변경\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
         "operationId": "getTopics",
         "responses": {
           "200": {
@@ -451,7 +498,7 @@
       "get": {
         "tags": ["Meta"],
         "summary": "활성 태그 조회",
-        "description": "## 인증(JWT): **불필요**\n\n## 요청 파라미터\n- 없음\n\n## 반환값 (List\u003CConceptTag\u003E)\n- 활성화된 개념 태그 전체 목록\n\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.07\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/1\" target=\"_blank\"\u003E#1\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EAI 서버 및 Spring 서버 초기 프로젝트 구성\u003C/td\u003E\u003Ctd\u003E활성 태그 조회 API 추가\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
+        "description": "## 인증(JWT): **불필요**\n\n## 요청 파라미터\n- 없음\n\n## 반환값 (List\u003CConceptTag\u003E)\n- 활성화된 개념 태그 전체 목록\n- 식별자는 conceptTagUuid (UUID), 비즈니스 키 tagKey 동시 노출\n\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.07\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/1\" target=\"_blank\"\u003E#1\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EAI 서버 및 Spring 서버 초기 프로젝트 구성\u003C/td\u003E\u003Ctd\u003E활성 태그 조회 API 추가\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.08\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/22\" target=\"_blank\"\u003E#22\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EEntity 스키마 보강 submission 테이블 및 question.is_active 컬럼 추가\u003C/td\u003E\u003Ctd\u003EConceptTag PK 를 UUID(conceptTagUuid) 로 재작성. tagKey 는 unique 컬럼으로 보존\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
         "operationId": "getTags",
         "responses": {
           "200": {
@@ -501,20 +548,102 @@
         }
       }
     },
-    "/api/ai/similar/{questionId}": {
+    "/api/home/greeting": {
+      "get": {
+        "tags": ["home-controller"],
+        "operationId": "getGreeting",
+        "parameters": [
+          {
+            "name": "memberUuid",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/GreetingResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/exam-schedules": {
+      "get": {
+        "tags": ["ExamSchedule"],
+        "summary": "시험 일정 조회",
+        "description": "## 인증(JWT): **불필요**\n\n## 요청 파라미터\n- **`certType`** (optional): 자격증 종류 필터 (SQLD / SQLP). 미입력 시 전체 조회\n\n## 반환값 (List\u003CExamScheduleResponse\u003E)\n- certType + round 오름차순 정렬\n- 각 행: examScheduleUuid, certType, round, examDate, isSelected\n\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.08\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/23\" target=\"_blank\"\u003E#23\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003Esqld, sqlp 시험에 대한 Exam Schedule 도메인 및 시험 일정 관리 API 구현 필요\u003C/td\u003E\u003Ctd\u003E시험 일정 조회 API 신규 추가. certType 파라미터로 자격증 종류 필터링 가능\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
+        "operationId": "getSchedules",
+        "parameters": [
+          {
+            "name": "certType",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExamScheduleResponse"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/exam-schedules/selected": {
+      "get": {
+        "tags": ["ExamSchedule"],
+        "summary": "현재 선택된 시험 일정 조회",
+        "description": "## 인증(JWT): **불필요**\n\n## 반환값 (ExamScheduleResponse)\n- isSelected = true 인 단일 시험 일정\n- 선택된 일정이 없으면 200 OK + null body (홈화면 greeting fallback 처리)\n\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.08\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/23\" target=\"_blank\"\u003E#23\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003Esqld, sqlp 시험에 대한 Exam Schedule 도메인 및 시험 일정 관리 API 구현 필요\u003C/td\u003E\u003Ctd\u003E현재 선택된 시험 일정 조회 API 신규 추가. 선택된 일정이 없으면 200 + null 반환\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
+        "operationId": "getSelected",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExamScheduleResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/ai/similar/{questionUuid}": {
       "get": {
         "tags": ["AI"],
         "summary": "유사 문제 조회",
-        "description": "## 인증(JWT): **불필요**\n\n## 요청 파라미터\n- **`questionId`**: 기준 문제 ID (path variable)\n- **`k`**: 조회할 유사 문제 수 (default: 5)\n\n## 반환값 (List\u003CSimilarQuestion\u003E)\n- 벡터 유사도 기반 유사 문제 목록\n\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.07\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/1\" target=\"_blank\"\u003E#1\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EAI 서버 및 Spring 서버 초기 프로젝트 구성\u003C/td\u003E\u003Ctd\u003E유사 문제 조회 API 추가\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
+        "description": "\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.07\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/1\" target=\"_blank\"\u003E#1\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EAI 서버 및 Spring 서버 초기 프로젝트 구성\u003C/td\u003E\u003Ctd\u003E유사 문제 조회 API 추가\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.08\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/22\" target=\"_blank\"\u003E#22\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EEntity 스키마 보강 submission 테이블 및 question.is_active 컬럼 추가\u003C/td\u003E\u003Ctd\u003EPathVariable: Long id → UUID questionUuid. 응답 DTO SimilarQuestion{questionUuid, stem, topicName, score}\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
         "operationId": "getSimilar",
         "parameters": [
           {
-            "name": "questionId",
+            "name": "questionUuid",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int64"
+              "type": "string",
+              "format": "uuid"
             }
           },
           {
@@ -663,12 +792,12 @@
             "type": "integer",
             "format": "int64"
           },
-          "pageable": {
-            "$ref": "#/components/schemas/PageableObject"
-          },
           "numberOfElements": {
             "type": "integer",
             "format": "int32"
+          },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
           },
           "size": {
             "type": "integer",
@@ -705,15 +834,15 @@
             "type": "integer",
             "format": "int32"
           },
-          "unpaged": {
-            "type": "boolean"
-          },
           "paged": {
             "type": "boolean"
           },
           "pageSize": {
             "type": "integer",
             "format": "int32"
+          },
+          "unpaged": {
+            "type": "boolean"
           },
           "offset": {
             "type": "integer",
@@ -727,11 +856,11 @@
       "QuestionSummary": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
+          "questionUuid": {
+            "type": "string",
+            "format": "uuid"
           },
-          "topicCode": {
+          "topicName": {
             "type": "string"
           },
           "difficulty": {
@@ -740,10 +869,6 @@
           },
           "stemPreview": {
             "type": "string"
-          },
-          "executionMode": {
-            "type": "string",
-            "enum": ["EXECUTABLE", "CONCEPT_ONLY"]
           }
         }
       },
@@ -783,14 +908,14 @@
       "QuestionDetail": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
+          "questionUuid": {
+            "type": "string",
+            "format": "uuid"
           },
-          "topicCode": {
+          "topicName": {
             "type": "string"
           },
-          "subtopicCode": {
+          "subtopicName": {
             "type": "string"
           },
           "difficulty": {
@@ -815,12 +940,34 @@
           }
         }
       },
-      "ProgressSummary": {
+      "TodayQuestionResponse": {
         "type": "object",
         "properties": {
-          "solved": {
+          "question": {
+            "$ref": "#/components/schemas/QuestionSummary"
+          },
+          "alreadySolvedToday": {
+            "type": "boolean"
+          }
+        }
+      },
+      "RecommendationsResponse": {
+        "type": "object",
+        "properties": {
+          "questions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/QuestionSummary"
+            }
+          }
+        }
+      },
+      "ProgressResponse": {
+        "type": "object",
+        "properties": {
+          "solvedCount": {
             "type": "integer",
-            "format": "int32"
+            "format": "int64"
           },
           "correctRate": {
             "type": "number",
@@ -832,25 +979,6 @@
           }
         }
       },
-      "HeatmapEntry": {
-        "type": "object",
-        "properties": {
-          "topicCode": {
-            "type": "string"
-          },
-          "topicName": {
-            "type": "string"
-          },
-          "solved": {
-            "type": "integer",
-            "format": "int32"
-          },
-          "correctRate": {
-            "type": "number",
-            "format": "double"
-          }
-        }
-      },
       "SubtopicItem": {
         "type": "object",
         "properties": {
@@ -859,6 +987,13 @@
           },
           "displayName": {
             "type": "string"
+          },
+          "sortOrder": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isActive": {
+            "type": "boolean"
           }
         }
       },
@@ -871,6 +1006,13 @@
           "displayName": {
             "type": "string"
           },
+          "sortOrder": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "isActive": {
+            "type": "boolean"
+          },
           "subtopics": {
             "type": "array",
             "items": {
@@ -882,6 +1024,24 @@
       "ConceptTag": {
         "type": "object",
         "properties": {
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "createdBy": {
+            "type": "string"
+          },
+          "updatedBy": {
+            "type": "string"
+          },
+          "conceptTagUuid": {
+            "type": "string",
+            "format": "uuid"
+          },
           "tagKey": {
             "type": "string"
           },
@@ -932,17 +1092,48 @@
           }
         }
       },
+      "GreetingResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "ExamScheduleResponse": {
+        "type": "object",
+        "properties": {
+          "examScheduleUuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "certType": {
+            "type": "string"
+          },
+          "round": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "examDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "isSelected": {
+            "type": "boolean"
+          }
+        }
+      },
       "SimilarQuestion": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer",
-            "format": "int64"
+          "questionUuid": {
+            "type": "string",
+            "format": "uuid"
           },
           "stem": {
             "type": "string"
           },
-          "topicCode": {
+          "topicName": {
             "type": "string"
           },
           "score": {
