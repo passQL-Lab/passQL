@@ -1,7 +1,12 @@
 """src.core.config
-.env 파일에서 설정값을 로드합니다.
+ENVIRONMENT 환경변수에 따라 .env.dev 또는 .env.prod를 로드합니다.
+우선순위: 시스템 환경변수 > .env.{env} 파일
 """
+import os
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+_env = os.getenv("ENVIRONMENT", "dev")
+_env_file = f".env.{_env}"
 
 
 class Settings(BaseSettings):
@@ -19,10 +24,19 @@ class Settings(BaseSettings):
     # AI 서버 인증
     AI_SERVER_API_KEY: str = ""
 
+    # Google Gemini 설정 (API Key는 환경변수 전용)
+    GEMINI_API_KEY: str = ""
+    GEMINI_MODEL: str = "gemini-2.5-flash-lite"  # fallback 기본값
+
+    # Redis 설정 (Spring과 공유 - 모델명 등 수정 가능한 설정값)
+    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = 6379
+    REDIS_PASSWORD: str = ""
+
     # 환경 설정
     ENVIRONMENT: str = "dev"  # dev: 로컬, prod: 서버환경
 
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(env_file=_env_file, extra="ignore")
 
 
 settings = Settings()

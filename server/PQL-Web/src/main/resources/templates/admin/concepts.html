@@ -29,9 +29,9 @@
                         </div>
                         <div class="flex items-center gap-2 shrink-0">
                             <span class="badge badge-outline badge-xs" th:text="${tag.category}">aggregation</span>
-                            <span th:classappend="${tag.isActive} ? 'badge-success' : 'badge-ghost'"
+                            <span th:classappend="${tag.getIsActive()} ? 'badge-success' : 'badge-ghost'"
                                   class="badge badge-xs"
-                                  th:text="${tag.isActive} ? '활성' : '비활성'">활성</span>
+                                  th:text="${tag.getIsActive()} ? '활성' : '비활성'">활성</span>
                         </div>
                     </a>
 
@@ -100,9 +100,9 @@
                                       th:text="'v' + ${doc.embeddingVersion} + ' · ' + ${#temporals.format(doc.updatedAt, 'yyyy-MM-dd')}">v1 · 2026-04-01</span>
                             </div>
                             <div class="flex gap-1">
-                                <span th:classappend="${doc.isActive} ? 'badge-success' : 'badge-ghost'"
+                                <span th:classappend="${doc.getIsActive()} ? 'badge-success' : 'badge-ghost'"
                                       class="badge badge-xs"
-                                      th:text="${doc.isActive} ? '활성' : '비활성'">활성</span>
+                                      th:text="${doc.getIsActive()} ? '활성' : '비활성'">활성</span>
                                 <button class="btn btn-xs btn-ghost">
                                     <i data-lucide="pencil" class="size-3"></i>
                                 </button>
@@ -111,11 +111,12 @@
                         <div class="p-4">
                             <textarea class="textarea textarea-bordered w-full font-mono text-sm"
                                       rows="8"
-                                      th:name="'doc_' + ${doc.id}"
+                                      th:name="'doc_' + ${doc.conceptDocUuid}"
                                       th:text="${doc.bodyMd}"></textarea>
                             <div class="flex justify-end mt-2">
                                 <button type="button" class="btn btn-sm btn-primary"
-                                        th:onclick="|saveDoc(${doc.id})|">
+                                        th:data-uuid="${doc.conceptDocUuid}"
+                                        onclick="saveDoc(this.dataset.uuid)">
                                     <i data-lucide="save" class="size-4"></i>
                                     저장
                                 </button>

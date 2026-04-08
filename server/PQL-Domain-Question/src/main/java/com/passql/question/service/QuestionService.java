@@ -6,6 +6,7 @@ import com.passql.meta.entity.Subtopic;
 import com.passql.meta.entity.Topic;
 import com.passql.meta.repository.SubtopicRepository;
 import com.passql.meta.repository.TopicRepository;
+import com.passql.question.constant.ExecutionMode;
 import com.passql.question.dto.QuestionDetail;
 import com.passql.question.dto.QuestionSummary;
 import com.passql.question.dto.RecommendationsResponse;
@@ -36,8 +37,14 @@ public class QuestionService {
     private final TopicRepository topicRepository;
     private final SubtopicRepository subtopicRepository;
 
-    public Page<QuestionSummary> getQuestions(String topic, String subtopic, Integer difficulty, String mode, Pageable pageable) {
-        return questionRepository.findByIsActiveTrue(pageable).map(this::toSummary);
+    public Page<QuestionSummary> getQuestions(String topicCode, String subtopic, Integer difficulty, String mode, Pageable pageable) {
+        UUID topicUuid = (topicCode != null && !topicCode.isBlank())
+                ? topicRepository.findByCode(topicCode).map(Topic::getTopicUuid).orElse(null)
+                : null;
+        ExecutionMode executionMode = (mode != null && !mode.isBlank())
+                ? ExecutionMode.valueOf(mode)
+                : null;
+        return questionRepository.findByFilters(topicUuid, difficulty, executionMode, pageable).map(this::toSummary);
     }
 
     public QuestionDetail getQuestion(UUID questionUuid) {

@@ -67,7 +67,7 @@
                     </thead>
                     <tbody>
                     <tr th:each="s : ${schedules}"
-                        th:classappend="${s.isSelected} ? 'bg-primary/10'">
+                        th:classappend="${s.getIsSelected()} ? 'bg-primary/10'">
                         <td>
                             <span class="badge badge-sm"
                                   th:classappend="${s.certType == 'SQLD'} ? 'badge-info' : 'badge-warning'"
@@ -77,12 +77,14 @@
                         <td th:text="${s.examDate}">2026-05-31</td>
                         <td>
                             <input type="radio" name="selected" class="radio radio-primary radio-sm"
-                                   th:checked="${s.isSelected}"
-                                   th:onclick="|selectSchedule('${s.examScheduleUuid}')|"/>
+                                   th:checked="${s.getIsSelected()}"
+                                   th:data-uuid="${s.examScheduleUuid}"
+                                   onclick="selectSchedule(this.dataset.uuid)"/>
                         </td>
                         <td>
                             <button class="btn btn-xs btn-ghost text-error"
-                                    th:onclick="|deleteSchedule('${s.examScheduleUuid}')|">
+                                    th:data-uuid="${s.examScheduleUuid}"
+                                    onclick="deleteSchedule(this.dataset.uuid)">
                                 <i data-lucide="trash-2" class="size-4"></i>
                             </button>
                         </td>
