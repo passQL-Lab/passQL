@@ -13,7 +13,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,11 +27,16 @@ public class AdminDailyChallengeService {
     private final QuestionService questionService;
 
     public List<DailyChallengeItem> getChallenges(LocalDate from, LocalDate to) {
-        return dailyChallengeRepository
-                .findByChallengeDateBetweenOrderByChallengeDateAsc(from, to)
-                .stream()
+        List<DailyChallenge> challenges = dailyChallengeRepository
+                .findByChallengeDateBetweenOrderByChallengeDateAsc(from, to);
+
+        List<UUID> uuids = challenges.stream().map(DailyChallenge::getQuestionUuid).toList();
+        Map<UUID, Question> questionMap = questionRepository.findAllById(uuids)
+                .stream().collect(Collectors.toMap(Question::getQuestionUuid, q -> q));
+
+        return challenges.stream()
                 .map(dc -> {
-                    Question q = questionRepository.findById(dc.getQuestionUuid()).orElse(null);
+                    Question q = questionMap.get(dc.getQuestionUuid());
                     if (q == null) return null;
                     return new DailyChallengeItem(
                             dc.getChallengeDate(),
