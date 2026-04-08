@@ -5,12 +5,13 @@
     <meta charset="utf-8"/>
     <title>passQL Admin | <th:block layout:fragment="title">Dashboard</th:block></title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes"/>
-
-    <!-- Tailwind CSS 4 -->
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}"/>
 
     <!-- DaisyUI 5 -->
     <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css"/>
+
+    <!-- Tailwind CSS 4 -->
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
@@ -69,8 +70,8 @@
         <label for="drawer-toggle" aria-label="close sidebar" class="drawer-overlay"></label>
         <aside class="bg-base-100 min-h-full w-64 border-r border-base-300">
             <!-- Logo -->
-            <div class="flex items-center gap-3 px-4 py-5 border-b border-base-300">
-                <span class="text-xl font-bold">passQL</span>
+            <div class="flex items-center gap-3 px-4 py-4 border-b border-base-300">
+                <img th:src="@{/images/logo.png}" alt="passQL" class="h-8 w-auto"/>
                 <span class="badge badge-primary badge-sm">Admin</span>
             </div>
 
