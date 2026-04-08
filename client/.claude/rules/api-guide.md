@@ -18,25 +18,25 @@ Frontend ──(/api)──> Backend(Spring) ──(x-api-key)──> AI Server(
 
 ### Members (`src/api/members.ts`)
 
-| 함수 | 메서드 | 경로 | 인증 | 응답 타입 | 상태 |
-|------|--------|------|:----:|-----------|:----:|
-| `register()` | POST | `/members/register` | - | `MemberRegisterResponse` | O |
-| `fetchMe()` | GET | `/members/me` | O (query param) | `MemberMeResponse` | O |
-| `regenerateNickname()` | POST | `/members/me/regenerate-nickname` | O (query param) | `NicknameRegenerateResponse` | O |
+| 함수                   | 메서드 | 경로                              |      인증       | 응답 타입                    | 상태 |
+| ---------------------- | ------ | --------------------------------- | :-------------: | ---------------------------- | :--: |
+| `register()`           | POST   | `/members/register`               |        -        | `MemberRegisterResponse`     |  O   |
+| `fetchMe()`            | GET    | `/members/me`                     | O (query param) | `MemberMeResponse`           |  O   |
+| `regenerateNickname()` | POST   | `/members/me/regenerate-nickname` | O (query param) | `NicknameRegenerateResponse` |  O   |
 
 - 첫 진입 시 `register` → UUID 발급 → memberStore에 저장.
 - `fetchMe`로 닉네임 조회 (홈, 설정 화면).
 
 ### Questions (`src/api/questions.ts`)
 
-| 함수 | 메서드 | 경로 | 인증 | 응답 타입 | 상태 |
-|------|--------|------|:----:|-----------|:----:|
-| `fetchQuestions(params)` | GET | `/questions?page&size&topic&subtopic&difficulty&mode` | - | `Page<QuestionSummary>` | O |
-| `fetchQuestion(questionUuid)` | GET | `/questions/{questionUuid}` | - | `QuestionDetail` | O |
-| `fetchTodayQuestion(memberUuid?)` | GET | `/questions/today?memberUuid` | O (query param) | `TodayQuestionResponse` | O |
-| `fetchRecommendations(size?, excludeQuestionUuid?)` | GET | `/questions/recommendations?size&excludeQuestionUuid` | - | `RecommendationsResponse` | O |
-| `submitAnswer(questionUuid, selectedChoiceKey)` | POST | `/questions/{questionUuid}/submit` | O (header) | `SubmitResult` | O |
-| `executeChoice(questionUuid, sql)` | POST | `/questions/{questionUuid}/execute` | - | `ExecuteResult` | O |
+| 함수                                                | 메서드 | 경로                                                  |      인증       | 응답 타입                 | 상태 |
+| --------------------------------------------------- | ------ | ----------------------------------------------------- | :-------------: | ------------------------- | :--: |
+| `fetchQuestions(params)`                            | GET    | `/questions?page&size&topic&subtopic&difficulty&mode` |        -        | `Page<QuestionSummary>`   |  O   |
+| `fetchQuestion(questionUuid)`                       | GET    | `/questions/{questionUuid}`                           |        -        | `QuestionDetail`          |  O   |
+| `fetchTodayQuestion(memberUuid?)`                   | GET    | `/questions/today?memberUuid`                         | O (query param) | `TodayQuestionResponse`   |  O   |
+| `fetchRecommendations(size?, excludeQuestionUuid?)` | GET    | `/questions/recommendations?size&excludeQuestionUuid` |        -        | `RecommendationsResponse` |  O   |
+| `submitAnswer(questionUuid, selectedChoiceKey)`     | POST   | `/questions/{questionUuid}/submit`                    |   O (header)    | `SubmitResult`            |  O   |
+| `executeChoice(questionUuid, sql)`                  | POST   | `/questions/{questionUuid}/execute`                   |        -        | `ExecuteResult`           |  O   |
 
 - `fetchTodayQuestion`: 오늘의 데일리 챌린지 문제 반환. 큐레이션 행(daily_challenge)이 있으면 그 문제, 없으면 활성 문제 풀에서 날짜 시드 기반 결정적 폴백. `memberUuid`가 주어지면 오늘 해당 문제 제출 여부를 `alreadySolvedToday`로 함께 반환. 활성 문제 0개면 `{ question: null, alreadySolvedToday: false }`.
 - `fetchRecommendations`: 활성 문제 풀에서 랜덤 N개 반환. size 기본 3, 최대 5 (초과 시 5로 clamp, 1 미만은 1). `excludeQuestionUuid` 미지정 시 데일리 챌린지 자동 제외.
@@ -44,11 +44,11 @@ Frontend ──(/api)──> Backend(Spring) ──(x-api-key)──> AI Server(
 
 ### AI (`src/api/ai.ts`)
 
-| 함수 | 메서드 | 경로 | 인증 | 응답 타입 | 상태 |
-|------|--------|------|:----:|-----------|:----:|
-| `explainError(payload)` | POST | `/ai/explain-error` | O (header) | `AiResult` | O |
-| `diffExplain(payload)` | POST | `/ai/diff-explain` | O (header) | `AiResult` | O |
-| `fetchSimilar(questionUuid, k=5)` | GET | `/ai/similar/{questionUuid}?k` | - | `SimilarQuestion[]` | O |
+| 함수                              | 메서드 | 경로                           |    인증    | 응답 타입           | 상태 |
+| --------------------------------- | ------ | ------------------------------ | :--------: | ------------------- | :--: |
+| `explainError(payload)`           | POST   | `/ai/explain-error`            | O (header) | `AiResult`          |  O   |
+| `diffExplain(payload)`            | POST   | `/ai/diff-explain`             | O (header) | `AiResult`          |  O   |
+| `fetchSimilar(questionUuid, k=5)` | GET    | `/ai/similar/{questionUuid}?k` |     -      | `SimilarQuestion[]` |  O   |
 
 **AI 요청 body 스펙** (백엔드가 AI 서버로 프록시 — 필드 누락 시 422):
 
@@ -74,33 +74,33 @@ Frontend ──(/api)──> Backend(Spring) ──(x-api-key)──> AI Server(
 
 ### Progress (`src/api/progress.ts`)
 
-| 함수 | 메서드 | 경로 | 인증 | 응답 타입 | 상태 |
-|------|--------|------|:----:|-----------|:----:|
-| `fetchProgress(memberUuid)` | GET | `/progress?memberUuid` | O (query param) | `ProgressResponse` | O |
+| 함수                        | 메서드 | 경로                   |      인증       | 응답 타입          | 상태 |
+| --------------------------- | ------ | ---------------------- | :-------------: | ------------------ | :--: |
+| `fetchProgress(memberUuid)` | GET    | `/progress?memberUuid` | O (query param) | `ProgressResponse` |  O   |
 
 - `fetchProgress`: 응답 필드 `solvedCount`(int64, distinct questionUuid 기준), `correctRate`(double, 0.0~1.0 둘째자리 반올림, 마지막 시도 기준), `streakDays`(int32, 하루 그레이스 -- 오늘 미제출이어도 어제까지 연속이면 유지). 제출 이력 0건이면 `{ 0, 0.0, 0 }`.
 
 ### Meta (`src/api/meta.ts`)
 
-| 함수 | 메서드 | 경로 | 인증 | 응답 타입 | 상태 |
-|------|--------|------|:----:|-----------|:----:|
-| `fetchTopics()` | GET | `/meta/topics` | - | `TopicTree[]` | O |
-| `fetchTags()` | GET | `/meta/tags` | - | `ConceptTag[]` | O |
+| 함수            | 메서드 | 경로           | 인증 | 응답 타입      | 상태 |
+| --------------- | ------ | -------------- | :--: | -------------- | :--: |
+| `fetchTopics()` | GET    | `/meta/topics` |  -   | `TopicTree[]`  |  O   |
+| `fetchTags()`   | GET    | `/meta/tags`   |  -   | `ConceptTag[]` |  O   |
 
 ### Home (`src/api/home.ts`)
 
-| 함수 | 메서드 | 경로 | 인증 | 응답 타입 | 상태 |
-|------|--------|------|:----:|-----------|:----:|
-| `fetchGreeting(memberUuid)` | GET | `/home/greeting?memberUuid` | O (query param) | `GreetingResponse` | O |
+| 함수                        | 메서드 | 경로                        |      인증       | 응답 타입          | 상태 |
+| --------------------------- | ------ | --------------------------- | :-------------: | ------------------ | :--: |
+| `fetchGreeting(memberUuid)` | GET    | `/home/greeting?memberUuid` | O (query param) | `GreetingResponse` |  O   |
 
 - `fetchGreeting`: 홈 화면 인사 메시지 반환. `GreetingResponse { message: string }`.
 
 ### ExamSchedule (`src/api/examSchedules.ts`)
 
-| 함수 | 메서드 | 경로 | 인증 | 응답 타입 | 상태 |
-|------|--------|------|:----:|-----------|:----:|
-| `fetchExamSchedules(certType?)` | GET | `/exam-schedules?certType` | - | `ExamScheduleResponse[]` | O |
-| `fetchSelectedSchedule()` | GET | `/exam-schedules/selected` | - | `ExamScheduleResponse \| null` | O |
+| 함수                            | 메서드 | 경로                       | 인증 | 응답 타입                      | 상태 |
+| ------------------------------- | ------ | -------------------------- | :--: | ------------------------------ | :--: |
+| `fetchExamSchedules(certType?)` | GET    | `/exam-schedules?certType` |  -   | `ExamScheduleResponse[]`       |  O   |
+| `fetchSelectedSchedule()`       | GET    | `/exam-schedules/selected` |  -   | `ExamScheduleResponse \| null` |  O   |
 
 - `fetchExamSchedules`: `certType`(SQLD/SQLP) 필터. 미입력 시 전체 조회. certType + round 오름차순 정렬.
 - `fetchSelectedSchedule`: `isSelected = true`인 단일 일정 반환. 선택된 일정 없으면 200 + null body (홈 화면 greeting fallback 처리).
@@ -159,8 +159,8 @@ Frontend ──(/api)──> Backend(Spring) ──(x-api-key)──> AI Server(
 
 ```typescript
 class ApiError extends Error {
-  readonly status: number;  // HTTP 상태 코드
-  readonly body: unknown;   // 서버 응답 body (JSON 파싱 실패 시 null)
+  readonly status: number; // HTTP 상태 코드
+  readonly body: unknown; // 서버 응답 body (JSON 파싱 실패 시 null)
 }
 ```
 
@@ -187,7 +187,9 @@ AI 요청 body 필드 누락/타입 오류 시 백엔드가 422를 프록시할 
 
 ```typescript
 // ApiError.body 구조
-{ detail: [{ loc: ["body", "sql"], msg: "Field required", type: "missing" }] }
+{
+  detail: [{ loc: ["body", "sql"], msg: "Field required", type: "missing" }];
+}
 ```
 
 - AI 엔드포인트 호출 시 422를 별도 분기하여 어떤 필드가 문제인지 표시.
