@@ -44,9 +44,14 @@
   --color-heat-3: #818CF8;
   --color-heat-4: #4F46E5;
 
-  /* ── Spacing ── */
-  --spacing-section: 1.5rem;
-  --spacing-module: 2rem;
+  /* ── Spacing (4px base unit) ── */
+  --spacing-xs: 0.25rem;     /* 4px */
+  --spacing-sm: 0.5rem;      /* 8px */
+  --spacing-md: 0.75rem;     /* 12px */
+  --spacing-lg: 1rem;        /* 16px */
+  --spacing-xl: 1.25rem;     /* 20px - card padding */
+  --spacing-section: 1.5rem; /* 24px - between sections */
+  --spacing-module: 2rem;    /* 32px - generous margins */
 
   /* ── Transitions ── */
   --ease-smooth: cubic-bezier(0.4, 0, 0.2, 1);
