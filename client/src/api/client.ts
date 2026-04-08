@@ -1,6 +1,9 @@
+import { getMockResponse } from "./mock-data";
+
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "/api";
 const TIMEOUT_MS = 25_000;
 const IS_DEV = import.meta.env.DEV;
+const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true";
 
 function log(label: string, method: string, path: string, data?: unknown) {
   if (!IS_DEV) return;
@@ -31,6 +34,18 @@ export async function apiFetch<T>(
   options: RequestInit = {},
 ): Promise<T> {
   const method = options.method ?? "GET";
+
+  // Mock mode: return mock data without network request
+  if (USE_MOCK) {
+    log("MOCK", method, path);
+    await new Promise((r) => setTimeout(r, 200)); // simulate latency
+    const mock = getMockResponse(path, method, options.body as string | undefined);
+    if (mock !== null) {
+      log("RES", method, path, mock);
+      return mock as T;
+    }
+  }
+
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
 
