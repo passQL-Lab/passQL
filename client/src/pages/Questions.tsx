@@ -18,6 +18,7 @@ export default function Questions() {
 
   return (
     <div className="py-6 space-y-0">
+      <h1 className="text-h1 mb-4">문제</h1>
       {/* 1. Filter bar */}
       <section className="flex gap-3 mb-4 relative">
         <div className="relative">
@@ -29,7 +30,7 @@ export default function Questions() {
             {topics?.find((t) => t.code === topic)?.displayName ?? "토픽"} <ChevronDown size={14} className="text-text-caption inline" />
           </button>
           {topicOpen && (
-            <div className="absolute top-full mt-1 left-0 bg-surface-card border border-border rounded-lg shadow-lg z-10 py-1 min-w-[140px]">
+            <div className="absolute top-full mt-1 left-0 bg-surface-card border border-border rounded-lg z-10 py-1 min-w-[140px]">
               <button
                 type="button"
                 className="w-full text-left px-4 py-2 text-sm hover:bg-surface"
@@ -60,7 +61,7 @@ export default function Questions() {
             {difficulty ? `난이도 ${difficulty}` : "난이도"} <ChevronDown size={14} className="text-text-caption inline" />
           </button>
           {diffOpen && (
-            <div className="absolute top-full mt-1 left-0 bg-surface-card border border-border rounded-lg shadow-lg z-10 py-1 min-w-[120px]">
+            <div className="absolute top-full mt-1 left-0 bg-surface-card border border-border rounded-lg z-10 py-1 min-w-[120px]">
               <button
                 type="button"
                 className="w-full text-left px-4 py-2 text-sm hover:bg-surface"
@@ -75,7 +76,7 @@ export default function Questions() {
                   className="w-full text-left px-4 py-2 text-sm hover:bg-surface"
                   onClick={() => { setDifficulty(d); setDiffOpen(false); setPage(0); }}
                 >
-                  {"★".repeat(d)}{"☆".repeat(3 - d)}
+                  <StarRating level={d} />
                 </button>
               ))}
             </div>

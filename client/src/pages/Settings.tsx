@@ -1,4 +1,5 @@
-import { Copy, RefreshCw } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Copy, Check, RefreshCw } from "lucide-react";
 import { useMemberStore } from "../stores/memberStore";
 import { useRegenerateNickname } from "../hooks/useMember";
 
@@ -7,9 +8,20 @@ export default function Settings() {
   const nickname = useMemberStore((s) => s.nickname);
   const truncatedUuid = uuid.slice(0, 20) + "...";
   const regenerateMutation = useRegenerateNickname();
+  const [copied, setCopied] = useState(false);
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+    };
+  }, []);
 
   const handleCopy = () => {
     navigator.clipboard.writeText(uuid);
+    setCopied(true);
+    if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
+    copyTimerRef.current = setTimeout(() => setCopied(false), 2000);
   };
 
   const handleRegenerate = () => {
@@ -18,6 +30,7 @@ export default function Settings() {
 
   return (
     <div className="py-6">
+      <h1 className="text-h1 mb-6">설정</h1>
       <div className="card-base p-0">
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <div>
@@ -30,7 +43,7 @@ export default function Settings() {
             title="복사"
             onClick={handleCopy}
           >
-            <Copy size={16} />
+            {copied ? <Check size={16} className="text-sem-success" /> : <Copy size={16} />}
           </button>
         </div>
 

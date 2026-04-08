@@ -53,6 +53,7 @@ export default function Stats() {
 
   return (
     <div className="py-6 space-y-6">
+      <h1 className="text-h1 mb-6">학습 통계</h1>
       <div className="card-base flex items-center divide-x divide-border">
         {[
           { value: String(progress?.solved ?? 0), label: "푼 문제" },

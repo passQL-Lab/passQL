@@ -46,6 +46,18 @@ export default function Home() {
         <h1 className="text-h2">안녕하세요, {displayName}</h1>
       </section>
 
+      <section className="mb-4">
+        <Link to="/questions">
+          <div className="card-base flex items-center gap-4 border-l-4 border-l-brand cursor-pointer hover:bg-surface transition-colors">
+            <div className="flex-1 min-w-0">
+              <p className="text-secondary mb-1">문제 풀기</p>
+              <p className="text-body">SQL 문제를 풀어보세요</p>
+            </div>
+            <ChevronRight size={20} className="text-text-caption flex-shrink-0" />
+          </div>
+        </Link>
+      </section>
+
       {streak > 0 && (
         <section className="mb-6">
           <span
@@ -59,18 +71,6 @@ export default function Home() {
           </span>
         </section>
       )}
-
-      <section className="mb-4">
-        <Link to="/questions">
-          <div className="card-base flex items-center gap-4 border-l-4 border-l-brand cursor-pointer hover:bg-surface transition-colors">
-            <div className="flex-1 min-w-0">
-              <p className="text-secondary mb-1">문제 풀기</p>
-              <p className="text-body">SQL 문제를 풀어보세요</p>
-            </div>
-            <ChevronRight size={20} className="text-text-caption flex-shrink-0" />
-          </div>
-        </Link>
-      </section>
 
       <section className="grid grid-cols-2 gap-3">
         <div className="card-base flex flex-col items-start">
