@@ -1,11 +1,15 @@
 package com.passql.web.controller.admin;
 
+import com.passql.meta.repository.PromptTemplateRepository;
 import com.passql.meta.service.PromptService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.util.UUID;
 
 @Controller
 @RequestMapping("/admin/prompts")
@@ -13,10 +17,23 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class AdminPromptController {
 
     private final PromptService promptService;
+    private final PromptTemplateRepository promptTemplateRepository;
 
     @GetMapping
     public String list(Model model) {
-        // TODO: 프롬프트 템플릿 목록 조회 후 Thymeleaf 템플릿 반환
+        model.addAttribute("promptTemplates", promptService.findAll());
+        model.addAttribute("currentMenu", "prompts");
+        model.addAttribute("pageTitle", "프롬프트 관리");
+        return "admin/prompts";
+    }
+
+    @GetMapping("/{uuid}")
+    public String detail(@PathVariable UUID uuid, Model model) {
+        model.addAttribute("promptTemplates", promptService.findAll());
+        promptTemplateRepository.findById(uuid)
+                .ifPresent(pt -> model.addAttribute("selectedPrompt", pt));
+        model.addAttribute("currentMenu", "prompts");
+        model.addAttribute("pageTitle", "프롬프트 관리");
         return "admin/prompts";
     }
 }

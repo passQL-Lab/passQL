@@ -6,7 +6,10 @@ import com.passql.meta.entity.PromptTemplate;
 import com.passql.meta.repository.PromptTemplateRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -17,5 +20,9 @@ public class PromptService {
     public PromptTemplate getActivePrompt(String keyName) {
         return promptTemplateRepository.findFirstByKeyNameAndIsActiveTrueOrderByVersionDesc(keyName)
                 .orElseThrow(() -> new CustomException(ErrorCode.PROMPT_NOT_FOUND));
+    }
+
+    public List<PromptTemplate> findAll() {
+        return promptTemplateRepository.findAll(Sort.by(Sort.Direction.ASC, "keyName"));
     }
 }

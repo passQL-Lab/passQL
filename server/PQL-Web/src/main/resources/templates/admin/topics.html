@@ -37,7 +37,8 @@
                         <tr th:each="topic : ${topics}"
                             th:classappend="${selectedTopicCode == topic.code} ? 'bg-primary/5'"
                             class="cursor-pointer hover"
-                            th:onclick="|window.location.href='@{/admin/topics}?topicCode=${topic.code}'|">
+                            th:data-code="${topic.code}"
+                            onclick="window.location.href='/admin/topics?topicCode=' + this.dataset.code">
                             <td class="font-mono text-xs font-bold" th:text="${topic.code}">SELECT</td>
                             <td th:text="${topic.displayName}">SELECT 문</td>
                             <td class="text-center" th:text="${topic.sortOrder}">1</td>
@@ -48,7 +49,11 @@
                             </td>
                             <td>
                                 <button class="btn btn-xs btn-ghost"
-                                        th:onclick="|editTopic('${topic.code}', '${topic.displayName}', ${topic.sortOrder}, ${topic.isActive}); event.stopPropagation()|">
+                                        th:data-code="${topic.code}"
+                                        th:data-name="${topic.displayName}"
+                                        th:data-sort="${topic.sortOrder}"
+                                        th:data-active="${topic.isActive}"
+                                        onclick="editTopic(this.dataset.code, this.dataset.name, this.dataset.sort, this.dataset.active); event.stopPropagation()">
                                     <i data-lucide="pencil" class="size-3"></i>
                                 </button>
                             </td>
