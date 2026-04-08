@@ -1,11 +1,38 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-07T14:03:14Z",
-    "currentVersion": "0.0.22",
+    "lastUpdated": "2026-04-08T10:51:36Z",
+    "currentVersion": "0.0.23",
     "projectType": "basic",
-    "totalReleases": 2
+    "totalReleases": 3
   },
   "releases": [
+    {
+      "version": "0.0.23",
+      "project_type": "basic",
+      "date": "2026-04-08",
+      "pr_number": 29,
+      "raw_summary": "## Summary by CodeRabbit\n\n# 릴리스 노트 v0.0.23\n\n* **새로운 기능**\n  * 매일의 도전 문제 기능 추가\n  * 문제 추천 기능 추가\n  * 시험 일정 관리 기능 추가\n  * 연속 풀이 일수 추적 기능 추가\n  * 오늘의 문제 조회 기능 추가\n\n* **개선사항**\n  * 진행률 통계 조회 시스템 개선\n  * 관리자 대시보드에 시험 일정 관리 페이지 추가",
+      "parsed_changes": {
+        "새로운_기능": {
+          "title": "새로운 기능",
+          "items": [
+            "매일의 도전 문제 기능 추가",
+            "문제 추천 기능 추가",
+            "시험 일정 관리 기능 추가",
+            "연속 풀이 일수 추적 기능 추가",
+            "오늘의 문제 조회 기능 추가"
+          ]
+        },
+        "개선사항": {
+          "title": "개선사항",
+          "items": [
+            "진행률 통계 조회 시스템 개선",
+            "관리자 대시보드에 시험 일정 관리 페이지 추가"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.22",
       "project_type": "basic",
