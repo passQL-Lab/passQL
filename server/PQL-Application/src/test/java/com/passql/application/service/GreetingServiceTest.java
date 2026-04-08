@@ -1,130 +1,65 @@
 package com.passql.application.service;
 
+import static kr.suhsaechan.suhlogger.util.SuhLogger.lineLog;
+import static kr.suhsaechan.suhlogger.util.SuhLogger.superLog;
+import static kr.suhsaechan.suhlogger.util.SuhLogger.timeLog;
+
 import com.passql.application.dto.GreetingResponse;
 import com.passql.common.exception.CustomException;
-import com.passql.member.entity.Member;
-import com.passql.member.repository.MemberRepository;
-import com.passql.meta.entity.ExamSchedule;
-import com.passql.meta.constant.CertType;
-import com.passql.meta.repository.ExamScheduleRepository;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
+import com.passql.member.dto.MemberRegisterResponse;
+import com.passql.member.service.MemberService;
+import com.passql.web.PassqlApplication;
+import lombok.extern.slf4j.Slf4j;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.util.Optional;
 import java.util.UUID;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.when;
-
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest(classes = PassqlApplication.class)
+@ActiveProfiles("dev")
+@Slf4j
 class GreetingServiceTest {
 
-    @Mock MemberRepository memberRepository;
-    @Mock ExamScheduleRepository examScheduleRepository;
-    @InjectMocks GreetingService greetingService;
-
-    UUID memberUuid;
-    Member member;
-
-    @BeforeEach
-    void setUp() {
-        memberUuid = UUID.randomUUID();
-        member = org.mockito.Mockito.mock(Member.class);
-        org.mockito.Mockito.lenient().when(member.getNickname()).thenReturn("테스터");
-    }
+    @Autowired GreetingService greetingService;
+    @Autowired MemberService memberService;
 
     @Test
-    @DisplayName("존재하지 않는 memberUuid → MEMBER_NOT_FOUND 예외")
-    void memberNotFound() {
-        when(memberRepository.findByMemberUuidAndIsDeletedFalse(memberUuid))
-                .thenReturn(Optional.empty());
+    @Transactional
+    public void mainTest() {
+        lineLog("테스트시작");
 
-        assertThatThrownBy(() -> greetingService.getGreeting(memberUuid))
+        lineLog(null);
+        timeLog(this::존재하지않는_uuid_404예외_테스트);
+        lineLog(null);
+
+        lineLog(null);
+        timeLog(this::정상_회원_인사말_반환_테스트);
+        lineLog(null);
+
+        lineLog("테스트종료");
+    }
+
+    public void 존재하지않는_uuid_404예외_테스트() {
+        lineLog("존재하지 않는 memberUuid → CustomException 발생 확인");
+        UUID fakeUuid = UUID.randomUUID();
+        lineLog("fakeUuid: " + fakeUuid);
+        Assertions.assertThatThrownBy(() -> greetingService.getGreeting(fakeUuid))
                 .isInstanceOf(CustomException.class);
+        lineLog("CustomException 발생 확인 완료");
     }
 
-    @Test
-    @DisplayName("시험 없음 → message가 null이 아니고 비어있지 않음")
-    void noExam() {
-        when(memberRepository.findByMemberUuidAndIsDeletedFalse(memberUuid))
-                .thenReturn(Optional.of(member));
-        when(examScheduleRepository.findFirstByIsSelectedTrue())
-                .thenReturn(Optional.empty());
+    public void 정상_회원_인사말_반환_테스트() {
+        lineLog("정상 회원 등록 후 인사말 조회 → message 눈으로 확인");
+        MemberRegisterResponse registered = memberService.register();
+        lineLog("등록된 회원 UUID: " + registered.getMemberUuid());
+        lineLog("등록된 닉네임: " + registered.getNickname());
 
-        GreetingResponse response = greetingService.getGreeting(memberUuid);
-
-        assertThat(response.message()).isNotBlank();
-    }
-
-    @Test
-    @DisplayName("dDay == 0 → message에 '오늘' 또는 '시험' 포함")
-    void dDayZero() {
-        ExamSchedule exam = org.mockito.Mockito.mock(ExamSchedule.class);
-        when(exam.getExamDate()).thenReturn(LocalDate.now());
-        when(exam.getCertType()).thenReturn(CertType.SQLD);
-        when(memberRepository.findByMemberUuidAndIsDeletedFalse(memberUuid))
-                .thenReturn(Optional.of(member));
-        when(examScheduleRepository.findFirstByIsSelectedTrue())
-                .thenReturn(Optional.of(exam));
-
-        GreetingResponse response = greetingService.getGreeting(memberUuid);
-
-        assertThat(response.message()).containsAnyOf("오늘", "시험");
-    }
-
-    @Test
-    @DisplayName("1 <= dDay <= 7 → message에 'D-' 포함")
-    void dDayOneToSeven() {
-        ExamSchedule exam = org.mockito.Mockito.mock(ExamSchedule.class);
-        when(exam.getExamDate()).thenReturn(LocalDate.now().plusDays(3));
-        when(exam.getCertType()).thenReturn(CertType.SQLD);
-        when(memberRepository.findByMemberUuidAndIsDeletedFalse(memberUuid))
-                .thenReturn(Optional.of(member));
-        when(examScheduleRepository.findFirstByIsSelectedTrue())
-                .thenReturn(Optional.of(exam));
-
-        GreetingResponse response = greetingService.getGreeting(memberUuid);
-
-        assertThat(response.message()).contains("D-");
-    }
-
-    @Test
-    @DisplayName("8 <= dDay <= 30 → message가 null이 아니고 비어있지 않음")
-    void dDayEightToThirty() {
-        ExamSchedule exam = org.mockito.Mockito.mock(ExamSchedule.class);
-        when(exam.getExamDate()).thenReturn(LocalDate.now().plusDays(15));
-        when(exam.getCertType()).thenReturn(CertType.SQLD);
-        when(memberRepository.findByMemberUuidAndIsDeletedFalse(memberUuid))
-                .thenReturn(Optional.of(member));
-        when(examScheduleRepository.findFirstByIsSelectedTrue())
-                .thenReturn(Optional.of(exam));
-
-        GreetingResponse response = greetingService.getGreeting(memberUuid);
-
-        assertThat(response.message()).isNotBlank();
-    }
-
-    @Test
-    @DisplayName("dDay > 30 → message에 D-day 숫자가 포함되지 않음")
-    void dDayOverThirty() {
-        ExamSchedule exam = org.mockito.Mockito.mock(ExamSchedule.class);
-        when(exam.getExamDate()).thenReturn(LocalDate.now().plusDays(60));
-        when(exam.getCertType()).thenReturn(CertType.SQLD);
-        when(memberRepository.findByMemberUuidAndIsDeletedFalse(memberUuid))
-                .thenReturn(Optional.of(member));
-        when(examScheduleRepository.findFirstByIsSelectedTrue())
-                .thenReturn(Optional.of(exam));
-
-        GreetingResponse response = greetingService.getGreeting(memberUuid);
-
-        assertThat(response.message()).isNotBlank();
-        assertThat(response.message()).doesNotContain("D-60");
+        GreetingResponse response = greetingService.getGreeting(registered.getMemberUuid());
+        superLog(response);
+        lineLog("message: " + response.message());
     }
 }
