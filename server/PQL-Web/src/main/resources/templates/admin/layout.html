@@ -108,6 +108,12 @@
                     </a>
                 </li>
                 <li>
+                    <a th:href="@{/admin/daily-challenges}" th:classappend="${currentMenu == 'daily-challenges'} ? 'active'">
+                        <i data-lucide="calendar-check" class="size-5"></i>
+                        일일 챌린지
+                    </a>
+                </li>
+                <li>
                     <a th:href="@{/admin/exam-schedules}" th:classappend="${currentMenu == 'exam-schedules'} ? 'active'">
                         <i data-lucide="calendar-days" class="size-5"></i>
                         시험 일정
