@@ -25,4 +25,8 @@ public class PromptService {
     public List<PromptTemplate> findAll() {
         return promptTemplateRepository.findAll(Sort.by(Sort.Direction.ASC, "keyName"));
     }
+
+    public java.util.Optional<PromptTemplate> findById(java.util.UUID uuid) {
+        return promptTemplateRepository.findById(uuid);
+    }
 }

@@ -1,6 +1,5 @@
 package com.passql.web.controller.admin;
 
-import com.passql.meta.repository.PromptTemplateRepository;
 import com.passql.meta.service.PromptService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
@@ -17,7 +16,6 @@ import java.util.UUID;
 public class AdminPromptController {
 
     private final PromptService promptService;
-    private final PromptTemplateRepository promptTemplateRepository;
 
     @GetMapping
     public String list(Model model) {
@@ -30,7 +28,7 @@ public class AdminPromptController {
     @GetMapping("/{uuid}")
     public String detail(@PathVariable UUID uuid, Model model) {
         model.addAttribute("promptTemplates", promptService.findAll());
-        promptTemplateRepository.findById(uuid)
+        promptService.findById(uuid)
                 .ifPresent(pt -> model.addAttribute("selectedPrompt", pt));
         model.addAttribute("currentMenu", "prompts");
         model.addAttribute("pageTitle", "프롬프트 관리");

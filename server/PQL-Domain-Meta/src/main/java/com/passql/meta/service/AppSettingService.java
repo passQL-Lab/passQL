@@ -2,6 +2,7 @@ package com.passql.meta.service;
 
 import com.passql.common.exception.CustomException;
 import com.passql.common.exception.constant.ErrorCode;
+import com.passql.meta.dto.SettingView;
 import com.passql.meta.entity.AppSetting;
 import com.passql.meta.repository.AppSettingRepository;
 import lombok.RequiredArgsConstructor;
@@ -43,6 +44,23 @@ public class AppSettingService {
 
     public List<AppSetting> findAll() {
         return appSettingRepository.findAll(Sort.by("category", "settingKey"));
+    }
+
+    /** 마스킹 처리된 SettingView 목록 반환 — Controller에 변환 로직 두지 않음 */
+    public List<SettingView> findAllAsView() {
+        return findAll().stream()
+                .map(s -> {
+                    boolean sensitive = isSensitiveKey(s.getSettingKey());
+                    return new SettingView(
+                            s.getSettingKey(),
+                            s.getValueType(),
+                            sensitive ? maskValue(s.getValueText()) : s.getValueText(),
+                            s.getCategory(),
+                            s.getDescription(),
+                            sensitive
+                    );
+                })
+                .toList();
     }
 
     @Transactional
