@@ -27,7 +27,8 @@ public class AdminQuestionController {
                        @RequestParam(required = false) String executionMode,
                        @RequestParam(defaultValue = "0") int page,
                        @RequestParam(defaultValue = "20") int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        int clampedSize = Math.min(size, 100);
+        Pageable pageable = PageRequest.of(page, clampedSize, Sort.by(Sort.Direction.DESC, "createdAt"));
         model.addAttribute("questions", questionService.getQuestions(topic, null, difficulty, executionMode, pageable));
         model.addAttribute("topics", metaService.getTopicTree());
         model.addAttribute("currentMenu", "questions");

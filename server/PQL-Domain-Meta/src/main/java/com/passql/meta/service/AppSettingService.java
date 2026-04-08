@@ -16,6 +16,7 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AppSettingService {
 
     public static final String REDIS_PREFIX = "passql:settings:";
