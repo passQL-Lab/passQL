@@ -45,7 +45,11 @@
                         <tr th:each="setting : ${settings}"
                             th:data-category="${setting.category}"
                             class="setting-row">
-                            <td class="font-mono text-xs font-semibold" th:text="${setting.settingKey}">sql.max_length</td>
+                            <td class="font-mono text-xs font-semibold">
+                                <span th:text="${setting.settingKey}">sql.max_length</span>
+                                <span th:if="${setting.sensitive}"
+                                      class="badge badge-xs badge-error ml-1">🔒</span>
+                            </td>
                             <td>
                                 <span class="badge badge-outline badge-xs" th:text="${setting.category}">SANDBOX</span>
                             </td>
@@ -57,26 +61,37 @@
                                     <input type="text"
                                            th:id="'val_' + ${setting.settingKey}"
                                            th:value="${setting.valueText}"
-                                           class="input input-bordered input-xs w-40 font-mono"
+                                           th:class="${setting.sensitive}
+                                               ? 'input input-bordered input-xs w-40 font-mono opacity-60 cursor-not-allowed'
+                                               : 'input input-bordered input-xs w-40 font-mono'"
                                            readonly/>
-                                    <button class="btn btn-xs btn-ghost hidden edit-actions"
+                                    <button th:if="${!setting.sensitive}"
+                                            class="btn btn-xs btn-ghost hidden edit-actions"
                                             th:id="'btn_save_' + ${setting.settingKey}"
-                                            th:onclick="|saveSetting('${setting.settingKey}')|">
+                                            th:data-key="${setting.settingKey}"
+                                            onclick="saveSetting(this.dataset.key)">
                                         <i data-lucide="check" class="size-3 text-success"></i>
                                     </button>
-                                    <button class="btn btn-xs btn-ghost hidden edit-actions"
+                                    <button th:if="${!setting.sensitive}"
+                                            class="btn btn-xs btn-ghost hidden edit-actions"
                                             th:id="'btn_cancel_' + ${setting.settingKey}"
-                                            th:onclick="|cancelEdit('${setting.settingKey}', '${setting.valueText}')|">
+                                            th:data-key="${setting.settingKey}"
+                                            th:data-value="${setting.valueText}"
+                                            onclick="cancelEdit(this.dataset.key, this.dataset.value)">
                                         <i data-lucide="x" class="size-3 text-error"></i>
                                     </button>
                                 </div>
                             </td>
                             <td class="text-xs text-base-content/60" th:text="${setting.description}">SQL 최대 길이 제한</td>
                             <td>
-                                <button class="btn btn-xs btn-ghost"
-                                        th:onclick="|startEdit('${setting.settingKey}')|">
+                                <button th:if="${!setting.sensitive}"
+                                        class="btn btn-xs btn-ghost"
+                                        th:data-key="${setting.settingKey}"
+                                        onclick="startEdit(this.dataset.key)">
                                     <i data-lucide="pencil" class="size-3"></i>
                                 </button>
+                                <span th:if="${setting.sensitive}"
+                                      class="text-xs text-base-content/30">읽기전용</span>
                             </td>
                         </tr>
 

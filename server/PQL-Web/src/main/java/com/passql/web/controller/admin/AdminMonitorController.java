@@ -1,5 +1,6 @@
 package com.passql.web.controller.admin;
 
+import com.passql.submission.service.SubmissionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,9 +12,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @RequiredArgsConstructor
 public class AdminMonitorController {
 
+    private final SubmissionService submissionService;
+
     @GetMapping
     public String dashboard(Model model) {
-        // TODO: 시스템 모니터링 대시보드 데이터 조회
+        model.addAttribute("executionLogs", submissionService.getRecentLogs());
+        model.addAttribute("monitorStats", submissionService.getStats24h());
+        model.addAttribute("currentMenu", "monitor");
+        model.addAttribute("pageTitle", "모니터링");
         return "admin/monitor";
     }
 }

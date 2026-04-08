@@ -44,6 +44,7 @@ public enum ErrorCode {
     TOPIC_NOT_FOUND(HttpStatus.NOT_FOUND, "토픽을 찾을 수 없습니다."),
     EXAM_SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, "시험 일정을 찾을 수 없습니다."),
     EXAM_SCHEDULE_DUPLICATE(HttpStatus.CONFLICT, "이미 등록된 시험 회차입니다."),
+    DAILY_CHALLENGE_QUESTION_INACTIVE(HttpStatus.UNPROCESSABLE_ENTITY, "비활성 문제는 일일 챌린지로 배정할 수 없습니다."),
 
     // Member
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "회원을 찾을 수 없습니다."),

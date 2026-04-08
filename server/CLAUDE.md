@@ -129,10 +129,24 @@ private boolean isTestAccount;
 - 모든 REST Controller는 `PQL-Web/src/main/java/com/passql/web/controller/` 에 둔다.
 - Domain 모듈에는 Controller를 두지 않는다.
 
+### Controller 역할 제한 (중요)
+
+- **Controller는 요청/응답 변환과 Model 바인딩만 담당한다. 비즈니스 로직을 두지 않는다.**
+- **Controller에서 Repository를 직접 주입하지 않는다.** 반드시 Service를 통해 호출한다.
+  - 금지: `private final ConceptTagRepository conceptTagRepository;` (Controller에서)
+  - 허용: `private final MetaService metaService;`
+- **`@Transactional`을 Controller에 선언하지 않는다.** 트랜잭션은 Service 레이어에서만 관리한다.
+- Controller에 조건/변환 로직이 3줄 이상이면 Service 메서드로 추출한다.
+
 ### DTO 위치
 
 - 요청/응답 DTO는 해당 Domain 모듈의 `dto/` 에 둔다.
 - Controller는 Domain DTO를 그대로 반환한다.
+
+### API 변경 시 문서 관리
+
+- **API를 추가/변경/삭제하면 반드시 Controller DOCS에 정보를 추가한다.**
+- 다음과 같은형식으로 추가필요   @ApiLog(date = "2026.04.07", author = Author.SUHSAECHAN, issueNumber = 1, description = "SQL 에러 AI 해설 API 추가"),
 
 ---
 
@@ -146,10 +160,83 @@ private boolean isTestAccount;
 - `JpaRepository<Entity, UUID>` — 두 번째 제네릭은 항상 `UUID`.
 - 메서드명은 Spring Data JPA 명명 규칙 준수.
 
+## 예외 처리 규칙 (중요)
+
+- **비즈니스 예외는 반드시 `CustomException(ErrorCode.XXX)`만 사용한다.**
+- **도메인별 `RuntimeException` 서브클래스(`XxxException`) 생성 금지** — `SqlSafetyException`, `MemberNotFoundException` 같은 개별 예외 클래스를 만들지 않는다.
+- 새 에러 타입이 필요하면 `PQL-Common`의 `ErrorCode` enum에 항목을 추가한다.
+- `GlobalExceptionHandler`는 `PQL-Common`에서 중앙 관리 — 도메인 모듈에 `@ControllerAdvice`를 두지 않는다.
+
+```java
+// 금지
+throw new SqlSafetyException("SELECT만 허용됩니다");
+
+// 올바른 방법
+throw new CustomException(ErrorCode.NOT_SELECT);
+```
+
+### ErrorCode 추가 방법
+`PQL-Common/src/main/java/com/passql/common/exception/constant/ErrorCode.java`에 카테고리에 맞게 추가:
+```java
+// Sandbox 카테고리 예시
+SQL_SAFETY_VIOLATION(HttpStatus.BAD_REQUEST, "허용되지 않는 SQL입니다."),
+```
+
+---
+
 ## Service 컨벤션
 
 - `@Service` + 생성자 주입(`@RequiredArgsConstructor`).
 - 클래스 레벨 `@Transactional(readOnly = true)` + 변경 메서드에 `@Transactional` 재선언.
+
+## 테스트 코드 컨벤션
+
+### 철학
+- **눈으로 보는 테스트**: `assertEquals` 같은 단언문 대신 `superLog()`로 결과를 출력하고 눈으로 확인한다.
+- **통합 테스트 우선**: 실제 DB와 스프링 컨텍스트를 띄워서 진짜 동작을 검증한다.
+
+### 구조 (필수 패턴)
+```java
+@SpringBootTest(classes = PassqlApplication.class)
+@ActiveProfiles("dev")
+@Slf4j
+class XxxServiceTest {
+
+    @Autowired XxxService xxxService;
+
+    @Test
+    @Transactional
+    public void mainTest() {
+        lineLog("테스트시작");
+
+        lineLog(null);
+        timeLog(this::케이스명_테스트);
+        lineLog(null);
+
+        lineLog("테스트종료");
+    }
+
+    public void 케이스명_테스트() {
+        lineLog("케이스 설명");
+        var result = xxxService.someMethod(...);
+        superLog(result);   // 결과 출력 — 눈으로 확인
+    }
+}
+```
+
+### 규칙
+- `@Test`는 `mainTest()` 하나만. 세부 케이스는 `timeLog(this::xxx_테스트)`로 위임한다.
+- `@Transactional`은 `@Test`(= `mainTest()`) 에 선언한다. 세부 메서드에는 붙이지 않는다.
+- 결과 출력은 `superLog(객체)` / 구분선은 `lineLog("설명")` 또는 `lineLog(null)` / 시간 측정은 `timeLog(this::메서드)`.
+- `import static kr.suhsaechan.suhlogger.util.SuhLogger.*` 사용.
+- 멀티모듈 프로젝트에서 `PassqlApplication`을 사용하려면 해당 모듈 `build.gradle`에 `testImplementation project(':PQL-Web')` 추가.
+- 테스트 파일 위치: 대상 클래스와 동일한 패키지 구조로 `src/test/java/` 하위에 생성.
+
+### assertThat 사용 여부
+- 기본적으로 **사용하지 않는다**. `superLog()`로 출력하고 눈으로 확인하는 것이 이 프로젝트의 스타일.
+- 단, NPE·예외 발생 여부처럼 눈으로 확인이 불가능한 경우에만 최소한으로 사용할 수 있다.
+
+---
 
 ## 외부 라이브러리 / 저장소
 
@@ -172,3 +259,12 @@ private boolean isTestAccount;
 - [ ] 마이그레이션 파일 작성 전 `version.yml`을 읽어 현재 버전을 확인했는가?
 - [ ] 동일 버전으로 파일이 2개 이상 생성되지 않았는가? (버전당 파일 1개 원칙)
 - [ ] 이미 존재하는 마이그레이션을 중복 생성하지 않았는가? (이력 표 먼저 확인)
+- [ ] Controller에서 Repository를 직접 주입하지 않았는가? (반드시 Service 경유)
+- [ ] Controller에 `@Transactional`이 없는가? (Service 레이어에만 허용)
+- [ ] Controller에 비즈니스 로직이 없는가? (3줄 이상 조건/변환 → Service로 추출)
+- [ ] API 추가/변경 시 `docs/apilog/` 에 변경 내역을 기록했는가?
+- [ ] 테스트 코드에 `assertThat` 대신 `superLog()`로 결과를 출력했는가?
+- [ ] 테스트 `@Transactional`은 `mainTest()`에만 선언했는가? (세부 메서드에 중복 선언 금지)
+- [ ] 멀티모듈 테스트에 `testImplementation project(':PQL-Web')`를 추가했는가?
+- [ ] 도메인별 `XxxException` 클래스를 만들지 않았는가? (반드시 `CustomException(ErrorCode.XXX)` 사용)
+- [ ] 새 에러 타입이 필요하면 `ErrorCode` enum에 추가했는가?

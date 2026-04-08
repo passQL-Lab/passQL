@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="ko"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+
+<head>
+    <title layout:fragment="title">일일 챌린지</title>
+</head>
+
+<th:block layout:fragment="css">
+    <!-- FullCalendar 6 -->
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet"/>
+    <style>
+        #calendar .fc-daygrid-day { cursor: pointer; }
+        #calendar .fc-daygrid-day:hover { background: oklch(var(--b2)); }
+        .fc-event { cursor: pointer; font-size: 0.72rem; }
+    </style>
+</th:block>
+
+<th:block layout:fragment="content">
+
+    <!-- 헤더 -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h2 class="text-xl font-bold">일일 챌린지 관리</h2>
+            <p class="text-base-content/60 text-sm mt-1">날짜를 클릭해 오늘의 챌린지 문제를 배정하세요</p>
+        </div>
+    </div>
+
+    <!-- 캘린더 카드 -->
+    <div class="card bg-base-100 shadow-sm">
+        <div class="card-body p-4">
+            <div id="calendar"></div>
+        </div>
+    </div>
+
+    <!-- 배정 모달 -->
+    <dialog id="assignModal" class="modal">
+        <div class="modal-box w-11/12 max-w-2xl">
+            <h3 class="font-bold text-lg mb-1">문제 배정</h3>
+            <p class="text-base-content/60 text-sm mb-4">
+                날짜: <span id="modalDate" class="font-mono font-bold"></span>
+            </p>
+
+            <!-- 검색 -->
+            <input id="questionSearch" type="text" placeholder="지문 검색..."
+                   class="input input-bordered w-full mb-3" oninput="filterQuestions()"/>
+
+            <!-- 문제 목록 -->
+            <div class="overflow-y-auto max-h-64 border border-base-300 rounded-lg">
+                <table class="table table-sm">
+                    <thead class="sticky top-0 bg-base-100">
+                    <tr>
+                        <th>토픽</th>
+                        <th>난이도</th>
+                        <th class="w-1/2">지문 미리보기</th>
+                        <th></th>
+                    </tr>
+                    </thead>
+                    <tbody id="questionList">
+                    <tr th:each="q : ${activeQuestions}" class="question-row hover">
+                        <td>
+                            <span class="badge badge-outline badge-sm" th:text="${q.topicName}">-</span>
+                        </td>
+                        <td>
+                            <span class="badge badge-sm"
+                                  th:classappend="${q.difficulty <= 2} ? 'badge-success' : (${q.difficulty == 3} ? 'badge-warning' : 'badge-error')"
+                                  th:text="${q.difficulty}">3</span>
+                        </td>
+                        <td class="text-xs text-base-content/80 question-stem"
+                            th:text="${#strings.length(q.stemPreview) > 60 ? #strings.substring(q.stemPreview,0,60)+'...' : q.stemPreview}">지문</td>
+                        <td>
+                            <button class="btn btn-xs btn-primary"
+                                    th:attr="data-uuid=${q.questionUuid}"
+                                    onclick="selectQuestion(this)">배정</button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 현재 배정 해제 버튼 -->
+            <div class="mt-3 flex justify-between items-center">
+                <button id="unassignBtn" class="btn btn-sm btn-outline btn-error hidden"
+                        onclick="unassignChallenge()">
+                    <i data-lucide="trash-2" class="size-4"></i>
+                    배정 해제 (폴백 복귀)
+                </button>
+                <div class="flex-1"></div>
+                <button class="btn btn-sm" onclick="closeModal()">닫기</button>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop"><button>close</button></form>
+    </dialog>
+
+</th:block>
+
+<th:block layout:fragment="js">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+    <script>
+        let calendar;
+        let selectedDate = null;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const el = document.getElementById('calendar');
+            calendar = new FullCalendar.Calendar(el, {
+                initialView: 'dayGridMonth',
+                locale: 'ko',
+                height: 'auto',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: ''
+                },
+                events: function (info, successCallback, failureCallback) {
+                    const from = info.startStr.substring(0, 10);
+                    const to = info.endStr.substring(0, 10);
+                    fetch(`/admin/daily-challenges/api?from=${from}&to=${to}`)
+                        .then(r => r.json())
+                        .then(items => {
+                            successCallback(items.map(item => ({
+                                title: `D${item.difficulty} ${item.stemPreview ? item.stemPreview.substring(0, 20) : ''}`,
+                                start: item.challengeDate,
+                                extendedProps: {
+                                    questionUuid: item.questionUuid,
+                                    topicName: item.topicName,
+                                    difficulty: item.difficulty,
+                                    stemPreview: item.stemPreview
+                                },
+                                color: item.difficulty <= 2 ? '#22c55e' : item.difficulty === 3 ? '#f59e0b' : '#ef4444'
+                            })));
+                        })
+                        .catch(failureCallback);
+                },
+                dateClick: function (info) {
+                    openModal(info.dateStr, null);
+                },
+                eventClick: function (info) {
+                    openModal(info.event.startStr, info.event.extendedProps.questionUuid);
+                }
+            });
+            calendar.render();
+        });
+
+        function openModal(dateStr, currentQuestionUuid) {
+            selectedDate = dateStr;
+            document.getElementById('modalDate').textContent = dateStr;
+            const unassignBtn = document.getElementById('unassignBtn');
+            if (currentQuestionUuid) {
+                unassignBtn.classList.remove('hidden');
+            } else {
+                unassignBtn.classList.add('hidden');
+            }
+            document.getElementById('questionSearch').value = '';
+            filterQuestions();
+            document.getElementById('assignModal').showModal();
+            lucide.createIcons();
+        }
+
+        function closeModal() {
+            document.getElementById('assignModal').close();
+        }
+
+        function filterQuestions() {
+            const keyword = document.getElementById('questionSearch').value.toLowerCase();
+            document.querySelectorAll('.question-row').forEach(row => {
+                const stem = row.querySelector('.question-stem').textContent.toLowerCase();
+                row.style.display = stem.includes(keyword) ? '' : 'none';
+            });
+        }
+
+        function selectQuestion(btn) {
+            const questionUuid = btn.getAttribute('data-uuid');
+            fetch(`/admin/daily-challenges/${selectedDate}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ questionUuid })
+            })
+            .then(r => {
+                if (!r.ok) return r.json().then(e => { throw new Error(e.message || '배정 실패'); });
+                return r.json();
+            })
+            .then(() => {
+                calendar.refetchEvents();
+                closeModal();
+            })
+            .catch(err => alert(err.message));
+        }
+
+        function unassignChallenge() {
+            if (!confirm(`${selectedDate} 배정을 해제하시겠습니까?`)) return;
+            fetch(`/admin/daily-challenges/${selectedDate}`, { method: 'DELETE' })
+            .then(r => {
+                if (!r.ok) throw new Error('해제 실패');
+                calendar.refetchEvents();
+                closeModal();
+            })
+            .catch(err => alert(err.message));
+        }
+    </script>
+</th:block>
+
+</html>

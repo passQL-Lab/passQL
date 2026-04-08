@@ -2,10 +2,12 @@ package com.passql.web.controller.admin;
 
 import com.passql.meta.service.AppSettingService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @Controller
 @RequestMapping("/admin/settings")
@@ -16,7 +18,20 @@ public class AdminSettingController {
 
     @GetMapping
     public String list(Model model) {
-        // TODO: 앱 설정 목록 조회 후 Thymeleaf 템플릿 반환
+        model.addAttribute("settings", appSettingService.findAllAsView());
+        model.addAttribute("currentMenu", "settings");
+        model.addAttribute("pageTitle", "앱 설정");
         return "admin/settings";
+    }
+
+    @PutMapping("/{key}")
+    @ResponseBody
+    public ResponseEntity<Void> updateSetting(@PathVariable String key,
+                                              @RequestBody Map<String, String> body) {
+        if (AppSettingService.isSensitiveKey(key)) {
+            return ResponseEntity.status(403).build();
+        }
+        appSettingService.save(key, body.get("value"));
+        return ResponseEntity.ok().build();
     }
 }
