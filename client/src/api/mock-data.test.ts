@@ -28,9 +28,16 @@ describe("getMockResponse", () => {
       expect(result.number).toBe(0);
     });
 
-    it("filters by topic", () => {
+    it("filters by topic code", () => {
       const result = getMockResponse("/questions?page=0&size=10&topic=JOIN", "GET") as Page<QuestionSummary>;
       expect(result.content.every((q) => q.topicName === "JOIN")).toBe(true);
+      expect(result.content.length).toBe(2);
+    });
+
+    it("filters by topic code with Korean displayName", () => {
+      const result = getMockResponse("/questions?page=0&size=10&topic=SUBQUERY", "GET") as Page<QuestionSummary>;
+      expect(result.content.every((q) => q.topicName === "서브쿼리")).toBe(true);
+      expect(result.content.length).toBe(2);
     });
 
     it("returns empty page for non-existent topic", () => {

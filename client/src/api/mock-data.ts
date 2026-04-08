@@ -27,14 +27,21 @@ const MOCK_TOPICS: readonly TopicTree[] = [
 ];
 
 const MOCK_QUESTIONS: readonly QuestionSummary[] = [
+  // JOIN (2)
   { questionUuid: "q-uuid-0001", topicName: "JOIN", difficulty: 2, stemPreview: "고객별 주문 수를 구하는 올바른 SQL은?" },
-  { questionUuid: "q-uuid-0002", topicName: "서브쿼리", difficulty: 3, stemPreview: "서브쿼리를 사용하여 평균 이상 주문한 고객을 조회하는 SQL은?" },
-  { questionUuid: "q-uuid-0003", topicName: "GROUP BY", difficulty: 2, stemPreview: "부서별 평균 급여가 500만원 이상인 부서를 구하는 SQL은?" },
-  { questionUuid: "q-uuid-0004", topicName: "DDL", difficulty: 1, stemPreview: "외래키 제약조건을 포함한 테이블 생성 SQL로 올바른 것은?" },
-  { questionUuid: "q-uuid-0005", topicName: "제약조건", difficulty: 3, stemPreview: "NOT NULL과 UNIQUE 제약조건의 차이를 올바르게 설명한 것은?" },
   { questionUuid: "q-uuid-0006", topicName: "JOIN", difficulty: 3, stemPreview: "LEFT JOIN과 INNER JOIN의 결과 차이를 올바르게 설명한 것은?" },
+  // 서브쿼리 (2)
+  { questionUuid: "q-uuid-0002", topicName: "서브쿼리", difficulty: 3, stemPreview: "서브쿼리를 사용하여 평균 이상 주문한 고객을 조회하는 SQL은?" },
+  { questionUuid: "q-uuid-0009", topicName: "서브쿼리", difficulty: 2, stemPreview: "상관 서브쿼리와 비상관 서브쿼리의 차이를 올바르게 설명한 것은?" },
+  // GROUP BY (2)
+  { questionUuid: "q-uuid-0003", topicName: "GROUP BY", difficulty: 2, stemPreview: "부서별 평균 급여가 500만원 이상인 부서를 구하는 SQL은?" },
   { questionUuid: "q-uuid-0007", topicName: "GROUP BY", difficulty: 1, stemPreview: "GROUP BY와 HAVING의 실행 순서로 올바른 것은?" },
+  // DDL (2)
+  { questionUuid: "q-uuid-0004", topicName: "DDL", difficulty: 1, stemPreview: "외래키 제약조건을 포함한 테이블 생성 SQL로 올바른 것은?" },
   { questionUuid: "q-uuid-0008", topicName: "DDL", difficulty: 2, stemPreview: "CREATE TABLE 시 DEFAULT 제약조건 문법은?" },
+  // 제약조건 (2)
+  { questionUuid: "q-uuid-0005", topicName: "제약조건", difficulty: 3, stemPreview: "NOT NULL과 UNIQUE 제약조건의 차이를 올바르게 설명한 것은?" },
+  { questionUuid: "q-uuid-0010", topicName: "제약조건", difficulty: 1, stemPreview: "PRIMARY KEY와 UNIQUE 제약조건의 공통점과 차이점은?" },
 ];
 
 const MOCK_QUESTION_DETAIL: QuestionDetail = {
@@ -102,7 +109,8 @@ export function getMockResponse(path: string, method: string, body?: string): un
     const page = Number(url.get("page") ?? 0);
     const size = Number(url.get("size") ?? 10);
     const topic = url.get("topic");
-    const filtered = topic ? MOCK_QUESTIONS.filter((q) => q.topicName === topic) : MOCK_QUESTIONS;
+    const topicDisplayName = topic ? MOCK_TOPICS.find((t) => t.code === topic)?.displayName : undefined;
+    const filtered = topicDisplayName ? MOCK_QUESTIONS.filter((q) => q.topicName === topicDisplayName) : topic ? [] : MOCK_QUESTIONS;
     const start = page * size;
     const content = filtered.slice(start, start + size);
     return {
