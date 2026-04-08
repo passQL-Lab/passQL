@@ -107,6 +107,12 @@
                     </a>
                 </li>
                 <li>
+                    <a th:href="@{/admin/exam-schedules}" th:classappend="${currentMenu == 'exam-schedules'} ? 'active'">
+                        <i data-lucide="calendar-days" class="size-5"></i>
+                        시험 일정
+                    </a>
+                </li>
+                <li>
                     <a th:href="@{/admin/settings}" th:classappend="${currentMenu == 'settings'} ? 'active'">
                         <i data-lucide="settings" class="size-5"></i>
                         앱 설정

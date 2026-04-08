@@ -76,8 +76,8 @@
                     </thead>
                     <tbody>
                     <tr th:each="log : ${executionLogs}" th:if="${executionLogs != null and !executionLogs.isEmpty()}">
-                        <td class="font-mono text-xs" th:text="${#strings.substring(log.userUuid, 0, 8) + '...'}">a1b2c3d4...</td>
-                        <td class="font-mono" th:text="${log.questionId}">42</td>
+                        <td class="font-mono text-xs" th:text="${log.memberUuid != null ? #strings.substring(log.memberUuid.toString(), 0, 8) + '...' : '-'}">a1b2c3d4...</td>
+                        <td class="font-mono text-xs" th:text="${#strings.substring(log.questionUuid.toString(), 0, 8) + '...'}">q1234...</td>
                         <td class="font-mono font-bold" th:text="${log.choiceKey ?: '-'}">A</td>
                         <td>
                             <span th:classappend="${log.status == 'OK'} ? 'badge-success' :

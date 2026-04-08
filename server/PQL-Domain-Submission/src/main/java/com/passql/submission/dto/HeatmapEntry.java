@@ -1,3 +1,5 @@
 package com.passql.submission.dto;
 
-public record HeatmapEntry(String topicCode, String topicName, int solved, double correctRate) {}
+import java.time.LocalDate;
+
+public record HeatmapEntry(LocalDate date, int count) {}

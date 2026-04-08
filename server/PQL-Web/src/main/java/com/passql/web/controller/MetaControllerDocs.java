@@ -16,6 +16,7 @@ public interface MetaControllerDocs {
 
   @ApiLogs({
       @ApiLog(date = "2026.04.07", author = Author.SUHSAECHAN, issueNumber = 1, description = "주제 트리 조회 API 추가"),
+      @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 22, description = "Topic/Subtopic PK 를 UUID 로 재작성. TopicTree 내부 식별자(topicUuid/subtopicUuid) UUID 기반으로 변경"),
   })
   @Operation(
       summary = "주제 트리 조회",
@@ -27,12 +28,14 @@ public interface MetaControllerDocs {
 
           ## 반환값 (List<TopicTree>)
           - topic > subtopic 계층 구조의 전체 트리
+          - 각 노드 식별자는 UUID (topicUuid / subtopicUuid)
           """
   )
   ResponseEntity<List<TopicTree>> getTopics();
 
   @ApiLogs({
       @ApiLog(date = "2026.04.07", author = Author.SUHSAECHAN, issueNumber = 1, description = "활성 태그 조회 API 추가"),
+      @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 22, description = "ConceptTag PK 를 UUID(conceptTagUuid) 로 재작성. tagKey 는 unique 컬럼으로 보존"),
   })
   @Operation(
       summary = "활성 태그 조회",
@@ -44,6 +47,7 @@ public interface MetaControllerDocs {
 
           ## 반환값 (List<ConceptTag>)
           - 활성화된 개념 태그 전체 목록
+          - 식별자는 conceptTagUuid (UUID), 비즈니스 키 tagKey 동시 노출
           """
   )
   ResponseEntity<List<ConceptTag>> getTags();

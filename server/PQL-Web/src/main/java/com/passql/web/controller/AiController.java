@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/ai")
@@ -19,30 +20,30 @@ public class AiController implements AiControllerDocs {
 
     @PostMapping("/explain-error")
     public ResponseEntity<AiResult> explainError(
-        @RequestHeader(value = "X-User-UUID") String userUuid,
+        @RequestHeader(value = "X-Member-UUID") UUID memberUuid,
         @RequestBody Map<String, Object> body
     ) {
-        Long questionId = Long.valueOf(body.get("questionId").toString());
+        UUID questionUuid = UUID.fromString(body.get("questionUuid").toString());
         String sql = (String) body.get("sql");
         String errorMessage = (String) body.get("errorMessage");
-        return ResponseEntity.ok(aiService.explainError(userUuid, questionId, sql, errorMessage));
+        return ResponseEntity.ok(aiService.explainError(memberUuid, questionUuid, sql, errorMessage));
     }
 
     @PostMapping("/diff-explain")
     public ResponseEntity<AiResult> diffExplain(
-        @RequestHeader(value = "X-User-UUID") String userUuid,
+        @RequestHeader(value = "X-Member-UUID") UUID memberUuid,
         @RequestBody Map<String, Object> body
     ) {
-        Long questionId = Long.valueOf(body.get("questionId").toString());
-        String selectedKey = (String) body.get("selectedKey");
-        return ResponseEntity.ok(aiService.diffExplain(userUuid, questionId, selectedKey));
+        UUID questionUuid = UUID.fromString(body.get("questionUuid").toString());
+        String selectedChoiceKey = (String) body.get("selectedChoiceKey");
+        return ResponseEntity.ok(aiService.diffExplain(memberUuid, questionUuid, selectedChoiceKey));
     }
 
-    @GetMapping("/similar/{questionId}")
+    @GetMapping("/similar/{questionUuid}")
     public ResponseEntity<List<SimilarQuestion>> getSimilar(
-        @PathVariable Long questionId,
+        @PathVariable UUID questionUuid,
         @RequestParam(defaultValue = "5") int k
     ) {
-        return ResponseEntity.ok(aiService.getSimilar(questionId, k));
+        return ResponseEntity.ok(aiService.getSimilar(questionUuid, k));
     }
 }

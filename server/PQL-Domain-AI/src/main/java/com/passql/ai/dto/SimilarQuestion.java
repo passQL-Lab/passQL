@@ -1,3 +1,5 @@
 package com.passql.ai.dto;
 
-public record SimilarQuestion(Long id, String stem, String topicCode, double score) {}
+import java.util.UUID;
+
+public record SimilarQuestion(UUID questionUuid, String stem, String topicName, double score) {}

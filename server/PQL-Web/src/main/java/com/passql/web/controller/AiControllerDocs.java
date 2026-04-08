@@ -15,77 +15,38 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
 @Tag(name = "AI", description = "AI 해설 / 유사 문제 조회")
 public interface AiControllerDocs {
 
   @ApiLogs({
       @ApiLog(date = "2026.04.07", author = Author.SUHSAECHAN, issueNumber = 1, description = "SQL 에러 AI 해설 API 추가"),
+      @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 22, description = "Header: X-User-UUID(String) → X-Member-UUID(UUID). Body 내 questionId(Long) → questionUuid(UUID)"),
   })
-  @Operation(
-      summary = "SQL 에러 해설",
-      description = """
-          ## 인증(JWT): **불필요**
-
-          ## 요청 헤더
-          - **`X-User-UUID`**: 회원 UUID
-
-          ## 요청 바디
-          - **`questionId`**: 문제 ID (Long)
-          - **`sql`**: 실행한 SQL (String)
-          - **`errorMessage`**: 발생한 에러 메시지 (String)
-
-          ## 반환값 (AiResult)
-          - AI가 생성한 에러 해설
-          """
-  )
+  @Operation(summary = "SQL 에러 해설")
   ResponseEntity<AiResult> explainError(
-      @RequestHeader(value = "X-User-UUID") String userUuid,
+      @RequestHeader(value = "X-Member-UUID") UUID memberUuid,
       @RequestBody Map<String, Object> body
   );
 
   @ApiLogs({
       @ApiLog(date = "2026.04.07", author = Author.SUHSAECHAN, issueNumber = 1, description = "SQL 차이 AI 해설 API 추가"),
+      @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 22, description = "Header: X-User-UUID(String) → X-Member-UUID(UUID)"),
   })
-  @Operation(
-      summary = "SQL 차이 해설",
-      description = """
-          ## 인증(JWT): **불필요**
-
-          ## 요청 헤더
-          - **`X-User-UUID`**: 회원 UUID
-
-          ## 요청 바디
-          - **`questionId`**: 문제 ID (Long)
-          - **`selectedKey`**: 선택한 선택지 키 (String)
-
-          ## 반환값 (AiResult)
-          - 정답과 선택한 답의 차이에 대한 AI 해설
-          """
-  )
+  @Operation(summary = "SQL 차이 해설")
   ResponseEntity<AiResult> diffExplain(
-      @RequestHeader(value = "X-User-UUID") String userUuid,
+      @RequestHeader(value = "X-Member-UUID") UUID memberUuid,
       @RequestBody Map<String, Object> body
   );
 
   @ApiLogs({
       @ApiLog(date = "2026.04.07", author = Author.SUHSAECHAN, issueNumber = 1, description = "유사 문제 조회 API 추가"),
+      @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 22, description = "PathVariable: Long id → UUID questionUuid. 응답 DTO SimilarQuestion{questionUuid, stem, topicName, score}"),
   })
-  @Operation(
-      summary = "유사 문제 조회",
-      description = """
-          ## 인증(JWT): **불필요**
-
-          ## 요청 파라미터
-          - **`questionId`**: 기준 문제 ID (path variable)
-          - **`k`**: 조회할 유사 문제 수 (default: 5)
-
-          ## 반환값 (List<SimilarQuestion>)
-          - 벡터 유사도 기반 유사 문제 목록
-          """
-  )
+  @Operation(summary = "유사 문제 조회")
   ResponseEntity<List<SimilarQuestion>> getSimilar(
-      @PathVariable Long questionId,
+      @PathVariable UUID questionUuid,
       @RequestParam(defaultValue = "5") int k
   );
 }
