@@ -1,17 +1,49 @@
 package com.passql.meta.entity;
 
+import com.passql.common.entity.BaseEntity;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.util.UUID;
 
 @Entity
-@Table(name = "subtopic")
+@Table(
+    name = "subtopic",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "uk_subtopic_code", columnNames = "code")
+    },
+    indexes = {
+        @Index(name = "idx_subtopic_topic_uuid", columnList = "topic_uuid")
+    }
+)
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
-public class Subtopic {
+@AllArgsConstructor(access = AccessLevel.PRIVATE)
+@Builder
+public class Subtopic extends BaseEntity {
+
     @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(columnDefinition = "CHAR(36)", updatable = false, nullable = false)
+    private UUID subtopicUuid;
+
+    @Column(nullable = false, length = 100)
     private String code;
-    private String topicCode;
+
+    @Column(nullable = false, columnDefinition = "CHAR(36)")
+    private UUID topicUuid;
+
+    @Column(length = 255)
     private String displayName;
+
     private Integer sortOrder;
-    private Boolean isActive;
+
+    @Column(nullable = false)
+    private Boolean isActive = true;
 }

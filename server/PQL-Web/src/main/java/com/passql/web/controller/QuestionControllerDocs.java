@@ -4,7 +4,9 @@ import com.passql.common.dto.Author;
 import com.passql.question.dto.ExecuteResult;
 import com.passql.question.dto.QuestionDetail;
 import com.passql.question.dto.QuestionSummary;
+import com.passql.question.dto.RecommendationsResponse;
 import com.passql.question.dto.SubmitResult;
+import com.passql.question.dto.TodayQuestionResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.suhsaechan.suhapilog.annotation.ApiLog;
@@ -18,29 +20,16 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.Map;
+import java.util.UUID;
 
 @Tag(name = "Question", description = "문제 조회 / SQL 실행 / 제출")
 public interface QuestionControllerDocs {
 
   @ApiLogs({
       @ApiLog(date = "2026.04.07", author = Author.SUHSAECHAN, issueNumber = 1, description = "문제 목록 조회 API 추가"),
+      @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 22, description = "Entity UUID 통일 재작성: questionUuid/topicUuid 기반으로 응답 전환 (Long id → UUID)"),
   })
-  @Operation(
-      summary = "문제 목록 조회",
-      description = """
-          ## 인증(JWT): **불필요**
-
-          ## 요청 파라미터
-          - **`topic`**: 주제 필터 (optional)
-          - **`subtopic`**: 세부 주제 필터 (optional)
-          - **`difficulty`**: 난이도 필터 (optional)
-          - **`mode`**: 모드 필터 (optional)
-          - Pageable 파라미터 (page, size, sort)
-
-          ## 반환값 (Page<QuestionSummary>)
-          - 페이징된 문제 요약 목록
-          """
-  )
+  @Operation(summary = "문제 목록 조회")
   ResponseEntity<Page<QuestionSummary>> getQuestions(
       @RequestParam(required = false) String topic,
       @RequestParam(required = false) String subtopic,
@@ -50,70 +39,57 @@ public interface QuestionControllerDocs {
   );
 
   @ApiLogs({
-      @ApiLog(date = "2026.04.07", author = Author.SUHSAECHAN, issueNumber = 1, description = "문제 상세 조회 API 추가"),
+      @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 5, description = "오늘의 문제 조회 API 추가"),
+      @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 22, description = "HomeService Facade 로 이동 (Controller 직접 의존 제거, 응답 스키마 동일)"),
   })
-  @Operation(
-      summary = "문제 상세 조회",
-      description = """
-          ## 인증(JWT): **불필요**
+  @Operation(summary = "오늘의 문제 조회",
+      description = "오늘의 데일리 챌린지 문제를 반환. 큐레이션 행(daily_challenge)이 있으면 그 문제, 없으면 활성 문제 풀에서 날짜 시드 기반 결정적 폴백. " +
+          "memberUuid 가 주어지면 오늘(00:00~24:00) 해당 문제 제출 여부를 alreadySolvedToday 로 함께 반환. " +
+          "활성 문제가 0개면 { question: null, alreadySolvedToday: false }.")
+  ResponseEntity<TodayQuestionResponse> getToday(
+      @RequestParam(required = false) UUID memberUuid
+  );
 
-          ## 요청 파라미터
-          - **`id`**: 문제 ID (path variable)
+  @ApiLogs({
+      @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 6, description = "추천 문제 조회 API 추가"),
+      @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 22, description = "네이티브 쿼리를 exclude 유무 기준 2분기로 분리하여 UUID 바인딩 타입 안전성 확보"),
+  })
+  @Operation(summary = "추천 문제 조회 (랜덤 활성 문제)",
+      description = "활성 문제 풀에서 랜덤 N개 반환. size 기본 3, 최대 5 (초과 시 5로 clamp, 1 미만은 1). " +
+          "excludeQuestionUuid 미지정 시 오늘의 데일리 챌린지 문제를 자동 제외. " +
+          "활성 문제가 size 보다 적으면 가능한 만큼만 반환. 캐싱 없음 (매 호출 새로 섞임).")
+  ResponseEntity<RecommendationsResponse> getRecommendations(
+      @RequestParam(defaultValue = "3") int size,
+      @RequestParam(required = false) UUID excludeQuestionUuid
+  );
 
-          ## 반환값 (QuestionDetail)
-          - 문제 상세 정보 (본문, 선택지, 스키마 등)
-          """
-  )
-  ResponseEntity<QuestionDetail> getQuestion(@PathVariable Long id);
+  @ApiLogs({
+      @ApiLog(date = "2026.04.07", author = Author.SUHSAECHAN, issueNumber = 1, description = "문제 상세 조회 API 추가"),
+      @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 22, description = "PathVariable: Long id → UUID questionUuid. 응답 DTO(topicName/subtopicName) UUID 기반으로 변경"),
+  })
+  @Operation(summary = "문제 상세 조회")
+  ResponseEntity<QuestionDetail> getQuestion(@PathVariable UUID questionUuid);
 
   @ApiLogs({
       @ApiLog(date = "2026.04.07", author = Author.SUHSAECHAN, issueNumber = 1, description = "SQL 실행(테스트) API 추가"),
+      @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 22, description = "PathVariable: Long id → UUID questionUuid"),
   })
-  @Operation(
-      summary = "SQL 실행 (테스트)",
-      description = """
-          ## 인증(JWT): **불필요**
-
-          ## 요청 파라미터
-          - **`id`**: 문제 ID (path variable)
-
-          ## 요청 바디
-          - **`sql`**: 실행할 SQL (String)
-
-          ## 반환값 (ExecuteResult)
-          - SQL 실행 결과 (컬럼, 행 데이터)
-          - 제출이 아닌 테스트 실행이므로 채점하지 않음
-          """
-  )
+  @Operation(summary = "SQL 실행 (테스트)")
   ResponseEntity<ExecuteResult> executeChoice(
-      @PathVariable Long id,
+      @PathVariable UUID questionUuid,
       @RequestBody Map<String, String> body
   );
 
   @ApiLogs({
       @ApiLog(date = "2026.04.07", author = Author.SUHSAECHAN, issueNumber = 1, description = "문제 제출 API 추가"),
+      @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 22, description = "PathVariable: Long id → UUID questionUuid. Header: X-User-UUID(String) → X-Member-UUID(UUID). Body: selectedKey → selectedChoiceKey (구 selectedKey 한시적 fallback 지원)"),
   })
-  @Operation(
-      summary = "문제 제출",
-      description = """
-          ## 인증(JWT): **불필요**
-
-          ## 요청 헤더
-          - **`X-User-UUID`**: 회원 UUID
-
-          ## 요청 파라미터
-          - **`id`**: 문제 ID (path variable)
-
-          ## 요청 바디
-          - **`selectedKey`**: 선택한 선택지 키 (String)
-
-          ## 반환값 (SubmitResult)
-          - 정답 여부, 정답 선택지, AI 해설 여부 등
-          """
-  )
+  @Operation(summary = "문제 제출",
+      description = "선택지 제출 후 정답 여부 반환. 헤더 X-Member-UUID(UUID) 필수. " +
+          "Body: { \"selectedChoiceKey\": \"A\" } (구 필드명 selectedKey 도 한시적으로 수용).")
   ResponseEntity<SubmitResult> submit(
-      @PathVariable Long id,
-      @RequestHeader(value = "X-User-UUID") String userUuid,
+      @PathVariable UUID questionUuid,
+      @RequestHeader(value = "X-Member-UUID") UUID memberUuid,
       @RequestBody Map<String, String> body
   );
 }

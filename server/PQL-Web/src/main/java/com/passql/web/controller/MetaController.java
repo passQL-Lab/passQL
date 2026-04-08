@@ -12,18 +12,18 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/meta")
+@RequestMapping("/api")
 @RequiredArgsConstructor
 public class MetaController implements MetaControllerDocs {
 
     private final MetaService metaService;
 
-    @GetMapping("/topics")
+    @GetMapping("/meta/topics")
     public ResponseEntity<List<TopicTree>> getTopics() {
         return ResponseEntity.ok(metaService.getTopicTree());
     }
 
-    @GetMapping("/tags")
+    @GetMapping("/meta/tags")
     public ResponseEntity<List<ConceptTag>> getTags() {
         return ResponseEntity.ok(metaService.getActiveTags());
     }

@@ -1,3 +1,3 @@
 package com.passql.submission.dto;
 
-public record ProgressSummary(int solved, double correctRate, int streakDays) {}
+public record ProgressSummary(long solvedCount, double correctRate, int streakDays) {}

@@ -103,8 +103,8 @@
                     </thead>
                     <tbody>
                     <tr th:each="log : ${recentLogs}">
-                        <td class="font-mono text-xs" th:text="${#strings.substring(log.userUuid, 0, 8) + '...'}">uuid1234...</td>
-                        <td th:text="${log.questionId}">1</td>
+                        <td class="font-mono text-xs" th:text="${log.memberUuid != null ? #strings.substring(log.memberUuid.toString(), 0, 8) + '...' : '-'}">uuid1234...</td>
+                        <td class="font-mono text-xs" th:text="${#strings.substring(log.questionUuid.toString(), 0, 8) + '...'}">q1234...</td>
                         <td>
                             <span th:classappend="${log.status == 'OK'} ? 'badge-success' : 'badge-error'"
                                   class="badge badge-sm"

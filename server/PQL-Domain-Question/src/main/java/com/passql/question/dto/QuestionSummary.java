@@ -1,5 +1,10 @@
 package com.passql.question.dto;
 
-import com.passql.question.constant.ExecutionMode;
+import java.util.UUID;
 
-public record QuestionSummary(Long id, String topicCode, Integer difficulty, String stemPreview, ExecutionMode executionMode) {}
+public record QuestionSummary(
+    UUID questionUuid,
+    String topicName,
+    Integer difficulty,
+    String stemPreview
+) {}
