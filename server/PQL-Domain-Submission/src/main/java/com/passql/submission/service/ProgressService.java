@@ -1,14 +1,16 @@
 package com.passql.submission.service;
 
+import com.passql.common.exception.CustomException;
+import com.passql.common.exception.constant.ErrorCode;
+import com.passql.member.repository.MemberRepository;
 import com.passql.submission.dto.ProgressResponse;
 import com.passql.submission.dto.ProgressSummary;
 import com.passql.submission.repository.SubmissionRepository;
+import com.passql.submission.util.StreakCalculator;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
-import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -16,48 +18,23 @@ import java.util.UUID;
 @Transactional(readOnly = true)
 public class ProgressService {
     private final SubmissionRepository submissionRepository;
+    private final MemberRepository memberRepository;
 
     public ProgressResponse getProgress(UUID memberUuid) {
+        if (!memberRepository.existsById(memberUuid)) {
+            throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
+        }
         long solvedCount = submissionRepository.countDistinctQuestionUuidByMemberUuid(memberUuid);
         Double rateRaw = submissionRepository.calculateCorrectRateByMemberUuid(memberUuid.toString());
         double correctRate = rateRaw == null ? 0.0 : Math.round(rateRaw * 100.0) / 100.0;
-        int streakDays = calculateStreak(memberUuid);
+        int streakDays = StreakCalculator.calculate(
+            submissionRepository.findSubmissionDatesByMemberUuid(memberUuid)
+        );
         return new ProgressResponse(solvedCount, correctRate, streakDays);
     }
 
     public ProgressSummary getSummary(UUID memberUuid) {
         ProgressResponse pr = getProgress(memberUuid);
         return new ProgressSummary(pr.solvedCount(), pr.correctRate(), pr.streakDays());
-    }
-
-    private int calculateStreak(UUID memberUuid) {
-        List<java.sql.Date> dates = submissionRepository.findSubmissionDatesByMemberUuid(memberUuid);
-        if (dates == null || dates.isEmpty()) {
-            return 0;
-        }
-        LocalDate today = LocalDate.now();
-        int streak = 0;
-        LocalDate expected = today;
-        boolean started = false;
-        for (java.sql.Date d : dates) {
-            LocalDate ld = d.toLocalDate();
-            if (!started) {
-                if (ld.equals(today) || ld.equals(today.minusDays(1))) {
-                    streak = 1;
-                    expected = ld.minusDays(1);
-                    started = true;
-                } else {
-                    return 0;
-                }
-            } else {
-                if (ld.equals(expected)) {
-                    streak++;
-                    expected = expected.minusDays(1);
-                } else if (ld.isBefore(expected)) {
-                    break;
-                }
-            }
-        }
-        return streak;
     }
 }
