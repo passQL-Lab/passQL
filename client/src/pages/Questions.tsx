@@ -101,8 +101,8 @@ export default function Questions() {
       ) : (
         <section className="space-y-3">
           {data?.content.map((q) => (
-            <Link key={q.id} to={`/questions/${q.id}`}>
-              <div className="card-base flex flex-col gap-2 cursor-pointer hover:bg-surface transition-colors">
+            <Link key={q.id} to={`/questions/${q.id}`} className="block">
+              <div className="card-base flex flex-col gap-3 cursor-pointer hover:bg-surface transition-colors">
                 <div className="flex items-center justify-between">
                   <span className="font-mono text-xs text-text-caption">Q{String(q.id).padStart(3, "0")}</span>
                   <span className="badge-topic">{q.topicCode}</span>

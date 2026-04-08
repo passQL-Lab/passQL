@@ -125,7 +125,7 @@ export default function QuestionDetail() {
         <div className="mx-auto max-w-180">
           <button
             type="button"
-            className={`w-full h-12 rounded-lg text-body font-bold ${selectedKey && !submitMutation.isPending ? "bg-brand text-white" : "bg-border text-text-caption cursor-not-allowed"}`}
+            className={`w-full h-12 rounded-lg text-base font-bold ${selectedKey && !submitMutation.isPending ? "bg-brand text-white" : "bg-border text-text-caption cursor-not-allowed"}`}
             disabled={!selectedKey || submitMutation.isPending}
             onClick={handleSubmit}
           >
