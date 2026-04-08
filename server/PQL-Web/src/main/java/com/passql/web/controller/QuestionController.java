@@ -1,5 +1,6 @@
 package com.passql.web.controller;
 
+import com.passql.application.service.HomeService;
 import com.passql.question.dto.ExecuteResult;
 import com.passql.question.dto.QuestionDetail;
 import com.passql.question.dto.QuestionSummary;
@@ -8,7 +9,6 @@ import com.passql.question.dto.SubmitResult;
 import com.passql.question.dto.TodayQuestionResponse;
 import com.passql.question.service.QuestionService;
 import com.passql.question.service.SandboxExecutor;
-import com.passql.submission.repository.SubmissionRepository;
 import com.passql.submission.service.SubmissionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -16,8 +16,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Map;
 import java.util.UUID;
 
@@ -27,9 +25,9 @@ import java.util.UUID;
 public class QuestionController implements QuestionControllerDocs {
 
     private final QuestionService questionService;
+    private final HomeService homeService;
     private final SandboxExecutor sandboxExecutor;
     private final SubmissionService submissionService;
-    private final SubmissionRepository submissionRepository;
 
     @GetMapping
     public ResponseEntity<Page<QuestionSummary>> getQuestions(
@@ -46,18 +44,7 @@ public class QuestionController implements QuestionControllerDocs {
     public ResponseEntity<TodayQuestionResponse> getToday(
         @RequestParam(required = false) UUID memberUuid
     ) {
-        var question = questionService.resolveTodayQuestion();
-        if (question == null) {
-            return ResponseEntity.ok(new TodayQuestionResponse(null, false));
-        }
-        boolean already = false;
-        if (memberUuid != null) {
-            LocalDateTime start = LocalDate.now().atStartOfDay();
-            LocalDateTime end = LocalDate.now().plusDays(1).atStartOfDay();
-            already = submissionRepository.existsByMemberUuidAndQuestionUuidAndSubmittedAtBetween(
-                memberUuid, question.getQuestionUuid(), start, end);
-        }
-        return ResponseEntity.ok(new TodayQuestionResponse(questionService.toSummary(question), already));
+        return ResponseEntity.ok(homeService.getToday(memberUuid));
     }
 
     @GetMapping("/recommendations")
