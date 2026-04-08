@@ -15,6 +15,8 @@ public final class StreakCalculator {
      * @param dates 제출 날짜 목록 (DESC 정렬, distinct)
      * @return 연속 학습 일수
      */
+    // 전제: dates는 DESC 정렬된 distinct 날짜 목록이어야 한다.
+    // findSubmissionDatesByMemberUuid 쿼리가 이를 보장한다.
     public static int calculate(List<Date> dates) {
         if (dates == null || dates.isEmpty()) {
             return 0;

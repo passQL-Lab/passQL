@@ -12,6 +12,8 @@ public interface MemberRepository extends JpaRepository<Member, UUID> {
     // === 일반 조회 (소프트 딜리트 제외) ===
     Optional<Member> findByMemberUuidAndIsDeletedFalse(UUID memberUuid);
 
+    boolean existsByMemberUuidAndIsDeletedFalse(UUID memberUuid);
+
     boolean existsByNicknameAndIsDeletedFalse(String nickname);
 
     Optional<Member> findByAuthProviderAndProviderUserIdAndIsDeletedFalse(

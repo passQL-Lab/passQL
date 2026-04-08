@@ -21,7 +21,7 @@ public class ProgressService {
     private final MemberRepository memberRepository;
 
     public ProgressResponse getProgress(UUID memberUuid) {
-        if (!memberRepository.existsById(memberUuid)) {
+        if (!memberRepository.existsByMemberUuidAndIsDeletedFalse(memberUuid)) {
             throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
         }
         long solvedCount = submissionRepository.countDistinctQuestionUuidByMemberUuid(memberUuid);
