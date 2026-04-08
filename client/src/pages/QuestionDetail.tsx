@@ -85,6 +85,7 @@ export default function QuestionDetail() {
       <header className="sticky top-0 z-20 flex items-center justify-between h-14 bg-surface-card border-b border-border px-4 -mx-4 lg:-mx-0">
         <button type="button" className="text-text-primary" onClick={() => navigate(-1)}><ArrowLeft size={20} /></button>
         <div className="flex items-center gap-2">
+          <span className="font-mono text-xs text-text-caption">Q{String(questionId).padStart(3, "0")}</span>
           <span className="badge-topic">{question.topicCode}</span>
           <StarRating level={question.difficulty} />
         </div>
@@ -128,7 +129,7 @@ export default function QuestionDetail() {
             disabled={!selectedKey || submitMutation.isPending}
             onClick={handleSubmit}
           >
-            {submitMutation.isPending ? "제출 중..." : "제출"}
+            {submitMutation.isPending ? "제출 중..." : "답안 제출하기"}
           </button>
         </div>
       </div>

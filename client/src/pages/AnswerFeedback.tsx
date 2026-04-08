@@ -59,7 +59,7 @@ export default function AnswerFeedback() {
               <h1 className="text-2xl font-bold" style={{ color: "var(--color-sem-success-text)" }}>
                 정답입니다!
               </h1>
-              <p className="text-secondary mt-2">잘했어요! 다음 문제도 도전해보세요</p>
+              <p className="text-secondary mt-2">정확히 맞혔어요! 다음 문제도 도전해보세요</p>
             </div>
             <div className="card-base">
               <p className="text-secondary text-sm mb-3">해설</p>
@@ -99,7 +99,7 @@ export default function AnswerFeedback() {
               <h1 className="text-2xl font-bold" style={{ color: "var(--color-sem-error-text)" }}>
                 오답입니다
               </h1>
-              <p className="text-secondary mt-2">괜찮아요, 해설을 확인해보세요</p>
+              <p className="text-secondary mt-2">다음엔 맞출 수 있어요. 해설을 확인해보세요</p>
             </div>
             <div className="card-base space-y-0">
               {selectedSql && (
