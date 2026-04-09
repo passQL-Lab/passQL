@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import { useParams, useNavigate, Navigate } from "react-router-dom";
+import { Home } from "lucide-react";
 import { usePracticeStore } from "../stores/practiceStore";
 import { getRandomMessage } from "../constants/microcopy";
 import QuestionDetail from "./QuestionDetail";
@@ -48,6 +49,13 @@ export default function PracticeSet() {
     <div className="flex flex-col h-screen max-w-[480px] mx-auto w-full">
       <div className="px-4 pt-3 pb-2">
         <div className="flex items-center justify-between mb-2">
+          <button
+            type="button"
+            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-border transition-colors"
+            onClick={() => navigate("/")}
+          >
+            <Home size={18} className="text-text-secondary" />
+          </button>
           <span className="text-sm font-semibold text-text-secondary">
             {currentIndex + 1} / {totalQuestions}
           </span>

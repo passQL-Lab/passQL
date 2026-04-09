@@ -223,8 +223,8 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
           {choicesSection}
         </div>
 
-        {/* 하단 고정: 버튼 */}
-        <div className="bg-surface-card border-t border-border p-4">
+        {/* 하단 고정: 버튼만 */}
+        <div className="px-4 pb-4 pt-2">
           {submitButton}
         </div>
 
