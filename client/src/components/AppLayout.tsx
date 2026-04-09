@@ -62,9 +62,6 @@ export default function AppLayout() {
     <div className="flex min-h-screen bg-surface">
       <SidebarNav />
       <main className="flex-1 lg:py-8 pb-16 lg:pb-8">
-        <div className="lg:hidden flex items-center h-12 px-4">
-          <img src={logo} alt="passQL" className="h-5 w-auto" />
-        </div>
         <div className="mx-auto max-w-180 px-4 lg:px-0">
           <Outlet />
         </div>
