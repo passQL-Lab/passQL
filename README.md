@@ -12,11 +12,7 @@
 
 [전체 버전 기록 보기](CHANGELOG.md)
 
-### 링크
-
-- [서비스 메인](https://passql.vercel.app/)
-- [관리자 화면](https://api.passql.suhsaechan.kr/admin/questions)
-- [Swagger UI](https://api.passql.suhsaechan.kr/docs/swagger-ui/index.html) · [API Docs (JSON)](https://api.passql.suhsaechan.kr/docs/api-docs)
+[**Live Demo**](https://passql.vercel.app/) · [**Admin**](https://api.passql.suhsaechan.kr/admin/questions) · [**API Docs**](https://api.passql.suhsaechan.kr/docs/swagger-ui/index.html)
 
 </div>
 
