@@ -8,6 +8,7 @@ import ScoreCountUp from "../components/ScoreCountUp";
 import StepNavigator from "../components/StepNavigator";
 
 function formatDuration(ms: number): string {
+  if (!Number.isFinite(ms) || ms <= 0) return "0초";
   const sec = Math.round(ms / 1000);
   if (sec < 60) return `${sec}초`;
   const min = Math.floor(sec / 60);
@@ -53,7 +54,9 @@ export default function PracticeResult() {
   }
 
   const totalDuration = formatDuration(analysis.totalDurationMs);
-  const avgDuration = formatDuration(Math.round(analysis.totalDurationMs / analysis.totalCount));
+  const avgDuration = analysis.totalCount > 0
+    ? formatDuration(Math.round(analysis.totalDurationMs / analysis.totalCount))
+    : "0초";
 
   const step1 = (
     <>
@@ -76,7 +79,7 @@ export default function PracticeResult() {
         style={{ opacity: statsVisible ? 1 : 0, transform: statsVisible ? "translateY(0)" : "translateY(12px)" }}
       >
         <div className="text-center">
-          <div className="text-lg font-bold">{Math.round((analysis.correctCount / analysis.totalCount) * 100)}%</div>
+          <div className="text-lg font-bold">{analysis.totalCount > 0 ? Math.round((analysis.correctCount / analysis.totalCount) * 100) : 0}%</div>
           <div className="text-xs text-text-caption mt-0.5">정답률</div>
         </div>
         <div className="text-center">
@@ -143,7 +146,7 @@ export default function PracticeResult() {
   );
 
   return (
-    <div className="h-screen">
+    <div className="h-screen max-w-[480px] mx-auto">
       <StepNavigator
         steps={[step1, step2, step3]}
         lastButtonLabel="다른 카테고리"
