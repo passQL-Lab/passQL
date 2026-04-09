@@ -37,6 +37,9 @@ export default function Stats3DChart({ categories, onCategoryClick }: Stats3DCha
     const tooltip = tooltipRef.current;
     if (!container || !tooltip || categories.length === 0) return;
 
+    // Disable color management to match r128 behavior (brighter colors)
+    THREE.ColorManagement.enabled = false;
+
     // Scene
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xFAFAFA);
