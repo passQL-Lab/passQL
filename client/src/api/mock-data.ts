@@ -19,6 +19,7 @@ import type {
   ChoiceItem,
   HeatmapResponse,
   PracticeAnalysis,
+  CategoryStats,
 } from "../types/api";
 
 const MOCK_TOPICS: readonly TopicTree[] = [
@@ -96,6 +97,18 @@ const MOCK_EXAM_SCHEDULES: readonly ExamScheduleResponse[] = [
   { examScheduleUuid: "es-uuid-0003", certType: "SQLP", round: 1, examDate: "2026-06-21", isSelected: false },
 ];
 
+const MOCK_CATEGORY_STATS: readonly CategoryStats[] = [
+  { code: "JOIN", displayName: "JOIN", correctRate: 0.82, solvedCount: 45 },
+  { code: "GROUP_BY", displayName: "GROUP BY", correctRate: 0.68, solvedCount: 32 },
+  { code: "SUBQUERY", displayName: "서브쿼리", correctRate: 0.41, solvedCount: 18 },
+  { code: "DDL", displayName: "DDL", correctRate: 0.90, solvedCount: 28 },
+  { code: "CONSTRAINT", displayName: "제약조건", correctRate: 0.55, solvedCount: 22 },
+  { code: "SELECT", displayName: "SELECT", correctRate: 0.75, solvedCount: 38 },
+  { code: "SQL_FUNC", displayName: "SQL 함수", correctRate: 0.33, solvedCount: 12 },
+  { code: "WINDOW", displayName: "윈도우 함수", correctRate: 0.60, solvedCount: 15 },
+  { code: "HIERARCHY", displayName: "계층 쿼리", correctRate: 0.20, solvedCount: 5 },
+];
+
 function buildMockHeatmap(): HeatmapResponse {
   const pattern = [3, 0, 5, 2, 1, 0, 4, 6, 0, 1, 2, 3, 0, 0, 5, 1, 2, 0, 3, 4, 0, 1, 0, 6, 2, 3, 1, 0, 4, 2];
   const entries = [];
@@ -170,6 +183,11 @@ export function getMockResponse(path: string, method: string, body?: string): un
     const selectedKey = (parsed.selectedChoiceKey ?? "A") as string;
     const isCorrect = selectedKey === "A";
     return { isCorrect, correctKey: "A", rationale: "CUSTOMER와 ORDERS를 customer_id로 JOIN한 후 c.name으로 GROUP BY하면 고객별 주문 수를 정확히 구할 수 있습니다." } satisfies SubmitResult;
+  }
+
+  // GET /progress/categories (specific before /progress)
+  if (method === "GET" && path.startsWith("/progress/categories")) {
+    return MOCK_CATEGORY_STATS;
   }
 
   // GET /progress/heatmap (specific before /progress)

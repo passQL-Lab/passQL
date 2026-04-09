@@ -62,6 +62,13 @@ export interface ProgressResponse {
   readonly streakDays: number;
 }
 
+export interface CategoryStats {
+  readonly code: string;
+  readonly displayName: string;
+  readonly correctRate: number;
+  readonly solvedCount: number;
+}
+
 // === Heatmap ===
 export interface HeatmapEntry {
   readonly date: string;

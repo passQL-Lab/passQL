@@ -1,10 +1,15 @@
 import { apiFetch } from "./client";
 import { getMemberUuid } from "../stores/memberStore";
-import type { ProgressResponse, HeatmapResponse } from "../types/api";
+import type { ProgressResponse, HeatmapResponse, CategoryStats } from "../types/api";
 
 export function fetchProgress(): Promise<ProgressResponse> {
   const uuid = getMemberUuid();
   return apiFetch(`/progress?memberUuid=${uuid}`);
+}
+
+export function fetchCategoryStats(): Promise<readonly CategoryStats[]> {
+  const uuid = getMemberUuid();
+  return apiFetch(`/progress/categories?memberUuid=${uuid}`);
 }
 
 export function fetchHeatmap(memberUuid: string, from?: string, to?: string): Promise<HeatmapResponse> {
