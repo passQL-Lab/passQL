@@ -2465,7 +2465,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            const branch = '${{ needs.get-branch-from-issue.outputs.branch }}';
+            const branch = '${{ needs.get-branch-from-issue.outputs.branch_name }}';
             try {
               await github.rest.repos.getBranch({
                 owner: context.repo.owner,
@@ -2486,7 +2486,7 @@ jobs:
           script: |
             const runUrl = `https://github.com/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
             const msg = '${{ steps.check_branch.outputs.errorMessage }}';
-            const branch = '${{ needs.get-branch-from-issue.outputs.branch }}';
+            const branch = '${{ needs.get-branch-from-issue.outputs.branch_name }}';
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,

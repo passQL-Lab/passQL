@@ -92,15 +92,22 @@ public class SandboxValidator {
     }
 
     /**
-     * 두 결과셋을 정렬 무시하고 set 비교한다.
+     * 두 결과셋을 정렬 무시하고 비교한다 (중복 행 포함).
+     * HashSet 은 중복 행을 제거하므로, 각 행을 문자열 변환 후 정렬하여 비교한다.
      */
     private boolean resultSetsMatch(ExecuteResult expected, ExecuteResult actual) {
         if (!expected.columns().equals(actual.columns())) {
             return false;
         }
-        // row 를 set 으로 비교 (정렬 무시)
-        Set<List<Object>> expectedSet = new HashSet<>(expected.rows());
-        Set<List<Object>> actualSet = new HashSet<>(actual.rows());
-        return expectedSet.equals(actualSet);
+        if (expected.rows().size() != actual.rows().size()) {
+            return false;
+        }
+        // 각 row를 문자열로 변환 후 정렬 → 순서 무시하면서 중복 행도 보존
+        Comparator<List<Object>> rowComparator = Comparator.comparing(Objects::toString);
+        List<List<Object>> expectedSorted = expected.rows().stream()
+                .sorted(rowComparator).toList();
+        List<List<Object>> actualSorted = actual.rows().stream()
+                .sorted(rowComparator).toList();
+        return expectedSorted.equals(actualSorted);
     }
 }
