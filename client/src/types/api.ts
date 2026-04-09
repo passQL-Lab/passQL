@@ -24,7 +24,6 @@ export interface QuestionDetail {
   readonly executionMode: ExecutionMode;
   readonly stem: string;
   readonly schemaDisplay: string;
-  readonly choices: readonly ChoiceItem[];
 }
 
 export interface SubmitResult {
@@ -150,4 +149,28 @@ export interface ExamScheduleResponse {
   readonly round: number;
   readonly examDate: string;
   readonly isSelected: boolean;
+}
+
+// === AI 선택지 생성 SSE ===
+export type ChoiceGenerationPhase = "generating" | "validating";
+
+export interface ChoiceGenerationStatus {
+  readonly phase: ChoiceGenerationPhase;
+  readonly message: string;
+}
+
+export interface ChoiceSetComplete {
+  readonly choiceSetId: string;
+  readonly choices: readonly ChoiceItem[];
+}
+
+export interface ChoiceGenerationError {
+  readonly code: string;
+  readonly message: string;
+  readonly retryable: boolean;
+}
+
+export interface SubmitPayload {
+  readonly choiceSetId: string;
+  readonly selectedChoiceKey: string;
 }
