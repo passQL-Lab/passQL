@@ -121,7 +121,7 @@ export default function QuestionDetail({ practiceMode, questionUuid: propUuid, o
     !submitMutation.isPending;
 
   return (
-    <div className={practiceMode ? "pb-4" : "pb-24"}>
+    <div className="pb-24">
       {!practiceMode && (
         <header className="sticky top-0 z-20 flex items-center justify-between h-14 bg-surface-card border-b border-border px-4 -mx-4 lg:-mx-0">
           <button
@@ -207,11 +207,8 @@ export default function QuestionDetail({ practiceMode, questionUuid: propUuid, o
         onClose={() => setAiSheetOpen(false)}
       />
 
-      <div className={practiceMode
-        ? "sticky bottom-0 bg-surface-card border-t border-border p-4 z-20"
-        : "fixed bottom-0 inset-x-0 lg:left-55 bg-surface-card border-t border-border p-4 z-20"
-      }>
-        <div className={practiceMode ? "" : "mx-auto max-w-180"}>
+      <div className="fixed bottom-0 inset-x-0 lg:left-55 bg-surface-card border-t border-border p-4 z-20">
+        <div className={practiceMode ? "mx-auto max-w-[480px] px-2" : "mx-auto max-w-180"}>
           <button
             type="button"
             className={`w-full h-12 rounded-lg text-base font-bold ${
