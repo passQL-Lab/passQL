@@ -1723,7 +1723,6 @@ jobs:
         working-directory: server
         run: |
           BUILD_START=$(date +%s)
-          chmod +x ./gradlew
           ./gradlew clean bootJar -x test --no-daemon
           BUILD_END=$(date +%s)
           BUILD_DURATION=$((BUILD_END - BUILD_START))
