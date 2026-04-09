@@ -76,7 +76,6 @@ class MemberAdminServiceTest {
         lineLog("닉네임 필터 테스트 완료");
     }
 
-    @Transactional
     public void suspendAndUnsuspend_제재_및_해제_테스트() {
         lineLog("제재 및 해제 테스트");
 

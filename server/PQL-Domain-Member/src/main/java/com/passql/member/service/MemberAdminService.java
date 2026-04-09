@@ -14,10 +14,13 @@ import com.passql.member.repository.MemberSpecification;
 import com.passql.member.repository.MemberSuspendHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
@@ -32,6 +35,11 @@ public class MemberAdminService {
 
     private final MemberRepository memberRepository;
     private final MemberSuspendHistoryRepository suspendHistoryRepository;
+
+    /** self-injection: @Transactional(REQUIRES_NEW) 가 AOP 프록시를 거치게 하기 위함. */
+    @Autowired
+    @Lazy
+    private MemberAdminService self;
 
     /** 회원 목록 검색 (동적 필터 + 페이지네이션) */
     public Page<MemberAdminListResponse> searchMembers(MemberSearchCondition cond, Pageable pageable) {
@@ -98,32 +106,47 @@ public class MemberAdminService {
 
     /**
      * 만료된 제재 자동 해제 (스케줄러에서 호출).
-     * 한 건이 실패해도 나머지는 계속 처리한다.
+     * 조회는 readOnly TX, 건별 해제는 REQUIRES_NEW로 격리하여
+     * 한 건 실패가 배치 전체를 롤백하지 않도록 한다.
      */
-    @Transactional
     public void autoUnsuspendExpired() {
         LocalDateTime now = LocalDateTime.now();
-        List<Member> expired = memberRepository
-            .findAllByStatusAndSuspendUntilBeforeAndIsDeletedFalse(MemberStatus.SUSPENDED, now);
+        List<UUID> expiredUuids = memberRepository
+            .findAllByStatusAndSuspendUntilBeforeAndIsDeletedFalse(MemberStatus.SUSPENDED, now)
+            .stream()
+            .map(Member::getMemberUuid)
+            .toList();
 
         int succeeded = 0;
         int failed = 0;
-        for (Member member : expired) {
+        for (UUID uuid : expiredUuids) {
             try {
-                member.setStatus(MemberStatus.ACTIVE);
-                member.setSuspendUntil(null);
-                suspendHistoryRepository.save(MemberSuspendHistory.ofUnsuspend(member.getMemberUuid()));
-                log.info("Member auto-unsuspended: uuid={}", member.getMemberUuid());
+                self.unsuspendSingleInNewTx(uuid);
                 succeeded++;
             } catch (Exception e) {
                 failed++;
-                log.error("Auto-unsuspend failed for member: uuid={}", member.getMemberUuid(), e);
+                log.error("Auto-unsuspend failed for member: uuid={}", uuid, e);
             }
         }
 
-        if (!expired.isEmpty()) {
+        if (!expiredUuids.isEmpty()) {
             log.info("Auto-unsuspend batch: total={}, succeeded={}, failed={}",
-                expired.size(), succeeded, failed);
+                expiredUuids.size(), succeeded, failed);
         }
+    }
+
+    /** 단건 자동 해제 — 새 트랜잭션에서 실행되어 실패가 배치 전체를 오염시키지 않는다. */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void unsuspendSingleInNewTx(UUID memberUuid) {
+        Member member = memberRepository.findByMemberUuidAndIsDeletedFalse(memberUuid)
+            .orElseThrow(() -> new CustomException(ErrorCode.MEMBER_NOT_FOUND));
+        // 배치 조회 후 상태 변경됐을 수 있으므로 재확인
+        if (member.getStatus() != MemberStatus.SUSPENDED) {
+            return;
+        }
+        member.setStatus(MemberStatus.ACTIVE);
+        member.setSuspendUntil(null);
+        suspendHistoryRepository.save(MemberSuspendHistory.ofUnsuspend(memberUuid));
+        log.info("Member auto-unsuspended: uuid={}", memberUuid);
     }
 }

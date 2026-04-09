@@ -49,6 +49,8 @@ public enum ErrorCode {
     // Member
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "회원을 찾을 수 없습니다."),
     MEMBER_ALREADY_WITHDRAWN(HttpStatus.GONE, "이미 탈퇴한 회원입니다."),
+    MEMBER_SUSPENDED(HttpStatus.FORBIDDEN, "제재된 회원입니다."),
+    INVALID_SUSPEND_UNTIL(HttpStatus.BAD_REQUEST, "제재 만료 시각이 유효하지 않습니다."),
     NICKNAME_DUPLICATE(HttpStatus.CONFLICT, "이미 사용 중인 닉네임입니다."),
     NICKNAME_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "닉네임 생성에 실패했습니다.");
 

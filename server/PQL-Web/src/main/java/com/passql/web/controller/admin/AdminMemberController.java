@@ -29,8 +29,9 @@ public class AdminMemberController {
     public String list(MemberSearchCondition condition, Model model,
                        @RequestParam(defaultValue = "0") int page,
                        @RequestParam(defaultValue = "20") int size) {
-        int clampedSize = Math.min(size, 100);
-        Pageable pageable = PageRequest.of(page, clampedSize, Sort.by(Sort.Direction.DESC, "createdAt"));
+        int clampedPage = Math.max(0, page);
+        int clampedSize = Math.min(Math.max(1, size), 100);
+        Pageable pageable = PageRequest.of(clampedPage, clampedSize, Sort.by(Sort.Direction.DESC, "createdAt"));
 
         model.addAttribute("members", memberAdminService.searchMembers(condition, pageable));
         model.addAttribute("condition", condition);

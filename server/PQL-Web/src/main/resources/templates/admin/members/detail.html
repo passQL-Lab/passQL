@@ -131,7 +131,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="h : ${member.suspendHistories}" th:if="${!member.suspendHistories.isEmpty()}">
+                    <tr th:each="h : ${member.suspendHistories}">
                         <td class="text-xs" th:text="${#temporals.format(h.actedAt, 'yyyy-MM-dd HH:mm')}">-</td>
                         <td>
                             <span class="badge badge-sm"
@@ -181,7 +181,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="s : ${submissions}" th:if="${submissions != null and !submissions.isEmpty()}">
+                    <tr th:each="s : ${submissions}">
                         <td class="font-mono text-xs" th:text="${s.questionUuid}">uuid</td>
                         <td>
                             <span class="badge badge-sm"

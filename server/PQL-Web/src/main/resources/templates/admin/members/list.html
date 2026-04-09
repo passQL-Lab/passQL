@@ -105,7 +105,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="m : ${members}" th:if="${members != null and !members.isEmpty()}">
+                    <tr th:each="m : ${members}">
                         <td class="font-medium text-sm" th:text="${m.nickname}">닉네임</td>
                         <td>
                             <span class="badge badge-sm"
@@ -148,12 +148,30 @@
             <!-- 페이지네이션 -->
             <div class="flex justify-center p-4" th:if="${members != null and members.totalPages > 1}">
                 <div class="join">
-                    <a th:href="@{/admin/members(page=${members.number - 1}, nickname=${condition.nickname}, status=${condition.status}, role=${condition.role})}"
+                    <a th:href="@{/admin/members(
+                            page=${members.number - 1},
+                            nickname=${condition.nickname},
+                            status=${condition.status},
+                            role=${condition.role},
+                            joinedFrom=${condition.joinedFrom},
+                            joinedTo=${condition.joinedTo},
+                            lastSeenFrom=${condition.lastSeenFrom},
+                            lastSeenTo=${condition.lastSeenTo},
+                            includeTest=${condition.includeTest})}"
                        class="join-item btn btn-sm"
                        th:classappend="${members.first} ? 'btn-disabled'">«</a>
                     <button class="join-item btn btn-sm btn-active"
                             th:text="${members.number + 1} + ' / ' + ${members.totalPages}">1 / 10</button>
-                    <a th:href="@{/admin/members(page=${members.number + 1}, nickname=${condition.nickname}, status=${condition.status}, role=${condition.role})}"
+                    <a th:href="@{/admin/members(
+                            page=${members.number + 1},
+                            nickname=${condition.nickname},
+                            status=${condition.status},
+                            role=${condition.role},
+                            joinedFrom=${condition.joinedFrom},
+                            joinedTo=${condition.joinedTo},
+                            lastSeenFrom=${condition.lastSeenFrom},
+                            lastSeenTo=${condition.lastSeenTo},
+                            includeTest=${condition.includeTest})}"
                        class="join-item btn btn-sm"
                        th:classappend="${members.last} ? 'btn-disabled'">»</a>
                 </div>
