@@ -159,10 +159,7 @@ describe("generateChoices 제거 확인", () => {
 });
 
 describe("타입 계약 (컴파일 타임 검증 보조)", () => {
-  it("ExplainErrorPayload에 errorMessage 필드가 있다 (snake_case 아님)", async () => {
-    const types = await import("../types/api");
-    // 런타임 검증: 타입 이름이 export되는지 확인 (interface는 런타임에 없으므로
-    // 실제 사용 패턴으로 검증)
+  it("ExplainErrorPayload에 errorMessage 필드가 있다 (snake_case 아님)", () => {
     const payload: import("../types/api").ExplainErrorPayload = {
       questionUuid: "q-uuid",
       sql: "SELECT 1",

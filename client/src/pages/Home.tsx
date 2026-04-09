@@ -1,13 +1,19 @@
-import { Flame, ChevronRight } from "lucide-react";
+import { Flame, ChevronRight, Calendar } from "lucide-react";
 import { Link } from "react-router-dom";
 import { useProgress } from "../hooks/useProgress";
 import { useMember } from "../hooks/useMember";
 import { useMemberStore } from "../stores/memberStore";
 import ErrorFallback from "../components/ErrorFallback";
+import { StarRating } from "../components/StarRating";
+import { useGreeting, useTodayQuestion, useRecommendations, useSelectedSchedule } from "../hooks/useHome";
 
 export default function Home() {
   const { data: progress, isLoading, isError, refetch } = useProgress();
   useMember();
+  const { data: greeting } = useGreeting();
+  const { data: today } = useTodayQuestion();
+  const { data: recommendations } = useRecommendations();
+  const { data: schedule } = useSelectedSchedule();
   const uuid = useMemberStore((s) => s.uuid);
   const nickname = useMemberStore((s) => s.nickname);
   const displayName = nickname || uuid.slice(0, 8);
@@ -43,19 +49,42 @@ export default function Home() {
         >
           {initials}
         </div>
-        <h1 className="text-h2">안녕하세요, {displayName}</h1>
+        <div>
+          <h1 className="text-h2">안녕하세요, {displayName}</h1>
+          {greeting?.message && (
+            <p className="text-secondary mt-1">{greeting.message}</p>
+          )}
+        </div>
       </section>
 
       <section className="mb-4">
-        <Link to="/questions">
-          <div className="card-base flex items-center gap-4 border-l-4 border-l-brand cursor-pointer hover:bg-surface transition-colors">
-            <div className="flex-1 min-w-0">
-              <p className="text-secondary mb-1">문제 풀기</p>
-              <p className="text-body">SQL 문제를 풀어보세요</p>
+        {today?.question ? (
+          <Link to={`/questions/${today.question.questionUuid}`}>
+            <div className="card-base flex items-center gap-4 border-l-4 border-l-brand cursor-pointer hover:bg-surface transition-colors">
+              <div className="flex-1 min-w-0">
+                <p className="text-secondary mb-1">
+                  {today.alreadySolvedToday ? "오늘의 문제 (완료)" : "오늘의 문제"}
+                </p>
+                <p className="text-body truncate">{today.question.stemPreview}</p>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="badge-topic">{today.question.topicName}</span>
+                  <StarRating level={today.question.difficulty} />
+                </div>
+              </div>
+              <ChevronRight size={20} className="text-text-caption flex-shrink-0" />
             </div>
-            <ChevronRight size={20} className="text-text-caption flex-shrink-0" />
-          </div>
-        </Link>
+          </Link>
+        ) : (
+          <Link to="/questions">
+            <div className="card-base flex items-center gap-4 border-l-4 border-l-brand cursor-pointer hover:bg-surface transition-colors">
+              <div className="flex-1 min-w-0">
+                <p className="text-secondary mb-1">문제 풀기</p>
+                <p className="text-body">SQL 문제를 풀어보세요</p>
+              </div>
+              <ChevronRight size={20} className="text-text-caption flex-shrink-0" />
+            </div>
+          </Link>
+        )}
       </section>
 
       {streak > 0 && (
@@ -72,6 +101,18 @@ export default function Home() {
         </section>
       )}
 
+      {schedule && (
+        <section className="mb-6">
+          <div className="card-base flex items-center gap-3">
+            <Calendar size={18} className="text-brand flex-shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-secondary text-sm">{schedule.certType} {schedule.round}회</p>
+              <p className="text-body font-bold">{schedule.examDate}</p>
+            </div>
+          </div>
+        </section>
+      )}
+
       <section className="grid grid-cols-2 gap-3">
         <div className="card-base flex flex-col items-start">
           <span className="text-h1 text-brand">{solved}</span>
@@ -85,6 +126,28 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {recommendations && recommendations.questions.length > 0 && (
+        <section className="mt-6">
+          <h2 className="text-secondary text-sm mb-3">추천 문제</h2>
+          <div className="space-y-2">
+            {recommendations.questions.map((q) => (
+              <Link key={q.questionUuid} to={`/questions/${q.questionUuid}`}>
+                <div className="card-base flex items-center gap-3 cursor-pointer hover:bg-surface transition-colors">
+                  <div className="flex-1 min-w-0">
+                    <p className="text-body truncate">{q.stemPreview}</p>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="badge-topic">{q.topicName}</span>
+                      <StarRating level={q.difficulty} />
+                    </div>
+                  </div>
+                  <ChevronRight size={16} className="text-text-caption flex-shrink-0" />
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }
