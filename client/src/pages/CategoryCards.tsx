@@ -30,7 +30,7 @@ export default function CategoryCards() {
     <div className="py-6">
       <h1 className="text-h1 mb-1">문제 풀기</h1>
       <p className="text-secondary mb-6">
-        카테고리를 선택하면 AI가 맞춤 문제 10개를 생성합니다
+        골라보세요, AI가 딱 맞는 문제를 만들어드릴게요
       </p>
 
       {isLoading ? (
