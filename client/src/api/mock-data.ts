@@ -102,7 +102,7 @@ interface ChoiceGenerationCallbacks {
   readonly onError: (error: ChoiceGenerationError) => void;
 }
 
-/** Mock SSE 시뮬레이션 — 타이머 기반 순서 재현. Returns cleanup function. */
+/** Mock SSE 시뮬레이션 — 타이머 기반 순서 재현. Returns cleanup function. onError는 mock에서 호출되지 않음. */
 export function generateChoicesMock(
   _questionUuid: string,
   callbacks: ChoiceGenerationCallbacks,

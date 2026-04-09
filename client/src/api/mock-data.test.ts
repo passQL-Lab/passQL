@@ -248,4 +248,26 @@ describe("generateChoicesMock", () => {
     await new Promise((r) => setTimeout(r, 1000));
     expect(onComplete).not.toHaveBeenCalled();
   });
+
+  it("stops remaining callbacks when aborted mid-flight", async () => {
+    const onStatus = vi.fn();
+    const onComplete = vi.fn();
+    const abort = generateChoicesMock("q-uuid-0001", {
+      onStatus,
+      onComplete,
+      onError: vi.fn(),
+    });
+
+    // Wait past 200ms so "generating" fires
+    await new Promise((r) => setTimeout(r, 300));
+    expect(onStatus).toHaveBeenCalledTimes(1);
+    expect(onStatus).toHaveBeenCalledWith(expect.objectContaining({ phase: "generating" }));
+
+    // Abort before 500ms (validating) and 800ms (complete)
+    abort();
+
+    await new Promise((r) => setTimeout(r, 700));
+    expect(onStatus).toHaveBeenCalledTimes(1); // no additional calls
+    expect(onComplete).not.toHaveBeenCalled();
+  });
 });
