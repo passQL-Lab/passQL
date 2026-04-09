@@ -50,10 +50,14 @@
                 </button>
                 <a th:href="@{/admin/questions}" class="btn btn-sm btn-ghost">초기화</a>
 
-                <div class="ml-auto">
+                <div class="ml-auto flex gap-2">
+                    <a th:href="@{/admin/questions/register}" class="btn btn-sm btn-primary">
+                        <i data-lucide="pencil" class="size-4"></i>
+                        직접 등록
+                    </a>
                     <a th:href="@{/admin/questions/new}" class="btn btn-sm btn-success">
-                        <i data-lucide="plus" class="size-4"></i>
-                        문제 등록
+                        <i data-lucide="sparkles" class="size-4"></i>
+                        AI 생성
                     </a>
                 </div>
             </form>

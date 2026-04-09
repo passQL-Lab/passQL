@@ -60,11 +60,17 @@ def get_setting(key: str, fallback: str) -> str:
             return fallback
         value = client.get(REDIS_PREFIX + key)
         if value is not None:  # 빈 문자열("")도 유효한 설정값으로 처리 (Java와 동일)
-            logger.debug(f"Redis 설정 로드: {key}={value}")
+            _SENSITIVE = ("key", "secret", "password", "token")
+            log_value = "***" if any(k in key.lower() for k in _SENSITIVE) else value
+            logger.debug(f"Redis 설정 로드: {key}={log_value}")
             return value
     except Exception as e:
         logger.warning(f"Redis 설정 읽기 실패 ({key}) — fallback 사용: {e}")
     return fallback
+
+
+def get_gemini_api_key() -> str:
+    return get_setting("ai.gemini_api_key", settings.GEMINI_API_KEY)
 
 
 def get_gemini_model() -> str:
