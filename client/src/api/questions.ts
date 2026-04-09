@@ -1,4 +1,5 @@
 import { apiFetch } from "./client";
+import { getMockResponse } from "./mock-data";
 import { getMemberUuid } from "../stores/memberStore";
 import type {
   Page,
@@ -9,6 +10,20 @@ import type {
   TodayQuestionResponse,
   RecommendationsResponse,
 } from "../types/api";
+
+function isPracticeUuid(uuid: string): boolean {
+  return uuid.startsWith("practice-");
+}
+
+async function fetchWithPracticeFallback<T>(path: string, options: RequestInit = {}): Promise<T> {
+  try {
+    return await apiFetch<T>(path, options);
+  } catch {
+    const mock = getMockResponse(path, options.method ?? "GET", options.body as string | undefined);
+    if (mock !== null) return mock as T;
+    throw new Error(`No mock fallback for ${path}`);
+  }
+}
 
 interface QuestionListParams {
   readonly page?: number;
@@ -35,6 +50,9 @@ export function fetchQuestions(
 }
 
 export function fetchQuestion(questionUuid: string): Promise<QuestionDetail> {
+  if (isPracticeUuid(questionUuid)) {
+    return fetchWithPracticeFallback(`/questions/${questionUuid}`);
+  }
   return apiFetch(`/questions/${questionUuid}`);
 }
 
@@ -60,19 +78,27 @@ export function submitAnswer(
   questionUuid: string,
   selectedChoiceKey: string,
 ): Promise<SubmitResult> {
-  return apiFetch(`/questions/${questionUuid}/submit`, {
+  const options: RequestInit = {
     method: "POST",
     headers: { "X-Member-UUID": getMemberUuid() },
     body: JSON.stringify({ selectedChoiceKey }),
-  });
+  };
+  if (isPracticeUuid(questionUuid)) {
+    return fetchWithPracticeFallback(`/questions/${questionUuid}/submit`, options);
+  }
+  return apiFetch(`/questions/${questionUuid}/submit`, options);
 }
 
 export function executeChoice(
   questionUuid: string,
   sql: string,
 ): Promise<ExecuteResult> {
-  return apiFetch(`/questions/${questionUuid}/execute`, {
+  const options: RequestInit = {
     method: "POST",
     body: JSON.stringify({ sql }),
-  });
+  };
+  if (isPracticeUuid(questionUuid)) {
+    return fetchWithPracticeFallback(`/questions/${questionUuid}/execute`, options);
+  }
+  return apiFetch(`/questions/${questionUuid}/execute`, options);
 }
