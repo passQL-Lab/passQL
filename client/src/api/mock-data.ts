@@ -177,8 +177,8 @@ export function getMockResponse(path: string, method: string, body?: string): un
     return buildMockHeatmap() satisfies HeatmapResponse;
   }
 
-  // GET /progress
-  if (method === "GET" && path === "/progress") {
+  // GET /progress?memberUuid=...
+  if (method === "GET" && (path === "/progress" || path.startsWith("/progress?"))) {
     return MOCK_PROGRESS satisfies ProgressResponse;
   }
 
