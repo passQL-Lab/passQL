@@ -24,6 +24,7 @@ export interface QuestionDetail {
   readonly executionMode: ExecutionMode;
   readonly stem: string;
   readonly schemaDisplay: string;
+  readonly choices: readonly ChoiceItem[];
 }
 
 export interface SubmitResult {
@@ -119,12 +120,12 @@ export interface NicknameRegenerateResponse {
 export interface ExplainErrorPayload {
   readonly questionUuid: string;
   readonly sql: string;
-  readonly error_message: string;
+  readonly errorMessage: string;
 }
 
 export interface DiffExplainPayload {
-  readonly question_id: number;
-  readonly selected_key: string;
+  readonly questionUuid: string;
+  readonly selectedChoiceKey: string;
 }
 
 // === Today / Recommendations ===
@@ -151,26 +152,3 @@ export interface ExamScheduleResponse {
   readonly isSelected: boolean;
 }
 
-// === AI 선택지 생성 SSE ===
-export type ChoiceGenerationPhase = "generating" | "validating";
-
-export interface ChoiceGenerationStatus {
-  readonly phase: ChoiceGenerationPhase;
-  readonly message: string;
-}
-
-export interface ChoiceSetComplete {
-  readonly choiceSetId: string;
-  readonly choices: readonly ChoiceItem[];
-}
-
-export interface ChoiceGenerationError {
-  readonly code: string;
-  readonly message: string;
-  readonly retryable: boolean;
-}
-
-export interface SubmitPayload {
-  readonly choiceSetId: string;
-  readonly selectedChoiceKey: string;
-}

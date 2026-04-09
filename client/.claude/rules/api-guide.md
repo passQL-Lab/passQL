@@ -57,15 +57,15 @@ Frontend ──(/api)──> Backend(Spring) ──(x-api-key)──> AI Server(
 |------|------|:----:|------|
 | `questionUuid` | string (UUID) | O | 문제 UUID |
 | `sql` | string | O | 사용자가 작성한 SQL |
-| `error_message` | string | O | 발생한 에러 메시지 |
+| `errorMessage` | string | O | 발생한 에러 메시지 |
 
 - `user_uuid`는 프론트에서 전달하지 않음 (헤더 `X-Member-UUID`로 대체).
 
 `diffExplain`:
 | 필드 | 타입 | 필수 | 설명 |
 |------|------|:----:|------|
-| `question_id` | integer | O | 문제 ID |
-| `selected_key` | string | O | 사용자가 선택한 답 키 |
+| `questionUuid` | string (UUID) | O | 문제 UUID |
+| `selectedChoiceKey` | string | O | 사용자가 선택한 답 키 |
 
 (프론트는 위 2개만 전달. 백엔드가 나머지 필드 `correct_key`, `question_stem`, `choice_bodies`를 자동으로 조회하고 `X-Member-UUID` 헤더에서 사용자를 식별하여 AI 서버로 프록시)
 

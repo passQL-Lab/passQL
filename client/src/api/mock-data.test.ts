@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
-import { getMockResponse, generateChoicesMock } from "./mock-data";
+import { describe, it, expect } from "vitest";
+import { getMockResponse } from "./mock-data";
 import type {
   Page,
   QuestionSummary,
@@ -88,7 +88,7 @@ describe("getMockResponse", () => {
       const result = getMockResponse(
         "/questions/1/submit",
         "POST",
-        JSON.stringify({ selectedKey: "A" }),
+        JSON.stringify({ selectedChoiceKey: "A" }),
       ) as SubmitResult;
       expect(result.isCorrect).toBe(true);
       expect(result.correctKey).toBe("A");
@@ -98,7 +98,7 @@ describe("getMockResponse", () => {
       const result = getMockResponse(
         "/questions/1/submit",
         "POST",
-        JSON.stringify({ selectedKey: "C" }),
+        JSON.stringify({ selectedChoiceKey: "C" }),
       ) as SubmitResult;
       expect(result.isCorrect).toBe(false);
       expect(result.correctKey).toBe("A");
@@ -207,65 +207,3 @@ describe("getMockResponse", () => {
   });
 });
 
-describe("generateChoicesMock", () => {
-  it("calls onStatus then onComplete in sequence", async () => {
-    const onStatus = vi.fn();
-    const onComplete = vi.fn();
-    const onError = vi.fn();
-
-    const abort = generateChoicesMock("q-uuid-0001", { onStatus, onComplete, onError });
-
-    await new Promise((r) => setTimeout(r, 1000));
-
-    expect(onStatus).toHaveBeenCalledWith(
-      expect.objectContaining({ phase: "generating" })
-    );
-    expect(onStatus).toHaveBeenCalledWith(
-      expect.objectContaining({ phase: "validating" })
-    );
-    expect(onComplete).toHaveBeenCalledWith(
-      expect.objectContaining({
-        choiceSetId: expect.stringContaining("cs-mock-"),
-        choices: expect.arrayContaining([
-          expect.objectContaining({ key: "A" }),
-        ]),
-      })
-    );
-    expect(onError).not.toHaveBeenCalled();
-    abort();
-  });
-
-  it("does not call onComplete if aborted immediately", async () => {
-    const onComplete = vi.fn();
-    const abort = generateChoicesMock("q-uuid-0001", {
-      onStatus: vi.fn(),
-      onComplete,
-      onError: vi.fn(),
-    });
-    abort();
-    await new Promise((r) => setTimeout(r, 1000));
-    expect(onComplete).not.toHaveBeenCalled();
-  });
-
-  it("stops remaining callbacks when aborted mid-flight", async () => {
-    const onStatus = vi.fn();
-    const onComplete = vi.fn();
-    const abort = generateChoicesMock("q-uuid-0001", {
-      onStatus,
-      onComplete,
-      onError: vi.fn(),
-    });
-
-    // Wait past 200ms so "generating" fires
-    await new Promise((r) => setTimeout(r, 300));
-    expect(onStatus).toHaveBeenCalledTimes(1);
-    expect(onStatus).toHaveBeenCalledWith(expect.objectContaining({ phase: "generating" }));
-
-    // Abort before 500ms (validating) and 800ms (complete)
-    abort();
-
-    await new Promise((r) => setTimeout(r, 700));
-    expect(onStatus).toHaveBeenCalledTimes(1); // no additional calls
-    expect(onComplete).not.toHaveBeenCalled();
-  });
-});

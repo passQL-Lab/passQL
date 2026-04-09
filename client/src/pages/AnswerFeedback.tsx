@@ -13,7 +13,6 @@ interface FeedbackState {
   readonly selectedSql?: string;
   readonly correctSql?: string;
   readonly questionUuid: string;
-  readonly choiceSetId: string;
 }
 
 export default function AnswerFeedback() {
@@ -33,8 +32,8 @@ export default function AnswerFeedback() {
     setAiSheetOpen(true);
     setAiText("");
     diffMutation.mutate({
-      question_id: 0,
-      selected_key: state.selectedKey,
+      questionUuid: state.questionUuid,
+      selectedChoiceKey: state.selectedKey,
     });
   };
 

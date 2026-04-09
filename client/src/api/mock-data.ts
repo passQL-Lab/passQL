@@ -16,9 +16,6 @@ import type {
   RecommendationsResponse,
   GreetingResponse,
   ExamScheduleResponse,
-  ChoiceGenerationStatus,
-  ChoiceSetComplete,
-  ChoiceGenerationError,
   ChoiceItem,
 } from "../types/api";
 
@@ -63,6 +60,7 @@ const MOCK_QUESTION_DETAIL: QuestionDetail = {
   executionMode: "EXECUTABLE",
   stem: "다음 SQL 중 고객별 주문 수를 올바르게 구하는 것은?",
   schemaDisplay: "CUSTOMER (id INT PK, name VARCHAR, email VARCHAR)\nORDERS (id INT PK, customer_id INT FK, amount INT, order_date DATE)",
+  choices: MOCK_CHOICES,
 };
 
 const MOCK_PROGRESS: ProgressResponse = {
@@ -95,45 +93,6 @@ const MOCK_EXAM_SCHEDULES: readonly ExamScheduleResponse[] = [
   { examScheduleUuid: "es-uuid-0002", certType: "SQLD", round: 2, examDate: "2026-09-13", isSelected: false },
   { examScheduleUuid: "es-uuid-0003", certType: "SQLP", round: 1, examDate: "2026-06-21", isSelected: false },
 ];
-
-interface ChoiceGenerationCallbacks {
-  readonly onStatus: (status: ChoiceGenerationStatus) => void;
-  readonly onComplete: (result: ChoiceSetComplete) => void;
-  readonly onError: (error: ChoiceGenerationError) => void;
-}
-
-/** Mock SSE 시뮬레이션 — 타이머 기반 순서 재현. Returns cleanup function. onError는 mock에서 호출되지 않음. */
-export function generateChoicesMock(
-  _questionUuid: string,
-  callbacks: ChoiceGenerationCallbacks,
-): () => void {
-  let aborted = false;
-
-  const t1 = setTimeout(() => {
-    if (aborted) return;
-    callbacks.onStatus({ phase: "generating", message: "선택지 생성 중..." });
-  }, 200);
-
-  const t2 = setTimeout(() => {
-    if (aborted) return;
-    callbacks.onStatus({ phase: "validating", message: "SQL 실행 검증 중..." });
-  }, 500);
-
-  const t3 = setTimeout(() => {
-    if (aborted) return;
-    callbacks.onComplete({
-      choiceSetId: `cs-mock-${Date.now()}`,
-      choices: MOCK_CHOICES,
-    });
-  }, 800);
-
-  return () => {
-    aborted = true;
-    clearTimeout(t1);
-    clearTimeout(t2);
-    clearTimeout(t3);
-  };
-}
 
 /** path + method → mock response 매핑 */
 export function getMockResponse(path: string, method: string, body?: string): unknown {
@@ -189,7 +148,7 @@ export function getMockResponse(path: string, method: string, body?: string): un
   // POST /questions/:uuid/submit
   if (method === "POST" && path.includes("/submit")) {
     const parsed = body ? JSON.parse(body) : {};
-    const selectedKey = (parsed.selectedChoiceKey ?? parsed.selectedKey ?? "A") as string;
+    const selectedKey = (parsed.selectedChoiceKey ?? "A") as string;
     const isCorrect = selectedKey === "A";
     return { isCorrect, correctKey: "A", rationale: "CUSTOMER와 ORDERS를 customer_id로 JOIN한 후 c.name으로 GROUP BY하면 고객별 주문 수를 정확히 구할 수 있습니다." } satisfies SubmitResult;
   }

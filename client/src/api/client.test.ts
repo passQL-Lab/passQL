@@ -153,14 +153,14 @@ describe("apiFetch", () => {
 
     await apiFetch("/submit", {
       method: "POST",
-      body: JSON.stringify({ selectedKey: "A" }),
+      body: JSON.stringify({ selectedChoiceKey: "A" }),
     });
 
     expect(mockFetch).toHaveBeenCalledWith(
       expect.any(String),
       expect.objectContaining({
         method: "POST",
-        body: '{"selectedKey":"A"}',
+        body: '{"selectedChoiceKey":"A"}',
       }),
     );
   });

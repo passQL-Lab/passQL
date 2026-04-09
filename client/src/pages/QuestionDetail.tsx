@@ -1,19 +1,15 @@
 import { useState, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
-import { ArrowLeft, ChevronUp, ChevronDown, RefreshCw } from "lucide-react";
+import { ArrowLeft, ChevronUp, ChevronDown } from "lucide-react";
 import { StarRating } from "../components/StarRating";
 import { ChoiceCard } from "../components/ChoiceCard";
-import { ChoicesSkeleton } from "../components/ChoicesSkeleton";
 import AiExplanationSheet from "../components/AiExplanationSheet";
 import {
   useQuestionDetail,
   useExecuteChoice,
   useSubmitAnswer,
-  useGenerateChoices,
 } from "../hooks/useQuestionDetail";
-import { usePrefetch } from "../hooks/usePrefetch";
-import { fetchRecommendations } from "../api/questions";
 import { explainError } from "../api/ai";
 import type { ExecuteResult } from "../types/api";
 
@@ -21,9 +17,6 @@ export default function QuestionDetail() {
   const { questionUuid } = useParams<{ questionUuid: string }>();
   const navigate = useNavigate();
   const { data: question, isLoading } = useQuestionDetail(questionUuid!);
-  const { prefetch, consumeCache } = usePrefetch();
-  const prefetchedRef = useRef(consumeCache(questionUuid!));
-  const { state: choicesState, retry: retryGenerate } = useGenerateChoices(questionUuid!, prefetchedRef.current);
   const executeMutation = useExecuteChoice(questionUuid!);
   const submitMutation = useSubmitAnswer(questionUuid!);
 
@@ -34,7 +27,8 @@ export default function QuestionDetail() {
   executeCacheRef.current = executeCache;
   const [aiSheetOpen, setAiSheetOpen] = useState(false);
   const [aiText, setAiText] = useState("");
-  const prefetchTriggeredRef = useRef(false);
+
+  const choices = question?.choices ?? [];
 
   const explainMutation = useMutation({
     mutationFn: explainError,
@@ -59,57 +53,41 @@ export default function QuestionDetail() {
       if (question?.executionMode === "EXECUTABLE" && !executeCacheRef.current[choiceKey]) {
         handleExecute(choiceKey, sql);
       }
-      // Trigger prefetch for next question on first selection
-      if (!prefetchTriggeredRef.current) {
-        prefetchTriggeredRef.current = true;
-        fetchRecommendations(1, questionUuid)
-          .then((res) => {
-            const nextUuid = res.questions[0]?.questionUuid;
-            if (nextUuid) prefetch(nextUuid);
-          })
-          .catch(() => {}); // Prefetch failure is silent
-      }
     },
-    [handleExecute, prefetch, questionUuid, question],
+    [handleExecute, question],
   );
 
   const handleSubmit = useCallback(() => {
-    if (!selectedKey || !question || choicesState.kind !== "done") return;
-    const { choiceSetId, choices } = choicesState;
-    submitMutation.mutate(
-      { choiceSetId, selectedChoiceKey: selectedKey },
-      {
-        onSuccess: (result) => {
-          const selectedChoice = choices.find((c) => c.key === selectedKey);
-          const correctChoice = choices.find((c) => c.key === result.correctKey);
-          navigate(`/questions/${questionUuid}/result`, {
-            state: {
-              ...result,
-              selectedKey,
-              selectedSql: selectedChoice?.body,
-              correctSql: correctChoice?.body,
-              questionUuid,
-              choiceSetId,
-            },
-          });
-        },
+    if (!selectedKey || !question) return;
+    submitMutation.mutate(selectedKey, {
+      onSuccess: (result) => {
+        const selectedChoice = choices.find((c) => c.key === selectedKey);
+        const correctChoice = choices.find((c) => c.key === result.correctKey);
+        navigate(`/questions/${questionUuid}/result`, {
+          state: {
+            ...result,
+            selectedKey,
+            selectedSql: selectedChoice?.body,
+            correctSql: correctChoice?.body,
+            questionUuid,
+          },
+        });
       },
-    );
-  }, [selectedKey, submitMutation, question, choicesState, questionUuid, navigate]);
+    });
+  }, [selectedKey, submitMutation, question, choices, questionUuid, navigate]);
 
   const handleAskAi = useCallback(
     (choiceKey: string, _errorCode: string, errorMessage: string) => {
       setAiSheetOpen(true);
       setAiText("");
-      if (choicesState.kind !== "done") return;
-      const choice = choicesState.choices.find((c) => c.key === choiceKey);
+      const choice = choices.find((c) => c.key === choiceKey);
       explainMutation.mutate({
         questionUuid: questionUuid!,
         sql: choice?.body ?? "",
-        error_message: errorMessage,
+        errorMessage,
       });
     },
-    [choicesState, questionUuid, explainMutation],
+    [choices, questionUuid, explainMutation],
   );
 
   if (isLoading || !question) {
@@ -128,7 +106,7 @@ export default function QuestionDetail() {
 
   const isSubmitReady =
     selectedKey !== null &&
-    choicesState.kind === "done" &&
+    choices.length > 0 &&
     !submitMutation.isPending;
 
   return (
@@ -176,42 +154,21 @@ export default function QuestionDetail() {
         </section>
       )}
 
-      {/* Choices area — driven by SSE state */}
-      {choicesState.kind === "loading" && (
-        <ChoicesSkeleton phase={choicesState.phase} message={choicesState.message} />
-      )}
-
-      {choicesState.kind === "error" && (
-        <div className="mt-4 card-base text-center space-y-3">
-          <p className="text-secondary">
-            {choicesState.error.retryable
-              ? "일시적인 문제가 발생했습니다. 다시 시도해 보세요"
-              : "선택지 생성에 실패했습니다"}
-          </p>
-          {choicesState.error.retryable ? (
-            <button
-              type="button"
-              className="btn-primary inline-flex items-center gap-2"
-              onClick={retryGenerate}
-            >
-              <RefreshCw size={16} />
-              다시 시도
-            </button>
-          ) : (
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={() => navigate("/questions")}
-            >
-              문제 목록으로
-            </button>
-          )}
+      {choices.length === 0 ? (
+        <div className="mt-4 space-y-3">
+          {Array.from({ length: 4 }, (_, i) => (
+            <div key={i} className="card-base space-y-2">
+              <div className="flex items-center gap-3">
+                <div className="w-5 h-5 rounded-full bg-border animate-pulse" />
+                <div className="w-4 h-4 rounded bg-border animate-pulse" />
+              </div>
+              <div className="h-16 rounded-lg bg-border animate-pulse" />
+            </div>
+          ))}
         </div>
-      )}
-
-      {choicesState.kind === "done" && (
+      ) : (
         <section className="mt-4 space-y-3">
-          {choicesState.choices.map((choice) => (
+          {choices.map((choice) => (
             <ChoiceCard
               key={choice.key}
               choice={choice}
