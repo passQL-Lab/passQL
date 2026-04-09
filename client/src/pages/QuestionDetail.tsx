@@ -13,7 +13,12 @@ import {
 import { explainError } from "../api/ai";
 import type { ExecuteResult } from "../types/api";
 
-export default function QuestionDetail() {
+interface QuestionDetailProps {
+  readonly practiceMode?: boolean;
+  readonly onPracticeSubmit?: (isCorrect: boolean, selectedChoiceKey: string) => void;
+}
+
+export default function QuestionDetail({ practiceMode, onPracticeSubmit }: QuestionDetailProps = {}) {
   const { questionUuid } = useParams<{ questionUuid: string }>();
   const navigate = useNavigate();
   const { data: question, isLoading } = useQuestionDetail(questionUuid!);
@@ -61,6 +66,10 @@ export default function QuestionDetail() {
     if (!selectedKey || !question) return;
     submitMutation.mutate(selectedKey, {
       onSuccess: (result) => {
+        if (practiceMode && onPracticeSubmit) {
+          onPracticeSubmit(result.isCorrect, selectedKey!);
+          return;
+        }
         const selectedChoice = choices.find((c) => c.key === selectedKey);
         const correctChoice = choices.find((c) => c.key === result.correctKey);
         navigate(`/questions/${questionUuid}/result`, {
@@ -74,7 +83,7 @@ export default function QuestionDetail() {
         });
       },
     });
-  }, [selectedKey, submitMutation, question, choices, questionUuid, navigate]);
+  }, [selectedKey, submitMutation, question, choices, questionUuid, navigate, practiceMode, onPracticeSubmit]);
 
   const handleAskAi = useCallback(
     (choiceKey: string, _errorCode: string, errorMessage: string) => {
