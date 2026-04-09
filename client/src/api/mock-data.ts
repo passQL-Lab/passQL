@@ -97,17 +97,15 @@ const MOCK_EXAM_SCHEDULES: readonly ExamScheduleResponse[] = [
   { examScheduleUuid: "es-uuid-0003", certType: "SQLP", round: 1, examDate: "2026-06-21", isSelected: false },
 ];
 
-const MOCK_CATEGORY_STATS: readonly CategoryStats[] = [
-  { code: "JOIN", displayName: "JOIN", correctRate: 0.82, solvedCount: 45 },
-  { code: "GROUP_BY", displayName: "GROUP BY", correctRate: 0.68, solvedCount: 32 },
-  { code: "SUBQUERY", displayName: "서브쿼리", correctRate: 0.41, solvedCount: 18 },
-  { code: "DDL", displayName: "DDL", correctRate: 0.90, solvedCount: 28 },
-  { code: "CONSTRAINT", displayName: "제약조건", correctRate: 0.55, solvedCount: 22 },
-  { code: "SELECT", displayName: "SELECT", correctRate: 0.75, solvedCount: 38 },
-  { code: "SQL_FUNC", displayName: "SQL 함수", correctRate: 0.33, solvedCount: 12 },
-  { code: "WINDOW", displayName: "윈도우 함수", correctRate: 0.60, solvedCount: 15 },
-  { code: "HIERARCHY", displayName: "계층 쿼리", correctRate: 0.20, solvedCount: 5 },
-];
+// MOCK_TOPICS에서 자동 생성 — 카테고리 수 일관성 유지
+const MOCK_RATE_POOL = [0.82, 0.68, 0.41, 0.90, 0.55, 0.75, 0.33, 0.60, 0.20];
+const MOCK_SOLVED_POOL = [45, 32, 18, 28, 22, 38, 12, 15, 5];
+const MOCK_CATEGORY_STATS: readonly CategoryStats[] = MOCK_TOPICS.map((t, i) => ({
+  code: t.code,
+  displayName: t.displayName,
+  correctRate: MOCK_RATE_POOL[i % MOCK_RATE_POOL.length],
+  solvedCount: MOCK_SOLVED_POOL[i % MOCK_SOLVED_POOL.length],
+}));
 
 function buildMockHeatmap(): HeatmapResponse {
   const pattern = [3, 0, 5, 2, 1, 0, 4, 6, 0, 1, 2, 3, 0, 0, 5, 1, 2, 0, 3, 4, 0, 1, 0, 6, 2, 3, 1, 0, 4, 2];
