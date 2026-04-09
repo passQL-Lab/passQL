@@ -1,34 +1,56 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{admin/layout :: layout(~{::content})}">
-<div th:fragment="content">
-    <h2>선택지 세트 이력</h2>
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
 
-    <table border="1">
-        <thead>
-            <tr>
-                <th>UUID</th>
-                <th>문제</th>
-                <th>출처</th>
-                <th>상태</th>
-                <th>재시도</th>
-                <th>모델</th>
-                <th>생성시각</th>
-                <th>상세</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="set : ${choiceSets.content}">
-                <td th:text="${#strings.abbreviate(set.choiceSetUuid.toString(), 12)}">uuid</td>
-                <td th:text="${#strings.abbreviate(set.questionUuid.toString(), 12)}">q-uuid</td>
-                <td th:text="${set.source}">AI_RUNTIME</td>
-                <td th:text="${set.status}">OK</td>
-                <td th:text="${set.generationAttempts}">1</td>
-                <td th:text="${set.modelName}">gemini</td>
-                <td th:text="${set.createdAt}">2026-04-09</td>
-                <td><a th:href="@{/admin/choice-sets/{uuid}(uuid=${set.choiceSetUuid})}">상세</a></td>
-            </tr>
-        </tbody>
-    </table>
-</div>
+<th:block layout:fragment="title">선택지 세트 이력</th:block>
+
+<th:block layout:fragment="content">
+
+    <div class="card bg-base-100 shadow">
+        <div class="card-body p-0">
+            <div class="overflow-x-auto">
+                <table class="table table-sm">
+                    <thead>
+                    <tr>
+                        <th>UUID</th>
+                        <th>문제</th>
+                        <th>출처</th>
+                        <th>상태</th>
+                        <th>재시도</th>
+                        <th>모델</th>
+                        <th>생성시각</th>
+                        <th>상세</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="set : ${choiceSets.content}">
+                        <td class="font-mono text-xs" th:text="${#strings.abbreviate(set.choiceSetUuid.toString(), 12)}">uuid</td>
+                        <td class="font-mono text-xs" th:text="${#strings.abbreviate(set.questionUuid.toString(), 12)}">q-uuid</td>
+                        <td><span class="badge badge-outline badge-sm" th:text="${set.source}">AI_RUNTIME</span></td>
+                        <td><span class="badge badge-sm" th:text="${set.status}">OK</span></td>
+                        <td class="text-xs" th:text="${set.generationAttempts}">1</td>
+                        <td class="text-xs" th:text="${set.modelName}">gemini</td>
+                        <td class="text-xs" th:text="${#temporals.format(set.createdAt, 'yyyy-MM-dd HH:mm')}">2026-04-09</td>
+                        <td>
+                            <a th:href="@{/admin/choice-sets/{uuid}(uuid=${set.choiceSetUuid})}"
+                               class="btn btn-xs btn-ghost">
+                                <i data-lucide="eye" class="size-3"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    <tr th:if="${choiceSets == null or choiceSets.isEmpty()}">
+                        <td colspan="8" class="text-center text-base-content/50 py-12">데이터가 없습니다.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</th:block>
+
+<th:block layout:fragment="js">
+    <script>lucide.createIcons();</script>
+</th:block>
 </html>

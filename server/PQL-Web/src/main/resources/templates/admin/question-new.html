@@ -1,146 +1,231 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{admin/layout :: layout(~{::content})}">
-<div th:fragment="content">
-    <h2>문제 등록 (AI 생성)</h2>
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+
+<th:block layout:fragment="title">문제 등록 (AI 생성)</th:block>
+
+<th:block layout:fragment="content">
 
     <!-- Step 1: 기본 설정 -->
     <div id="step1">
-        <h3>Step 1: 기본 설정</h3>
-        <form id="generateForm">
-            <div>
-                <label>토픽</label>
-                <select id="topic" required>
-                    <option value="">선택</option>
-                    <option th:each="t : ${topics}" th:value="${t.displayName}" th:text="${t.displayName}">-</option>
-                </select>
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <h2 class="card-title mb-4">
+                    <i data-lucide="sparkles" class="size-5"></i>
+                    Step 1: 기본 설정
+                </h2>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- 토픽 -->
+                    <div class="form-control">
+                        <label class="label label-text">토픽</label>
+                        <select id="topic" class="select select-bordered" required>
+                            <option value="">선택</option>
+                            <option th:each="t : ${topics}"
+                                    th:value="${t.topicUuid}"
+                                    th:attr="data-name=${t.displayName}"
+                                    th:text="${t.displayName}">-</option>
+                        </select>
+                    </div>
+
+                    <!-- 난이도 -->
+                    <div class="form-control">
+                        <label class="label label-text">난이도 (1~5)</label>
+                        <input type="number" id="difficulty" class="input input-bordered" min="1" max="5" value="3" required />
+                    </div>
+
+                    <!-- 스키마 의도 -->
+                    <div class="form-control">
+                        <label class="label label-text">스키마 의도</label>
+                        <input type="text" id="schemaIntent" class="input input-bordered" placeholder="예: 주문-고객 1:N 관계" />
+                    </div>
+
+                    <!-- 힌트 키워드 -->
+                    <div class="form-control">
+                        <label class="label label-text">힌트 키워드</label>
+                        <input type="text" id="hint" class="input input-bordered" placeholder="예: OUTER JOIN 함정" />
+                    </div>
+                </div>
+
+                <!-- DDL -->
+                <div class="form-control mt-2">
+                    <label class="label label-text">DDL (CREATE TABLE)</label>
+                    <textarea id="schemaDdl" class="textarea textarea-bordered font-mono text-sm" rows="8" required
+                              placeholder="CREATE TABLE orders (&#10;  id INT PRIMARY KEY,&#10;  ...&#10;);"></textarea>
+                </div>
+
+                <!-- 샘플 데이터 -->
+                <div class="form-control mt-2">
+                    <label class="label label-text">샘플 데이터 (INSERT, 선택)</label>
+                    <textarea id="schemaSampleData" class="textarea textarea-bordered font-mono text-sm" rows="4"
+                              placeholder="INSERT INTO orders VALUES (1, ...);"></textarea>
+                </div>
+
+                <div class="card-actions justify-end mt-4">
+                    <button type="button" class="btn btn-primary" onclick="generateQuestion()">
+                        <i data-lucide="sparkles" class="size-4"></i>
+                        AI 생성
+                    </button>
+                </div>
             </div>
-            <div>
-                <label>난이도 (1-5)</label>
-                <input type="number" id="difficulty" min="1" max="5" value="3" required />
-            </div>
-            <div>
-                <label>DDL (CREATE TABLE)</label>
-                <textarea id="schemaDdl" rows="8" required></textarea>
-            </div>
-            <div>
-                <label>샘플 데이터 (INSERT)</label>
-                <textarea id="schemaSampleData" rows="5"></textarea>
-            </div>
-            <div>
-                <label>스키마 의도</label>
-                <input type="text" id="schemaIntent" placeholder="예: 주문-고객 1:N 관계" />
-            </div>
-            <div>
-                <label>힌트 키워드</label>
-                <input type="text" id="hint" placeholder="예: OUTER JOIN 함정" />
-            </div>
-            <button type="button" onclick="generateQuestion()">AI 생성</button>
-        </form>
+        </div>
     </div>
 
-    <!-- Step 2: AI 생성 중 -->
-    <div id="step2" style="display:none;">
-        <h3>AI가 문제를 만들고 있어요...</h3>
-        <p>잠시만 기다려주세요.</p>
+    <!-- Step 2: 생성 중 -->
+    <div id="step2" class="hidden">
+        <div class="card bg-base-100 shadow">
+            <div class="card-body items-center py-16">
+                <span class="loading loading-spinner loading-lg text-primary"></span>
+                <p class="mt-4 text-base-content/60">AI가 문제를 만들고 있어요...</p>
+            </div>
+        </div>
     </div>
 
     <!-- Step 3: 검토 & 저장 -->
-    <div id="step3" style="display:none;">
-        <h3>Step 3: 검토 & 저장</h3>
-        <form id="saveForm" action="/admin/questions" method="post">
-            <input type="hidden" name="topicUuid" id="topicUuidHidden" />
-            <input type="hidden" name="difficulty" id="difficultyHidden" />
-            <input type="hidden" name="schemaDdl" id="schemaDdlHidden" />
-            <input type="hidden" name="schemaSampleData" id="schemaSampleDataHidden" />
-            <input type="hidden" name="schemaIntent" id="schemaIntentHidden" />
-            <input type="hidden" name="choiceSetPolicy" value="AI_ONLY" />
+    <div id="step3" class="hidden">
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <h2 class="card-title mb-4">
+                    <i data-lucide="check-circle" class="size-5"></i>
+                    Step 2: 검토 &amp; 저장
+                </h2>
 
-            <div>
-                <label>문제 (stem)</label>
-                <textarea name="stem" id="stemField" rows="4" required></textarea>
-            </div>
-            <div>
-                <label>정답 SQL</label>
-                <textarea name="answerSql" id="answerSqlField" rows="3" required></textarea>
-            </div>
-            <div>
-                <label>힌트</label>
-                <input type="text" name="hint" id="hintField" />
-            </div>
+                <form id="saveForm" action="/admin/questions" method="post">
+                    <input type="hidden" name="topicUuid" id="topicUuidHidden" />
+                    <input type="hidden" name="difficulty" id="difficultyHidden" />
+                    <input type="hidden" name="schemaDdl" id="schemaDdlHidden" />
+                    <input type="hidden" name="schemaSampleData" id="schemaSampleDataHidden" />
+                    <input type="hidden" name="schemaIntent" id="schemaIntentHidden" />
+                    <input type="hidden" name="choiceSetPolicy" value="AI_ONLY" />
 
-            <h4>선택지 (A~D)</h4>
-            <div id="choicesContainer">
-                <!-- JS가 동적으로 채움 -->
-            </div>
+                    <!-- 문제 -->
+                    <div class="form-control">
+                        <label class="label label-text font-semibold">문제 (stem)</label>
+                        <textarea name="stem" id="stemField" class="textarea textarea-bordered" rows="4" required></textarea>
+                    </div>
 
-            <button type="button" onclick="regenerate()">재생성</button>
-            <button type="submit">저장</button>
-        </form>
+                    <!-- 정답 SQL -->
+                    <div class="form-control mt-3">
+                        <label class="label label-text font-semibold">정답 SQL</label>
+                        <textarea name="answerSql" id="answerSqlField" class="textarea textarea-bordered font-mono text-sm" rows="3" required></textarea>
+                    </div>
+
+                    <!-- 힌트 -->
+                    <div class="form-control mt-3">
+                        <label class="label label-text font-semibold">힌트</label>
+                        <input type="text" name="hint" id="hintField" class="input input-bordered" />
+                    </div>
+
+                    <!-- 선택지 -->
+                    <div class="mt-4">
+                        <h3 class="font-semibold mb-2">선택지 (A~D)</h3>
+                        <div id="choicesContainer" class="flex flex-col gap-3"></div>
+                    </div>
+
+                    <div class="card-actions justify-between mt-6">
+                        <button type="button" class="btn btn-ghost" onclick="regenerate()">
+                            <i data-lucide="refresh-cw" class="size-4"></i>
+                            재생성
+                        </button>
+                        <button type="submit" class="btn btn-primary">
+                            <i data-lucide="save" class="size-4"></i>
+                            저장
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
 
-    <script>
-        async function generateQuestion() {
-            document.getElementById('step1').style.display = 'none';
-            document.getElementById('step2').style.display = 'block';
+</th:block>
 
-            const body = {
-                schema_ddl: document.getElementById('schemaDdl').value,
-                schema_sample_data: document.getElementById('schemaSampleData').value,
-                schema_intent: document.getElementById('schemaIntent').value,
-                topic: document.getElementById('topic').value,
-                difficulty: parseInt(document.getElementById('difficulty').value),
-                hint: document.getElementById('hint').value
-            };
+<th:block layout:fragment="js">
+<script>
+    async function generateQuestion() {
+        document.getElementById('step1').classList.add('hidden');
+        document.getElementById('step2').classList.remove('hidden');
 
-            try {
-                const resp = await fetch('/admin/questions/generate-full', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(body)
-                });
-                if (!resp.ok) throw new Error(await resp.text());
-                const data = await resp.json();
-                populateStep3(data);
-            } catch (e) {
-                alert('AI 생성 실패: ' + e.message);
-                document.getElementById('step2').style.display = 'none';
-                document.getElementById('step1').style.display = 'block';
-            }
-        }
+        const topicSelect = document.getElementById('topic');
+        const topicName = topicSelect.options[topicSelect.selectedIndex].getAttribute('data-name');
+        const body = {
+            schema_ddl: document.getElementById('schemaDdl').value,
+            schema_sample_data: document.getElementById('schemaSampleData').value,
+            schema_intent: document.getElementById('schemaIntent').value,
+            topic: topicName,
+            difficulty: parseInt(document.getElementById('difficulty').value),
+            hint: document.getElementById('hint').value
+        };
 
-        function populateStep3(data) {
-            document.getElementById('step2').style.display = 'none';
-            document.getElementById('step3').style.display = 'block';
-
-            document.getElementById('stemField').value = data.stem || '';
-            document.getElementById('answerSqlField').value = data.answerSql || '';
-            document.getElementById('difficultyHidden').value = document.getElementById('difficulty').value;
-            document.getElementById('schemaDdlHidden').value = document.getElementById('schemaDdl').value;
-            document.getElementById('schemaSampleDataHidden').value = document.getElementById('schemaSampleData').value;
-            document.getElementById('schemaIntentHidden').value = document.getElementById('schemaIntent').value;
-            document.getElementById('hintField').value = document.getElementById('hint').value;
-
-            const container = document.getElementById('choicesContainer');
-            container.innerHTML = '';
-            (data.seedChoices || []).forEach((c, i) => {
-                container.innerHTML += `
-                    <div style="border:1px solid #ccc; padding:8px; margin:4px 0;">
-                        <strong>${c.key}</strong>
-                        ${c.isCorrect ? '<span style="color:green;">(정답)</span>' : ''}
-                        <input type="hidden" name="choiceKeys" value="${c.key}" />
-                        <textarea name="choiceBodies" rows="2" style="width:100%">${c.body}</textarea>
-                        <input type="hidden" name="choiceCorrects" value="${c.isCorrect}" />
-                        <textarea name="choiceRationales" rows="2" style="width:100%" placeholder="해설">${c.rationale}</textarea>
-                    </div>
-                `;
+        try {
+            const resp = await fetch('/admin/questions/generate-full', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(body)
             });
+            if (!resp.ok) throw new Error(await resp.text());
+            const data = await resp.json();
+            populateStep3(data);
+        } catch (e) {
+            alert('AI 생성 실패: ' + e.message);
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('step1').classList.remove('hidden');
         }
+    }
 
-        function regenerate() {
-            document.getElementById('step3').style.display = 'none';
-            document.getElementById('step1').style.display = 'block';
-        }
-    </script>
-</div>
+    function populateStep3(data) {
+        document.getElementById('step2').classList.add('hidden');
+        document.getElementById('step3').classList.remove('hidden');
+
+        const topicSel = document.getElementById('topic');
+        document.getElementById('topicUuidHidden').value = topicSel.value;
+        document.getElementById('stemField').value = data.stem || '';
+        document.getElementById('answerSqlField').value = data.answerSql || '';
+        document.getElementById('difficultyHidden').value = document.getElementById('difficulty').value;
+        document.getElementById('schemaDdlHidden').value = document.getElementById('schemaDdl').value;
+        document.getElementById('schemaSampleDataHidden').value = document.getElementById('schemaSampleData').value;
+        document.getElementById('schemaIntentHidden').value = document.getElementById('schemaIntent').value;
+        document.getElementById('hintField').value = document.getElementById('hint').value;
+
+        const container = document.getElementById('choicesContainer');
+        container.innerHTML = '';
+        (data.seedChoices || []).forEach((c) => {
+            const isCorrect = c.isCorrect || c.correct;
+            container.innerHTML += `
+                <div class="card bg-base-200 p-4 ${isCorrect ? 'border border-success' : ''}">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="badge badge-outline font-bold">${c.key}</span>
+                        ${isCorrect ? '<span class="badge badge-success badge-sm">정답</span>' : ''}
+                    </div>
+                    <input type="hidden" name="choiceKeys" value="${c.key}" />
+                    <input type="hidden" name="choiceCorrects" value="${isCorrect}" />
+                    <div class="form-control">
+                        <label class="label label-text text-xs">선택지 내용</label>
+                        <textarea name="choiceBodies" class="textarea textarea-bordered font-mono text-sm" rows="2">${escapeHtml(c.body)}</textarea>
+                    </div>
+                    <div class="form-control mt-2">
+                        <label class="label label-text text-xs">해설</label>
+                        <textarea name="choiceRationales" class="textarea textarea-bordered text-sm" rows="2">${escapeHtml(c.rationale || '')}</textarea>
+                    </div>
+                </div>
+            `;
+        });
+
+        lucide.createIcons();
+    }
+
+    function regenerate() {
+        document.getElementById('step3').classList.add('hidden');
+        document.getElementById('step1').classList.remove('hidden');
+    }
+
+    function escapeHtml(str) {
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+</script>
+</th:block>
 </html>

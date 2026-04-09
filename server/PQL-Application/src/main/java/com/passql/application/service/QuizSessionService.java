@@ -167,7 +167,7 @@ public class QuizSessionService {
     public QuizSession completeSession(UUID sessionUuid) {
         QuizSession session = getSession(sessionUuid);
         session.setStatus(QuizSessionStatus.COMPLETED);
-        session.setFinishedAt(LocalDateTime.now());
+        session.setCompletedAt(LocalDateTime.now());
         return quizSessionRepository.save(session);
     }
 

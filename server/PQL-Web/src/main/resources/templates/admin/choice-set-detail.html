@@ -1,47 +1,110 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{admin/layout :: layout(~{::content})}">
-<div th:fragment="content">
-    <h2>선택지 세트 상세</h2>
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
 
-    <table border="1">
-        <tr><th>UUID</th><td th:text="${choiceSet.choiceSetUuid}">-</td></tr>
-        <tr><th>문제</th><td th:text="${choiceSet.questionUuid}">-</td></tr>
-        <tr><th>출처</th><td th:text="${choiceSet.source}">-</td></tr>
-        <tr><th>상태</th><td th:text="${choiceSet.status}">-</td></tr>
-        <tr><th>대상 회원</th><td th:text="${choiceSet.generatedForMemberUuid}">-</td></tr>
-        <tr><th>모델</th><td th:text="${choiceSet.modelName}">-</td></tr>
-        <tr><th>temperature</th><td th:text="${choiceSet.temperature}">-</td></tr>
-        <tr><th>재시도</th><td th:text="${choiceSet.generationAttempts}">-</td></tr>
-        <tr><th>샌드박스 검증</th><td th:text="${choiceSet.sandboxValidationPassed}">-</td></tr>
-        <tr><th>재사용</th><td th:text="${choiceSet.isReusable}">-</td></tr>
-        <tr><th>소요(ms)</th><td th:text="${choiceSet.totalElapsedMs}">-</td></tr>
-        <tr><th>생성시각</th><td th:text="${choiceSet.createdAt}">-</td></tr>
-    </table>
+<th:block layout:fragment="title">선택지 세트 상세</th:block>
 
-    <h3>선택지</h3>
-    <div th:each="item : ${items}" style="border:1px solid #ccc; padding:8px; margin:4px 0;">
-        <strong th:text="${item.choiceKey}">A</strong>
-        <span th:if="${item.isCorrect}" style="color:green;font-weight:bold;">(정답)</span>
-        <pre th:text="${item.body}">SQL</pre>
-        <p><strong>해설:</strong> <span th:text="${item.rationale}">-</span></p>
+<th:block layout:fragment="content">
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- 메타 정보 -->
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <h2 class="card-title mb-4">
+                    <i data-lucide="info" class="size-5"></i>
+                    세트 정보
+                </h2>
+                <table class="table table-sm">
+                    <tbody>
+                    <tr><th class="w-32">UUID</th><td class="font-mono text-xs" th:text="${choiceSet.choiceSetUuid}">-</td></tr>
+                    <tr><th>문제</th><td class="font-mono text-xs" th:text="${choiceSet.questionUuid}">-</td></tr>
+                    <tr><th>출처</th><td><span class="badge badge-outline badge-sm" th:text="${choiceSet.source}">-</span></td></tr>
+                    <tr><th>상태</th><td><span class="badge badge-sm" th:text="${choiceSet.status}">-</span></td></tr>
+                    <tr><th>대상 회원</th><td class="font-mono text-xs" th:text="${choiceSet.generatedForMemberUuid}">-</td></tr>
+                    <tr><th>모델</th><td th:text="${choiceSet.modelName}">-</td></tr>
+                    <tr><th>temperature</th><td th:text="${choiceSet.temperature}">-</td></tr>
+                    <tr><th>재시도</th><td th:text="${choiceSet.generationAttempts}">-</td></tr>
+                    <tr><th>샌드박스 검증</th>
+                        <td>
+                            <span class="badge badge-success badge-sm" th:if="${choiceSet.sandboxValidationPassed}">통과</span>
+                            <span class="badge badge-error badge-sm" th:unless="${choiceSet.sandboxValidationPassed}">실패</span>
+                        </td>
+                    </tr>
+                    <tr><th>재사용</th>
+                        <td>
+                            <span class="badge badge-info badge-sm" th:if="${choiceSet.isReusable}">가능</span>
+                            <span class="badge badge-ghost badge-sm" th:unless="${choiceSet.isReusable}">불가</span>
+                        </td>
+                    </tr>
+                    <tr><th>소요(ms)</th><td th:text="${choiceSet.totalElapsedMs}">-</td></tr>
+                    <tr><th>생성시각</th><td th:text="${#temporals.format(choiceSet.createdAt, 'yyyy-MM-dd HH:mm:ss')}">-</td></tr>
+                    </tbody>
+                </table>
+
+                <div class="card-actions justify-end mt-4 gap-2">
+                    <button class="btn btn-sm btn-error btn-outline" onclick="disableSet()">
+                        <i data-lucide="x-circle" class="size-4"></i>
+                        비활성화
+                    </button>
+                    <button class="btn btn-sm btn-success btn-outline" onclick="promoteSet()">
+                        <i data-lucide="arrow-up-circle" class="size-4"></i>
+                        재사용 풀 승격
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 선택지 목록 -->
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <h2 class="card-title mb-4">
+                    <i data-lucide="list" class="size-5"></i>
+                    선택지
+                </h2>
+                <div class="flex flex-col gap-3">
+                    <div th:each="item : ${items}"
+                         th:classappend="${item.isCorrect} ? 'border-success' : 'border-base-300'"
+                         class="card bg-base-200 border">
+                        <div class="card-body p-4">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="badge badge-outline font-bold" th:text="${item.choiceKey}">A</span>
+                                <span class="badge badge-success badge-sm" th:if="${item.isCorrect}">정답</span>
+                            </div>
+                            <pre class="bg-base-100 rounded p-2 text-sm font-mono overflow-x-auto whitespace-pre-wrap"
+                                 th:text="${item.body}">SQL</pre>
+                            <p class="text-sm mt-2 text-base-content/70">
+                                <span class="font-semibold">해설:</span>
+                                <span th:text="${item.rationale}">-</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
-    <div style="margin-top:16px;">
-        <button onclick="disableSet()">비활성화</button>
-        <button onclick="promoteSet()">재사용 풀 승격</button>
-    </div>
+</th:block>
 
-    <script th:inline="javascript">
-        const uuid = [[${choiceSet.choiceSetUuid}]];
-        async function disableSet() {
-            await fetch('/admin/choice-sets/' + uuid + '/disable', {method:'PUT'});
-            location.reload();
-        }
-        async function promoteSet() {
-            await fetch('/admin/choice-sets/' + uuid + '/promote', {method:'PUT'});
-            location.reload();
-        }
-    </script>
-</div>
+<th:block layout:fragment="js">
+<script th:inline="javascript">
+    const uuid = [[${choiceSet.choiceSetUuid}]];
+
+    async function disableSet() {
+        if (!confirm('비활성화하시겠습니까?')) return;
+        await fetch('/admin/choice-sets/' + uuid + '/disable', {method: 'PUT'});
+        location.reload();
+    }
+
+    async function promoteSet() {
+        if (!confirm('재사용 풀로 승격하시겠습니까?')) return;
+        await fetch('/admin/choice-sets/' + uuid + '/promote', {method: 'PUT'});
+        location.reload();
+    }
+
+    lucide.createIcons();
+</script>
+</th:block>
 </html>

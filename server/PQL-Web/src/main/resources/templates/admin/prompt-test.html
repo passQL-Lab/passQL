@@ -1,92 +1,133 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      th:replace="~{admin/layout :: layout(~{::content})}">
-<div th:fragment="content">
-    <h2>프롬프트 테스트</h2>
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
 
-    <div style="display:flex; gap:24px;">
+<th:block layout:fragment="title">프롬프트 테스트</th:block>
+
+<th:block layout:fragment="content">
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
         <!-- 좌측: 프롬프트 정보 -->
-        <div style="flex:1;">
-            <h3 th:text="${prompt.keyName}">key</h3>
-            <p>버전: <span th:text="${prompt.version}">1</span></p>
-            <p>모델: <span th:text="${prompt.model}">gemini</span></p>
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <h2 class="card-title">
+                    <i data-lucide="message-square-code" class="size-5"></i>
+                    프롬프트 정보
+                </h2>
 
-            <h4>System Prompt</h4>
-            <pre style="white-space:pre-wrap; background:#f5f5f5; padding:8px;"
-                 th:text="${prompt.systemPrompt}">-</pre>
+                <div class="flex flex-wrap gap-2 mb-2" th:if="${prompt != null}">
+                    <span class="badge badge-primary" th:text="${prompt.keyName}">key</span>
+                    <span class="badge badge-outline">v<span th:text="${prompt.version}">1</span></span>
+                    <span class="badge badge-ghost" th:text="${prompt.model}">gemini</span>
+                </div>
 
-            <h4>User Template</h4>
-            <pre style="white-space:pre-wrap; background:#f5f5f5; padding:8px;"
-                 th:text="${prompt.userTemplate}">-</pre>
+                <div th:if="${prompt != null}">
+                    <div class="form-control mb-3">
+                        <label class="label label-text font-semibold">System Prompt</label>
+                        <pre class="bg-base-200 rounded-lg p-3 text-sm overflow-x-auto whitespace-pre-wrap font-mono"
+                             th:text="${prompt.systemPrompt}">-</pre>
+                    </div>
+                    <div class="form-control">
+                        <label class="label label-text font-semibold">User Template</label>
+                        <pre class="bg-base-200 rounded-lg p-3 text-sm overflow-x-auto whitespace-pre-wrap font-mono"
+                             th:text="${prompt.userTemplate}">-</pre>
+                    </div>
+                </div>
+
+                <div th:unless="${prompt != null}" class="text-base-content/50 py-8 text-center">
+                    프롬프트를 찾을 수 없습니다.
+                </div>
+            </div>
         </div>
 
         <!-- 우측: 테스트 패널 -->
-        <div style="flex:1;">
-            <h3>테스트 실행</h3>
-            <div id="variableInputs">
-                <!-- JS가 user_template 에서 {변수} 파싱해서 자동 생성 -->
-            </div>
-            <button onclick="runTest()">테스트 실행</button>
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <h2 class="card-title">
+                    <i data-lucide="play" class="size-5"></i>
+                    테스트 실행
+                </h2>
 
-            <div id="resultArea" style="display:none; margin-top:16px;">
-                <h4>결과</h4>
-                <pre id="resultText" style="white-space:pre-wrap; background:#f5f5f5; padding:8px;"></pre>
-                <p>응답시간: <span id="elapsedMs">-</span>ms</p>
-            </div>
+                <div id="variableInputs" class="flex flex-col gap-3"></div>
 
-            <div style="margin-top:16px;">
-                <button onclick="activateVersion()">이 버전 활성화</button>
+                <button class="btn btn-primary mt-4" onclick="runTest()">
+                    <i data-lucide="play" class="size-4"></i>
+                    테스트 실행
+                </button>
+
+                <!-- 결과 -->
+                <div id="resultArea" class="hidden mt-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-semibold">결과</span>
+                        <span class="badge badge-ghost text-xs">응답시간: <span id="elapsedMs">-</span>ms</span>
+                    </div>
+                    <pre id="resultText" class="bg-base-200 rounded-lg p-3 text-sm overflow-x-auto whitespace-pre-wrap font-mono min-h-24"></pre>
+                </div>
+
+                <div class="divider"></div>
+
+                <button class="btn btn-outline btn-sm" onclick="activateVersion()">
+                    <i data-lucide="check-circle" class="size-4"></i>
+                    이 버전 활성화
+                </button>
             </div>
         </div>
+
     </div>
 
-    <script th:inline="javascript">
-        const promptUuid = [[${prompt.promptTemplateUuid}]];
-        const userTemplate = [[${prompt.userTemplate}]];
+</th:block>
 
-        // {변수명} 파싱해서 입력 필드 생성
-        const varPattern = /\{(\w+)\}/g;
-        const variables = new Set();
-        let match;
-        while ((match = varPattern.exec(userTemplate)) !== null) {
-            variables.add(match[1]);
-        }
-        const container = document.getElementById('variableInputs');
+<th:block layout:fragment="js">
+<script th:inline="javascript">
+    const promptUuid = [[${prompt != null ? prompt.promptTemplateUuid : ''}]];
+    const userTemplate = [[${prompt != null ? prompt.userTemplate : ''}]];
+
+    const varPattern = /\{(\w+)\}/g;
+    const variables = new Set();
+    let match;
+    while ((match = varPattern.exec(userTemplate)) !== null) {
+        variables.add(match[1]);
+    }
+    const container = document.getElementById('variableInputs');
+    variables.forEach(v => {
+        container.innerHTML += `
+            <div class="form-control">
+                <label class="label label-text"><code class="font-mono">{${v}}</code></label>
+                <textarea id="var_${v}" class="textarea textarea-bordered font-mono text-sm" rows="2"></textarea>
+            </div>
+        `;
+    });
+
+    async function runTest() {
+        const vars = {};
         variables.forEach(v => {
-            container.innerHTML += `
-                <div style="margin:4px 0;">
-                    <label><strong>{${v}}</strong></label><br/>
-                    <textarea id="var_${v}" rows="2" style="width:100%"></textarea>
-                </div>
-            `;
+            vars[v] = document.getElementById('var_' + v).value;
         });
-
-        async function runTest() {
-            const vars = {};
-            variables.forEach(v => {
-                vars[v] = document.getElementById('var_' + v).value;
+        try {
+            const resp = await fetch('/admin/prompts/' + promptUuid + '/test', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(vars)
             });
-            try {
-                const resp = await fetch('/admin/prompts/' + promptUuid + '/test', {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify(vars)
-                });
-                if (!resp.ok) throw new Error(await resp.text());
-                const data = await resp.json();
-                document.getElementById('resultText').textContent = data.result;
-                document.getElementById('elapsedMs').textContent = data.elapsedMs;
-                document.getElementById('resultArea').style.display = 'block';
-            } catch (e) {
-                alert('테스트 실패: ' + e.message);
-            }
+            if (!resp.ok) throw new Error(await resp.text());
+            const data = await resp.json();
+            document.getElementById('resultText').textContent = data.result;
+            document.getElementById('elapsedMs').textContent = data.elapsedMs;
+            document.getElementById('resultArea').classList.remove('hidden');
+        } catch (e) {
+            alert('테스트 실패: ' + e.message);
         }
+    }
 
-        async function activateVersion() {
-            await fetch('/admin/prompts/' + promptUuid + '/activate', {method:'PUT'});
-            alert('활성화 완료');
-            location.reload();
-        }
-    </script>
-</div>
+    async function activateVersion() {
+        await fetch('/admin/prompts/' + promptUuid + '/activate', {method: 'PUT'});
+        alert('활성화 완료');
+        location.reload();
+    }
+
+    lucide.createIcons();
+</script>
+</th:block>
 </html>

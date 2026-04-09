@@ -8,9 +8,9 @@
 <th:block layout:fragment="content">
 
     <!-- 필터 바 -->
-    <div class="card bg-base-100 shadow mb-4">
-        <div class="card-body p-4">
-            <form th:action="@{/admin/members}" method="get" class="flex flex-wrap gap-3 items-end">
+    <div class="card bg-base-100 shadow mb-3">
+        <div class="card-body p-3">
+            <form th:action="@{/admin/members}" method="get" class="flex flex-wrap gap-2 items-end">
 
                 <!-- 닉네임 검색 -->
                 <div class="form-control">
@@ -92,7 +92,7 @@
     <div class="card bg-base-100 shadow">
         <div class="card-body p-0">
             <div class="overflow-x-auto">
-                <table class="table table-sm">
+                <table class="table table-xs">
                     <thead>
                     <tr>
                         <th>닉네임</th>
@@ -109,9 +109,7 @@
                         <td class="font-medium text-sm" th:text="${m.nickname}">닉네임</td>
                         <td>
                             <span class="badge badge-sm"
-                                  th:classappend="${m.status.name() == 'ACTIVE'} ? 'badge-success' :
-                                                  ${m.status.name() == 'SUSPENDED'} ? 'badge-error' :
-                                                  ${m.status.name() == 'WITHDRAWN'} ? 'badge-ghost' : 'badge-warning'"
+                                  th:classappend="${m.status.name() == 'ACTIVE'} ? 'badge-success' : (${m.status.name() == 'SUSPENDED'} ? 'badge-error' : (${m.status.name() == 'WITHDRAWN'} ? 'badge-ghost' : 'badge-warning'))"
                                   th:text="${m.status.name()}">ACTIVE</span>
                         </td>
                         <td>
