@@ -16,8 +16,6 @@ import type {
   RecommendationsResponse,
   GreetingResponse,
   ExamScheduleResponse,
-  ChoiceSetComplete,
-  ChoiceGenerationStatus,
 } from "../types/api";
 
 describe("getMockResponse", () => {

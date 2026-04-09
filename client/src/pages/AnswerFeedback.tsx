@@ -13,6 +13,7 @@ interface FeedbackState {
   readonly selectedSql?: string;
   readonly correctSql?: string;
   readonly questionUuid: string;
+  readonly choiceSetId: string;
 }
 
 export default function AnswerFeedback() {
