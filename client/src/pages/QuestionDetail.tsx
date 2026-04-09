@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
-import { ArrowLeft, ChevronUp, ChevronDown } from "lucide-react";
+import { ArrowLeft, ChevronUp, ChevronDown, BookOpen } from "lucide-react";
 import { StarRating } from "../components/StarRating";
 import { ChoiceCard } from "../components/ChoiceCard";
 import AiExplanationSheet from "../components/AiExplanationSheet";
@@ -30,6 +30,7 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
 
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [schemaOpen, setSchemaOpen] = useState(false);
+  const [stemOpen, setStemOpen] = useState(true);
   const [executeCache, setExecuteCache] = useState<Record<string, ExecuteResult>>({});
   const executeCacheRef = useRef(executeCache);
   executeCacheRef.current = executeCache;
@@ -121,85 +122,144 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
     choices.length > 0 &&
     !submitMutation.isPending;
 
-  return (
-    <div className={practiceMode ? "flex flex-col min-h-full" : "pb-24"}>
-      {!practiceMode && (
-        <header className="sticky top-0 z-20 flex items-center justify-between h-14 bg-surface-card border-b border-border px-4 -mx-4 lg:-mx-0">
-          <button
-            type="button"
-            className="text-text-primary"
-            onClick={() => navigate(-1)}
-          >
-            <ArrowLeft size={20} />
-          </button>
-          <div className="flex items-center gap-2">
-            <span className="font-mono text-xs text-text-caption">
-              {questionUuid?.slice(0, 8)}
-            </span>
-            <span className="badge-topic">{question.topicName}</span>
-            <StarRating level={question.difficulty} />
-          </div>
-        </header>
+  const stemSection = (
+    <section className="card-base mt-4">
+      <p className="text-body">{question.stem}</p>
+    </section>
+  );
+
+  const schemaSection = question.schemaDisplay ? (
+    <section className="mt-3">
+      <button
+        type="button"
+        className="flex items-center gap-2 text-secondary text-sm w-full"
+        onClick={() => setSchemaOpen((prev) => !prev)}
+      >
+        <span>스키마 보기</span>
+        {schemaOpen ? (
+          <ChevronUp size={16} className="text-text-caption" />
+        ) : (
+          <ChevronDown size={16} className="text-text-caption" />
+        )}
+      </button>
+      {schemaOpen && (
+        <pre className="code-block mt-2">
+          <code>{question.schemaDisplay}</code>
+        </pre>
       )}
+    </section>
+  ) : null;
 
-      <section className="card-base mt-4">
-        <p className="text-body">{question.stem}</p>
-      </section>
+  const choicesSection = choices.length === 0 ? (
+    <div className="mt-4 space-y-3">
+      {Array.from({ length: 4 }, (_, i) => (
+        <div key={i} className="card-base space-y-2">
+          <div className="flex items-center gap-3">
+            <div className="w-5 h-5 rounded-full bg-border animate-pulse" />
+            <div className="w-4 h-4 rounded bg-border animate-pulse" />
+          </div>
+          <div className="h-16 rounded-lg bg-border animate-pulse" />
+        </div>
+      ))}
+    </div>
+  ) : (
+    <section className="mt-4 space-y-3">
+      {choices.map((choice) => (
+        <ChoiceCard
+          key={choice.key}
+          choice={choice}
+          isSelected={selectedKey === choice.key}
+          cached={executeCache[choice.key]}
+          isExecutable={question.executionMode === "EXECUTABLE"}
+          isExecuting={
+            executeMutation.isPending &&
+            executeMutation.variables === choice.body
+          }
+          onSelect={handleSelect}
+          onExecute={handleExecute}
+          onAskAi={handleAskAi}
+        />
+      ))}
+    </section>
+  );
 
-      {question.schemaDisplay && (
-        <section className="mt-3">
+  const submitButton = (
+    <button
+      type="button"
+      className={`w-full h-12 rounded-lg text-base font-bold ${
+        isSubmitReady
+          ? "bg-brand text-white"
+          : "bg-border text-text-caption cursor-not-allowed"
+      }`}
+      disabled={!isSubmitReady}
+      onClick={handleSubmit}
+    >
+      {submitMutation.isPending ? "제출 중..." : (practiceSubmitLabel ?? "답안 제출하기")}
+    </button>
+  );
+
+  if (practiceMode) {
+    return (
+      <div className="flex flex-col h-full">
+        {/* Sticky: 문제 지문 (토글) + 스키마 (토글) */}
+        <div className="sticky top-0 z-10 bg-surface px-1 pb-2">
           <button
             type="button"
-            className="flex items-center gap-2 text-secondary text-sm w-full"
-            onClick={() => setSchemaOpen((prev) => !prev)}
+            className="card-base w-full text-left flex items-start gap-2 mt-2"
+            onClick={() => setStemOpen((prev) => !prev)}
           >
-            <span>스키마 보기</span>
-            {schemaOpen ? (
-              <ChevronUp size={16} className="text-text-caption" />
+            <BookOpen size={16} className="text-brand mt-0.5 flex-shrink-0" />
+            {stemOpen ? (
+              <p className="text-body text-sm">{question.stem}</p>
             ) : (
-              <ChevronDown size={16} className="text-text-caption" />
+              <p className="text-body text-sm truncate">{question.stem}</p>
             )}
           </button>
-          {schemaOpen && (
-            <pre className="code-block mt-2">
-              <code>{question.schemaDisplay}</code>
-            </pre>
-          )}
-        </section>
-      )}
-
-      {choices.length === 0 ? (
-        <div className="mt-4 space-y-3">
-          {Array.from({ length: 4 }, (_, i) => (
-            <div key={i} className="card-base space-y-2">
-              <div className="flex items-center gap-3">
-                <div className="w-5 h-5 rounded-full bg-border animate-pulse" />
-                <div className="w-4 h-4 rounded bg-border animate-pulse" />
-              </div>
-              <div className="h-16 rounded-lg bg-border animate-pulse" />
-            </div>
-          ))}
+          {schemaSection}
         </div>
-      ) : (
-        <section className="mt-4 space-y-3">
-          {choices.map((choice) => (
-            <ChoiceCard
-              key={choice.key}
-              choice={choice}
-              isSelected={selectedKey === choice.key}
-              cached={executeCache[choice.key]}
-              isExecutable={question.executionMode === "EXECUTABLE"}
-              isExecuting={
-                executeMutation.isPending &&
-                executeMutation.variables === choice.body
-              }
-              onSelect={handleSelect}
-              onExecute={handleExecute}
-              onAskAi={handleAskAi}
-            />
-          ))}
-        </section>
-      )}
+
+        {/* 스크롤: 선택지 */}
+        <div className="flex-1 overflow-y-auto px-1">
+          {choicesSection}
+        </div>
+
+        {/* 하단 고정: 버튼 */}
+        <div className="bg-surface-card border-t border-border p-4">
+          {submitButton}
+        </div>
+
+        <AiExplanationSheet
+          isOpen={aiSheetOpen}
+          isLoading={explainMutation.isPending}
+          text={aiText}
+          onClose={() => setAiSheetOpen(false)}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div className="pb-24">
+      <header className="sticky top-0 z-20 flex items-center justify-between h-14 bg-surface-card border-b border-border px-4 -mx-4 lg:-mx-0">
+        <button
+          type="button"
+          className="text-text-primary"
+          onClick={() => navigate(-1)}
+        >
+          <ArrowLeft size={20} />
+        </button>
+        <div className="flex items-center gap-2">
+          <span className="font-mono text-xs text-text-caption">
+            {questionUuid?.slice(0, 8)}
+          </span>
+          <span className="badge-topic">{question.topicName}</span>
+          <StarRating level={question.difficulty} />
+        </div>
+      </header>
+
+      {stemSection}
+      {schemaSection}
+      {choicesSection}
 
       <AiExplanationSheet
         isOpen={aiSheetOpen}
@@ -208,23 +268,9 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
         onClose={() => setAiSheetOpen(false)}
       />
 
-      <div className={practiceMode
-        ? "mt-auto bg-surface-card border-t border-border p-4 z-20"
-        : "fixed bottom-0 inset-x-0 lg:left-55 bg-surface-card border-t border-border p-4 z-20"
-      }>
-        <div className={practiceMode ? "" : "mx-auto max-w-180"}>
-          <button
-            type="button"
-            className={`w-full h-12 rounded-lg text-base font-bold ${
-              isSubmitReady
-                ? "bg-brand text-white"
-                : "bg-border text-text-caption cursor-not-allowed"
-            }`}
-            disabled={!isSubmitReady}
-            onClick={handleSubmit}
-          >
-            {submitMutation.isPending ? "제출 중..." : (practiceSubmitLabel ?? "답안 제출하기")}
-          </button>
+      <div className="fixed bottom-0 inset-x-0 lg:left-55 bg-surface-card border-t border-border p-4 z-20">
+        <div className="mx-auto max-w-180">
+          {submitButton}
         </div>
       </div>
     </div>
