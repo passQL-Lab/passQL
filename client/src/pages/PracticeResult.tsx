@@ -1,9 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useParams, useNavigate, Navigate, Link } from "react-router-dom";
 import { Check, RotateCcw } from "lucide-react";
 import { usePracticeStore } from "../stores/practiceStore";
-import { submitPractice } from "../api/practice";
-import type { PracticeAnalysis } from "../types/api";
 import ScoreCountUp from "../components/ScoreCountUp";
 import StepNavigator from "../components/StepNavigator";
 
@@ -20,40 +18,26 @@ export default function PracticeResult() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
   const store = usePracticeStore();
-  const [analysis, setAnalysis] = useState<PracticeAnalysis | null>(null);
   const [statsVisible, setStatsVisible] = useState(false);
 
-  useEffect(() => {
-    if (!store.topicCode || store.results.length === 0) return;
+  const analysis = useMemo(() => {
+    const results = store.results;
+    const correctCount = results.filter((r) => r.isCorrect).length;
+    const totalCount = results.length;
+    const totalDurationMs = results.reduce((sum, r) => sum + r.durationMs, 0);
 
-    const correctCount = store.results.filter((r) => r.isCorrect).length;
-    const totalDurationMs = store.results.reduce((sum, r) => sum + r.durationMs, 0);
-    const totalCount = store.results.length;
-
-    const buildFallback = (): PracticeAnalysis => ({
+    return {
       correctCount,
       totalCount,
       totalDurationMs,
       greeting: correctCount >= 9 ? "완벽해요!" : correctCount >= 7 ? "꽤 잘했어요!" : correctCount >= 5 ? "괜찮아요!" : "다시 도전해봐요!",
       analysis: "INNER JOIN과 테이블 별칭은 이미 익숙하게 쓰고 있어요. 다중 테이블 JOIN 순서도 효율적이에요. 다만 OUTER JOIN에서 NULL 처리가 아직 어색한 것 같아요. LEFT JOIN 결과에서 매칭 안 되는 행을 WHERE로 필터링할 때 실수가 반복됐어요.",
       tip: "LEFT JOIN + WHERE col IS NULL 패턴을 연습해보세요.",
-    });
-
-    submitPractice({ topicCode: store.topicCode, results: store.results })
-      .then(setAnalysis)
-      .catch(() => setAnalysis(buildFallback()));
-  }, [store.topicCode, store.results]);
+    };
+  }, [store.results]);
 
   if (!store.sessionId || store.sessionId !== sessionId) {
     return <Navigate to="/questions" replace />;
-  }
-
-  if (!analysis) {
-    return (
-      <div className="flex items-center justify-center h-screen">
-        <div className="w-12 h-12 border-3 border-accent-light border-t-brand rounded-full animate-spin" />
-      </div>
-    );
   }
 
   const totalDuration = formatDuration(analysis.totalDurationMs);
