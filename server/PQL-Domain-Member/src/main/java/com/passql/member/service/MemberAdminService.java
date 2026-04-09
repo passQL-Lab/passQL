@@ -53,7 +53,7 @@ public class MemberAdminService {
             .and(MemberSpecification.lastSeenAfter(cond.getLastSeenFrom()))
             .and(MemberSpecification.lastSeenBefore(cond.getLastSeenTo()));
 
-        if (!cond.isIncludeTest()) {
+        if (!Boolean.TRUE.equals(cond.getIncludeTest())) {
             spec = spec.and(MemberSpecification.excludeTest());
         }
 

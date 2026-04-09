@@ -16,6 +16,8 @@ CREATE TABLE IF NOT EXISTS member_suspend_history (
     acted_at                    DATETIME(6)  NOT NULL,
     created_at                  DATETIME(6)  NULL,
     updated_at                  DATETIME(6)  NULL,
+    created_by                  VARCHAR(255) NULL,
+    updated_by                  VARCHAR(255) NULL,
     PRIMARY KEY (member_suspend_history_uuid),
     INDEX idx_suspend_history_member (member_uuid)
 ) COMMENT = '회원 제재/해제 이력';

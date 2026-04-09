@@ -27,5 +27,5 @@ public class MemberSearchCondition {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate lastSeenTo;
 
-    private boolean includeTest = false;
+    private Boolean includeTest = false;
 }
