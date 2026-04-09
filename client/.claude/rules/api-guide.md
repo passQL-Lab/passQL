@@ -77,8 +77,10 @@ Frontend ──(/api)──> Backend(Spring) ──(x-api-key)──> AI Server(
 | 함수                        | 메서드 | 경로                   |      인증       | 응답 타입          | 상태 |
 | --------------------------- | ------ | ---------------------- | :-------------: | ------------------ | :--: |
 | `fetchProgress(memberUuid)` | GET    | `/progress?memberUuid` | O (query param) | `ProgressResponse` |  O   |
+| `fetchHeatmap(memberUuid, from?, to?)` | GET | `/progress/heatmap?memberUuid&from&to` | O (query param) | `HeatmapResponse` | 미구현 |
 
 - `fetchProgress`: 응답 필드 `solvedCount`(int64, distinct questionUuid 기준), `correctRate`(double, 0.0~1.0 둘째자리 반올림, 마지막 시도 기준), `streakDays`(int32, 하루 그레이스 -- 오늘 미제출이어도 어제까지 연속이면 유지). 제출 이력 0건이면 `{ 0, 0.0, 0 }`.
+- `fetchHeatmap`: [미구현] 날짜별 학습 기록. `HeatmapResponse { entries: HeatmapEntry[] }`, `HeatmapEntry { date, solvedCount, correctCount }`. 현재 mock 데이터로 동작.
 
 ### Meta (`src/api/meta.ts`)
 

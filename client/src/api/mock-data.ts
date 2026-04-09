@@ -17,6 +17,7 @@ import type {
   GreetingResponse,
   ExamScheduleResponse,
   ChoiceItem,
+  HeatmapResponse,
 } from "../types/api";
 
 const MOCK_TOPICS: readonly TopicTree[] = [
@@ -94,6 +95,23 @@ const MOCK_EXAM_SCHEDULES: readonly ExamScheduleResponse[] = [
   { examScheduleUuid: "es-uuid-0003", certType: "SQLP", round: 1, examDate: "2026-06-21", isSelected: false },
 ];
 
+function buildMockHeatmap(): HeatmapResponse {
+  const pattern = [3, 0, 5, 2, 1, 0, 4, 6, 0, 1, 2, 3, 0, 0, 5, 1, 2, 0, 3, 4, 0, 1, 0, 6, 2, 3, 1, 0, 4, 2];
+  const entries = [];
+  const today = new Date();
+  for (let i = 29; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().slice(0, 10);
+    const solved = pattern[29 - i];
+    if (solved > 0) {
+      const correct = Math.min(solved, Math.max(0, solved - 1));
+      entries.push({ date: dateStr, solvedCount: solved, correctCount: correct });
+    }
+  }
+  return { entries };
+}
+
 /** path + method → mock response 매핑 */
 export function getMockResponse(path: string, method: string, body?: string): unknown {
   // GET /questions/today  (specific before generic /questions/:uuid)
@@ -151,6 +169,11 @@ export function getMockResponse(path: string, method: string, body?: string): un
     const selectedKey = (parsed.selectedChoiceKey ?? "A") as string;
     const isCorrect = selectedKey === "A";
     return { isCorrect, correctKey: "A", rationale: "CUSTOMER와 ORDERS를 customer_id로 JOIN한 후 c.name으로 GROUP BY하면 고객별 주문 수를 정확히 구할 수 있습니다." } satisfies SubmitResult;
+  }
+
+  // GET /progress/heatmap (specific before /progress)
+  if (method === "GET" && path.startsWith("/progress/heatmap")) {
+    return buildMockHeatmap() satisfies HeatmapResponse;
   }
 
   // GET /progress
