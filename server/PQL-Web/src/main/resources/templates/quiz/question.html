@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>passQL - 퀴즈</title>
+</head>
+<body>
+    <h1>문제 <span th:text="${index + 1}">1</span> / <span th:text="${session.totalQuestions}">10</span></h1>
+
+    <div>
+        <p th:text="${question.stem}">문제 내용</p>
+    </div>
+
+    <details>
+        <summary>DB 스키마</summary>
+        <pre th:text="${question.schemaDdl}">DDL</pre>
+    </details>
+
+    <form th:action="@{/quiz/{id}/q/{idx}/submit(id=${session.sessionUuid},idx=${index})}" method="post">
+        <input type="hidden" name="choiceSetUuid" th:value="${choiceSet.choiceSetUuid}" />
+
+        <div th:each="item : ${items}">
+            <label>
+                <input type="radio" name="choiceKey" th:value="${item.choiceKey}" required />
+                <strong th:text="${item.choiceKey}">A</strong>
+                <pre th:text="${item.body}">SELECT ...</pre>
+            </label>
+        </div>
+
+        <button type="submit">제출</button>
+    </form>
+</body>
+</html>

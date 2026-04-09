@@ -38,4 +38,7 @@ public interface QuestionRepository extends JpaRepository<Question, UUID> {
 
     @Query("SELECT q.questionUuid FROM Question q WHERE q.isActive = true ORDER BY q.createdAt ASC")
     List<UUID> findActiveUuidsOrderedByCreatedAt();
+
+    @Query("SELECT q.questionUuid FROM Question q WHERE q.isActive = true AND q.choiceSetPolicy = com.passql.question.constant.ChoiceSetPolicy.AI_ONLY")
+    List<UUID> findActiveAiOnlyUuids();
 }

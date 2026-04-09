@@ -2,6 +2,7 @@ package com.passql.question.entity;
 
 import com.passql.common.entity.BaseEntity;
 import com.passql.question.constant.Dialect;
+import com.passql.question.constant.ChoiceSetPolicy;
 import com.passql.question.constant.ExecutionMode;
 import jakarta.persistence.*;
 import lombok.*;
@@ -60,6 +61,23 @@ public class Question extends BaseEntity {
 
     @Column(columnDefinition = "TEXT")
     private String explanationSummary;
+
+    @Column(columnDefinition = "TEXT")
+    private String schemaSampleData;
+
+    @Column(columnDefinition = "TEXT")
+    private String schemaIntent;
+
+    @Column(columnDefinition = "TEXT")
+    private String answerSql;
+
+    @Column(columnDefinition = "TEXT")
+    private String hint;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20, nullable = false)
+    @Builder.Default
+    private ChoiceSetPolicy choiceSetPolicy = ChoiceSetPolicy.AI_ONLY;
 
     @Column(columnDefinition = "JSON")
     private String extraMetaJson;

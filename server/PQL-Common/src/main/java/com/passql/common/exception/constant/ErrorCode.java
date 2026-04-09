@@ -52,7 +52,33 @@ public enum ErrorCode {
     MEMBER_SUSPENDED(HttpStatus.FORBIDDEN, "제재된 회원입니다."),
     INVALID_SUSPEND_UNTIL(HttpStatus.BAD_REQUEST, "제재 만료 시각이 유효하지 않습니다."),
     NICKNAME_DUPLICATE(HttpStatus.CONFLICT, "이미 사용 중인 닉네임입니다."),
-    NICKNAME_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "닉네임 생성에 실패했습니다.");
+    NICKNAME_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "닉네임 생성에 실패했습니다."),
+
+    // === AI Gateway / Choice Set Generation (신규: Sub-plan 1) ===
+    AI_SERVER_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "AI 서버에 연결할 수 없습니다."),
+    AI_FALLBACK_FAILED(HttpStatus.SERVICE_UNAVAILABLE, "AI 서버와 대체 경로 모두 실패했습니다."),
+    AI_RESPONSE_PARSE_FAILED(HttpStatus.BAD_GATEWAY, "AI 응답을 해석할 수 없습니다."),
+    AI_STRUCTURED_SCHEMA_VIOLATION(HttpStatus.BAD_GATEWAY, "AI가 스키마에 맞지 않는 응답을 반환했습니다."),
+
+    CHOICE_SET_GENERATION_FAILED(HttpStatus.UNPROCESSABLE_ENTITY, "선택지 세트 생성에 실패했습니다. 다시 시도해주세요."),
+    CHOICE_SET_VALIDATION_NO_CORRECT(HttpStatus.UNPROCESSABLE_ENTITY, "생성된 선택지 중 정답이 없습니다."),
+    CHOICE_SET_VALIDATION_MULTIPLE_CORRECT(HttpStatus.UNPROCESSABLE_ENTITY, "생성된 선택지 중 정답이 여러 개입니다."),
+    CHOICE_SET_NOT_FOUND(HttpStatus.NOT_FOUND, "선택지 세트를 찾을 수 없습니다."),
+    CHOICE_SET_POLICY_NOT_IMPLEMENTED(HttpStatus.NOT_IMPLEMENTED, "해당 선택지 정책은 아직 지원되지 않습니다."),
+
+    // === Sandbox Validation (신규: Sub-plan 1) ===
+    SANDBOX_SETUP_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "샌드박스 환경 구성에 실패했습니다."),
+    SANDBOX_ANSWER_SQL_FAILED(HttpStatus.UNPROCESSABLE_ENTITY, "기준 정답 SQL 실행에 실패했습니다."),
+
+    // === Quiz Session (신규: Sub-plan 1) ===
+    QUIZ_SESSION_NOT_FOUND(HttpStatus.NOT_FOUND, "퀴즈 세션을 찾을 수 없습니다."),
+    QUIZ_SESSION_ALREADY_COMPLETED(HttpStatus.CONFLICT, "이미 완료된 세션입니다."),
+    QUIZ_SESSION_INDEX_OUT_OF_RANGE(HttpStatus.BAD_REQUEST, "잘못된 문제 인덱스입니다."),
+    QUIZ_SESSION_CHOICE_SET_MISMATCH(HttpStatus.BAD_REQUEST, "제출한 선택지 세트가 현재 세션과 일치하지 않습니다."),
+    QUIZ_SESSION_INSUFFICIENT_QUESTIONS(HttpStatus.UNPROCESSABLE_ENTITY, "세션을 생성할 문제가 부족합니다."),
+
+    // === Admin Question Generation (신규: Sub-plan 1) ===
+    QUESTION_GENERATE_INPUT_INVALID(HttpStatus.BAD_REQUEST, "문제 생성 입력값이 올바르지 않습니다.");
 
     private final HttpStatus status;
     private final String message;
