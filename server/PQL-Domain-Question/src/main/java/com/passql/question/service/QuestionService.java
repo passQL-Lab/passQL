@@ -117,12 +117,36 @@ public class QuestionService {
     public QuestionSummary toSummary(Question q) {
         String stem = q.getStem();
         String preview = stem == null ? "" : (stem.length() > 100 ? stem.substring(0, 100) : stem);
+        Topic topic = q.getTopicUuid() != null ? topicRepository.findById(q.getTopicUuid()).orElse(null) : null;
         return new QuestionSummary(
                 q.getQuestionUuid(),
-                topicName(q.getTopicUuid()),
+                topic != null ? topic.getCode() : null,
+                topic != null ? topic.getDisplayName() : null,
                 q.getDifficulty(),
-                preview
+                q.getExecutionMode(),
+                preview,
+                q.getCreatedAt()
         );
+    }
+
+    @Transactional
+    public void updateQuestion(UUID questionUuid, String stem, String schemaDisplay, String schemaDdl,
+                               String schemaSampleData, String schemaIntent, String answerSql, String hint,
+                               Integer difficulty, ExecutionMode executionMode,
+                               UUID topicUuid, UUID subtopicUuid) {
+        Question q = questionRepository.findById(questionUuid)
+                .orElseThrow(() -> new CustomException(ErrorCode.QUESTION_NOT_FOUND));
+        q.setStem(stem);
+        q.setSchemaDisplay(schemaDisplay);
+        q.setSchemaDdl(schemaDdl);
+        q.setSchemaSampleData(schemaSampleData);
+        q.setSchemaIntent(schemaIntent);
+        q.setAnswerSql(answerSql);
+        q.setHint(hint);
+        q.setDifficulty(difficulty);
+        q.setExecutionMode(executionMode);
+        q.setTopicUuid(topicUuid);
+        q.setSubtopicUuid(subtopicUuid);
     }
 
     private String topicName(UUID topicUuid) {

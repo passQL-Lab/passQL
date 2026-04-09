@@ -5,6 +5,8 @@ import com.passql.ai.dto.GenerateQuestionFullResult;
 import com.passql.ai.dto.QuestionFullContextDto;
 import com.passql.meta.service.MetaService;
 import com.passql.question.constant.ChoiceSetPolicy;
+import com.passql.question.constant.ExecutionMode;
+import com.passql.question.dto.QuestionDetail;
 import com.passql.question.entity.Question;
 import com.passql.question.service.QuestionGenerateService;
 import com.passql.question.service.QuestionService;
@@ -18,6 +20,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import com.passql.common.exception.CustomException;
+import com.passql.common.exception.constant.ErrorCode;
+
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -55,6 +61,45 @@ public class AdminQuestionController {
         return "admin/question-new";
     }
 
+    @GetMapping("/{uuid}")
+    public String detail(@PathVariable UUID uuid, Model model) {
+        QuestionDetail question = questionService.getQuestion(uuid);
+        model.addAttribute("question", question);
+        model.addAttribute("currentMenu", "questions");
+        model.addAttribute("pageTitle", "문제 상세");
+        return "admin/question-detail";
+    }
+
+    @GetMapping("/{uuid}/edit")
+    public String editForm(@PathVariable UUID uuid, Model model) {
+        Question question = questionService.getQuestionEntity(uuid);
+        model.addAttribute("question", question);
+        model.addAttribute("topics", metaService.getTopicTree());
+        model.addAttribute("currentMenu", "questions");
+        model.addAttribute("pageTitle", "문제 편집");
+        return "admin/question-edit";
+    }
+
+    @PostMapping("/{uuid}/edit")
+    public String update(
+            @PathVariable UUID uuid,
+            @RequestParam UUID topicUuid,
+            @RequestParam(required = false) UUID subtopicUuid,
+            @RequestParam int difficulty,
+            @RequestParam String stem,
+            @RequestParam(required = false) String schemaDisplay,
+            @RequestParam(required = false) String schemaDdl,
+            @RequestParam(required = false) String schemaSampleData,
+            @RequestParam(required = false) String schemaIntent,
+            @RequestParam(required = false) String answerSql,
+            @RequestParam(required = false) String hint,
+            @RequestParam String executionMode
+    ) {
+        questionService.updateQuestion(uuid, stem, schemaDisplay, schemaDdl, schemaSampleData, schemaIntent,
+                answerSql, hint, difficulty, ExecutionMode.valueOf(executionMode), topicUuid, subtopicUuid);
+        return "redirect:/admin/questions/" + uuid;
+    }
+
     /**
      * AI 문제 생성 (JSON 반환, AJAX preview 용).
      */
@@ -83,15 +128,19 @@ public class AdminQuestionController {
             @RequestParam(required = false) String choiceSetPolicy,
             @RequestParam List<String> choiceKeys,
             @RequestParam List<String> choiceBodies,
-            @RequestParam List<Boolean> choiceCorrects,
+            @RequestParam List<String> choiceCorrects,
             @RequestParam List<String> choiceRationales
     ) {
-        List<GeneratedChoiceDto> choices = new java.util.ArrayList<>();
-        for (int i = 0; i < choiceKeys.size(); i++) {
+        int choiceCount = choiceKeys.size();
+        if (choiceCount != choiceBodies.size() || choiceCount != choiceCorrects.size() || choiceCount != choiceRationales.size()) {
+            throw new CustomException(ErrorCode.QUESTION_GENERATE_INPUT_INVALID);
+        }
+        List<GeneratedChoiceDto> choices = new ArrayList<>();
+        for (int i = 0; i < choiceCount; i++) {
             choices.add(new GeneratedChoiceDto(
                     choiceKeys.get(i),
                     choiceBodies.get(i),
-                    Boolean.TRUE.equals(choiceCorrects.get(i)),
+                    "true".equalsIgnoreCase(choiceCorrects.get(i)),
                     choiceRationales.get(i)
             ));
         }

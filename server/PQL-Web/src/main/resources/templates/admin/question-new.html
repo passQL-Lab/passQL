@@ -88,7 +88,7 @@
             <div class="card-body">
                 <h2 class="card-title mb-4">
                     <i data-lucide="check-circle" class="size-5"></i>
-                    Step 2: 검토 &amp; 저장
+                    Step 3: 검토 &amp; 저장
                 </h2>
 
                 <form id="saveForm" action="/admin/questions" method="post">
@@ -142,19 +142,44 @@
 
 <th:block layout:fragment="js">
 <script>
+    // Step1 입력값을 저장해두는 변수 (Step1이 hidden 이후에도 참조 가능)
+    let _savedTopicUuid = '';
+    let _savedDifficulty = '';
+    let _savedSchemaDdl = '';
+    let _savedSchemaSampleData = '';
+    let _savedSchemaIntent = '';
+    let _savedHint = '';
+
     async function generateQuestion() {
+        const topicSelect = document.getElementById('topic');
+        if (!topicSelect.value) {
+            alert('토픽을 선택해주세요.');
+            return;
+        }
+        if (!document.getElementById('schemaDdl').value.trim()) {
+            alert('DDL을 입력해주세요.');
+            return;
+        }
+
+        // Step1 값을 변수에 저장
+        _savedTopicUuid = topicSelect.value;
+        _savedDifficulty = document.getElementById('difficulty').value;
+        _savedSchemaDdl = document.getElementById('schemaDdl').value;
+        _savedSchemaSampleData = document.getElementById('schemaSampleData').value;
+        _savedSchemaIntent = document.getElementById('schemaIntent').value;
+        _savedHint = document.getElementById('hint').value;
+
         document.getElementById('step1').classList.add('hidden');
         document.getElementById('step2').classList.remove('hidden');
 
-        const topicSelect = document.getElementById('topic');
         const topicName = topicSelect.options[topicSelect.selectedIndex].getAttribute('data-name');
         const body = {
-            schema_ddl: document.getElementById('schemaDdl').value,
-            schema_sample_data: document.getElementById('schemaSampleData').value,
-            schema_intent: document.getElementById('schemaIntent').value,
+            schema_ddl: _savedSchemaDdl,
+            schema_sample_data: _savedSchemaSampleData,
+            schema_intent: _savedSchemaIntent,
             topic: topicName,
-            difficulty: parseInt(document.getElementById('difficulty').value),
-            hint: document.getElementById('hint').value
+            difficulty: parseInt(_savedDifficulty),
+            hint: _savedHint
         };
 
         try {
@@ -177,38 +202,78 @@
         document.getElementById('step2').classList.add('hidden');
         document.getElementById('step3').classList.remove('hidden');
 
-        const topicSel = document.getElementById('topic');
-        document.getElementById('topicUuidHidden').value = topicSel.value;
+        document.getElementById('topicUuidHidden').value = _savedTopicUuid;
+        document.getElementById('difficultyHidden').value = _savedDifficulty;
+        document.getElementById('schemaDdlHidden').value = _savedSchemaDdl;
+        document.getElementById('schemaSampleDataHidden').value = _savedSchemaSampleData;
+        document.getElementById('schemaIntentHidden').value = _savedSchemaIntent;
         document.getElementById('stemField').value = data.stem || '';
         document.getElementById('answerSqlField').value = data.answerSql || '';
-        document.getElementById('difficultyHidden').value = document.getElementById('difficulty').value;
-        document.getElementById('schemaDdlHidden').value = document.getElementById('schemaDdl').value;
-        document.getElementById('schemaSampleDataHidden').value = document.getElementById('schemaSampleData').value;
-        document.getElementById('schemaIntentHidden').value = document.getElementById('schemaIntent').value;
-        document.getElementById('hintField').value = document.getElementById('hint').value;
+        document.getElementById('hintField').value = _savedHint;
 
         const container = document.getElementById('choicesContainer');
         container.innerHTML = '';
         (data.seedChoices || []).forEach((c) => {
-            const isCorrect = c.isCorrect || c.correct;
-            container.innerHTML += `
-                <div class="card bg-base-200 p-4 ${isCorrect ? 'border border-success' : ''}">
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="badge badge-outline font-bold">${c.key}</span>
-                        ${isCorrect ? '<span class="badge badge-success badge-sm">정답</span>' : ''}
-                    </div>
-                    <input type="hidden" name="choiceKeys" value="${c.key}" />
-                    <input type="hidden" name="choiceCorrects" value="${isCorrect}" />
-                    <div class="form-control">
-                        <label class="label label-text text-xs">선택지 내용</label>
-                        <textarea name="choiceBodies" class="textarea textarea-bordered font-mono text-sm" rows="2">${escapeHtml(c.body)}</textarea>
-                    </div>
-                    <div class="form-control mt-2">
-                        <label class="label label-text text-xs">해설</label>
-                        <textarea name="choiceRationales" class="textarea textarea-bordered text-sm" rows="2">${escapeHtml(c.rationale || '')}</textarea>
-                    </div>
-                </div>
-            `;
+            const isCorrect = c.isCorrect === true || c.correct === true || c.isCorrect === 'true';
+
+            const card = document.createElement('div');
+            card.className = 'card bg-base-200 p-4' + (isCorrect ? ' border border-success' : '');
+
+            // 뱃지 행
+            const header = document.createElement('div');
+            header.className = 'flex items-center gap-2 mb-2';
+            const keyBadge = document.createElement('span');
+            keyBadge.className = 'badge badge-outline font-bold';
+            keyBadge.textContent = c.key;
+            header.appendChild(keyBadge);
+            if (isCorrect) {
+                const correctBadge = document.createElement('span');
+                correctBadge.className = 'badge badge-success badge-sm';
+                correctBadge.textContent = '정답';
+                header.appendChild(correctBadge);
+            }
+            card.appendChild(header);
+
+            // hidden inputs
+            const keyInput = document.createElement('input');
+            keyInput.type = 'hidden'; keyInput.name = 'choiceKeys'; keyInput.value = c.key;
+            card.appendChild(keyInput);
+
+            const correctInput = document.createElement('input');
+            correctInput.type = 'hidden'; correctInput.name = 'choiceCorrects'; correctInput.value = String(isCorrect);
+            card.appendChild(correctInput);
+
+            // body textarea
+            const bodyWrap = document.createElement('div');
+            bodyWrap.className = 'form-control';
+            const bodyLabel = document.createElement('label');
+            bodyLabel.className = 'label label-text text-xs';
+            bodyLabel.textContent = '선택지 내용';
+            const bodyArea = document.createElement('textarea');
+            bodyArea.name = 'choiceBodies';
+            bodyArea.className = 'textarea textarea-bordered font-mono text-sm';
+            bodyArea.rows = 2;
+            bodyArea.value = c.body || '';
+            bodyWrap.appendChild(bodyLabel);
+            bodyWrap.appendChild(bodyArea);
+            card.appendChild(bodyWrap);
+
+            // rationale textarea
+            const ratWrap = document.createElement('div');
+            ratWrap.className = 'form-control mt-2';
+            const ratLabel = document.createElement('label');
+            ratLabel.className = 'label label-text text-xs';
+            ratLabel.textContent = '해설';
+            const ratArea = document.createElement('textarea');
+            ratArea.name = 'choiceRationales';
+            ratArea.className = 'textarea textarea-bordered text-sm';
+            ratArea.rows = 2;
+            ratArea.value = c.rationale || '';
+            ratWrap.appendChild(ratLabel);
+            ratWrap.appendChild(ratArea);
+            card.appendChild(ratWrap);
+
+            container.appendChild(card);
         });
 
         lucide.createIcons();
@@ -217,15 +282,16 @@
     function regenerate() {
         document.getElementById('step3').classList.add('hidden');
         document.getElementById('step1').classList.remove('hidden');
+        // hidden inputs 초기화 (재생성 후 다른 토픽 선택 시 이전 값 오염 방지)
+        document.getElementById('topicUuidHidden').value = '';
+        document.getElementById('difficultyHidden').value = '';
+        document.getElementById('schemaDdlHidden').value = '';
+        document.getElementById('schemaSampleDataHidden').value = '';
+        document.getElementById('schemaIntentHidden').value = '';
+        document.getElementById('choicesContainer').innerHTML = '';
     }
 
-    function escapeHtml(str) {
-        return String(str)
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;');
-    }
+
 </script>
 </th:block>
 </html>

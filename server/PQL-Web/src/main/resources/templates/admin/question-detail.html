@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+
+<th:block layout:fragment="title">문제 상세</th:block>
+
+<th:block layout:fragment="content">
+
+    <div class="mb-4 flex items-center gap-2">
+        <a th:href="@{/admin/questions}" class="btn btn-sm btn-ghost">
+            <i data-lucide="arrow-left" class="size-4"></i>
+            목록으로
+        </a>
+        <h2 class="text-lg font-bold">문제 상세</h2>
+        <a th:href="@{/admin/questions/{uuid}/edit(uuid=${question.questionUuid})}" class="btn btn-sm btn-primary ml-auto">
+            <i data-lucide="pencil" class="size-4"></i>
+            편집
+        </a>
+    </div>
+
+    <!-- 기본 정보 -->
+    <div class="card bg-base-100 shadow mb-4">
+        <div class="card-body">
+            <h3 class="card-title text-base mb-4">
+                <i data-lucide="info" class="size-5"></i>
+                기본 정보
+            </h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div>
+                    <div class="text-base-content/50 text-xs mb-1">토픽</div>
+                    <span class="badge badge-outline" th:text="${question.topicName}">-</span>
+                </div>
+                <div>
+                    <div class="text-base-content/50 text-xs mb-1">서브토픽</div>
+                    <span th:text="${question.subtopicName ?: '-'}">-</span>
+                </div>
+                <div>
+                    <div class="text-base-content/50 text-xs mb-1">난이도</div>
+                    <span th:classappend="${question.difficulty == 1} ? 'badge-success' : (${question.difficulty == 2} ? 'badge-info' : (${question.difficulty == 3} ? 'badge-warning' : 'badge-error'))"
+                          class="badge badge-sm"
+                          th:text="'Lv.' + ${question.difficulty}">Lv.3</span>
+                </div>
+                <div>
+                    <div class="text-base-content/50 text-xs mb-1">실행 모드</div>
+                    <span th:classappend="${question.executionMode != null and question.executionMode.name() == 'EXECUTABLE'} ? 'badge-primary' : 'badge-ghost'"
+                          class="badge badge-sm"
+                          th:text="${question.executionMode != null and question.executionMode.name() == 'EXECUTABLE'} ? '실행형' : '개념형'">개념형</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 지문 -->
+    <div class="card bg-base-100 shadow mb-4">
+        <div class="card-body">
+            <h3 class="card-title text-base mb-3">
+                <i data-lucide="file-text" class="size-5"></i>
+                지문
+            </h3>
+            <p class="text-sm whitespace-pre-wrap" th:text="${question.stem}">-</p>
+        </div>
+    </div>
+
+    <!-- 스키마 -->
+    <div class="card bg-base-100 shadow mb-4" th:if="${question.schemaDisplay != null and !question.schemaDisplay.isEmpty()}">
+        <div class="card-body">
+            <h3 class="card-title text-base mb-3">
+                <i data-lucide="table" class="size-5"></i>
+                스키마
+            </h3>
+            <pre class="text-sm bg-base-200 rounded p-3 overflow-x-auto" th:text="${question.schemaDisplay}"></pre>
+        </div>
+    </div>
+
+    <!-- 선택지 -->
+    <div class="card bg-base-100 shadow mb-4">
+        <div class="card-body">
+            <h3 class="card-title text-base mb-4">
+                <i data-lucide="list" class="size-5"></i>
+                선택지
+            </h3>
+            <div class="flex flex-col gap-3">
+                <div th:each="c : ${question.choices}"
+                     th:classappend="${c.body != null and !c.body.isEmpty()} ? '' : 'opacity-40'"
+                     class="border border-base-300 rounded-lg p-3">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="badge badge-primary font-bold" th:text="${c.key}">A</span>
+                        <span class="badge badge-xs badge-outline" th:text="${c.kind}">SQL</span>
+                        <span class="badge badge-success badge-sm ml-auto" th:if="${false}">정답 (DB에서 확인)</span>
+                    </div>
+                    <pre th:if="${c.body != null and !c.body.isEmpty()}"
+                         class="text-sm font-mono bg-base-200 rounded p-2 overflow-x-auto whitespace-pre-wrap"
+                         th:text="${c.body}"></pre>
+                    <p th:if="${c.body == null or c.body.isEmpty()}" class="text-xs text-base-content/40">미입력</p>
+                </div>
+                <div th:if="${question.choices == null or question.choices.isEmpty()}"
+                     class="text-center text-base-content/40 py-6">선택지 없음</div>
+            </div>
+        </div>
+    </div>
+
+</th:block>
+
+<th:block layout:fragment="js">
+    <script>lucide.createIcons();</script>
+</th:block>
+</html>

@@ -78,35 +78,31 @@
                     </thead>
                     <tbody>
                     <tr th:each="q : ${questions}" th:if="${questions != null and !questions.isEmpty()}">
-                        <td class="font-mono text-xs" th:text="${q.id}">1</td>
-                        <td class="max-w-xs truncate text-sm"
-                            th:text="${#strings.length(q.stem) > 50 ? #strings.substring(q.stem, 0, 50) + '...' : q.stem}">
+                        <td class="font-mono text-xs" th:text="${#strings.substring(q.questionUuid.toString(), 0, 8)}">xxxxxxxx</td>
+                        <td class="max-w-xs truncate text-sm" th:text="${q.stemPreview}">
                             다음 중 employees 테이블에서 부서별 평균 급여를...
                         </td>
                         <td>
-                            <span class="badge badge-outline badge-sm" th:text="${q.topicCode}">SELECT</span>
+                            <span class="badge badge-outline badge-sm" th:text="${q.topicCode ?: q.topicName}">SELECT</span>
                         </td>
                         <td>
-                            <span th:classappend="${q.difficulty == 1} ? 'badge-success' :
-                                                  ${q.difficulty == 2} ? 'badge-info' :
-                                                  ${q.difficulty == 3} ? 'badge-warning' :
-                                                  ${q.difficulty >= 4} ? 'badge-error' : ''"
+                            <span th:classappend="${q.difficulty == 1} ? 'badge-success' : (${q.difficulty == 2} ? 'badge-info' : (${q.difficulty == 3} ? 'badge-warning' : 'badge-error'))"
                                   class="badge badge-sm"
                                   th:text="'Lv.' + ${q.difficulty}">Lv.3</span>
                         </td>
                         <td>
-                            <span th:classappend="${q.executionMode?.name() == 'EXECUTABLE'} ? 'badge-primary' : 'badge-ghost'"
+                            <span th:classappend="${q.executionMode != null and q.executionMode.name() == 'EXECUTABLE'} ? 'badge-primary' : 'badge-ghost'"
                                   class="badge badge-sm"
-                                  th:text="${q.executionMode?.name() == 'EXECUTABLE'} ? '실행형' : '개념형'">실행형</span>
+                                  th:text="${q.executionMode != null and q.executionMode.name() == 'EXECUTABLE'} ? '실행형' : '개념형'">개념형</span>
                         </td>
                         <td class="text-xs" th:text="${q.createdAt != null ? #temporals.format(q.createdAt, 'yyyy-MM-dd') : '-'}">2026-04-01</td>
                         <td>
                             <div class="flex gap-1">
-                                <a th:href="@{/admin/questions/{id}(id=${q.id})}"
+                                <a th:href="@{/admin/questions/{uuid}(uuid=${q.questionUuid})}"
                                    class="btn btn-xs btn-ghost" title="상세">
                                     <i data-lucide="eye" class="size-3"></i>
                                 </a>
-                                <a th:href="@{/admin/questions/{id}/edit(id=${q.id})}"
+                                <a th:href="@{/admin/questions/{uuid}/edit(uuid=${q.questionUuid})}"
                                    class="btn btn-xs btn-ghost" title="편집">
                                     <i data-lucide="pencil" class="size-3"></i>
                                 </a>
