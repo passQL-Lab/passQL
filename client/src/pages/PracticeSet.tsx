@@ -31,7 +31,7 @@ export default function PracticeSet() {
   };
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full max-w-[480px] mx-auto w-full">
       <div className="px-4 pt-3 pb-2">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-semibold text-text-secondary">

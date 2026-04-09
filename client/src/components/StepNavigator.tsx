@@ -1,5 +1,6 @@
 import { useState, useRef, type ReactNode } from "react";
-import { ChevronLeft, ChevronRight, Grid2x2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Grid2x2, Home } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface StepNavigatorProps {
   readonly steps: readonly ReactNode[];
@@ -10,7 +11,9 @@ interface StepNavigatorProps {
 export default function StepNavigator({ steps, lastButtonLabel = "다른 카테고리", onLastStep }: StepNavigatorProps) {
   const [current, setCurrent] = useState(0);
   const touchStartX = useRef(0);
+  const navigate = useNavigate();
   const total = steps.length;
+  const isFirst = current === 0;
 
   const goTo = (idx: number) => {
     if (idx >= 0 && idx < total) setCurrent(idx);
@@ -38,9 +41,9 @@ export default function StepNavigator({ steps, lastButtonLabel = "다른 카테�
         <button
           type="button"
           className="w-10 h-10 flex items-center justify-center bg-surface-card border border-border rounded-lg"
-          onClick={() => goTo(current - 1)}
+          onClick={() => isFirst ? navigate("/") : goTo(current - 1)}
         >
-          <ChevronLeft size={20} className="text-text-primary" />
+          {isFirst ? <Home size={18} className="text-text-primary" /> : <ChevronLeft size={20} className="text-text-primary" />}
         </button>
         <span className="text-sm text-text-secondary font-semibold">
           {current + 1} / {total}
