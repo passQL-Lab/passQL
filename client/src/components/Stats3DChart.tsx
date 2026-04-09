@@ -37,9 +37,6 @@ export default function Stats3DChart({ categories, onCategoryClick }: Stats3DCha
     const tooltip = tooltipRef.current;
     if (!container || !tooltip || categories.length === 0) return;
 
-    // Match r128 rendering: no color management, linear output
-    THREE.ColorManagement.enabled = false;
-
     // Scene
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xFAFAFA);
@@ -49,13 +46,11 @@ export default function Stats3DChart({ categories, onCategoryClick }: Stats3DCha
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.shadowMap.enabled = true;
-    renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
-    renderer.toneMapping = THREE.NoToneMapping;
     container.appendChild(renderer.domElement);
 
-    // Lights
-    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
-    const sun = new THREE.DirectionalLight(0xffffff, 0.8);
+    // Lights — r183 물리 기반 조명은 r128보다 강도를 높여야 동일 밝기
+    scene.add(new THREE.AmbientLight(0xffffff, 3));
+    const sun = new THREE.DirectionalLight(0xffffff, 2);
     sun.position.set(5, 10, 7);
     sun.castShadow = true;
     scene.add(sun);
