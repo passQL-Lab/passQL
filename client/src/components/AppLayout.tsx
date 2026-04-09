@@ -33,6 +33,10 @@ function SidebarNav() {
           <span>{item.label}</span>
         </NavLink>
       ))}
+      <div className="mt-auto px-4 pt-4 border-t border-border">
+        <img src={logo} alt="passQL" className="h-4 w-auto opacity-40 mb-1" />
+        <p className="text-[10px] text-text-caption">© 2026 passQL</p>
+      </div>
     </aside>
   );
 }
