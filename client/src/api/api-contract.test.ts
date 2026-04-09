@@ -151,6 +151,33 @@ describe("Questions API 계약", () => {
   });
 });
 
+describe("Progress API 계약", () => {
+  describe("fetchHeatmap — GET /progress/heatmap", () => {
+    it("path에 memberUuid, from, to 파라미터를 포함한다", async () => {
+      const { fetchHeatmap } = await import("./progress");
+
+      await fetchHeatmap("test-uuid", "2026-03-10", "2026-04-09");
+
+      const [url] = mockFetch.mock.calls[0];
+      expect(url).toContain("/progress/heatmap");
+      expect(url).toContain("memberUuid=test-uuid");
+      expect(url).toContain("from=2026-03-10");
+      expect(url).toContain("to=2026-04-09");
+    });
+
+    it("from, to 생략 시 memberUuid만 포함한다", async () => {
+      const { fetchHeatmap } = await import("./progress");
+
+      await fetchHeatmap("test-uuid");
+
+      const [url] = mockFetch.mock.calls[0];
+      expect(url).toContain("memberUuid=test-uuid");
+      expect(url).not.toContain("from=");
+      expect(url).not.toContain("to=");
+    });
+  });
+});
+
 describe("generateChoices 제거 확인", () => {
   it("questions 모듈에서 generateChoices가 export되지 않는다", async () => {
     const questions = await import("./questions");
@@ -193,6 +220,22 @@ describe("타입 계약 (컴파일 타임 검증 보조)", () => {
     };
     expect(detail.choices).toHaveLength(1);
     expect(detail.choices[0].key).toBe("A");
+  });
+
+  it("HeatmapEntry와 HeatmapResponse 타입이 정의되어 있다", () => {
+    const entry: import("../types/api").HeatmapEntry = {
+      date: "2026-04-09",
+      solvedCount: 3,
+      correctCount: 2,
+    };
+    expect(entry.date).toBe("2026-04-09");
+    expect(entry.solvedCount).toBe(3);
+    expect(entry.correctCount).toBe(2);
+
+    const response: import("../types/api").HeatmapResponse = {
+      entries: [entry],
+    };
+    expect(response.entries).toHaveLength(1);
   });
 
   it("SubmitPayload, ChoiceGenerationPhase 등 SSE 타입이 export되지 않는다", async () => {

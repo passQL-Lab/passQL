@@ -8,7 +8,7 @@ const HEATMAP_COLORS = [
   "#4F46E5",
 ] as const;
 
-function getLevel(count: number): number {
+export function getLevel(count: number): number {
   if (count === 0) return 0;
   if (count === 1) return 1;
   if (count <= 3) return 2;
@@ -16,7 +16,7 @@ function getLevel(count: number): number {
   return 4;
 }
 
-function buildDayMap(entries: readonly HeatmapEntry[]): Map<string, number> {
+export function buildDayMap(entries: readonly HeatmapEntry[]): Map<string, number> {
   const map = new Map<string, number>();
   for (const e of entries) {
     map.set(e.date, e.solvedCount);
@@ -24,7 +24,7 @@ function buildDayMap(entries: readonly HeatmapEntry[]): Map<string, number> {
   return map;
 }
 
-function getLast30Days(): readonly string[] {
+export function getLast30Days(): readonly string[] {
   const days: string[] = [];
   const today = new Date();
   for (let i = 29; i >= 0; i--) {

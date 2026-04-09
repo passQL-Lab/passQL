@@ -16,6 +16,7 @@ import type {
   RecommendationsResponse,
   GreetingResponse,
   ExamScheduleResponse,
+  HeatmapResponse,
 } from "../types/api";
 
 describe("getMockResponse", () => {
@@ -112,6 +113,30 @@ describe("getMockResponse", () => {
       expect(result.solvedCount).toBe(42);
       expect(result.correctRate).toBeCloseTo(0.685);
       expect(result.streakDays).toBe(3);
+    });
+
+    it("returns heatmap response", () => {
+      const result = getMockResponse("/progress/heatmap?memberUuid=abc", "GET") as HeatmapResponse;
+      expect(result).toHaveProperty("entries");
+      expect(Array.isArray(result.entries)).toBe(true);
+      expect(result.entries.length).toBeGreaterThan(0);
+      for (const entry of result.entries) {
+        expect(entry).toHaveProperty("date");
+        expect(entry).toHaveProperty("solvedCount");
+        expect(entry).toHaveProperty("correctCount");
+        expect(entry.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+        expect(entry.solvedCount).toBeGreaterThan(0);
+        expect(entry.correctCount).toBeLessThanOrEqual(entry.solvedCount);
+      }
+    });
+
+    it("returns deterministic heatmap data", () => {
+      const r1 = getMockResponse("/progress/heatmap?memberUuid=abc", "GET") as HeatmapResponse;
+      const r2 = getMockResponse("/progress/heatmap?memberUuid=abc", "GET") as HeatmapResponse;
+      expect(r1.entries.length).toBe(r2.entries.length);
+      for (let i = 0; i < r1.entries.length; i++) {
+        expect(r1.entries[i].solvedCount).toBe(r2.entries[i].solvedCount);
+      }
     });
   });
 
