@@ -8,7 +8,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://api.passql.suhsaechan.kr",
+        target: process.env.BACKEND_URL ?? "http://localhost:8080",
         changeOrigin: true,
       },
     },
