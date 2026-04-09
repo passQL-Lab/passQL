@@ -1,11 +1,28 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-08T13:32:03Z",
-    "currentVersion": "0.0.24",
+    "lastUpdated": "2026-04-09T14:32:07Z",
+    "currentVersion": "0.0.33",
     "projectType": "basic",
-    "totalReleases": 4
+    "totalReleases": 5
   },
   "releases": [
+    {
+      "version": "0.0.33",
+      "project_type": "basic",
+      "date": "2026-04-09",
+      "pr_number": 45,
+      "raw_summary": "## Summary by CodeRabbit\n\n* **Chores**\n  * 애플리케이션 버전이 v0.0.33으로 업데이트되었습니다.\n  * 배포 구성 및 버전 정보가 동기화되었습니다.",
+      "parsed_changes": {
+        "chores": {
+          "title": "Chores",
+          "items": [
+            "애플리케이션 버전이 v0.0.33으로 업데이트되었습니다.",
+            "배포 구성 및 버전 정보가 동기화되었습니다."
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.24",
       "project_type": "basic",
