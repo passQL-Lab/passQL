@@ -20,6 +20,10 @@ export default function ScoreCountUp({ target, total, onComplete }: ScoreCountUp
   onCompleteRef.current = onComplete;
 
   useEffect(() => {
+    if (target <= 0) {
+      setTimeout(() => onCompleteRef.current?.(), 200);
+      return;
+    }
     let step = 0;
     const tick = () => {
       step++;

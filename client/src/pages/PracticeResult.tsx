@@ -25,20 +25,23 @@ export default function PracticeResult() {
 
   useEffect(() => {
     if (!store.topicCode || store.results.length === 0) return;
+
+    const correctCount = store.results.filter((r) => r.isCorrect).length;
+    const totalDurationMs = store.results.reduce((sum, r) => sum + r.durationMs, 0);
+    const totalCount = store.results.length;
+
+    const buildFallback = (): PracticeAnalysis => ({
+      correctCount,
+      totalCount,
+      totalDurationMs,
+      greeting: correctCount >= 9 ? "완벽해요!" : correctCount >= 7 ? "꽤 잘했어요!" : correctCount >= 5 ? "괜찮아요!" : "다시 도전해봐요!",
+      analysis: "INNER JOIN과 테이블 별칭은 이미 익숙하게 쓰고 있어요. 다중 테이블 JOIN 순서도 효율적이에요. 다만 OUTER JOIN에서 NULL 처리가 아직 어색한 것 같아요. LEFT JOIN 결과에서 매칭 안 되는 행을 WHERE로 필터링할 때 실수가 반복됐어요.",
+      tip: "LEFT JOIN + WHERE col IS NULL 패턴을 연습해보세요.",
+    });
+
     submitPractice({ topicCode: store.topicCode, results: store.results })
       .then(setAnalysis)
-      .catch(() => {
-        const correctCount = store.results.filter((r) => r.isCorrect).length;
-        const totalDurationMs = store.results.reduce((sum, r) => sum + r.durationMs, 0);
-        setAnalysis({
-          correctCount,
-          totalCount: store.results.length,
-          totalDurationMs,
-          greeting: correctCount >= 7 ? "꽤 잘했어요!" : "다시 도전해봐요!",
-          analysis: "",
-          tip: "",
-        });
-      });
+      .catch(() => setAnalysis(buildFallback()));
   }, [store.topicCode, store.results]);
 
   if (!store.sessionId || store.sessionId !== sessionId) {

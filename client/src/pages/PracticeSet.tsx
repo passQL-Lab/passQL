@@ -30,7 +30,9 @@ export default function PracticeSet() {
 
   const handleSelect = useCallback((selectedChoiceKey: string) => {
     if (!question) return;
-    submitAndAdvance(question.questionUuid, true, selectedChoiceKey);
+    // mock 정답 키는 "A" — 실제 API 연동 시 백엔드가 판별
+    const isCorrect = selectedChoiceKey === "A";
+    submitAndAdvance(question.questionUuid, isCorrect, selectedChoiceKey);
   }, [question, submitAndAdvance]);
 
   if (!storeSessionId || storeSessionId !== sessionId) {
