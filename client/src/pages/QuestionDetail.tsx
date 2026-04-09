@@ -15,11 +15,12 @@ import type { ExecuteResult } from "../types/api";
 
 interface QuestionDetailProps {
   readonly practiceMode?: boolean;
+  readonly practiceSubmitLabel?: string;
   readonly questionUuid?: string;
-  readonly onPracticeSubmit?: (isCorrect: boolean, selectedChoiceKey: string) => void;
+  readonly onPracticeSubmit?: (selectedChoiceKey: string) => void;
 }
 
-export default function QuestionDetail({ practiceMode, questionUuid: propUuid, onPracticeSubmit }: QuestionDetailProps = {}) {
+export default function QuestionDetail({ practiceMode, practiceSubmitLabel, questionUuid: propUuid, onPracticeSubmit }: QuestionDetailProps = {}) {
   const { questionUuid: paramUuid } = useParams<{ questionUuid: string }>();
   const questionUuid = propUuid ?? paramUuid;
   const navigate = useNavigate();
@@ -66,12 +67,12 @@ export default function QuestionDetail({ practiceMode, questionUuid: propUuid, o
 
   const handleSubmit = useCallback(() => {
     if (!selectedKey || !question) return;
+    if (practiceMode && onPracticeSubmit) {
+      onPracticeSubmit(selectedKey);
+      return;
+    }
     submitMutation.mutate(selectedKey, {
       onSuccess: (result) => {
-        if (practiceMode && onPracticeSubmit) {
-          onPracticeSubmit(result.isCorrect, selectedKey!);
-          return;
-        }
         const selectedChoice = choices.find((c) => c.key === selectedKey);
         const correctChoice = choices.find((c) => c.key === result.correctKey);
         navigate(`/questions/${questionUuid}/result`, {
@@ -222,7 +223,7 @@ export default function QuestionDetail({ practiceMode, questionUuid: propUuid, o
             disabled={!isSubmitReady}
             onClick={handleSubmit}
           >
-            {submitMutation.isPending ? "제출 중..." : "답안 제출하기"}
+            {submitMutation.isPending ? "제출 중..." : (practiceSubmitLabel ?? "답안 제출하기")}
           </button>
         </div>
       </div>

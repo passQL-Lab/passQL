@@ -14,8 +14,7 @@ interface PracticeState {
 interface PracticeActions {
   readonly startSession: (sessionId: string, topicCode: string, topicName: string, questions: readonly QuestionSummary[]) => void;
   readonly startTimer: () => void;
-  readonly recordResult: (questionUuid: string, isCorrect: boolean, selectedChoiceKey: string) => void;
-  readonly nextQuestion: () => void;
+  readonly submitAndAdvance: (questionUuid: string, isCorrect: boolean, selectedChoiceKey: string) => void;
   readonly reset: () => void;
 }
 
@@ -33,19 +32,20 @@ export const usePracticeStore = create<PracticeState & PracticeActions>()((set, 
   ...INITIAL_STATE,
 
   startSession: (sessionId, topicCode, topicName, questions) =>
-    set({ ...INITIAL_STATE, sessionId, topicCode, topicName, questions }),
+    set({ ...INITIAL_STATE, sessionId, topicCode, topicName, questions, startedAt: Date.now() }),
 
   startTimer: () => set({ startedAt: Date.now() }),
 
-  recordResult: (questionUuid, isCorrect, selectedChoiceKey) => {
+  submitAndAdvance: (questionUuid, isCorrect, selectedChoiceKey) => {
     const { startedAt, results } = get();
-    const completedAt = Date.now();
-    const durationMs = startedAt ? completedAt - startedAt : 0;
+    const durationMs = startedAt ? Date.now() - startedAt : 0;
     const newResult: PracticeQuestionResult = { questionUuid, isCorrect, selectedChoiceKey, durationMs };
-    set({ results: [...results, newResult], startedAt: null });
+    set((s) => ({
+      results: [...results, newResult],
+      currentIndex: s.currentIndex + 1,
+      startedAt: Date.now(),
+    }));
   },
-
-  nextQuestion: () => set((s) => ({ currentIndex: s.currentIndex + 1 })),
 
   reset: () => set(INITIAL_STATE),
 }));

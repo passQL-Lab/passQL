@@ -1,4 +1,3 @@
-import { useEffect } from "react";
 import { useParams, useNavigate, Navigate } from "react-router-dom";
 import { usePracticeStore } from "../stores/practiceStore";
 import QuestionDetail from "./QuestionDetail";
@@ -6,28 +5,31 @@ import QuestionDetail from "./QuestionDetail";
 export default function PracticeSet() {
   const { sessionId, index } = useParams<{ sessionId: string; index: string }>();
   const navigate = useNavigate();
-  const store = usePracticeStore();
+
+  const storeSessionId = usePracticeStore((s) => s.sessionId);
+  const questions = usePracticeStore((s) => s.questions);
+  const topicName = usePracticeStore((s) => s.topicName);
+  const submitAndAdvance = usePracticeStore((s) => s.submitAndAdvance);
+
   const currentIndex = Number(index ?? 0);
-  const question = store.questions[currentIndex];
+  const question = questions[currentIndex];
+  const isLast = currentIndex === questions.length - 1;
 
-  useEffect(() => {
-    if (question) {
-      store.startTimer();
-    }
-  }, [currentIndex, question]);
-
-  if (!store.sessionId || store.sessionId !== sessionId) {
+  if (!storeSessionId || storeSessionId !== sessionId) {
     return <Navigate to="/questions" replace />;
   }
 
-  if (currentIndex >= store.questions.length) {
+  if (currentIndex >= questions.length) {
     return <Navigate to={`/practice/${sessionId}/result`} replace />;
   }
 
-  const handleSubmitComplete = (isCorrect: boolean, selectedChoiceKey: string) => {
-    store.recordResult(question.questionUuid, isCorrect, selectedChoiceKey);
-    store.nextQuestion();
-    navigate(`/practice/${sessionId}/${currentIndex + 1}`, { replace: true });
+  const handleSelect = (selectedChoiceKey: string) => {
+    submitAndAdvance(question.questionUuid, true, selectedChoiceKey);
+    if (isLast) {
+      navigate(`/practice/${sessionId}/result`, { replace: true });
+    } else {
+      navigate(`/practice/${sessionId}/${currentIndex + 1}`, { replace: true });
+    }
   };
 
   return (
@@ -35,14 +37,14 @@ export default function PracticeSet() {
       <div className="px-4 pt-3 pb-2">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-semibold text-text-secondary">
-            {currentIndex + 1} / {store.questions.length}
+            {currentIndex + 1} / {questions.length}
           </span>
-          <span className="badge-topic">{store.topicName}</span>
+          <span className="badge-topic">{topicName}</span>
         </div>
         <div className="w-full h-1.5 bg-border rounded-full overflow-hidden">
           <div
             className="h-full bg-brand rounded-full transition-all duration-300"
-            style={{ width: `${((currentIndex + 1) / store.questions.length) * 100}%` }}
+            style={{ width: `${((currentIndex + 1) / questions.length) * 100}%` }}
           />
         </div>
       </div>
@@ -52,7 +54,8 @@ export default function PracticeSet() {
           key={question.questionUuid}
           questionUuid={question.questionUuid}
           practiceMode
-          onPracticeSubmit={handleSubmitComplete}
+          practiceSubmitLabel={isLast ? "결과 보기" : "다음 문제"}
+          onPracticeSubmit={handleSelect}
         />
       </div>
     </div>
