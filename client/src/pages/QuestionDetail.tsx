@@ -1,212 +1,255 @@
-import { useState } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Star, ArrowLeft, Check, AlertTriangle, ChevronUp, ChevronDown } from "lucide-react";
-
-// ── Mock Data ──
-const MOCK = {
-  id: 1,
-  topic: "JOIN",
-  difficulty: 2,
-  stem: "다음 SQL 중 고객별 주문 수를 올바르게 구하는 것은?",
-  schema: `CUSTOMER (id INT PK, name VARCHAR, email VARCHAR)
-ORDERS (id INT PK, customer_id INT FK, amount INT, order_date DATE)`,
-  choices: [
-    {
-      key: "A",
-      sql: `SELECT c.name, COUNT(*) AS cnt
-FROM CUSTOMER c
-JOIN ORDERS o ON c.id = o.customer_id
-GROUP BY c.name`,
-      status: "success" as const,
-      result: {
-        rows: 3,
-        ms: 34,
-        columns: ["name", "cnt"],
-        data: [
-          ["홍길동", "2"],
-          ["김영희", "3"],
-          ["이철수", "1"],
-        ],
-      },
-    },
-    {
-      key: "B",
-      sql: `SELECT c.name, COUNT(*) AS cnt
-FROM CUSTOMER c
-JOIN ORDERS o ON c.id = o.cust_id
-GROUP BY c.name`,
-      status: "error" as const,
-      error: {
-        code: "SQL_SYNTAX",
-        message: "Unknown column 'o.cust_id' in 'on clause'",
-      },
-    },
-    {
-      key: "C",
-      sql: `SELECT name, COUNT(*) AS cnt
-FROM CUSTOMER c
-JOIN ORDERS o ON c.id = o.customer_id
-GROUP BY name`,
-      status: "idle" as const,
-    },
-    {
-      key: "D",
-      sql: `SELECT c.name, SUM(o.amount) AS total
-FROM CUSTOMER c
-JOIN ORDERS o ON c.id = o.customer_id
-GROUP BY c.name`,
-      status: "idle" as const,
-    },
-  ],
-} as const;
-
-function StarRating({ level }: { readonly level: number }) {
-  return (
-    <span className="flex gap-0.5">
-      {Array.from({ length: 3 }, (_, i) => (
-        <Star
-          key={i}
-          size={14}
-          className={i < level ? "fill-[var(--color-sem-warning)] text-[var(--color-sem-warning)]" : "text-border"}
-        />
-      ))}
-    </span>
-  );
-}
+import { useMutation } from "@tanstack/react-query";
+import { ArrowLeft, ChevronUp, ChevronDown, RefreshCw } from "lucide-react";
+import { StarRating } from "../components/StarRating";
+import { ChoiceCard } from "../components/ChoiceCard";
+import { ChoicesSkeleton } from "../components/ChoicesSkeleton";
+import AiExplanationSheet from "../components/AiExplanationSheet";
+import {
+  useQuestionDetail,
+  useExecuteChoice,
+  useSubmitAnswer,
+  useGenerateChoices,
+} from "../hooks/useQuestionDetail";
+import { usePrefetch } from "../hooks/usePrefetch";
+import { fetchRecommendations } from "../api/questions";
+import { explainError } from "../api/ai";
+import type { ExecuteResult } from "../types/api";
 
 export default function QuestionDetail() {
-  const { id: _id } = useParams<{ id: string }>();
+  const { questionUuid } = useParams<{ questionUuid: string }>();
   const navigate = useNavigate();
-  const [selectedKey, setSelectedKey] = useState<string | null>("C");
+  const { data: question, isLoading } = useQuestionDetail(questionUuid!);
+  const { prefetch, consumeCache } = usePrefetch();
+  const prefetchedRef = useRef(consumeCache(questionUuid!));
+  const { state: choicesState, retry: retryGenerate } = useGenerateChoices(questionUuid!, prefetchedRef.current);
+  const executeMutation = useExecuteChoice(questionUuid!);
+  const submitMutation = useSubmitAnswer(questionUuid!);
+
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [schemaOpen, setSchemaOpen] = useState(false);
+  const [executeCache, setExecuteCache] = useState<Record<string, ExecuteResult>>({});
+  const executeCacheRef = useRef(executeCache);
+  executeCacheRef.current = executeCache;
+  const [aiSheetOpen, setAiSheetOpen] = useState(false);
+  const [aiText, setAiText] = useState("");
+  const prefetchTriggeredRef = useRef(false);
+
+  const explainMutation = useMutation({
+    mutationFn: explainError,
+    onSuccess: (result) => setAiText(result.text),
+  });
+
+  const handleExecute = useCallback(
+    (choiceKey: string, sql: string) => {
+      if (executeCacheRef.current[choiceKey]) return;
+      executeMutation.mutate(sql, {
+        onSuccess: (result) => {
+          setExecuteCache((prev) => ({ ...prev, [choiceKey]: result }));
+        },
+      });
+    },
+    [executeMutation],
+  );
+
+  const handleSelect = useCallback(
+    (choiceKey: string, sql: string) => {
+      setSelectedKey(choiceKey);
+      if (question?.executionMode === "EXECUTABLE" && !executeCacheRef.current[choiceKey]) {
+        handleExecute(choiceKey, sql);
+      }
+      // Trigger prefetch for next question on first selection
+      if (!prefetchTriggeredRef.current) {
+        prefetchTriggeredRef.current = true;
+        fetchRecommendations(1, questionUuid)
+          .then((res) => {
+            const nextUuid = res.questions[0]?.questionUuid;
+            if (nextUuid) prefetch(nextUuid);
+          })
+          .catch(() => {}); // Prefetch failure is silent
+      }
+    },
+    [handleExecute, prefetch, questionUuid, question],
+  );
+
+  const handleSubmit = useCallback(() => {
+    if (!selectedKey || !question || choicesState.kind !== "done") return;
+    const { choiceSetId, choices } = choicesState;
+    submitMutation.mutate(
+      { choiceSetId, selectedChoiceKey: selectedKey },
+      {
+        onSuccess: (result) => {
+          const selectedChoice = choices.find((c) => c.key === selectedKey);
+          const correctChoice = choices.find((c) => c.key === result.correctKey);
+          navigate(`/questions/${questionUuid}/result`, {
+            state: {
+              ...result,
+              selectedKey,
+              selectedSql: selectedChoice?.body,
+              correctSql: correctChoice?.body,
+              questionUuid,
+              choiceSetId,
+            },
+          });
+        },
+      },
+    );
+  }, [selectedKey, submitMutation, question, choicesState, questionUuid, navigate]);
+
+  const handleAskAi = useCallback(
+    (choiceKey: string, _errorCode: string, errorMessage: string) => {
+      setAiSheetOpen(true);
+      setAiText("");
+      if (choicesState.kind !== "done") return;
+      const choice = choicesState.choices.find((c) => c.key === choiceKey);
+      explainMutation.mutate({
+        questionUuid: questionUuid!,
+        sql: choice?.body ?? "",
+        error_message: errorMessage,
+      });
+    },
+    [choicesState, questionUuid, explainMutation],
+  );
+
+  if (isLoading || !question) {
+    return (
+      <div className="py-6 space-y-4">
+        <div className="h-14 bg-border animate-pulse rounded" />
+        <div className="h-24 bg-border animate-pulse rounded-xl" />
+        <div className="space-y-3">
+          {Array.from({ length: 4 }, (_, i) => (
+            <div key={i} className="h-40 bg-border animate-pulse rounded-xl" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  const isSubmitReady =
+    selectedKey !== null &&
+    choicesState.kind === "done" &&
+    !submitMutation.isPending;
 
   return (
     <div className="pb-24">
-      {/* ── 1. Sticky Header ── */}
       <header className="sticky top-0 z-20 flex items-center justify-between h-14 bg-surface-card border-b border-border px-4 -mx-4 lg:-mx-0">
         <button
           type="button"
-          className="text-text-primary text-lg"
+          className="text-text-primary"
           onClick={() => navigate(-1)}
         >
           <ArrowLeft size={20} />
         </button>
         <div className="flex items-center gap-2">
-          <span className="badge-topic">{MOCK.topic}</span>
-          <StarRating level={MOCK.difficulty} />
+          <span className="font-mono text-xs text-text-caption">
+            {questionUuid?.slice(0, 8)}
+          </span>
+          <span className="badge-topic">{question.topicName}</span>
+          <StarRating level={question.difficulty} />
         </div>
       </header>
 
-      {/* ── 2. Stem Card ── */}
       <section className="card-base mt-4">
-        <p className="text-body">{MOCK.stem}</p>
+        <p className="text-body">{question.stem}</p>
       </section>
 
-      {/* ── 3. Schema Card (collapsible) ── */}
-      <section className="mt-3">
-        <button
-          type="button"
-          className="flex items-center gap-2 text-secondary text-sm w-full"
-          onClick={() => setSchemaOpen((prev) => !prev)}
-        >
-          <span>스키마 보기</span>
-          {schemaOpen ? <ChevronUp size={16} className="text-text-caption" /> : <ChevronDown size={16} className="text-text-caption" />}
-        </button>
-        {schemaOpen && (
-          <pre className="code-block mt-2">
-            <code>{MOCK.schema}</code>
-          </pre>
-        )}
-      </section>
-
-      {/* ── 4. Choice Cards ── */}
-      <section className="mt-4 space-y-3">
-        {MOCK.choices.map((choice) => {
-          const isSelected = selectedKey === choice.key;
-          const borderClass = isSelected ? "border-brand border-2" : "border-border";
-
-          return (
-            <div key={choice.key} className={`card-base ${borderClass}`}>
-              {/* Choice header: Radio + Key */}
-              <div className="flex items-center gap-3 mb-3">
-                <button
-                  type="button"
-                  className={`radio-custom ${isSelected ? "radio-custom--selected" : ""}`}
-                  onClick={() => setSelectedKey(choice.key)}
-                  aria-label={`선택지 ${choice.key}`}
-                />
-                <span className="text-body font-bold">{choice.key}</span>
-              </div>
-
-              {/* SQL code block */}
-              <pre className="code-block text-sm">
-                <code>{choice.sql}</code>
-              </pre>
-
-              {/* Execute button */}
-              <div className="flex justify-end mt-2">
-                <button className="btn-compact" type="button">실행</button>
-              </div>
-
-              {/* Result: SUCCESS */}
-              {choice.status === "success" && (
-                <div className="success-card mt-3">
-                  <p className="text-sm font-medium" style={{ color: "var(--color-sem-success-text)" }}>
-                    <Check size={14} className="inline" /> {choice.result.rows}행 · {choice.result.ms}ms
-                  </p>
-                  <table className="data-table mt-2">
-                    <thead>
-                      <tr>
-                        {choice.result.columns.map((col) => (
-                          <th key={col}>{col}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {choice.result.data.map((row, i) => (
-                        <tr key={i}>
-                          {row.map((cell, j) => (
-                            <td key={j}>{cell}</td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              {/* Result: ERROR */}
-              {choice.status === "error" && (
-                <div className="error-card mt-3">
-                  <span className="text-code font-bold" style={{ color: "var(--color-sem-error)" }}>
-                    <AlertTriangle size={14} className="inline" /> {choice.error.code}
-                  </span>
-                  <p className="text-secondary mt-1">{choice.error.message}</p>
-                  <div className="flex justify-end mt-2">
-                    <button className="text-brand text-sm font-medium" type="button">
-                      AI에게 물어보기
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </section>
-
-      {/* ── 5. Sticky Submit Button ── */}
-      <div className="fixed bottom-0 inset-x-0 lg:left-[220px] bg-surface-card border-t border-border p-4 z-20">
-        <div className="mx-auto max-w-[720px]">
+      {question.schemaDisplay && (
+        <section className="mt-3">
           <button
             type="button"
-            className={`w-full h-12 rounded-lg text-body font-bold ${
-              selectedKey
+            className="flex items-center gap-2 text-secondary text-sm w-full"
+            onClick={() => setSchemaOpen((prev) => !prev)}
+          >
+            <span>스키마 보기</span>
+            {schemaOpen ? (
+              <ChevronUp size={16} className="text-text-caption" />
+            ) : (
+              <ChevronDown size={16} className="text-text-caption" />
+            )}
+          </button>
+          {schemaOpen && (
+            <pre className="code-block mt-2">
+              <code>{question.schemaDisplay}</code>
+            </pre>
+          )}
+        </section>
+      )}
+
+      {/* Choices area — driven by SSE state */}
+      {choicesState.kind === "loading" && (
+        <ChoicesSkeleton phase={choicesState.phase} message={choicesState.message} />
+      )}
+
+      {choicesState.kind === "error" && (
+        <div className="mt-4 card-base text-center space-y-3">
+          <p className="text-secondary">
+            {choicesState.error.retryable
+              ? "일시적인 문제가 발생했습니다. 다시 시도해 보세요"
+              : "선택지 생성에 실패했습니다"}
+          </p>
+          {choicesState.error.retryable ? (
+            <button
+              type="button"
+              className="btn-primary inline-flex items-center gap-2"
+              onClick={retryGenerate}
+            >
+              <RefreshCw size={16} />
+              다시 시도
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="btn-secondary"
+              onClick={() => navigate("/questions")}
+            >
+              문제 목록으로
+            </button>
+          )}
+        </div>
+      )}
+
+      {choicesState.kind === "done" && (
+        <section className="mt-4 space-y-3">
+          {choicesState.choices.map((choice) => (
+            <ChoiceCard
+              key={choice.key}
+              choice={choice}
+              isSelected={selectedKey === choice.key}
+              cached={executeCache[choice.key]}
+              isExecutable={question.executionMode === "EXECUTABLE"}
+              isExecuting={
+                executeMutation.isPending &&
+                executeMutation.variables === choice.body
+              }
+              onSelect={handleSelect}
+              onExecute={handleExecute}
+              onAskAi={handleAskAi}
+            />
+          ))}
+        </section>
+      )}
+
+      <AiExplanationSheet
+        isOpen={aiSheetOpen}
+        isLoading={explainMutation.isPending}
+        text={aiText}
+        onClose={() => setAiSheetOpen(false)}
+      />
+
+      <div className="fixed bottom-0 inset-x-0 lg:left-55 bg-surface-card border-t border-border p-4 z-20">
+        <div className="mx-auto max-w-180">
+          <button
+            type="button"
+            className={`w-full h-12 rounded-lg text-base font-bold ${
+              isSubmitReady
                 ? "bg-brand text-white"
                 : "bg-border text-text-caption cursor-not-allowed"
             }`}
-            disabled={!selectedKey}
+            disabled={!isSubmitReady}
+            onClick={handleSubmit}
           >
-            제출
+            {submitMutation.isPending ? "제출 중..." : "답안 제출하기"}
           </button>
         </div>
       </div>

@@ -56,4 +56,22 @@ public class PromptService {
         existing.setMaxTokens(form.getMaxTokens());
         return promptTemplateRepository.save(existing);
     }
+
+    public List<PromptTemplate> listVersionsByKeyName(String keyName) {
+        return promptTemplateRepository.findByKeyNameOrderByVersionDesc(keyName);
+    }
+
+    @Transactional
+    @CacheEvict(value = "prompts", allEntries = true)
+    public void activateVersion(UUID promptTemplateUuid) {
+        PromptTemplate target = promptTemplateRepository.findById(promptTemplateUuid)
+                .orElseThrow(() -> new CustomException(ErrorCode.PROMPT_NOT_FOUND));
+        // 같은 keyName 의 다른 버전 비활성화
+        List<PromptTemplate> siblings = promptTemplateRepository
+                .findByKeyNameOrderByVersionDesc(target.getKeyName());
+        for (PromptTemplate sibling : siblings) {
+            sibling.setIsActive(sibling.getPromptTemplateUuid().equals(promptTemplateUuid));
+            promptTemplateRepository.save(sibling);
+        }
+    }
 }

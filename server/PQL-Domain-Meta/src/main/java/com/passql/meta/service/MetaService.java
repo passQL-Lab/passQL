@@ -36,7 +36,7 @@ public class MetaService {
                             .stream()
                             .map(s -> new TopicTree.SubtopicItem(s.getCode(), s.getDisplayName(), s.getSortOrder(), s.getIsActive()))
                             .toList();
-                    return new TopicTree(topic.getCode(), topic.getDisplayName(), topic.getSortOrder(), topic.getIsActive(), subs);
+                    return new TopicTree(topic.getTopicUuid(), topic.getCode(), topic.getDisplayName(), topic.getSortOrder(), topic.getIsActive(), subs);
                 })
                 .toList();
     }

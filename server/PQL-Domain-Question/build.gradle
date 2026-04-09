@@ -10,6 +10,7 @@ jar { enabled = true; archiveClassifier = '' }
 dependencies {
     api project(':PQL-Common')
     api project(':PQL-Domain-Meta')
+    api project(':PQL-Domain-AI')
 
     // 테스트
     testImplementation project(':PQL-Web')

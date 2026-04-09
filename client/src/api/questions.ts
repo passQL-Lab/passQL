@@ -1,4 +1,5 @@
 import { apiFetch } from "./client";
+import { generateChoicesMock } from "./mock-data";
 import { getMemberUuid } from "../stores/memberStore";
 import type {
   Page,
@@ -6,7 +7,15 @@ import type {
   QuestionDetail,
   SubmitResult,
   ExecuteResult,
+  TodayQuestionResponse,
+  RecommendationsResponse,
+  ChoiceGenerationStatus,
+  ChoiceSetComplete,
+  ChoiceGenerationError,
 } from "../types/api";
+
+const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true";
+const BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "/api";
 
 interface QuestionListParams {
   readonly page?: number;
@@ -32,27 +41,183 @@ export function fetchQuestions(
   return apiFetch(`/questions?${query}`);
 }
 
-export function fetchQuestion(id: number): Promise<QuestionDetail> {
-  return apiFetch(`/questions/${id}`);
+export function fetchQuestion(questionUuid: string): Promise<QuestionDetail> {
+  return apiFetch(`/questions/${questionUuid}`);
+}
+
+export function fetchTodayQuestion(memberUuid?: string): Promise<TodayQuestionResponse> {
+  const query = new URLSearchParams();
+  if (memberUuid) query.set("memberUuid", memberUuid);
+  const qs = query.toString();
+  return apiFetch(`/questions/today${qs ? `?${qs}` : ""}`);
+}
+
+export function fetchRecommendations(
+  size?: number,
+  excludeQuestionUuid?: string,
+): Promise<RecommendationsResponse> {
+  const query = new URLSearchParams();
+  if (size != null) query.set("size", String(size));
+  if (excludeQuestionUuid) query.set("excludeQuestionUuid", excludeQuestionUuid);
+  const qs = query.toString();
+  return apiFetch(`/questions/recommendations${qs ? `?${qs}` : ""}`);
 }
 
 export function submitAnswer(
-  id: number,
-  selectedKey: string,
+  questionUuid: string,
+  choiceSetId: string,
+  selectedChoiceKey: string,
 ): Promise<SubmitResult> {
-  return apiFetch(`/questions/${id}/submit`, {
+  return apiFetch(`/questions/${questionUuid}/submit`, {
     method: "POST",
-    headers: { "X-User-UUID": getMemberUuid() },
-    body: JSON.stringify({ selectedKey }),
+    headers: { "X-Member-UUID": getMemberUuid() },
+    body: JSON.stringify({ choiceSetId, selectedChoiceKey }),
   });
 }
 
+interface ChoiceGenerationCallbacks {
+  readonly onStatus: (status: ChoiceGenerationStatus) => void;
+  readonly onComplete: (result: ChoiceSetComplete) => void;
+  readonly onError: (error: ChoiceGenerationError) => void;
+}
+
+/**
+ * POST /questions/{questionUuid}/generate-choices (SSE)
+ * Returns a cleanup function — call it to abort the stream.
+ */
+export function generateChoices(
+  questionUuid: string,
+  callbacks: ChoiceGenerationCallbacks,
+): () => void {
+  if (USE_MOCK) {
+    return generateChoicesMock(questionUuid, callbacks);
+  }
+
+  const controller = new AbortController();
+
+  (async () => {
+    try {
+      const res = await fetch(
+        `${BASE_URL}/questions/${questionUuid}/generate-choices`,
+        {
+          method: "POST",
+          headers: {
+            "X-Member-UUID": getMemberUuid(),
+            Accept: "text/event-stream",
+            "Content-Type": "application/json",
+          },
+          signal: controller.signal,
+        },
+      );
+
+      if (!res.ok || !res.body) {
+        callbacks.onError({
+          code: "HTTP_ERROR",
+          message: `서버 오류 (${res.status})`,
+          retryable: true,
+        });
+        return;
+      }
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+
+        // SSE blocks are separated by "\n\n"
+        const blocks = buffer.split("\n\n");
+        buffer = blocks.pop() ?? "";
+
+        for (const block of blocks) {
+          const lines = block.split("\n");
+          let eventType = "";
+          let dataStr = "";
+
+          for (const line of lines) {
+            if (line.startsWith("event: ")) eventType = line.slice(7).trim();
+            if (line.startsWith("data: ")) dataStr = line.slice(6).trim();
+          }
+
+          if (!eventType || !dataStr) continue;
+
+          // Note: Assumes single-line event/data fields per SSE block.
+          // Multi-line data fields (multiple "data:" lines) are not supported.
+          let data: unknown;
+          try {
+            data = JSON.parse(dataStr);
+          } catch {
+            callbacks.onError({
+              code: "JSON_PARSE_ERROR",
+              message: "서버 응답 파싱 오류",
+              retryable: true,
+            });
+            continue;
+          }
+
+          if (eventType === "status") {
+            const status = data as ChoiceGenerationStatus;
+            if (!status.phase || !status.message) {
+              callbacks.onError({ code: "INVALID_RESPONSE", message: "서버 응답 형식 오류", retryable: false });
+              continue;
+            }
+            callbacks.onStatus(status);
+          } else if (eventType === "complete") {
+            const complete = data as ChoiceSetComplete;
+            if (!complete.choiceSetId || !complete.choices) {
+              callbacks.onError({ code: "INVALID_RESPONSE", message: "서버 응답 형식 오류", retryable: false });
+              continue;
+            }
+            callbacks.onComplete(complete);
+          } else if (eventType === "error") {
+            callbacks.onError(data as ChoiceGenerationError);
+          }
+        }
+      }
+
+      // After the while loop, process any remaining buffer
+      if (buffer.trim()) {
+        const lines = buffer.split("\n");
+        let eventType = "";
+        let dataStr = "";
+        for (const line of lines) {
+          if (line.startsWith("event: ")) eventType = line.slice(7).trim();
+          if (line.startsWith("data: ")) dataStr = line.slice(6).trim();
+        }
+        if (eventType && dataStr) {
+          try {
+            const data = JSON.parse(dataStr) as unknown;
+            if (eventType === "status") callbacks.onStatus(data as ChoiceGenerationStatus);
+            else if (eventType === "complete") callbacks.onComplete(data as ChoiceSetComplete);
+            else if (eventType === "error") callbacks.onError(data as ChoiceGenerationError);
+          } catch {
+            // Ignore malformed trailing data
+          }
+        }
+      }
+    } catch (err) {
+      if (err instanceof DOMException && err.name === "AbortError") return;
+      callbacks.onError({
+        code: "NETWORK_ERROR",
+        message: "네트워크 오류가 발생했습니다",
+        retryable: true,
+      });
+    }
+  })();
+
+  return () => controller.abort();
+}
+
 export function executeChoice(
-  id: number,
-  choiceKey: string,
+  questionUuid: string,
+  sql: string,
 ): Promise<ExecuteResult> {
-  return apiFetch(`/questions/${id}/execute`, {
+  return apiFetch(`/questions/${questionUuid}/execute`, {
     method: "POST",
-    body: JSON.stringify({ choiceKey }),
+    body: JSON.stringify({ sql }),
   });
 }

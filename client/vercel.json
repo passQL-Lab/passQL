@@ -1,6 +1,5 @@
 {
   "rewrites": [
-    { "source": "/api/:path*", "destination": "http://api.passql.suhsaechan.kr/api/:path*" },
     { "source": "/((?!assets/).*)", "destination": "/index.html" }
   ]
 }

@@ -1,7 +1,9 @@
 """src.models.ai_response
 AI 기능 응답 모델 정의
 """
-from pydantic import BaseModel
+from typing import Any, Optional
+
+from pydantic import BaseModel, Field
 
 
 class AiResponse(BaseModel):
@@ -19,3 +21,40 @@ class SimilarItem(BaseModel):
 class SimilarResponse(BaseModel):
     """유사 문제 검색 응답"""
     items: list[SimilarItem]
+
+
+# === 실시간 선택지 세트 생성 (신규) ===
+
+
+class GeneratedChoice(BaseModel):
+    """생성된 선택지 한 개"""
+    key: str   # "A" | "B" | "C" | "D"
+    body: str
+    is_correct: bool
+    rationale: str
+
+
+class GenerationMetadata(BaseModel):
+    """AI 호출 메타데이터"""
+    model: str
+    elapsed_ms: int
+    prompt_tokens: Optional[int] = None
+    completion_tokens: Optional[int] = None
+    raw_response_json: Optional[dict[str, Any]] = None
+
+
+class GenerateQuestionFullResponse(BaseModel):
+    stem: str
+    answer_sql: str
+    seed_choices: list[GeneratedChoice] = Field(min_length=4, max_length=4)
+    metadata: GenerationMetadata
+
+
+class GenerateChoiceSetResponse(BaseModel):
+    choices: list[GeneratedChoice] = Field(min_length=4, max_length=4)
+    metadata: GenerationMetadata
+
+
+class TestPromptResponse(BaseModel):
+    result: str
+    elapsed_ms: int

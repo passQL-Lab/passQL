@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>passQL - 결과</title>
+</head>
+<body>
+    <h1 th:if="${result.isCorrect}" style="color:green;">정답!</h1>
+    <h1 th:unless="${result.isCorrect}" style="color:red;">오답</h1>
+
+    <p>정답: <strong th:text="${result.correctKey}">A</strong></p>
+
+    <h3>선택지별 해설</h3>
+    <div th:each="item : ${result.items}">
+        <p>
+            <strong th:text="${item.choiceKey}">A</strong>
+            <span th:if="${item.isCorrect}" style="color:green;">(정답)</span>
+            <span th:unless="${item.isCorrect}" style="color:gray;">(오답)</span>
+        </p>
+        <pre th:text="${item.body}">SQL</pre>
+        <p th:text="${item.rationale}">해설</p>
+        <hr/>
+    </div>
+
+    <a th:if="${index + 1 < totalQuestions}"
+       th:href="@{/quiz/{id}/q/{idx}(id=${sessionUuid},idx=${index + 1})}">다음 문제</a>
+    <a th:unless="${index + 1 < totalQuestions}"
+       th:href="@{/quiz/{id}/complete(id=${sessionUuid})}">결과 보기</a>
+</body>
+</html>

@@ -22,7 +22,9 @@ import java.util.UUID;
         @Index(name = "idx_submission_member", columnList = "member_uuid"),
         @Index(name = "idx_submission_member_submitted", columnList = "member_uuid, submitted_at"),
         @Index(name = "idx_submission_member_question", columnList = "member_uuid, question_uuid"),
-        @Index(name = "idx_submission_question", columnList = "question_uuid")
+        @Index(name = "idx_submission_question", columnList = "question_uuid"),
+        @Index(name = "idx_submission_session", columnList = "session_uuid"),
+        @Index(name = "idx_submission_choice_set", columnList = "choice_set_uuid")
     }
 )
 @Getter
@@ -42,6 +44,15 @@ public class Submission extends BaseEntity {
 
     @Column(columnDefinition = "CHAR(36)", nullable = false)
     private UUID questionUuid;
+
+    @Column(columnDefinition = "CHAR(36)")
+    private UUID choiceSetUuid;
+
+    @Column(columnDefinition = "CHAR(36)")
+    private UUID sessionUuid;
+
+    @Column
+    private Integer questionIndex;
 
     @Column(nullable = false, length = 8)
     private String selectedChoiceKey;

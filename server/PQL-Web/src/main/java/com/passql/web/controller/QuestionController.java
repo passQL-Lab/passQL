@@ -66,7 +66,7 @@ public class QuestionController implements QuestionControllerDocs {
         @RequestBody Map<String, String> body
     ) {
         String sql = body.get("sql");
-        return ResponseEntity.ok(sandboxExecutor.execute(questionUuid, sql));
+        return ResponseEntity.ok(sandboxExecutor.execute(questionUuid.toString(), sql));
     }
 
     @PostMapping("/{questionUuid}/submit")

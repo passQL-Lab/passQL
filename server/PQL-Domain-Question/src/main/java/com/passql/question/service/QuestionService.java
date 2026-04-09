@@ -6,6 +6,7 @@ import com.passql.meta.entity.Subtopic;
 import com.passql.meta.entity.Topic;
 import com.passql.meta.repository.SubtopicRepository;
 import com.passql.meta.repository.TopicRepository;
+import com.passql.question.constant.ChoiceSetSource;
 import com.passql.question.constant.ExecutionMode;
 import com.passql.question.dto.QuestionDetail;
 import com.passql.question.dto.QuestionSummary;
@@ -14,8 +15,12 @@ import com.passql.question.dto.TodayQuestionResponse;
 import com.passql.question.entity.DailyChallenge;
 import com.passql.question.entity.Question;
 import com.passql.question.entity.QuestionChoice;
+import com.passql.question.entity.QuestionChoiceSet;
+import com.passql.question.entity.QuestionChoiceSetItem;
 import com.passql.question.repository.DailyChallengeRepository;
 import com.passql.question.repository.QuestionChoiceRepository;
+import com.passql.question.repository.QuestionChoiceSetItemRepository;
+import com.passql.question.repository.QuestionChoiceSetRepository;
 import com.passql.question.repository.QuestionRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -33,6 +38,8 @@ import java.util.UUID;
 public class QuestionService {
     private final QuestionRepository questionRepository;
     private final QuestionChoiceRepository questionChoiceRepository;
+    private final QuestionChoiceSetRepository choiceSetRepository;
+    private final QuestionChoiceSetItemRepository choiceSetItemRepository;
     private final DailyChallengeRepository dailyChallengeRepository;
     private final TopicRepository topicRepository;
     private final SubtopicRepository subtopicRepository;
@@ -50,21 +57,42 @@ public class QuestionService {
     public QuestionDetail getQuestion(UUID questionUuid) {
         Question q = questionRepository.findById(questionUuid)
                 .orElseThrow(() -> new CustomException(ErrorCode.QUESTION_NOT_FOUND));
-        List<QuestionChoice> choices = questionChoiceRepository.findByQuestionUuidOrderBySortOrderAsc(questionUuid);
-        List<QuestionDetail.ChoiceItem> items = choices.stream()
-                .map(c -> new QuestionDetail.ChoiceItem(c.getChoiceKey(), c.getKind(), c.getBody(), c.getSortOrder()))
+
+        List<QuestionDetail.ChoiceSetSummary> choiceSets = choiceSetRepository
+                .findByQuestionUuidOrderByCreatedAtDesc(questionUuid)
+                .stream()
+                .map(set -> {
+                    List<QuestionDetail.ChoiceItem> items = choiceSetItemRepository
+                            .findByChoiceSetUuidOrderBySortOrderAsc(set.getChoiceSetUuid())
+                            .stream()
+                            .map(c -> new QuestionDetail.ChoiceItem(
+                                    c.getChoiceKey(), c.getKind(), c.getBody(),
+                                    c.getIsCorrect(), c.getRationale(), c.getSortOrder()))
+                            .toList();
+                    return new QuestionDetail.ChoiceSetSummary(
+                            set.getChoiceSetUuid(),
+                            set.getSource(),
+                            set.getStatus(),
+                            set.getSandboxValidationPassed(),
+                            set.getCreatedAt(),
+                            items);
+                })
                 .toList();
-        String topicName = topicName(q.getTopicUuid());
-        String subtopicName = subtopicName(q.getSubtopicUuid());
+
         return new QuestionDetail(
                 q.getQuestionUuid(),
-                topicName,
-                subtopicName,
+                topicName(q.getTopicUuid()),
+                subtopicName(q.getSubtopicUuid()),
                 q.getDifficulty(),
                 q.getExecutionMode(),
                 q.getStem(),
                 q.getSchemaDisplay(),
-                items
+                q.getSchemaDdl(),
+                q.getSchemaSampleData(),
+                q.getSchemaIntent(),
+                q.getAnswerSql(),
+                q.getHint(),
+                choiceSets
         );
     }
 
@@ -117,12 +145,36 @@ public class QuestionService {
     public QuestionSummary toSummary(Question q) {
         String stem = q.getStem();
         String preview = stem == null ? "" : (stem.length() > 100 ? stem.substring(0, 100) : stem);
+        Topic topic = q.getTopicUuid() != null ? topicRepository.findById(q.getTopicUuid()).orElse(null) : null;
         return new QuestionSummary(
                 q.getQuestionUuid(),
-                topicName(q.getTopicUuid()),
+                topic != null ? topic.getCode() : null,
+                topic != null ? topic.getDisplayName() : null,
                 q.getDifficulty(),
-                preview
+                q.getExecutionMode(),
+                preview,
+                q.getCreatedAt()
         );
+    }
+
+    @Transactional
+    public void updateQuestion(UUID questionUuid, String stem, String schemaDisplay, String schemaDdl,
+                               String schemaSampleData, String schemaIntent, String answerSql, String hint,
+                               Integer difficulty, ExecutionMode executionMode,
+                               UUID topicUuid, UUID subtopicUuid) {
+        Question q = questionRepository.findById(questionUuid)
+                .orElseThrow(() -> new CustomException(ErrorCode.QUESTION_NOT_FOUND));
+        q.setStem(stem);
+        q.setSchemaDisplay(schemaDisplay);
+        q.setSchemaDdl(schemaDdl);
+        q.setSchemaSampleData(schemaSampleData);
+        q.setSchemaIntent(schemaIntent);
+        q.setAnswerSql(answerSql);
+        q.setHint(hint);
+        q.setDifficulty(difficulty);
+        q.setExecutionMode(executionMode);
+        q.setTopicUuid(topicUuid);
+        q.setSubtopicUuid(subtopicUuid);
     }
 
     private String topicName(UUID topicUuid) {

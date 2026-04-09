@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+
+<th:block layout:fragment="title">프롬프트 테스트</th:block>
+
+<th:block layout:fragment="content">
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+        <!-- 좌측: 프롬프트 정보 -->
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <h2 class="card-title">
+                    <i data-lucide="message-square-code" class="size-5"></i>
+                    프롬프트 정보
+                </h2>
+
+                <div class="flex flex-wrap gap-2 mb-2" th:if="${prompt != null}">
+                    <span class="badge badge-primary" th:text="${prompt.keyName}">key</span>
+                    <span class="badge badge-outline">v<span th:text="${prompt.version}">1</span></span>
+                    <span class="badge badge-ghost" th:text="${prompt.model}">gemini</span>
+                </div>
+
+                <div th:if="${prompt != null}">
+                    <div class="form-control mb-3">
+                        <label class="label label-text font-semibold">System Prompt</label>
+                        <pre class="bg-base-200 rounded-lg p-3 text-sm overflow-x-auto whitespace-pre-wrap font-mono"
+                             th:text="${prompt.systemPrompt}">-</pre>
+                    </div>
+                    <div class="form-control">
+                        <label class="label label-text font-semibold">User Template</label>
+                        <pre class="bg-base-200 rounded-lg p-3 text-sm overflow-x-auto whitespace-pre-wrap font-mono"
+                             th:text="${prompt.userTemplate}">-</pre>
+                    </div>
+                </div>
+
+                <div th:unless="${prompt != null}" class="text-base-content/50 py-8 text-center">
+                    프롬프트를 찾을 수 없습니다.
+                </div>
+            </div>
+        </div>
+
+        <!-- 우측: 테스트 패널 -->
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <h2 class="card-title">
+                    <i data-lucide="play" class="size-5"></i>
+                    테스트 실행
+                </h2>
+
+                <div id="variableInputs" class="flex flex-col gap-3"></div>
+
+                <button class="btn btn-primary mt-4" onclick="runTest()">
+                    <i data-lucide="play" class="size-4"></i>
+                    테스트 실행
+                </button>
+
+                <!-- 결과 -->
+                <div id="resultArea" class="hidden mt-4">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="font-semibold">결과</span>
+                        <span class="badge badge-ghost text-xs">응답시간: <span id="elapsedMs">-</span>ms</span>
+                    </div>
+                    <pre id="resultText" class="bg-base-200 rounded-lg p-3 text-sm overflow-x-auto whitespace-pre-wrap font-mono min-h-24"></pre>
+                </div>
+
+                <div class="divider"></div>
+
+                <button class="btn btn-outline btn-sm" onclick="activateVersion()">
+                    <i data-lucide="check-circle" class="size-4"></i>
+                    이 버전 활성화
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+</th:block>
+
+<th:block layout:fragment="js">
+<script th:inline="javascript">
+    const promptUuid = [[${prompt != null ? prompt.promptTemplateUuid : ''}]];
+    const userTemplate = [[${prompt != null ? prompt.userTemplate : ''}]];
+
+    const varPattern = /\{(\w+)\}/g;
+    const variables = new Set();
+    let match;
+    while ((match = varPattern.exec(userTemplate)) !== null) {
+        variables.add(match[1]);
+    }
+    const container = document.getElementById('variableInputs');
+    variables.forEach(v => {
+        container.innerHTML += `
+            <div class="form-control">
+                <label class="label label-text"><code class="font-mono">{${v}}</code></label>
+                <textarea id="var_${v}" class="textarea textarea-bordered font-mono text-sm" rows="2"></textarea>
+            </div>
+        `;
+    });
+
+    async function runTest() {
+        const vars = {};
+        variables.forEach(v => {
+            vars[v] = document.getElementById('var_' + v).value;
+        });
+        try {
+            const resp = await fetch('/admin/prompts/' + promptUuid + '/test', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(vars)
+            });
+            if (!resp.ok) throw new Error(await resp.text());
+            const data = await resp.json();
+            document.getElementById('resultText').textContent = data.result;
+            document.getElementById('elapsedMs').textContent = data.elapsedMs;
+            document.getElementById('resultArea').classList.remove('hidden');
+        } catch (e) {
+            alert('테스트 실패: ' + e.message);
+        }
+    }
+
+    async function activateVersion() {
+        await fetch('/admin/prompts/' + promptUuid + '/activate', {method: 'PUT'});
+        alert('활성화 완료');
+        location.reload();
+    }
+
+    lucide.createIcons();
+</script>
+</th:block>
+</html>

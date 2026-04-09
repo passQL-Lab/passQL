@@ -38,8 +38,8 @@
 
   /* Geometry */
   --radius-selector: 999px;
-  --radius-field: 0.5rem;   /* 8px - buttons */
-  --radius-box: 0.75rem;    /* 12px - cards */
+  --radius-field: 0.75rem;  /* 12px - buttons */
+  --radius-box: 1rem;       /* 16px - cards */
 
   --size-selector: 0.25rem;
   --size-field: 0.25rem;

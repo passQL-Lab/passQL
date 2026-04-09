@@ -3,11 +3,14 @@ package com.passql.member.service;
 import com.passql.common.exception.CustomException;
 import com.passql.common.exception.constant.ErrorCode;
 import com.passql.common.util.NicknameGenerator;
+import com.passql.member.constant.MemberStatus;
 import com.passql.member.dto.MemberMeResponse;
 import com.passql.member.dto.MemberRegisterResponse;
 import com.passql.member.dto.NicknameRegenerateResponse;
 import com.passql.member.entity.Member;
+import com.passql.member.entity.MemberSuspendHistory;
 import com.passql.member.repository.MemberRepository;
+import com.passql.member.repository.MemberSuspendHistoryRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -31,6 +34,7 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
     private final NicknameGenerator nicknameGenerator;
+    private final MemberSuspendHistoryRepository memberSuspendHistoryRepository;
 
     /** 익명 회원 등록. UUID와 닉네임을 자동 발급한다. */
     @Transactional
@@ -58,7 +62,32 @@ public class MemberService {
     public MemberMeResponse getMe(UUID memberUuid) {
         Member member = findActiveMember(memberUuid);
         touchLastSeenIfStale(member);
+        checkAndAutoUnsuspendIfExpired(member);
         return MemberMeResponse.from(member);
+    }
+
+    /**
+     * 제재 상태 체크.
+     * <ul>
+     *   <li>만료된 경우 → 자동 해제 후 통과</li>
+     *   <li>만료 전(또는 영구 제재) → {@link ErrorCode#MEMBER_SUSPENDED} 예외</li>
+     *   <li>SUSPENDED 아님 → 통과</li>
+     * </ul>
+     */
+    private void checkAndAutoUnsuspendIfExpired(Member member) {
+        if (member.getStatus() != MemberStatus.SUSPENDED) {
+            return;
+        }
+        LocalDateTime until = member.getSuspendUntil();
+        if (until != null && until.isBefore(LocalDateTime.now())) {
+            member.setStatus(MemberStatus.ACTIVE);
+            member.setSuspendUntil(null);
+            memberSuspendHistoryRepository.save(MemberSuspendHistory.ofUnsuspend(member.getMemberUuid()));
+            log.info("Member auto-unsuspended on getMe: uuid={}", member.getMemberUuid());
+            return;
+        }
+        log.warn("Suspended member access blocked: uuid={}, until={}", member.getMemberUuid(), until);
+        throw new CustomException(ErrorCode.MEMBER_SUSPENDED);
     }
 
     /** 닉네임 재생성. */

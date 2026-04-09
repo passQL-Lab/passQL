@@ -14,7 +14,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/home")
 @RequiredArgsConstructor
-public class HomeController {
+public class HomeController implements HomeControllerDocs {
 
     private final GreetingService greetingService;
 
