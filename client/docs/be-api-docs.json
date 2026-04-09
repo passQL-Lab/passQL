@@ -7,7 +7,7 @@
   },
   "servers": [
     {
-      "url": "백엔드주소",
+      "url": "http://localhost:8080",
       "description": "Generated server url"
     }
   ],

@@ -30,7 +30,7 @@ export default function Home() {
     return <ErrorFallback onRetry={() => refetch()} />;
   }
 
-  const solved = progress?.solved ?? 0;
+  const solved = progress?.solvedCount ?? 0;
   const correctRate = progress?.correctRate ?? 0;
   const streak = progress?.streakDays ?? 0;
 
@@ -78,10 +78,10 @@ export default function Home() {
           <span className="text-secondary mt-1">푼 문제</span>
         </div>
         <div className="card-base flex flex-col items-start">
-          <span className="text-h1 text-brand">{Math.round(correctRate)}%</span>
+          <span className="text-h1 text-brand">{Math.round(correctRate * 100)}%</span>
           <span className="text-secondary mt-1">정답률</span>
           <div className="w-full mt-2 h-1 rounded-full bg-border">
-            <div className="h-full rounded-full bg-brand" style={{ width: `${correctRate}%` }} />
+            <div className="h-full rounded-full bg-brand" style={{ width: `${correctRate * 100}%` }} />
           </div>
         </div>
       </section>

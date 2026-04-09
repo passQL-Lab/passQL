@@ -1,18 +1,21 @@
-import { describe, it, expect } from "vitest";
-import { getMockResponse } from "./mock-data";
+import { describe, it, expect, vi } from "vitest";
+import { getMockResponse, generateChoicesMock } from "./mock-data";
 import type {
   Page,
   QuestionSummary,
   QuestionDetail,
   ExecuteResult,
   SubmitResult,
-  ProgressSummary,
-  HeatmapEntry,
+  ProgressResponse,
   TopicTree,
   AiResult,
   MemberRegisterResponse,
   MemberMeResponse,
   NicknameRegenerateResponse,
+  TodayQuestionResponse,
+  RecommendationsResponse,
+  GreetingResponse,
+  ExamScheduleResponse,
 } from "../types/api";
 
 describe("getMockResponse", () => {
@@ -25,9 +28,16 @@ describe("getMockResponse", () => {
       expect(result.number).toBe(0);
     });
 
-    it("filters by topic", () => {
+    it("filters by topic code", () => {
       const result = getMockResponse("/questions?page=0&size=10&topic=JOIN", "GET") as Page<QuestionSummary>;
-      expect(result.content.every((q) => q.topicCode === "JOIN")).toBe(true);
+      expect(result.content.every((q) => q.topicName === "JOIN")).toBe(true);
+      expect(result.content.length).toBe(2);
+    });
+
+    it("filters by topic code with Korean displayName", () => {
+      const result = getMockResponse("/questions?page=0&size=10&topic=SUBQUERY", "GET") as Page<QuestionSummary>;
+      expect(result.content.every((q) => q.topicName === "서브쿼리")).toBe(true);
+      expect(result.content.length).toBe(2);
     });
 
     it("returns empty page for non-existent topic", () => {
@@ -36,16 +46,15 @@ describe("getMockResponse", () => {
       expect(result.empty).toBe(true);
     });
 
-    it("returns question detail for GET /questions/:id", () => {
-      const result = getMockResponse("/questions/1", "GET") as QuestionDetail;
-      expect(result.id).toBe(1);
+    it("returns question detail for GET /questions/:uuid", () => {
+      const result = getMockResponse("/questions/q-uuid-0001", "GET") as QuestionDetail;
+      expect(result.questionUuid).toBe("q-uuid-0001");
       expect(result.stem).toBeTruthy();
-      expect(result.choices).toHaveLength(4);
     });
 
-    it("returns correct id for any question detail", () => {
-      const result = getMockResponse("/questions/42", "GET") as QuestionDetail;
-      expect(result.id).toBe(42);
+    it("returns correct uuid for any question detail", () => {
+      const result = getMockResponse("/questions/q-uuid-0042", "GET") as QuestionDetail;
+      expect(result.questionUuid).toBe("q-uuid-0042");
     });
   });
 
@@ -98,18 +107,40 @@ describe("getMockResponse", () => {
   });
 
   describe("Progress", () => {
-    it("returns progress summary", () => {
-      const result = getMockResponse("/progress", "GET") as ProgressSummary;
-      expect(result.solved).toBe(42);
-      expect(result.correctRate).toBeCloseTo(68.5);
+    it("returns progress response", () => {
+      const result = getMockResponse("/progress", "GET") as ProgressResponse;
+      expect(result.solvedCount).toBe(42);
+      expect(result.correctRate).toBeCloseTo(0.685);
       expect(result.streakDays).toBe(3);
     });
+  });
 
-    it("returns heatmap entries", () => {
-      const result = getMockResponse("/progress/heatmap", "GET") as HeatmapEntry[];
+  describe("New APIs", () => {
+    it("returns today question", () => {
+      const result = getMockResponse("/questions/today", "GET") as TodayQuestionResponse;
+      expect(result.question).not.toBeNull();
+      expect(result.alreadySolvedToday).toBe(false);
+    });
+
+    it("returns recommendations", () => {
+      const result = getMockResponse("/questions/recommendations", "GET") as RecommendationsResponse;
+      expect(result.questions.length).toBeGreaterThan(0);
+    });
+
+    it("returns greeting", () => {
+      const result = getMockResponse("/home/greeting?memberUuid=abc", "GET") as GreetingResponse;
+      expect(result.message).toBeTruthy();
+    });
+
+    it("returns exam schedules", () => {
+      const result = getMockResponse("/exam-schedules", "GET") as ExamScheduleResponse[];
       expect(result.length).toBeGreaterThan(0);
-      expect(result[0]).toHaveProperty("topicCode");
-      expect(result[0]).toHaveProperty("correctRate");
+      expect(result[0]).toHaveProperty("certType");
+    });
+
+    it("returns selected exam schedule", () => {
+      const result = getMockResponse("/exam-schedules/selected", "GET") as ExamScheduleResponse;
+      expect(result.isSelected).toBe(true);
     });
   });
 
@@ -173,5 +204,68 @@ describe("getMockResponse", () => {
     it("returns null for unknown method", () => {
       expect(getMockResponse("/progress", "DELETE")).toBeNull();
     });
+  });
+});
+
+describe("generateChoicesMock", () => {
+  it("calls onStatus then onComplete in sequence", async () => {
+    const onStatus = vi.fn();
+    const onComplete = vi.fn();
+    const onError = vi.fn();
+
+    const abort = generateChoicesMock("q-uuid-0001", { onStatus, onComplete, onError });
+
+    await new Promise((r) => setTimeout(r, 1000));
+
+    expect(onStatus).toHaveBeenCalledWith(
+      expect.objectContaining({ phase: "generating" })
+    );
+    expect(onStatus).toHaveBeenCalledWith(
+      expect.objectContaining({ phase: "validating" })
+    );
+    expect(onComplete).toHaveBeenCalledWith(
+      expect.objectContaining({
+        choiceSetId: expect.stringContaining("cs-mock-"),
+        choices: expect.arrayContaining([
+          expect.objectContaining({ key: "A" }),
+        ]),
+      })
+    );
+    expect(onError).not.toHaveBeenCalled();
+    abort();
+  });
+
+  it("does not call onComplete if aborted immediately", async () => {
+    const onComplete = vi.fn();
+    const abort = generateChoicesMock("q-uuid-0001", {
+      onStatus: vi.fn(),
+      onComplete,
+      onError: vi.fn(),
+    });
+    abort();
+    await new Promise((r) => setTimeout(r, 1000));
+    expect(onComplete).not.toHaveBeenCalled();
+  });
+
+  it("stops remaining callbacks when aborted mid-flight", async () => {
+    const onStatus = vi.fn();
+    const onComplete = vi.fn();
+    const abort = generateChoicesMock("q-uuid-0001", {
+      onStatus,
+      onComplete,
+      onError: vi.fn(),
+    });
+
+    // Wait past 200ms so "generating" fires
+    await new Promise((r) => setTimeout(r, 300));
+    expect(onStatus).toHaveBeenCalledTimes(1);
+    expect(onStatus).toHaveBeenCalledWith(expect.objectContaining({ phase: "generating" }));
+
+    // Abort before 500ms (validating) and 800ms (complete)
+    abort();
+
+    await new Promise((r) => setTimeout(r, 700));
+    expect(onStatus).toHaveBeenCalledTimes(1); // no additional calls
+    expect(onComplete).not.toHaveBeenCalled();
   });
 });
