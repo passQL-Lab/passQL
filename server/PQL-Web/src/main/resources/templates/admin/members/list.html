@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+
+<th:block layout:fragment="title">회원 관리</th:block>
+
+<th:block layout:fragment="content">
+
+    <!-- 필터 바 -->
+    <div class="card bg-base-100 shadow mb-4">
+        <div class="card-body p-4">
+            <form th:action="@{/admin/members}" method="get" class="flex flex-wrap gap-3 items-end">
+
+                <!-- 닉네임 검색 -->
+                <div class="form-control">
+                    <label class="label label-text text-xs">닉네임</label>
+                    <input type="text" name="nickname" class="input input-sm input-bordered w-36"
+                           th:value="${condition.nickname}" placeholder="닉네임 검색"/>
+                </div>
+
+                <!-- 상태 필터 -->
+                <div class="form-control">
+                    <label class="label label-text text-xs">상태</label>
+                    <select name="status" class="select select-sm select-bordered w-36">
+                        <option value="">전체</option>
+                        <option th:each="s : ${statuses}"
+                                th:value="${s.name()}"
+                                th:text="${s.name()}"
+                                th:selected="${condition.status != null and condition.status.name() == s.name()}">
+                            ACTIVE
+                        </option>
+                    </select>
+                </div>
+
+                <!-- 역할 필터 -->
+                <div class="form-control">
+                    <label class="label label-text text-xs">역할</label>
+                    <select name="role" class="select select-sm select-bordered w-36">
+                        <option value="">전체</option>
+                        <option th:each="r : ${roles}"
+                                th:value="${r.name()}"
+                                th:text="${r.name()}"
+                                th:selected="${condition.role != null and condition.role.name() == r.name()}">
+                            USER
+                        </option>
+                    </select>
+                </div>
+
+                <!-- 가입일 범위 -->
+                <div class="form-control">
+                    <label class="label label-text text-xs">가입일 시작</label>
+                    <input type="date" name="joinedFrom" class="input input-sm input-bordered w-36"
+                           th:value="${condition.joinedFrom}"/>
+                </div>
+                <div class="form-control">
+                    <label class="label label-text text-xs">가입일 종료</label>
+                    <input type="date" name="joinedTo" class="input input-sm input-bordered w-36"
+                           th:value="${condition.joinedTo}"/>
+                </div>
+
+                <!-- 마지막 접속일 범위 -->
+                <div class="form-control">
+                    <label class="label label-text text-xs">마지막 접속 시작</label>
+                    <input type="date" name="lastSeenFrom" class="input input-sm input-bordered w-36"
+                           th:value="${condition.lastSeenFrom}"/>
+                </div>
+                <div class="form-control">
+                    <label class="label label-text text-xs">마지막 접속 종료</label>
+                    <input type="date" name="lastSeenTo" class="input input-sm input-bordered w-36"
+                           th:value="${condition.lastSeenTo}"/>
+                </div>
+
+                <!-- 테스트 계정 포함 체크박스 -->
+                <div class="form-control justify-end">
+                    <label class="label cursor-pointer gap-2">
+                        <input type="checkbox" name="includeTest" value="true" class="checkbox checkbox-sm"
+                               th:checked="${condition.includeTest}"/>
+                        <span class="label-text text-xs">테스트 계정 포함</span>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn btn-sm btn-primary">
+                    <i data-lucide="search" class="size-4"></i>검색
+                </button>
+                <a th:href="@{/admin/members}" class="btn btn-sm btn-ghost">초기화</a>
+            </form>
+        </div>
+    </div>
+
+    <!-- 회원 목록 테이블 -->
+    <div class="card bg-base-100 shadow">
+        <div class="card-body p-0">
+            <div class="overflow-x-auto">
+                <table class="table table-sm">
+                    <thead>
+                    <tr>
+                        <th>닉네임</th>
+                        <th class="w-28">상태</th>
+                        <th class="w-28">역할</th>
+                        <th class="w-24">인증</th>
+                        <th class="w-32">가입일</th>
+                        <th class="w-32">마지막 접속</th>
+                        <th class="w-16">상세</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="m : ${members}" th:if="${members != null and !members.isEmpty()}">
+                        <td class="font-medium text-sm" th:text="${m.nickname}">닉네임</td>
+                        <td>
+                            <span class="badge badge-sm"
+                                  th:classappend="${m.status.name() == 'ACTIVE'} ? 'badge-success' :
+                                                  ${m.status.name() == 'SUSPENDED'} ? 'badge-error' :
+                                                  ${m.status.name() == 'WITHDRAWN'} ? 'badge-ghost' : 'badge-warning'"
+                                  th:text="${m.status.name()}">ACTIVE</span>
+                        </td>
+                        <td>
+                            <span class="badge badge-outline badge-sm" th:text="${m.role.name()}">USER</span>
+                        </td>
+                        <td class="text-xs" th:text="${m.authProvider.name()}">ANONYMOUS</td>
+                        <td class="text-xs"
+                            th:text="${m.createdAt != null ? #temporals.format(m.createdAt, 'yyyy-MM-dd') : '-'}">
+                            2026-01-01
+                        </td>
+                        <td class="text-xs"
+                            th:text="${m.lastSeenAt != null ? #temporals.format(m.lastSeenAt, 'yyyy-MM-dd') : '-'}">
+                            2026-04-01
+                        </td>
+                        <td>
+                            <a th:href="@{/admin/members/{uuid}(uuid=${m.memberUuid})}"
+                               class="btn btn-xs btn-ghost" title="상세">
+                                <i data-lucide="eye" class="size-3"></i>
+                            </a>
+                        </td>
+                    </tr>
+
+                    <!-- Empty state -->
+                    <tr th:if="${members == null or members.isEmpty()}">
+                        <td colspan="7" class="text-center text-base-content/50 py-12">
+                            <i data-lucide="users" class="size-10 mx-auto mb-2 opacity-40"></i>
+                            <p>회원이 없습니다.</p>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 페이지네이션 -->
+            <div class="flex justify-center p-4" th:if="${members != null and members.totalPages > 1}">
+                <div class="join">
+                    <a th:href="@{/admin/members(page=${members.number - 1}, nickname=${condition.nickname}, status=${condition.status}, role=${condition.role})}"
+                       class="join-item btn btn-sm"
+                       th:classappend="${members.first} ? 'btn-disabled'">«</a>
+                    <button class="join-item btn btn-sm btn-active"
+                            th:text="${members.number + 1} + ' / ' + ${members.totalPages}">1 / 10</button>
+                    <a th:href="@{/admin/members(page=${members.number + 1}, nickname=${condition.nickname}, status=${condition.status}, role=${condition.role})}"
+                       class="join-item btn btn-sm"
+                       th:classappend="${members.last} ? 'btn-disabled'">»</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</th:block>
+
+<th:block layout:fragment="js">
+    <script>lucide.createIcons();</script>
+</th:block>
+</html>

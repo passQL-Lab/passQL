@@ -81,6 +81,9 @@ public class Member extends SoftDeletableBaseEntity {
     // === 라이프사이클 ===
     private LocalDateTime withdrawnAt;
 
+    /** 제재 만료 시각. null이면 제재 없음. */
+    private LocalDateTime suspendUntil;
+
     // === 행동 추적 (향후 member_activity 테이블 분리 후보) ===
     private LocalDateTime lastSeenAt;
 

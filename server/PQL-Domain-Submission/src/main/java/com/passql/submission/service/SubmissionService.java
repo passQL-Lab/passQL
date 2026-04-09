@@ -56,6 +56,11 @@ public class SubmissionService {
     }
 
     @Transactional(readOnly = true)
+    public List<Submission> getSubmissionsByMember(UUID memberUuid) {
+        return submissionRepository.findByMemberUuidOrderBySubmittedAtDesc(memberUuid);
+    }
+
+    @Transactional(readOnly = true)
     public List<ExecutionLog> getRecentLogs() {
         return executionLogRepository.findTop20ByOrderByExecutedAtDesc();
     }
