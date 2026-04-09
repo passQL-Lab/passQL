@@ -46,11 +46,13 @@ export default function Stats3DChart({ categories, onCategoryClick }: Stats3DCha
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.shadowMap.enabled = true;
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.NoToneMapping;
     container.appendChild(renderer.domElement);
 
     // Lights
-    scene.add(new THREE.AmbientLight(0xffffff, 1.0));
-    const sun = new THREE.DirectionalLight(0xffffff, 0.5);
+    scene.add(new THREE.AmbientLight(0xffffff, 0.6));
+    const sun = new THREE.DirectionalLight(0xffffff, 0.8);
     sun.position.set(5, 10, 7);
     sun.castShadow = true;
     scene.add(sun);
@@ -85,9 +87,9 @@ export default function Stats3DChart({ categories, onCategoryClick }: Stats3DCha
       const mat = new THREE.MeshStandardMaterial({
         color: getColor(cat.correctRate),
         emissive: getEmissive(cat.correctRate),
-        emissiveIntensity: 0.05,
-        metalness: 0.02,
-        roughness: 0.8,
+        emissiveIntensity: 0.1,
+        metalness: 0.08,
+        roughness: 0.65,
       });
       const mesh = new THREE.Mesh(geo, mat);
       mesh.position.set(x, 0, z);
