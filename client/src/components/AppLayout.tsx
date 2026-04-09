@@ -14,7 +14,7 @@ function SidebarNav() {
   return (
     <aside className="hidden lg:flex flex-col w-55 border-r border-border bg-surface-card h-screen sticky top-0 py-6 px-3 gap-1">
       <div className="px-4 mb-8">
-        <img src={logo} alt="passQL" className="h-8 w-auto" />
+        <img src={logo} alt="passQL" className="h-12 w-auto" />
       </div>
       {NAV_ITEMS.map((item) => (
         <NavLink
