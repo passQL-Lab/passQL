@@ -27,7 +27,7 @@ const router = createBrowserRouter([
     element: <AnswerFeedback />,
   },
   {
-    path: "practice/:sessionId/:index",
+    path: "practice/:sessionId",
     element: <PracticeSet />,
   },
   {

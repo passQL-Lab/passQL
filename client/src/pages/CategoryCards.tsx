@@ -18,7 +18,7 @@ export default function CategoryCards() {
     try {
       const { sessionId, questions } = await generatePractice(code);
       startSession(sessionId, code, displayName, questions);
-      navigate(`/practice/${sessionId}/0`);
+      navigate(`/practice/${sessionId}`);
     } catch {
       setGenerating(null);
     }
