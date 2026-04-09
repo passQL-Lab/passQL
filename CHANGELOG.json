@@ -1,11 +1,43 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-09T14:32:07Z",
-    "currentVersion": "0.0.33",
+    "lastUpdated": "2026-04-09T16:09:59Z",
+    "currentVersion": "0.0.34",
     "projectType": "basic",
-    "totalReleases": 5
+    "totalReleases": 6
   },
   "releases": [
+    {
+      "version": "0.0.34",
+      "project_type": "basic",
+      "date": "2026-04-09",
+      "pr_number": 50,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **New Features**\n  * 관리자가 AI 생성 없이 문제를 직접 등록할 수 있는 새로운 관리자 인터페이스 추가\n  * JSON 형식의 문제 데이터를 페이스트 또는 파일 업로드로 한 번에 입력 가능\n  * 관리자 화면에서 문제 등록 전 DDL과 SQL을 테스트할 수 있는 샌드박스 실행 기능 추가\n\n* **Bug Fixes**\n  * DDL 실행 시 멱등성 개선으로 안정성 강화\n\n* **Chores**\n  * 민감한 설정값이 로그에 표시되지 않도록 마스킹 처리\n  * API 키 관리 체계 개선\n  * 버전 업데이트 (v0.0.34)",
+      "parsed_changes": {
+        "new_features": {
+          "title": "New Features",
+          "items": [
+            "관리자가 AI 생성 없이 문제를 직접 등록할 수 있는 새로운 관리자 인터페이스 추가",
+            "JSON 형식의 문제 데이터를 페이스트 또는 파일 업로드로 한 번에 입력 가능",
+            "관리자 화면에서 문제 등록 전 DDL과 SQL을 테스트할 수 있는 샌드박스 실행 기능 추가"
+          ]
+        },
+        "bug_fixes": {
+          "title": "Bug Fixes",
+          "items": [
+            "DDL 실행 시 멱등성 개선으로 안정성 강화"
+          ]
+        },
+        "chores": {
+          "title": "Chores",
+          "items": [
+            "민감한 설정값이 로그에 표시되지 않도록 마스킹 처리",
+            "API 키 관리 체계 개선",
+            "버전 업데이트 (v0.0.34)"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.33",
       "project_type": "basic",

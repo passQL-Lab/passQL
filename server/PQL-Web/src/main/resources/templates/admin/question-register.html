@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+
+<th:block layout:fragment="title">문제 직접 등록</th:block>
+
+<th:block layout:fragment="content">
+
+    <div class="mb-4 flex items-center gap-2 flex-wrap">
+        <a th:href="@{/admin/questions}" class="btn btn-sm btn-ghost">
+            <i data-lucide="arrow-left" class="size-4"></i>
+            목록으로
+        </a>
+        <h2 class="text-lg font-bold">문제 직접 등록</h2>
+        <span class="badge badge-outline badge-sm">선택지는 AI가 자동 생성</span>
+        <div class="ml-auto flex gap-2">
+            <button type="button" class="btn btn-sm btn-ghost" onclick="openGuideModal()" title="등록 가이드">
+                <i data-lucide="circle-help" class="size-4"></i>
+                가이드
+            </button>
+            <button type="button" class="btn btn-sm btn-outline" onclick="document.getElementById('jsonFileInput').click()">
+                <i data-lucide="upload" class="size-4"></i>
+                JSON 파일 불러오기
+            </button>
+            <button type="button" class="btn btn-sm btn-outline" onclick="openJsonPasteModal()">
+                <i data-lucide="clipboard-paste" class="size-4"></i>
+                JSON 붙여넣기
+            </button>
+            <input type="file" id="jsonFileInput" accept=".json" class="hidden" onchange="loadJsonFile(event)"/>
+        </div>
+    </div>
+
+    <!-- 가이드 모달 -->
+    <dialog id="guideModal" class="modal">
+        <div class="modal-box w-11/12 max-w-3xl max-h-[80vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-lg">문제 등록 가이드</h3>
+                <div class="flex gap-2">
+                    <a href="/docs/question-register-guide.md" download="question-register-guide.md"
+                       class="btn btn-sm btn-outline">
+                        <i data-lucide="download" class="size-4"></i>
+                        MD 파일 다운로드
+                    </a>
+                    <button type="button" class="btn btn-sm btn-ghost" onclick="copyPrompt()">
+                        <i data-lucide="copy" class="size-4"></i>
+                        AI 프롬프트 복사
+                    </button>
+                </div>
+            </div>
+
+            <!-- topicCode 목록 -->
+            <div class="mb-4">
+                <p class="font-semibold text-sm mb-2">topicCode 목록</p>
+                <div class="overflow-x-auto">
+                    <table class="table table-xs table-zebra">
+                        <thead><tr><th>topicCode</th><th>표시명</th></tr></thead>
+                        <tbody>
+                            <tr th:each="t : ${topics}">
+                                <td class="font-mono" th:text="${t.code}">-</td>
+                                <td th:text="${t.displayName}">-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- JSON 스키마 -->
+            <div class="mb-4">
+                <p class="font-semibold text-sm mb-2">JSON 스키마</p>
+                <div class="mockup-code text-xs">
+<pre class="p-4">{
+  "topicCode":        "sql_basic_select",   // 위 목록에서 선택
+  "difficulty":       3,                    // 1~5 정수
+  "executionMode":    "EXECUTABLE",         // EXECUTABLE | CONCEPT_ONLY
+  "stem":             "지문 전체 텍스트",
+  "hint":             "힌트 한 줄 (없으면 null)",
+  "schemaDdl":        "CREATE TABLE ... (EXECUTABLE 필수, \\n으로 줄바꿈)",
+  "schemaSampleData": "INSERT INTO ... (선택, \\n으로 줄바꿈)",
+  "schemaIntent":     "테이블이 테스트하는 개념 한 줄 (선택)",
+  "answerSql":        "SELECT ... (EXECUTABLE 필수, 정답 선택지 SQL)"
+}</pre>
+                </div>
+            </div>
+
+            <!-- AI 프롬프트 -->
+            <div class="mb-4">
+                <p class="font-semibold text-sm mb-2">AI 변환 프롬프트 <span class="text-base-content/50 font-normal">(복사 후 AI에게 문제 데이터 붙여넣기)</span></p>
+                <div class="relative">
+                    <textarea id="guidePromptText" rows="10" readonly
+                              class="textarea textarea-bordered w-full font-mono text-xs bg-base-200"></textarea>
+                </div>
+                <p id="copySuccessMsg" class="text-success text-xs mt-1 hidden">복사됐습니다.</p>
+            </div>
+
+            <div class="modal-action">
+                <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('guideModal').close()">닫기</button>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop"><button>close</button></form>
+    </dialog>
+
+    <!-- JSON 붙여넣기 모달 -->
+    <dialog id="jsonPasteModal" class="modal">
+        <div class="modal-box w-11/12 max-w-2xl">
+            <h3 class="font-bold text-lg mb-3">JSON 붙여넣기</h3>
+            <textarea id="jsonPasteArea" rows="14"
+                      class="textarea textarea-bordered w-full font-mono text-xs"
+                      placeholder='{"topicCode":"sql_basic_select","difficulty":3,"executionMode":"EXECUTABLE","stem":"...","hint":"...","schemaDdl":"CREATE TABLE ...","schemaSampleData":"INSERT INTO ...","schemaIntent":"...","answerSql":"SELECT ..."}'></textarea>
+            <p id="jsonPasteError" class="text-error text-sm mt-1 hidden"></p>
+            <div class="modal-action">
+                <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('jsonPasteModal').close()">취소</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="applyJsonFromPaste()">적용</button>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop"><button>close</button></form>
+    </dialog>
+
+    <form action="/admin/questions/register" method="post" class="space-y-4">
+
+        <!-- 기본 정보 -->
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <h3 class="card-title text-base mb-4">
+                    <i data-lucide="info" class="size-5"></i>
+                    기본 정보
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+
+                    <!-- 토픽 -->
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium">토픽 <span class="text-error">*</span></span></label>
+                        <select name="topicUuid" class="select select-bordered" required id="topicSelect">
+                            <option value="">토픽 선택</option>
+                            <option th:each="t : ${topics}"
+                                    th:value="${t.topicUuid}"
+                                    th:attr="data-code=${t.code}"
+                                    th:text="${t.displayName}">-</option>
+                        </select>
+                    </div>
+
+                    <!-- 난이도 -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">난이도 <span class="text-error">*</span></span>
+                            <span class="label-text-alt" id="difficultyLabel">Lv.3</span>
+                        </label>
+                        <input type="range" name="difficulty" min="1" max="5" value="3"
+                               class="range range-primary range-sm"
+                               oninput="document.getElementById('difficultyLabel').textContent='Lv.' + this.value"/>
+                        <div class="flex justify-between text-xs px-1 mt-1">
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                        </div>
+                    </div>
+
+                    <!-- 실행 모드 -->
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium">실행 모드 <span class="text-error">*</span></span></label>
+                        <div class="flex flex-col gap-2 mt-1" id="executionModeGroup">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="executionMode" value="EXECUTABLE" class="radio radio-primary radio-sm" checked/>
+                                <span class="text-sm">실행형 (SQL)</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="executionMode" value="CONCEPT_ONLY" class="radio radio-primary radio-sm"/>
+                                <span class="text-sm">개념형 (텍스트)</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 문제 내용 -->
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <h3 class="card-title text-base mb-4">
+                    <i data-lucide="file-text" class="size-5"></i>
+                    문제 내용
+                </h3>
+
+                <div class="space-y-4">
+
+                    <!-- 지문 -->
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium">지문 <span class="text-error">*</span></span></label>
+                        <textarea name="stem" rows="4" required
+                                  class="textarea textarea-bordered w-full"
+                                  placeholder="예) 다음 SQL 실행 결과로 올바른 것은?"></textarea>
+                    </div>
+
+                    <!-- 힌트 -->
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium">힌트</span></label>
+                        <input type="text" name="hint" class="input input-bordered w-full"
+                               placeholder="예) BETWEEN과 비교 연산자의 차이"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 스키마 (실행형만) -->
+        <div class="card bg-base-100 shadow" id="schemaSection">
+            <div class="card-body">
+                <h3 class="card-title text-base mb-4">
+                    <i data-lucide="database" class="size-5"></i>
+                    스키마 정보
+                    <span class="badge badge-warning badge-sm">실행형 필수</span>
+                </h3>
+
+                <div class="space-y-4">
+
+                    <!-- DDL -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">DDL <span class="text-error">*</span></span>
+                            <span class="label-text-alt text-base-content/50">CREATE TABLE ...</span>
+                        </label>
+                        <textarea name="schemaDdl" rows="8" id="schemaDdl"
+                                  class="textarea textarea-bordered w-full font-mono text-sm"
+                                  placeholder="CREATE TABLE SQLD_14 (&#10;  NUM INT,&#10;  CODE VARCHAR(1),&#10;  COL1 INT,&#10;  COL2 INT&#10;);"></textarea>
+                    </div>
+
+                    <!-- 샘플 데이터 -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">샘플 데이터</span>
+                            <span class="label-text-alt text-base-content/50">INSERT INTO ...</span>
+                        </label>
+                        <textarea name="schemaSampleData" rows="8" id="schemaSampleData"
+                                  class="textarea textarea-bordered w-full font-mono text-sm"
+                                  placeholder="INSERT INTO SQLD_14 VALUES (1,'A',100,350);&#10;INSERT INTO SQLD_14 VALUES (2,'A',130,300);&#10;..."></textarea>
+                    </div>
+
+                    <!-- 스키마 의도 -->
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium">스키마 의도</span></label>
+                        <input type="text" name="schemaIntent" class="input input-bordered w-full"
+                               placeholder="예) BETWEEN 연산자와 비교 연산자 혼합 조건 문제"/>
+                    </div>
+
+                    <!-- 정답 SQL -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">정답 SQL <span class="text-error">*</span></span>
+                            <span class="label-text-alt text-base-content/50">AI 선택지 생성 기준</span>
+                        </label>
+                        <textarea name="answerSql" rows="3" id="answerSql"
+                                  class="textarea textarea-bordered w-full font-mono text-sm"
+                                  placeholder="SELECT * FROM SQLD_14 WHERE COL1 &lt;= 200 AND COL2 &gt;= 200;"></textarea>
+                    </div>
+
+                    <!-- Sandbox 테스트 버튼 -->
+                    <div class="flex items-center gap-3">
+                        <button type="button" class="btn btn-outline btn-sm" onclick="testSandbox()">
+                            <i data-lucide="play" class="size-4"></i>
+                            정답 SQL 실행 테스트
+                        </button>
+                        <span id="sandboxStatus" class="text-sm text-base-content/50"></span>
+                    </div>
+
+                    <!-- 실행 결과 -->
+                    <div id="sandboxResult" class="hidden">
+                        <div class="mockup-code text-xs overflow-x-auto" id="sandboxOutput"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 선택지 정책 -->
+        <input type="hidden" name="choiceSetPolicy" value="AI_ONLY"/>
+
+        <!-- 제출 -->
+        <div class="flex justify-end gap-2">
+            <a th:href="@{/admin/questions}" class="btn btn-ghost">취소</a>
+            <button type="submit" class="btn btn-primary">
+                <i data-lucide="save" class="size-4"></i>
+                문제 등록
+            </button>
+        </div>
+
+    </form>
+
+</th:block>
+
+<th:block layout:fragment="js">
+<script>
+    lucide.createIcons();
+
+    // 실행 모드 전환 시 스키마 섹션 표시/숨김
+    document.querySelectorAll('input[name="executionMode"]').forEach(radio => {
+        radio.addEventListener('change', function () {
+            const schemaSection = document.getElementById('schemaSection');
+            if (this.value === 'EXECUTABLE') {
+                schemaSection.classList.remove('hidden');
+                document.getElementById('schemaDdl').required = true;
+                document.getElementById('answerSql').required = true;
+            } else {
+                schemaSection.classList.add('hidden');
+                document.getElementById('schemaDdl').required = false;
+                document.getElementById('answerSql').required = false;
+            }
+        });
+    });
+
+    // ── 가이드 모달 ────────────────────────────────────────────────
+    const AI_PROMPT = `아래 SQLD 문제 데이터를 passQL JSON 명세로 변환해줘.
+
+출력은 JSON 코드블록 하나만. 다른 설명 없이.
+
+필드 규칙:
+- topicCode: 다음 중 하나만 사용
+  data_modeling / sql_basic_select / sql_ddl_dml_tcl / sql_function / sql_join / sql_subquery / sql_group_aggregate / sql_window / sql_hierarchy_pivot
+- difficulty: 1~5 정수 (개념 암기=1~2, SQL 실행 추적=3, 복합 조건/JOIN=4, 윈도우/계층=5)
+- executionMode: "EXECUTABLE" (SQL 실행 결과를 묻는 문제) 또는 "CONCEPT_ONLY" (개념/이론)
+- stem: 지문 전체 텍스트 (선택지 A/B/C/D 제외)
+- hint: 핵심해설/함정포인트 기반 한 줄 힌트. 없으면 null
+- schemaDdl: EXECUTABLE이면 CREATE TABLE 문. 문제에 없으면 선택지에서 유추해서 생성. CONCEPT_ONLY면 null
+- schemaSampleData: EXECUTABLE이면 INSERT 문 목록. 문제에 데이터가 없으면 실행 가능한 최소 데이터 유추 생성. CONCEPT_ONLY면 null
+- schemaIntent: 이 테이블/데이터가 어떤 개념을 테스트하는지 한 줄 설명. CONCEPT_ONLY면 null
+- answerSql: EXECUTABLE이면 정답 번호에 해당하는 SELECT 쿼리. CONCEPT_ONLY면 null
+
+주의사항:
+- schemaDdl, schemaSampleData 문자열 내 줄바꿈은 \\n으로 표현
+- answerSql은 선택지 중 정답 SQL을 그대로 복사
+- SQLD MariaDB/Oracle 호환 SQL 작성
+
+--- 문제 데이터 ---
+[여기에 MD 파일의 ## 문제 N 섹션을 붙여넣기]`;
+
+    function openGuideModal() {
+        document.getElementById('guidePromptText').value = AI_PROMPT;
+        document.getElementById('copySuccessMsg').classList.add('hidden');
+        document.getElementById('guideModal').showModal();
+        lucide.createIcons();
+    }
+
+    function copyPrompt() {
+        navigator.clipboard.writeText(AI_PROMPT).then(() => {
+            const msg = document.getElementById('copySuccessMsg');
+            msg.classList.remove('hidden');
+            setTimeout(() => msg.classList.add('hidden'), 2000);
+        }).catch(() => {
+            const ta = document.getElementById('guidePromptText');
+            ta.select();
+            document.execCommand('copy');
+        });
+    }
+
+    // ── JSON 불러오기 공통 적용 ─────────────────────────────────────
+    function applyJson(data) {
+        // topicCode → select option 매핑
+        if (data.topicCode) {
+            const sel = document.getElementById('topicSelect');
+            for (const opt of sel.options) {
+                if (opt.dataset.code === data.topicCode) {
+                    sel.value = opt.value;
+                    break;
+                }
+            }
+        }
+
+        // 난이도
+        if (data.difficulty != null) {
+            const rangeEl = document.querySelector('input[name="difficulty"]');
+            rangeEl.value = data.difficulty;
+            document.getElementById('difficultyLabel').textContent = 'Lv.' + data.difficulty;
+        }
+
+        // 실행 모드
+        if (data.executionMode) {
+            const radio = document.querySelector(`input[name="executionMode"][value="${data.executionMode}"]`);
+            if (radio) {
+                radio.checked = true;
+                radio.dispatchEvent(new Event('change'));
+            }
+        }
+
+        // 텍스트 필드
+        const textMap = {
+            stem: 'textarea[name="stem"]',
+            hint: 'input[name="hint"]',
+            schemaDdl: '#schemaDdl',
+            schemaSampleData: '#schemaSampleData',
+            schemaIntent: 'input[name="schemaIntent"]',
+            answerSql: '#answerSql'
+        };
+        for (const [key, selector] of Object.entries(textMap)) {
+            if (data[key] != null) {
+                const el = document.querySelector(selector);
+                if (el) el.value = data[key];
+            }
+        }
+    }
+
+    // ── 파일 불러오기 ───────────────────────────────────────────────
+    function loadJsonFile(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const data = JSON.parse(e.target.result);
+                applyJson(data);
+            } catch (err) {
+                alert('JSON 파싱 오류: ' + err.message);
+            }
+        };
+        reader.readAsText(file);
+        event.target.value = '';  // 같은 파일 재선택 허용
+    }
+
+    // ── 붙여넣기 모달 ───────────────────────────────────────────────
+    function openJsonPasteModal() {
+        document.getElementById('jsonPasteArea').value = '';
+        document.getElementById('jsonPasteError').classList.add('hidden');
+        document.getElementById('jsonPasteModal').showModal();
+    }
+
+    function applyJsonFromPaste() {
+        const raw = document.getElementById('jsonPasteArea').value.trim();
+        const errEl = document.getElementById('jsonPasteError');
+        try {
+            const data = JSON.parse(raw);
+            applyJson(data);
+            document.getElementById('jsonPasteModal').close();
+        } catch (err) {
+            errEl.textContent = 'JSON 파싱 오류: ' + err.message;
+            errEl.classList.remove('hidden');
+        }
+    }
+
+    // ── Sandbox 실행 테스트 ─────────────────────────────────────────
+    async function testSandbox() {
+        const ddl = document.getElementById('schemaDdl').value.trim();
+        const sampleData = document.getElementById('schemaSampleData').value.trim();
+        const sql = document.getElementById('answerSql').value.trim();
+
+        if (!ddl) { alert('DDL을 입력해주세요.'); return; }
+        if (!sql) { alert('정답 SQL을 입력해주세요.'); return; }
+
+        const statusEl = document.getElementById('sandboxStatus');
+        const resultEl = document.getElementById('sandboxResult');
+        const outputEl = document.getElementById('sandboxOutput');
+
+        statusEl.textContent = '실행 중...';
+        resultEl.classList.add('hidden');
+
+        try {
+            const resp = await fetch('/admin/sandbox/execute', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ddl, sampleData, sql })
+            });
+            const data = await resp.json();
+
+            if (data.status === 'OK') {
+                statusEl.textContent = '✓ 성공 (' + data.elapsedMs + 'ms, ' + data.rowCount + '행)';
+                statusEl.className = 'text-sm text-success font-medium';
+                const header = (data.columns || []).join(' | ');
+                const rows = (data.rows || []).map(r => r.join(' | ')).join('\n');
+                const pre = document.createElement('pre');
+                pre.className = 'p-4';
+                pre.textContent = header + '\n' + '-'.repeat(header.length) + '\n' + rows;
+                outputEl.replaceChildren(pre);
+            } else {
+                statusEl.textContent = '✗ ' + (data.errorCode || 'ERROR');
+                statusEl.className = 'text-sm text-error font-medium';
+                const pre = document.createElement('pre');
+                pre.className = 'p-4';
+                pre.textContent = data.errorMessage || '';
+                outputEl.replaceChildren(pre);
+            }
+            resultEl.classList.remove('hidden');
+        } catch (e) {
+            statusEl.innerHTML = '<span class="text-error">요청 실패: ' + e.message + '</span>';
+        }
+    }
+</script>
+</th:block>
+</html>
