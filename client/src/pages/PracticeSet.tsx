@@ -29,12 +29,15 @@ export default function PracticeSet() {
   const totalQuestions = 10;
   const isLast = currentIndex === totalQuestions - 1;
 
-  const handleSelect = useCallback((selectedChoiceKey: string) => {
-    if (!question) return;
-    // mock 정답 키는 "A" — 실제 API 연동 시 백엔드가 판별
-    const isCorrect = selectedChoiceKey === "A";
-    submitAndAdvance(question.questionUuid, isCorrect, selectedChoiceKey);
-  }, [question, submitAndAdvance]);
+  const handleSelect = useCallback(
+    (selectedChoiceKey: string) => {
+      if (!question) return;
+      // mock 정답 키는 "A" — 실제 API 연동 시 백엔드가 판별
+      const isCorrect = selectedChoiceKey === "A";
+      submitAndAdvance(question.questionUuid, isCorrect, selectedChoiceKey);
+    },
+    [question, submitAndAdvance],
+  );
 
   if (!storeSessionId || storeSessionId !== sessionId) {
     return <Navigate to="/questions" replace />;
@@ -46,7 +49,7 @@ export default function PracticeSet() {
   }
 
   return (
-    <div className="flex flex-col h-screen max-w-[480px] mx-auto w-full">
+    <div className="flex flex-col h-screen max-w-120 mx-auto w-full">
       <div className="px-4 pt-3 pb-2">
         <div className="flex items-center justify-between mb-2">
           <button

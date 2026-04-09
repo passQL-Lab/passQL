@@ -218,7 +218,7 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
           className="card-base w-full text-left flex items-start gap-2 mt-2"
           onClick={() => setStemOpen((prev) => !prev)}
         >
-          <BookOpen size={16} className="text-brand mt-0.5 flex-shrink-0" />
+          <BookOpen size={16} className="text-brand mt-0.5 shrink-0" />
           {stemOpen ? (
             <p className="text-body text-sm">{question.stem}</p>
           ) : (

@@ -137,7 +137,7 @@ export default function Home() {
                       <StarRating level={q.difficulty} />
                     </div>
                   </div>
-                  <ChevronRight size={16} className="text-text-caption flex-shrink-0" />
+                  <ChevronRight size={16} className="text-text-caption shrink-0" />
                 </div>
               </Link>
             ))}

@@ -82,7 +82,7 @@ export default function PracticeResult() {
   );
 
   const step2 = (
-    <div className="text-left w-full max-w-[360px]">
+    <div className="text-left w-full max-w-90">
       <p className="text-2xl font-bold text-center mb-5">{analysis.greeting}</p>
       {analysis.analysis && (
         <p className="text-body leading-relaxed">{analysis.analysis}</p>
@@ -116,7 +116,7 @@ export default function PracticeResult() {
                 <p className="text-xs text-text-caption mt-0.5">{formatDuration(r.durationMs)}</p>
               </div>
               {r.isCorrect ? (
-                <Check size={16} className="text-green-500 flex-shrink-0" />
+                <Check size={16} className="text-green-500 shrink-0" />
               ) : (
                 <Link
                   to={`/questions/${r.questionUuid}`}
@@ -133,7 +133,7 @@ export default function PracticeResult() {
   );
 
   return (
-    <div className="h-screen max-w-[480px] mx-auto">
+    <div className="h-screen max-w-120 mx-auto">
       <StepNavigator
         steps={[step1, step2, step3]}
         lastButtonLabel="다른 카테고리"
