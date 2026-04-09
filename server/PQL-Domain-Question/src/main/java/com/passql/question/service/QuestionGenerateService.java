@@ -8,6 +8,7 @@ import com.passql.meta.entity.PromptTemplate;
 import com.passql.meta.service.PromptService;
 import com.passql.question.constant.ChoiceKind;
 import com.passql.question.constant.ChoiceSetPolicy;
+import com.passql.question.constant.ExecutionMode;
 import com.passql.question.constant.ChoiceSetSource;
 import com.passql.question.constant.ChoiceSetStatus;
 import com.passql.question.constant.Dialect;
@@ -85,6 +86,53 @@ public class QuestionGenerateService {
 
         GenerateQuestionFullRequest req = new GenerateQuestionFullRequest(context, llmConfig);
         return aiGatewayClient.generateQuestionFull(req);
+    }
+
+    /**
+     * 관리자 직접 입력으로 Question만 저장 (선택지 없음, AI가 나중에 자동 생성).
+     */
+    @Transactional
+    public Question createQuestionOnly(
+            UUID topicUuid,
+            UUID subtopicUuid,
+            int difficulty,
+            ExecutionMode executionMode,
+            String stem,
+            String schemaDdl,
+            String schemaSampleData,
+            String schemaIntent,
+            String answerSql,
+            String hint,
+            ChoiceSetPolicy choiceSetPolicy
+    ) {
+        ExecutionMode mode = executionMode != null ? executionMode : ExecutionMode.EXECUTABLE;
+        if (mode == ExecutionMode.EXECUTABLE) {
+            if (schemaDdl == null || schemaDdl.isBlank()) {
+                throw new CustomException(ErrorCode.QUESTION_GENERATE_INPUT_INVALID);
+            }
+            if (answerSql == null || answerSql.isBlank()) {
+                throw new CustomException(ErrorCode.QUESTION_GENERATE_INPUT_INVALID);
+            }
+        }
+
+        Question question = Question.builder()
+                .topicUuid(topicUuid)
+                .subtopicUuid(subtopicUuid)
+                .difficulty(difficulty)
+                .executionMode(mode)
+                .dialect(Dialect.MARIADB)
+                .stem(stem)
+                .schemaDdl(schemaDdl)
+                .schemaSampleData(schemaSampleData)
+                .schemaIntent(schemaIntent)
+                .answerSql(answerSql)
+                .hint(hint)
+                .choiceSetPolicy(choiceSetPolicy != null ? choiceSetPolicy : ChoiceSetPolicy.AI_ONLY)
+                .isActive(true)
+                .build();
+        question = questionRepository.saveAndFlush(question);
+        log.info("[question-register] saved: questionUuid={}", question.getQuestionUuid());
+        return question;
     }
 
     /**

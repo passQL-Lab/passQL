@@ -31,13 +31,25 @@ public class SandboxExecutor {
              Statement stmt = conn.createStatement()) {
             for (String sql : splitStatements(ddl)) {
                 if (!sql.isBlank()) {
-                    stmt.execute(sql);
+                    stmt.execute(normalizeDdl(sql.trim()));
                 }
             }
         } catch (Exception e) {
             throw new CustomException(ErrorCode.SANDBOX_SETUP_FAILED,
                     "DDL 적용 실패: " + e.getMessage());
         }
+    }
+
+    /**
+     * CREATE TABLE → CREATE TABLE IF NOT EXISTS 자동 변환.
+     * 관리자가 IF NOT EXISTS를 빠뜨려도 sandbox에서 안전하게 실행되도록 보정한다.
+     */
+    private String normalizeDdl(String sql) {
+        String upper = sql.toUpperCase();
+        if (upper.startsWith("CREATE TABLE") && !upper.startsWith("CREATE TABLE IF NOT EXISTS")) {
+            return sql.replaceFirst("(?i)CREATE\\s+TABLE\\s+", "CREATE TABLE IF NOT EXISTS ");
+        }
+        return sql;
     }
 
     /**

@@ -61,6 +61,39 @@ public class AdminQuestionController {
         return "admin/question-new";
     }
 
+    @GetMapping("/register")
+    public String registerForm(Model model) {
+        model.addAttribute("topics", metaService.getTopicTree());
+        model.addAttribute("currentMenu", "questions");
+        model.addAttribute("pageTitle", "문제 직접 등록");
+        return "admin/question-register";
+    }
+
+    @PostMapping("/register")
+    public String register(
+            @RequestParam UUID topicUuid,
+            @RequestParam(required = false) UUID subtopicUuid,
+            @RequestParam int difficulty,
+            @RequestParam String executionMode,
+            @RequestParam String stem,
+            @RequestParam(required = false) String schemaDdl,
+            @RequestParam(required = false) String schemaSampleData,
+            @RequestParam(required = false) String schemaIntent,
+            @RequestParam(required = false) String answerSql,
+            @RequestParam(required = false) String hint,
+            @RequestParam(required = false) String choiceSetPolicy
+    ) {
+        ChoiceSetPolicy policy = parseChoiceSetPolicy(choiceSetPolicy);
+
+        Question question = questionGenerateService.createQuestionOnly(
+                topicUuid, subtopicUuid, difficulty,
+                parseExecutionMode(executionMode),
+                stem, schemaDdl, schemaSampleData, schemaIntent,
+                answerSql, hint, policy);
+
+        return "redirect:/admin/questions/" + question.getQuestionUuid();
+    }
+
     @GetMapping("/{uuid}")
     public String detail(@PathVariable UUID uuid, Model model) {
         QuestionDetail question = questionService.getQuestion(uuid);
@@ -96,7 +129,7 @@ public class AdminQuestionController {
             @RequestParam String executionMode
     ) {
         questionService.updateQuestion(uuid, stem, schemaDisplay, schemaDdl, schemaSampleData, schemaIntent,
-                answerSql, hint, difficulty, ExecutionMode.valueOf(executionMode), topicUuid, subtopicUuid);
+                answerSql, hint, difficulty, parseExecutionMode(executionMode), topicUuid, subtopicUuid);
         return "redirect:/admin/questions/" + uuid;
     }
 
@@ -145,9 +178,7 @@ public class AdminQuestionController {
             ));
         }
 
-        ChoiceSetPolicy policy = choiceSetPolicy != null
-                ? ChoiceSetPolicy.valueOf(choiceSetPolicy)
-                : ChoiceSetPolicy.AI_ONLY;
+        ChoiceSetPolicy policy = parseChoiceSetPolicy(choiceSetPolicy);
 
         questionGenerateService.createQuestionWithSeedSet(
                 topicUuid, subtopicUuid, difficulty,
@@ -155,5 +186,22 @@ public class AdminQuestionController {
                 stem, answerSql, hint, policy, choices);
 
         return "redirect:/admin/questions";
+    }
+
+    private ExecutionMode parseExecutionMode(String value) {
+        try {
+            return ExecutionMode.valueOf(value);
+        } catch (IllegalArgumentException e) {
+            throw new CustomException(ErrorCode.QUESTION_GENERATE_INPUT_INVALID);
+        }
+    }
+
+    private ChoiceSetPolicy parseChoiceSetPolicy(String value) {
+        if (value == null) return ChoiceSetPolicy.AI_ONLY;
+        try {
+            return ChoiceSetPolicy.valueOf(value);
+        } catch (IllegalArgumentException e) {
+            throw new CustomException(ErrorCode.QUESTION_GENERATE_INPUT_INVALID);
+        }
     }
 }

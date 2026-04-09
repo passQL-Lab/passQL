@@ -9,6 +9,7 @@ from google.genai import types
 
 from src.core.config import settings
 from src.core.exceptions import CustomError
+from src.services.redis_settings import get_gemini_api_key
 
 logger = logging.getLogger(__name__)
 
@@ -21,10 +22,11 @@ class GeminiClient:
     - chat_structured: response_schema(JSON mode) 강제 응답
     """
 
-    def __init__(self):
-        if not settings.GEMINI_API_KEY:
-            logger.warning("GEMINI_API_KEY 가 비어있음 — GeminiClient 호출 시 실패함")
-        self._client = genai.Client(api_key=settings.GEMINI_API_KEY)
+    def _get_client(self) -> genai.Client:
+        api_key = get_gemini_api_key()
+        if not api_key:
+            raise CustomError("Gemini API Key 미설정 — Redis(DB) 또는 환경변수를 확인하세요")
+        return genai.Client(api_key=api_key)
 
     async def chat(
         self,
@@ -42,12 +44,13 @@ class GeminiClient:
         """
         logger.debug(f"Gemini chat: model={model}, max_tokens={max_tokens}")
         try:
+            client = self._get_client()
             config = types.GenerateContentConfig(
                 system_instruction=system_prompt,
                 temperature=temperature,
                 max_output_tokens=max_tokens,
             )
-            response = self._client.models.generate_content(
+            response = client.models.generate_content(
                 model=model,
                 contents=user_prompt,
                 config=config,
@@ -87,6 +90,7 @@ class GeminiClient:
 
         logger.debug(f"Gemini chat_structured: model={model}, max_tokens={max_tokens}")
         try:
+            client = self._get_client()
             config = types.GenerateContentConfig(
                 system_instruction=system_prompt,
                 temperature=temperature,
@@ -94,7 +98,7 @@ class GeminiClient:
                 response_mime_type="application/json",
                 response_schema=response_schema,
             )
-            response = self._client.models.generate_content(
+            response = client.models.generate_content(
                 model=model,
                 contents=user_prompt,
                 config=config,

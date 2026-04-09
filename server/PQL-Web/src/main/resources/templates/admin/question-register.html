@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+
+<th:block layout:fragment="title">문제 직접 등록</th:block>
+
+<th:block layout:fragment="content">
+
+    <div class="mb-4 flex items-center gap-2">
+        <a th:href="@{/admin/questions}" class="btn btn-sm btn-ghost">
+            <i data-lucide="arrow-left" class="size-4"></i>
+            목록으로
+        </a>
+        <h2 class="text-lg font-bold">문제 직접 등록</h2>
+        <span class="badge badge-outline badge-sm">선택지는 AI가 자동 생성</span>
+    </div>
+
+    <form action="/admin/questions/register" method="post" class="space-y-4">
+
+        <!-- 기본 정보 -->
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <h3 class="card-title text-base mb-4">
+                    <i data-lucide="info" class="size-5"></i>
+                    기본 정보
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+
+                    <!-- 토픽 -->
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium">토픽 <span class="text-error">*</span></span></label>
+                        <select name="topicUuid" class="select select-bordered" required id="topicSelect">
+                            <option value="">토픽 선택</option>
+                            <option th:each="t : ${topics}"
+                                    th:value="${t.topicUuid}"
+                                    th:text="${t.displayName}">-</option>
+                        </select>
+                    </div>
+
+                    <!-- 난이도 -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">난이도 <span class="text-error">*</span></span>
+                            <span class="label-text-alt" id="difficultyLabel">Lv.3</span>
+                        </label>
+                        <input type="range" name="difficulty" min="1" max="5" value="3"
+                               class="range range-primary range-sm"
+                               oninput="document.getElementById('difficultyLabel').textContent='Lv.' + this.value"/>
+                        <div class="flex justify-between text-xs px-1 mt-1">
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                        </div>
+                    </div>
+
+                    <!-- 실행 모드 -->
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium">실행 모드 <span class="text-error">*</span></span></label>
+                        <div class="flex flex-col gap-2 mt-1" id="executionModeGroup">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="executionMode" value="EXECUTABLE" class="radio radio-primary radio-sm" checked/>
+                                <span class="text-sm">실행형 (SQL)</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="executionMode" value="CONCEPT_ONLY" class="radio radio-primary radio-sm"/>
+                                <span class="text-sm">개념형 (텍스트)</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 문제 내용 -->
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <h3 class="card-title text-base mb-4">
+                    <i data-lucide="file-text" class="size-5"></i>
+                    문제 내용
+                </h3>
+
+                <div class="space-y-4">
+
+                    <!-- 지문 -->
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium">지문 <span class="text-error">*</span></span></label>
+                        <textarea name="stem" rows="4" required
+                                  class="textarea textarea-bordered w-full"
+                                  placeholder="예) 다음 SQL 실행 결과로 올바른 것은?"></textarea>
+                    </div>
+
+                    <!-- 힌트 -->
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium">힌트</span></label>
+                        <input type="text" name="hint" class="input input-bordered w-full"
+                               placeholder="예) BETWEEN과 비교 연산자의 차이"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 스키마 (실행형만) -->
+        <div class="card bg-base-100 shadow" id="schemaSection">
+            <div class="card-body">
+                <h3 class="card-title text-base mb-4">
+                    <i data-lucide="database" class="size-5"></i>
+                    스키마 정보
+                    <span class="badge badge-warning badge-sm">실행형 필수</span>
+                </h3>
+
+                <div class="space-y-4">
+
+                    <!-- DDL -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">DDL <span class="text-error">*</span></span>
+                            <span class="label-text-alt text-base-content/50">CREATE TABLE ...</span>
+                        </label>
+                        <textarea name="schemaDdl" rows="8" id="schemaDdl"
+                                  class="textarea textarea-bordered w-full font-mono text-sm"
+                                  placeholder="CREATE TABLE SQLD_14 (&#10;  NUM INT,&#10;  CODE VARCHAR(1),&#10;  COL1 INT,&#10;  COL2 INT&#10;);"></textarea>
+                    </div>
+
+                    <!-- 샘플 데이터 -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">샘플 데이터</span>
+                            <span class="label-text-alt text-base-content/50">INSERT INTO ...</span>
+                        </label>
+                        <textarea name="schemaSampleData" rows="8" id="schemaSampleData"
+                                  class="textarea textarea-bordered w-full font-mono text-sm"
+                                  placeholder="INSERT INTO SQLD_14 VALUES (1,'A',100,350);&#10;INSERT INTO SQLD_14 VALUES (2,'A',130,300);&#10;..."></textarea>
+                    </div>
+
+                    <!-- 스키마 의도 -->
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium">스키마 의도</span></label>
+                        <input type="text" name="schemaIntent" class="input input-bordered w-full"
+                               placeholder="예) BETWEEN 연산자와 비교 연산자 혼합 조건 문제"/>
+                    </div>
+
+                    <!-- 정답 SQL -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">정답 SQL <span class="text-error">*</span></span>
+                            <span class="label-text-alt text-base-content/50">AI 선택지 생성 기준</span>
+                        </label>
+                        <textarea name="answerSql" rows="3" id="answerSql"
+                                  class="textarea textarea-bordered w-full font-mono text-sm"
+                                  placeholder="SELECT * FROM SQLD_14 WHERE COL1 &lt;= 200 AND COL2 &gt;= 200;"></textarea>
+                    </div>
+
+                    <!-- Sandbox 테스트 버튼 -->
+                    <div class="flex items-center gap-3">
+                        <button type="button" class="btn btn-outline btn-sm" onclick="testSandbox()">
+                            <i data-lucide="play" class="size-4"></i>
+                            정답 SQL 실행 테스트
+                        </button>
+                        <span id="sandboxStatus" class="text-sm text-base-content/50"></span>
+                    </div>
+
+                    <!-- 실행 결과 -->
+                    <div id="sandboxResult" class="hidden">
+                        <div class="mockup-code text-xs overflow-x-auto" id="sandboxOutput"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 선택지 정책 -->
+        <input type="hidden" name="choiceSetPolicy" value="AI_ONLY"/>
+
+        <!-- 제출 -->
+        <div class="flex justify-end gap-2">
+            <a th:href="@{/admin/questions}" class="btn btn-ghost">취소</a>
+            <button type="submit" class="btn btn-primary">
+                <i data-lucide="save" class="size-4"></i>
+                문제 등록
+            </button>
+        </div>
+
+    </form>
+
+</th:block>
+
+<th:block layout:fragment="js">
+<script>
+    lucide.createIcons();
+
+    // 실행 모드 전환 시 스키마 섹션 표시/숨김
+    document.querySelectorAll('input[name="executionMode"]').forEach(radio => {
+        radio.addEventListener('change', function () {
+            const schemaSection = document.getElementById('schemaSection');
+            if (this.value === 'EXECUTABLE') {
+                schemaSection.classList.remove('hidden');
+                document.getElementById('schemaDdl').required = true;
+                document.getElementById('answerSql').required = true;
+            } else {
+                schemaSection.classList.add('hidden');
+                document.getElementById('schemaDdl').required = false;
+                document.getElementById('answerSql').required = false;
+            }
+        });
+    });
+
+    // Sandbox 실행 테스트
+    async function testSandbox() {
+        const ddl = document.getElementById('schemaDdl').value.trim();
+        const sampleData = document.getElementById('schemaSampleData').value.trim();
+        const sql = document.getElementById('answerSql').value.trim();
+
+        if (!ddl) { alert('DDL을 입력해주세요.'); return; }
+        if (!sql) { alert('정답 SQL을 입력해주세요.'); return; }
+
+        const statusEl = document.getElementById('sandboxStatus');
+        const resultEl = document.getElementById('sandboxResult');
+        const outputEl = document.getElementById('sandboxOutput');
+
+        statusEl.textContent = '실행 중...';
+        resultEl.classList.add('hidden');
+
+        try {
+            const resp = await fetch('/admin/sandbox/execute', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ddl, sampleData, sql })
+            });
+            const data = await resp.json();
+
+            if (data.status === 'OK') {
+                statusEl.textContent = '✓ 성공 (' + data.elapsedMs + 'ms, ' + data.rowCount + '행)';
+                statusEl.className = 'text-sm text-success font-medium';
+                const header = (data.columns || []).join(' | ');
+                const rows = (data.rows || []).map(r => r.join(' | ')).join('\n');
+                const pre = document.createElement('pre');
+                pre.className = 'p-4';
+                pre.textContent = header + '\n' + '-'.repeat(header.length) + '\n' + rows;
+                outputEl.replaceChildren(pre);
+            } else {
+                statusEl.textContent = '✗ ' + (data.errorCode || 'ERROR');
+                statusEl.className = 'text-sm text-error font-medium';
+                const pre = document.createElement('pre');
+                pre.className = 'p-4';
+                pre.textContent = data.errorMessage || '';
+                outputEl.replaceChildren(pre);
+            }
+            resultEl.classList.remove('hidden');
+        } catch (e) {
+            statusEl.innerHTML = '<span class="text-error">요청 실패: ' + e.message + '</span>';
+        }
+    }
+</script>
+</th:block>
+</html>
