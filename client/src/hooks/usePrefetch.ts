@@ -1,4 +1,4 @@
-import { useRef, useCallback } from "react";
+import { useRef, useCallback, useEffect } from "react";
 import { generateChoices } from "../api/questions";
 import type { ChoiceSetComplete } from "../types/api";
 
@@ -8,6 +8,14 @@ const prefetchCache = new Map<string, ChoiceSetComplete>();
 export function usePrefetch() {
   // Track in-flight prefetch abort functions
   const inFlightRef = useRef(new Map<string, () => void>());
+
+  // Abort all in-flight streams on unmount
+  useEffect(() => {
+    return () => {
+      inFlightRef.current.forEach((abort) => abort());
+      inFlightRef.current.clear();
+    };
+  }, []);
 
   const prefetch = useCallback((questionUuid: string) => {
     // Skip if already cached or in-flight

@@ -5,6 +5,7 @@ import type {
   ChoiceItem,
   ChoiceGenerationPhase,
   ChoiceGenerationError,
+  ChoiceSetComplete,
 } from "../types/api";
 
 export function useQuestionDetail(questionUuid: string) {
@@ -29,13 +30,16 @@ export function useSubmitAnswer(questionUuid: string) {
 }
 
 type GenerateState =
-  | { readonly kind: "idle" }
   | { readonly kind: "loading"; readonly phase: ChoiceGenerationPhase; readonly message: string }
   | { readonly kind: "done"; readonly choiceSetId: string; readonly choices: readonly ChoiceItem[] }
   | { readonly kind: "error"; readonly error: ChoiceGenerationError };
 
-export function useGenerateChoices(questionUuid: string) {
-  const [state, setState] = useState<GenerateState>({ kind: "idle" });
+export function useGenerateChoices(questionUuid: string, prefetched?: ChoiceSetComplete | null) {
+  const [state, setState] = useState<GenerateState>(
+    prefetched
+      ? { kind: "done", choiceSetId: prefetched.choiceSetId, choices: prefetched.choices }
+      : { kind: "loading", phase: "generating", message: "선택지 생성 중..." }
+  );
   const abortRef = useRef<(() => void) | null>(null);
 
   const generate = useCallback(() => {
@@ -59,13 +63,14 @@ export function useGenerateChoices(questionUuid: string) {
     });
   }, [questionUuid]);
 
-  // Auto-start on mount, cleanup on unmount
+  // Auto-start on mount, cleanup on unmount — skip if already hydrated from prefetch cache
   useEffect(() => {
+    if (prefetched) return;
     generate();
     return () => {
       abortRef.current?.();
     };
-  }, [generate]);
+  }, [generate, prefetched]);
 
   return { state, retry: generate };
 }

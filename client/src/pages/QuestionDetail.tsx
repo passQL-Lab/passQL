@@ -21,10 +21,11 @@ export default function QuestionDetail() {
   const { questionUuid } = useParams<{ questionUuid: string }>();
   const navigate = useNavigate();
   const { data: question, isLoading } = useQuestionDetail(questionUuid!);
-  const { state: choicesState, retry: retryGenerate } = useGenerateChoices(questionUuid!);
+  const { prefetch, consumeCache } = usePrefetch();
+  const prefetchedRef = useRef(consumeCache(questionUuid!));
+  const { state: choicesState, retry: retryGenerate } = useGenerateChoices(questionUuid!, prefetchedRef.current);
   const executeMutation = useExecuteChoice(questionUuid!);
   const submitMutation = useSubmitAnswer(questionUuid!);
-  const { prefetch } = usePrefetch();
 
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [schemaOpen, setSchemaOpen] = useState(false);
@@ -55,7 +56,7 @@ export default function QuestionDetail() {
   const handleSelect = useCallback(
     (choiceKey: string, sql: string) => {
       setSelectedKey(choiceKey);
-      if (!executeCacheRef.current[choiceKey]) {
+      if (question?.executionMode === "EXECUTABLE" && !executeCacheRef.current[choiceKey]) {
         handleExecute(choiceKey, sql);
       }
       // Trigger prefetch for next question on first selection
@@ -69,7 +70,7 @@ export default function QuestionDetail() {
           .catch(() => {}); // Prefetch failure is silent
       }
     },
-    [handleExecute, prefetch, questionUuid],
+    [handleExecute, prefetch, questionUuid, question],
   );
 
   const handleSubmit = useCallback(() => {
@@ -184,8 +185,8 @@ export default function QuestionDetail() {
         <div className="mt-4 card-base text-center space-y-3">
           <p className="text-secondary">
             {choicesState.error.retryable
-              ? "선택지 생성에 실패했습니다"
-              : "일시적인 문제가 발생했습니다"}
+              ? "일시적인 문제가 발생했습니다. 다시 시도해 보세요"
+              : "선택지 생성에 실패했습니다"}
           </p>
           {choicesState.error.retryable ? (
             <button
