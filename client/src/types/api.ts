@@ -163,3 +163,25 @@ export interface ExamScheduleResponse {
   readonly isSelected: boolean;
 }
 
+// === Practice ===
+export interface PracticeQuestionResult {
+  readonly questionUuid: string;
+  readonly isCorrect: boolean;
+  readonly selectedChoiceKey: string;
+  readonly durationMs: number;
+}
+
+export interface PracticeSubmitPayload {
+  readonly topicCode: string;
+  readonly results: readonly PracticeQuestionResult[];
+}
+
+export interface PracticeAnalysis {
+  readonly correctCount: number;
+  readonly totalCount: number;
+  readonly totalDurationMs: number;
+  readonly greeting: string;
+  readonly analysis: string;
+  readonly tip: string;
+}
+
