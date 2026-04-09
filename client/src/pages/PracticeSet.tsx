@@ -50,6 +50,7 @@ export default function PracticeSet() {
       <div className="flex-1 overflow-y-auto px-4">
         <QuestionDetail
           key={question.questionUuid}
+          questionUuid={question.questionUuid}
           practiceMode
           onPracticeSubmit={handleSubmitComplete}
         />

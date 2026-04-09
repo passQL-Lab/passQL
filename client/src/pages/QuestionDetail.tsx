@@ -15,11 +15,13 @@ import type { ExecuteResult } from "../types/api";
 
 interface QuestionDetailProps {
   readonly practiceMode?: boolean;
+  readonly questionUuid?: string;
   readonly onPracticeSubmit?: (isCorrect: boolean, selectedChoiceKey: string) => void;
 }
 
-export default function QuestionDetail({ practiceMode, onPracticeSubmit }: QuestionDetailProps = {}) {
-  const { questionUuid } = useParams<{ questionUuid: string }>();
+export default function QuestionDetail({ practiceMode, questionUuid: propUuid, onPracticeSubmit }: QuestionDetailProps = {}) {
+  const { questionUuid: paramUuid } = useParams<{ questionUuid: string }>();
+  const questionUuid = propUuid ?? paramUuid;
   const navigate = useNavigate();
   const { data: question, isLoading } = useQuestionDetail(questionUuid!);
   const executeMutation = useExecuteChoice(questionUuid!);
