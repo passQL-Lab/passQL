@@ -75,8 +75,8 @@ export default function Settings() {
       </div>
 
       <div className="text-center mt-8 space-y-2">
-        <img src={logo} alt="passQL" className="h-5 w-auto mx-auto opacity-30" />
-        <p className="text-xs" style={{ color: "#D1D5DB" }}>Powered by Vite + React</p>
+        <img src={logo} alt="passQL" className="h-5 w-auto mx-auto" />
+        <p className="text-xs text-text-caption">© 2026 passQL. All rights reserved.</p>
       </div>
     </div>
   );
