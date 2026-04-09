@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { AlertCircle } from "lucide-react";
 import { useTopics } from "../hooks/useTopics";
 import { getTopicIcon } from "../constants/topicIcons";
 import { generatePractice } from "../api/practice";
@@ -10,17 +11,20 @@ import ErrorFallback from "../components/ErrorFallback";
 export default function CategoryCards() {
   const { data: topics, isLoading, isError, refetch } = useTopics();
   const [generating, setGenerating] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const startSession = usePracticeStore((s) => s.startSession);
 
   const handleSelect = async (code: string, displayName: string) => {
     setGenerating(displayName);
+    setError(null);
     try {
       const { sessionId, questions } = await generatePractice(code);
       startSession(sessionId, code, displayName, questions);
       navigate(`/practice/${sessionId}`);
     } catch {
       setGenerating(null);
+      setError("문제 생성에 실패했어요. 다시 시도해주세요.");
     }
   };
 
@@ -60,6 +64,13 @@ export default function CategoryCards() {
               </button>
             );
           })}
+        </div>
+      )}
+
+      {error && (
+        <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg mt-4">
+          <AlertCircle size={16} className="text-red-500 shrink-0" />
+          <p className="text-sm text-red-700">{error}</p>
         </div>
       )}
 
