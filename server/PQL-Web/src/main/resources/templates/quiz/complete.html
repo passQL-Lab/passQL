@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>passQL - 퀴즈 완료</title>
+</head>
+<body>
+    <h1>퀴즈 완료!</h1>
+
+    <p>총 <span th:text="${session.totalQuestions}">10</span>문제</p>
+    <p>시작: <span th:text="${session.startedAt}">-</span></p>
+    <p>종료: <span th:text="${session.finishedAt}">-</span></p>
+
+    <a href="/">홈으로</a>
+</body>
+</html>

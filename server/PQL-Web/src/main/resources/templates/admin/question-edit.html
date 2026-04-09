@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+
+<th:block layout:fragment="title">문제 편집</th:block>
+
+<th:block layout:fragment="content">
+
+    <div class="mb-4 flex items-center gap-2">
+        <a th:href="@{/admin/questions/{uuid}(uuid=${question.questionUuid})}" class="btn btn-sm btn-ghost">
+            <i data-lucide="arrow-left" class="size-4"></i>
+            상세로
+        </a>
+        <h2 class="text-lg font-bold">문제 편집</h2>
+    </div>
+
+    <form th:action="@{/admin/questions/{uuid}/edit(uuid=${question.questionUuid})}" method="post" class="space-y-4">
+
+        <!-- 기본 정보 -->
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <h3 class="card-title text-base mb-4">
+                    <i data-lucide="info" class="size-5"></i>
+                    기본 정보
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- 토픽 -->
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium">토픽 <span class="text-error">*</span></span></label>
+                        <select name="topicUuid" class="select select-bordered" required>
+                            <option value="">토픽 선택</option>
+                            <option th:each="t : ${topics}"
+                                    th:value="${t.topicUuid}"
+                                    th:text="${t.displayName}"
+                                    th:selected="${question.topicUuid != null and question.topicUuid == t.topicUuid}">-</option>
+                        </select>
+                    </div>
+
+                    <!-- 난이도 -->
+                    <div class="form-control">
+                        <label class="label">
+                            <span class="label-text font-medium">난이도</span>
+                            <span class="label-text-alt" id="difficultyLabel">Lv.<span th:text="${question.difficulty ?: 3}">3</span></span>
+                        </label>
+                        <input type="range" name="difficulty" min="1" max="5"
+                               th:value="${question.difficulty ?: 3}"
+                               class="range range-primary range-sm"
+                               oninput="document.getElementById('difficultyLabel').textContent='Lv.' + this.value"/>
+                        <div class="flex justify-between text-xs px-1 mt-1">
+                            <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span>
+                        </div>
+                    </div>
+
+                    <!-- 실행 모드 -->
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium">실행 모드</span></label>
+                        <div class="flex flex-col gap-2 mt-1">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="executionMode" value="EXECUTABLE" class="radio radio-primary radio-sm"
+                                       th:checked="${question.executionMode != null and question.executionMode.name() == 'EXECUTABLE'}"/>
+                                <span class="text-sm">실행형</span>
+                            </label>
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="executionMode" value="CONCEPT_ONLY" class="radio radio-primary radio-sm"
+                                       th:checked="${question.executionMode == null or question.executionMode.name() == 'CONCEPT_ONLY'}"/>
+                                <span class="text-sm">개념형</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 문제 내용 -->
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <h3 class="card-title text-base mb-4">
+                    <i data-lucide="file-text" class="size-5"></i>
+                    문제 내용
+                </h3>
+
+                <div class="space-y-4">
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium">지문 <span class="text-error">*</span></span></label>
+                        <textarea name="stem" rows="5" required
+                                  class="textarea textarea-bordered w-full"
+                                  th:text="${question.stem}"></textarea>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium">스키마 표시</span></label>
+                        <textarea name="schemaDisplay" rows="4"
+                                  class="textarea textarea-bordered w-full font-mono text-sm"
+                                  th:text="${question.schemaDisplay}"></textarea>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium">스키마 DDL</span></label>
+                        <textarea name="schemaDdl" rows="6"
+                                  class="textarea textarea-bordered w-full font-mono text-sm"
+                                  th:text="${question.schemaDdl}"></textarea>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium">샘플 데이터</span></label>
+                        <textarea name="schemaSampleData" rows="3"
+                                  class="textarea textarea-bordered w-full font-mono text-sm"
+                                  th:text="${question.schemaSampleData}"></textarea>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium">스키마 의도</span></label>
+                        <input type="text" name="schemaIntent" class="input input-bordered w-full"
+                               th:value="${question.schemaIntent}"/>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium">정답 SQL</span></label>
+                        <textarea name="answerSql" rows="3"
+                                  class="textarea textarea-bordered w-full font-mono text-sm"
+                                  th:text="${question.answerSql}"></textarea>
+                    </div>
+
+                    <div class="form-control">
+                        <label class="label"><span class="label-text font-medium">힌트</span></label>
+                        <input type="text" name="hint" class="input input-bordered w-full"
+                               th:value="${question.hint}"/>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 제출 -->
+        <div class="flex justify-end gap-2">
+            <a th:href="@{/admin/questions/{uuid}(uuid=${question.questionUuid})}" class="btn btn-ghost">취소</a>
+            <button type="submit" class="btn btn-primary">
+                <i data-lucide="save" class="size-4"></i>
+                수정 저장
+            </button>
+        </div>
+    </form>
+
+</th:block>
+
+<th:block layout:fragment="js">
+    <script>lucide.createIcons();</script>
+</th:block>
+</html>

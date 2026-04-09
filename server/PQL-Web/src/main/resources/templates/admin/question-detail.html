@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+
+<th:block layout:fragment="title">문제 상세</th:block>
+
+<th:block layout:fragment="content">
+
+    <div class="mb-4 flex items-center gap-2">
+        <a th:href="@{/admin/questions}" class="btn btn-sm btn-ghost">
+            <i data-lucide="arrow-left" class="size-4"></i>
+            목록으로
+        </a>
+        <h2 class="text-lg font-bold">문제 상세</h2>
+        <a th:href="@{/admin/questions/{uuid}/edit(uuid=${question.questionUuid})}" class="btn btn-sm btn-primary ml-auto">
+            <i data-lucide="pencil" class="size-4"></i>
+            편집
+        </a>
+    </div>
+
+    <!-- 기본 정보 -->
+    <div class="card bg-base-100 shadow mb-4">
+        <div class="card-body">
+            <h3 class="card-title text-base mb-4">
+                <i data-lucide="info" class="size-5"></i>
+                기본 정보
+            </h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div>
+                    <div class="text-base-content/50 text-xs mb-1">토픽</div>
+                    <span class="badge badge-outline" th:text="${question.topicName ?: '-'}">-</span>
+                </div>
+                <div>
+                    <div class="text-base-content/50 text-xs mb-1">서브토픽</div>
+                    <span th:text="${question.subtopicName ?: '-'}">-</span>
+                </div>
+                <div>
+                    <div class="text-base-content/50 text-xs mb-1">난이도</div>
+                    <span th:classappend="${question.difficulty == 1} ? 'badge-success' : (${question.difficulty == 2} ? 'badge-info' : (${question.difficulty == 3} ? 'badge-warning' : 'badge-error'))"
+                          class="badge badge-sm"
+                          th:text="'Lv.' + ${question.difficulty}">Lv.3</span>
+                </div>
+                <div>
+                    <div class="text-base-content/50 text-xs mb-1">실행 모드</div>
+                    <span th:classappend="${question.executionMode != null and question.executionMode.name() == 'EXECUTABLE'} ? 'badge-primary' : 'badge-ghost'"
+                          class="badge badge-sm"
+                          th:text="${question.executionMode != null and question.executionMode.name() == 'EXECUTABLE'} ? '실행형' : '개념형'">개념형</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 지문 -->
+    <div class="card bg-base-100 shadow mb-4">
+        <div class="card-body">
+            <h3 class="card-title text-base mb-3">
+                <i data-lucide="file-text" class="size-5"></i>
+                지문
+            </h3>
+            <p class="text-sm whitespace-pre-wrap" th:text="${question.stem}">-</p>
+        </div>
+    </div>
+
+    <!-- 스키마 메타데이터 -->
+    <div class="card bg-base-100 shadow mb-4">
+        <div class="card-body">
+            <h3 class="card-title text-base mb-3">
+                <i data-lucide="database" class="size-5"></i>
+                스키마 메타데이터
+            </h3>
+            <div class="space-y-3">
+                <div th:if="${question.schemaIntent != null and !question.schemaIntent.isEmpty()}">
+                    <div class="text-xs text-base-content/50 mb-1">스키마 의도</div>
+                    <p class="text-sm" th:text="${question.schemaIntent}"></p>
+                </div>
+                <div th:if="${question.schemaDisplay != null and !question.schemaDisplay.isEmpty()}">
+                    <div class="text-xs text-base-content/50 mb-1">스키마 표시</div>
+                    <pre class="text-sm bg-base-200 rounded p-2 overflow-x-auto" th:text="${question.schemaDisplay}"></pre>
+                </div>
+                <div th:if="${question.schemaDdl != null and !question.schemaDdl.isEmpty()}">
+                    <div class="text-xs text-base-content/50 mb-1">DDL</div>
+                    <pre class="text-sm font-mono bg-base-200 rounded p-2 overflow-x-auto" th:text="${question.schemaDdl}"></pre>
+                </div>
+                <div th:if="${question.schemaSampleData != null and !question.schemaSampleData.isEmpty()}">
+                    <div class="text-xs text-base-content/50 mb-1">샘플 데이터</div>
+                    <pre class="text-sm font-mono bg-base-200 rounded p-2 overflow-x-auto" th:text="${question.schemaSampleData}"></pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 정답 SQL -->
+    <div class="card bg-base-100 shadow mb-4" th:if="${question.answerSql != null and !question.answerSql.isEmpty()}">
+        <div class="card-body">
+            <h3 class="card-title text-base mb-3">
+                <i data-lucide="code" class="size-5"></i>
+                정답 SQL
+            </h3>
+            <pre class="text-sm font-mono bg-base-200 rounded p-3 overflow-x-auto" th:text="${question.answerSql}"></pre>
+        </div>
+    </div>
+
+    <!-- 선택지 세트 목록 -->
+    <div class="card bg-base-100 shadow mb-4">
+        <div class="card-body">
+            <h3 class="card-title text-base mb-4">
+                <i data-lucide="layers" class="size-5"></i>
+                선택지 세트
+                <span class="badge badge-neutral badge-sm ml-1" th:text="${#lists.size(question.choiceSets)}">0</span>
+            </h3>
+
+            <div th:if="${question.choiceSets == null or question.choiceSets.isEmpty()}"
+                 class="text-center text-base-content/40 py-8">
+                <i data-lucide="inbox" class="size-8 mx-auto mb-2 opacity-40"></i>
+                <p>선택지 세트가 없습니다.</p>
+            </div>
+
+            <div class="space-y-4" th:if="${question.choiceSets != null and !question.choiceSets.isEmpty()}">
+                <div th:each="cs, stat : ${question.choiceSets}"
+                     class="border border-base-300 rounded-lg p-4">
+                    <!-- 세트 헤더 -->
+                    <div class="flex flex-wrap items-center gap-2 mb-3">
+                        <span class="font-mono text-xs text-base-content/40" th:text="${#strings.substring(cs.choiceSetUuid.toString(), 0, 8)}">xxxxxxxx</span>
+                        <span th:classappend="${cs.source.name() == 'ADMIN_SEED'} ? 'badge-primary' : (${cs.source.name() == 'AI_PREFETCH'} ? 'badge-secondary' : 'badge-neutral')"
+                              class="badge badge-sm" th:text="${cs.source}">ADMIN_SEED</span>
+                        <span th:classappend="${cs.status.name() == 'OK'} ? 'badge-success' : 'badge-error'"
+                              class="badge badge-sm" th:text="${cs.status}">OK</span>
+                        <span th:if="${cs.sandboxValidationPassed}" class="badge badge-info badge-sm">샌드박스 검증 완료</span>
+                        <span class="text-xs text-base-content/40 ml-auto"
+                              th:text="${cs.createdAt != null ? #temporals.format(cs.createdAt, 'yyyy-MM-dd HH:mm') : '-'}">-</span>
+                    </div>
+
+                    <!-- 선택지 아이템 -->
+                    <div class="flex flex-col gap-2">
+                        <div th:each="c : ${cs.items}"
+                             th:classappend="${c.isCorrect} ? 'border-success bg-success/5' : 'border-base-200'"
+                             class="border rounded p-2">
+                            <div class="flex items-center gap-2 mb-1">
+                                <span class="badge badge-primary badge-sm font-bold" th:text="${c.key}">A</span>
+                                <span class="badge badge-xs badge-ghost" th:text="${c.kind}">SQL</span>
+                                <span class="badge badge-success badge-xs" th:if="${c.isCorrect}">정답</span>
+                            </div>
+                            <pre th:if="${c.body != null and !c.body.isEmpty()}"
+                                 class="text-xs font-mono bg-base-200 rounded p-2 overflow-x-auto whitespace-pre-wrap"
+                                 th:text="${c.body}"></pre>
+                            <div th:if="${c.rationale != null and !c.rationale.isEmpty()}"
+                                 class="mt-1 text-xs text-base-content/60">
+                                <span class="font-semibold">해설:</span> <span th:text="${c.rationale}"></span>
+                            </div>
+                        </div>
+                        <div th:if="${cs.items == null or cs.items.isEmpty()}"
+                             class="text-xs text-base-content/40 text-center py-2">아이템 없음</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</th:block>
+
+<th:block layout:fragment="js">
+    <script>lucide.createIcons();</script>
+</th:block>
+</html>

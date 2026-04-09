@@ -8,9 +8,9 @@
 <th:block layout:fragment="content">
 
     <!-- 필터 바 -->
-    <div class="card bg-base-100 shadow mb-4">
-        <div class="card-body p-4">
-            <form th:action="@{/admin/members}" method="get" class="flex flex-wrap gap-3 items-end">
+    <div class="card bg-base-100 shadow mb-3">
+        <div class="card-body p-3">
+            <form th:action="@{/admin/members}" method="get" class="flex flex-wrap gap-2 items-end">
 
                 <!-- 닉네임 검색 -->
                 <div class="form-control">
@@ -92,40 +92,32 @@
     <div class="card bg-base-100 shadow">
         <div class="card-body p-0">
             <div class="overflow-x-auto">
-                <table class="table table-sm">
+                <table class="table table-sm table-fixed w-full">
                     <thead>
                     <tr>
-                        <th>닉네임</th>
-                        <th class="w-28">상태</th>
-                        <th class="w-28">역할</th>
-                        <th class="w-24">인증</th>
-                        <th class="w-32">가입일</th>
-                        <th class="w-32">마지막 접속</th>
-                        <th class="w-16">상세</th>
+                        <th class="w-40">닉네임</th>
+                        <th class="w-24">상태</th>
+                        <th class="w-20">역할</th>
+                        <th class="w-28">인증</th>
+                        <th class="w-28">가입일</th>
+                        <th class="w-28">마지막 접속</th>
+                        <th class="w-12">상세</th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr th:each="m : ${members}">
-                        <td class="font-medium text-sm" th:text="${m.nickname}">닉네임</td>
+                        <td class="text-sm font-medium truncate" th:text="${m.nickname}">닉네임</td>
                         <td>
-                            <span class="badge badge-sm"
-                                  th:classappend="${m.status.name() == 'ACTIVE'} ? 'badge-success' :
-                                                  ${m.status.name() == 'SUSPENDED'} ? 'badge-error' :
-                                                  ${m.status.name() == 'WITHDRAWN'} ? 'badge-ghost' : 'badge-warning'"
+                            <span class="badge badge-xs"
+                                  th:classappend="${m.status.name() == 'ACTIVE'} ? 'badge-success' : (${m.status.name() == 'SUSPENDED'} ? 'badge-error' : (${m.status.name() == 'WITHDRAWN'} ? 'badge-ghost' : 'badge-warning'))"
                                   th:text="${m.status.name()}">ACTIVE</span>
                         </td>
                         <td>
-                            <span class="badge badge-outline badge-sm" th:text="${m.role.name()}">USER</span>
+                            <span class="badge badge-xs badge-outline" th:text="${m.role.name()}">USER</span>
                         </td>
-                        <td class="text-xs" th:text="${m.authProvider.name()}">ANONYMOUS</td>
-                        <td class="text-xs"
-                            th:text="${m.createdAt != null ? #temporals.format(m.createdAt, 'yyyy-MM-dd') : '-'}">
-                            2026-01-01
-                        </td>
-                        <td class="text-xs"
-                            th:text="${m.lastSeenAt != null ? #temporals.format(m.lastSeenAt, 'yyyy-MM-dd') : '-'}">
-                            2026-04-01
-                        </td>
+                        <td class="text-xs truncate" th:text="${m.authProvider.name()}">ANONYMOUS</td>
+                        <td class="text-xs" th:text="${m.createdAt != null ? #temporals.format(m.createdAt, 'yyyy-MM-dd') : '-'}">2026-01-01</td>
+                        <td class="text-xs" th:text="${m.lastSeenAt != null ? #temporals.format(m.lastSeenAt, 'yyyy-MM-dd') : '-'}">2026-04-01</td>
                         <td>
                             <a th:href="@{/admin/members/{uuid}(uuid=${m.memberUuid})}"
                                class="btn btn-xs btn-ghost" title="상세">

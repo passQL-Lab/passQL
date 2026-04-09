@@ -6,8 +6,20 @@ passQL AI 기능 엔드포인트
 """
 import logging
 from fastapi import APIRouter, Depends, HTTPException
-from src.models.ai_request import ExplainErrorRequest, DiffExplainRequest
-from src.models.ai_response import AiResponse, SimilarResponse
+from src.models.ai_request import (
+    DiffExplainRequest,
+    ExplainErrorRequest,
+    GenerateChoiceSetRequest,
+    GenerateQuestionFullRequest,
+    TestPromptRequest,
+)
+from src.models.ai_response import (
+    AiResponse,
+    GenerateChoiceSetResponse,
+    GenerateQuestionFullResponse,
+    SimilarResponse,
+    TestPromptResponse,
+)
 from src.services.ai_service import ai_service
 from src.utils.auth import verify_api_key
 from src.core.exceptions import CustomError
@@ -108,4 +120,84 @@ async def similar(
         raise HTTPException(status_code=500, detail=e.message)
     except Exception as e:
         logger.error(f"[similar] 예기치 않은 오류: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="서버 내부 오류가 발생했습니다")
+
+
+# === 실시간 선택지 세트 생성 / 프롬프트 테스트 (신규) ===
+
+
+@router.post(
+    "/generate-question-full",
+    response_model=GenerateQuestionFullResponse,
+    status_code=200,
+)
+async def generate_question_full(
+    request: GenerateQuestionFullRequest,
+    _: None = Depends(verify_api_key),
+):
+    """
+    관리자 문제 등록용 AI 생성.
+    Spring 이 프롬프트 전문·response_schema 를 내려주면
+    그대로 Gemini structured output 을 호출한다.
+    """
+    logger.info(
+        f"[generate-question-full] topic={request.context.topic}, "
+        f"difficulty={request.context.difficulty}"
+    )
+    try:
+        return await ai_service.generate_question_full(request)
+    except CustomError as e:
+        logger.error(f"[generate-question-full] 실패: {e.message}")
+        raise HTTPException(status_code=500, detail=e.message)
+    except Exception as e:
+        logger.error(f"[generate-question-full] 예기치 않은 오류: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="서버 내부 오류가 발생했습니다")
+
+
+@router.post(
+    "/generate-choice-set",
+    response_model=GenerateChoiceSetResponse,
+    status_code=200,
+)
+async def generate_choice_set(
+    request: GenerateChoiceSetRequest,
+    _: None = Depends(verify_api_key),
+):
+    """
+    사용자 풀이용 AI 선택지 세트 생성 (메인 트래픽).
+    """
+    logger.info(
+        f"[generate-choice-set] question_uuid={request.context.question_uuid}"
+    )
+    try:
+        return await ai_service.generate_choice_set(request)
+    except CustomError as e:
+        logger.error(f"[generate-choice-set] 실패: {e.message}")
+        raise HTTPException(status_code=500, detail=e.message)
+    except Exception as e:
+        logger.error(f"[generate-choice-set] 예기치 않은 오류: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="서버 내부 오류가 발생했습니다")
+
+
+@router.post(
+    "/test-prompt",
+    response_model=TestPromptResponse,
+    status_code=200,
+)
+async def test_prompt(
+    request: TestPromptRequest,
+    _: None = Depends(verify_api_key),
+):
+    """
+    관리자 프롬프트 테스트.
+    response_schema 가 있으면 JSON 강제, 없으면 일반 텍스트.
+    """
+    logger.info(f"[test-prompt] model={request.llm_config.model}")
+    try:
+        return await ai_service.test_prompt(request)
+    except CustomError as e:
+        logger.error(f"[test-prompt] 실패: {e.message}")
+        raise HTTPException(status_code=500, detail=e.message)
+    except Exception as e:
+        logger.error(f"[test-prompt] 예기치 않은 오류: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="서버 내부 오류가 발생했습니다")
