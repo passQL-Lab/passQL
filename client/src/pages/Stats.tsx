@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Box, BarChart3 } from "lucide-react";
 import { useProgress } from "../hooks/useProgress";
+import { generatePractice } from "../api/practice";
+import { usePracticeStore } from "../stores/practiceStore";
 import { fetchCategoryStats } from "../api/progress";
 import ErrorFallback from "../components/ErrorFallback";
 import Stats2DChart from "../components/Stats2DChart";
@@ -17,9 +19,13 @@ export default function Stats() {
   });
   const [view, setView] = useState<"2d" | "3d">("3d");
   const navigate = useNavigate();
+  const startSession = usePracticeStore((s) => s.startSession);
 
-  const handleCategoryClick = (_code: string) => {
-    navigate("/questions");
+  const handleCategoryClick = async (code: string) => {
+    const displayName = categories?.find((c) => c.code === code)?.displayName ?? code;
+    const { sessionId, questions } = await generatePractice(code);
+    startSession(sessionId, code, displayName, questions);
+    navigate(`/practice/${sessionId}`);
   };
 
   if (progressLoading) {
