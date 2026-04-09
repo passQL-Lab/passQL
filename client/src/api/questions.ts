@@ -145,14 +145,57 @@ export function generateChoices(
 
           if (!eventType || !dataStr) continue;
 
-          const data = JSON.parse(dataStr) as unknown;
+          // Note: Assumes single-line event/data fields per SSE block.
+          // Multi-line data fields (multiple "data:" lines) are not supported.
+          let data: unknown;
+          try {
+            data = JSON.parse(dataStr);
+          } catch {
+            callbacks.onError({
+              code: "JSON_PARSE_ERROR",
+              message: "서버 응답 파싱 오류",
+              retryable: true,
+            });
+            continue;
+          }
 
           if (eventType === "status") {
-            callbacks.onStatus(data as ChoiceGenerationStatus);
+            const status = data as ChoiceGenerationStatus;
+            if (!status.phase || !status.message) {
+              callbacks.onError({ code: "INVALID_RESPONSE", message: "서버 응답 형식 오류", retryable: false });
+              continue;
+            }
+            callbacks.onStatus(status);
           } else if (eventType === "complete") {
-            callbacks.onComplete(data as ChoiceSetComplete);
+            const complete = data as ChoiceSetComplete;
+            if (!complete.choiceSetId || !complete.choices) {
+              callbacks.onError({ code: "INVALID_RESPONSE", message: "서버 응답 형식 오류", retryable: false });
+              continue;
+            }
+            callbacks.onComplete(complete);
           } else if (eventType === "error") {
             callbacks.onError(data as ChoiceGenerationError);
+          }
+        }
+      }
+
+      // After the while loop, process any remaining buffer
+      if (buffer.trim()) {
+        const lines = buffer.split("\n");
+        let eventType = "";
+        let dataStr = "";
+        for (const line of lines) {
+          if (line.startsWith("event: ")) eventType = line.slice(7).trim();
+          if (line.startsWith("data: ")) dataStr = line.slice(6).trim();
+        }
+        if (eventType && dataStr) {
+          try {
+            const data = JSON.parse(dataStr) as unknown;
+            if (eventType === "status") callbacks.onStatus(data as ChoiceGenerationStatus);
+            else if (eventType === "complete") callbacks.onComplete(data as ChoiceSetComplete);
+            else if (eventType === "error") callbacks.onError(data as ChoiceGenerationError);
+          } catch {
+            // Ignore malformed trailing data
           }
         }
       }
