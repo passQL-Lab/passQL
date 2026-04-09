@@ -5,6 +5,7 @@ import com.passql.question.constant.ChoiceSetStatus;
 import com.passql.question.entity.QuestionChoiceSet;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -22,4 +23,8 @@ public interface QuestionChoiceSetRepository extends JpaRepository<QuestionChoic
     boolean existsByQuestionUuidAndGeneratedForMemberUuidAndSourceAndStatusAndConsumedAtIsNull(
             UUID questionUuid, UUID generatedForMemberUuid,
             ChoiceSetSource source, ChoiceSetStatus status);
+
+    List<QuestionChoiceSet> findByQuestionUuidAndSourceOrderByCreatedAtDesc(UUID questionUuid, ChoiceSetSource source);
+
+    List<QuestionChoiceSet> findByQuestionUuidOrderByCreatedAtDesc(UUID questionUuid);
 }
