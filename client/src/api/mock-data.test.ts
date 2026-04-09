@@ -1,5 +1,5 @@
-import { describe, it, expect } from "vitest";
-import { getMockResponse } from "./mock-data";
+import { describe, it, expect, vi } from "vitest";
+import { getMockResponse, generateChoicesMock } from "./mock-data";
 import type {
   Page,
   QuestionSummary,
@@ -16,6 +16,8 @@ import type {
   RecommendationsResponse,
   GreetingResponse,
   ExamScheduleResponse,
+  ChoiceSetComplete,
+  ChoiceGenerationStatus,
 } from "../types/api";
 
 describe("getMockResponse", () => {
@@ -50,7 +52,6 @@ describe("getMockResponse", () => {
       const result = getMockResponse("/questions/q-uuid-0001", "GET") as QuestionDetail;
       expect(result.questionUuid).toBe("q-uuid-0001");
       expect(result.stem).toBeTruthy();
-      expect(result.choices).toHaveLength(4);
     });
 
     it("returns correct uuid for any question detail", () => {
@@ -205,5 +206,46 @@ describe("getMockResponse", () => {
     it("returns null for unknown method", () => {
       expect(getMockResponse("/progress", "DELETE")).toBeNull();
     });
+  });
+});
+
+describe("generateChoicesMock", () => {
+  it("calls onStatus then onComplete in sequence", async () => {
+    const onStatus = vi.fn();
+    const onComplete = vi.fn();
+    const onError = vi.fn();
+
+    const abort = generateChoicesMock("q-uuid-0001", { onStatus, onComplete, onError });
+
+    await new Promise((r) => setTimeout(r, 1000));
+
+    expect(onStatus).toHaveBeenCalledWith(
+      expect.objectContaining({ phase: "generating" })
+    );
+    expect(onStatus).toHaveBeenCalledWith(
+      expect.objectContaining({ phase: "validating" })
+    );
+    expect(onComplete).toHaveBeenCalledWith(
+      expect.objectContaining({
+        choiceSetId: expect.stringContaining("cs-mock-"),
+        choices: expect.arrayContaining([
+          expect.objectContaining({ key: "A" }),
+        ]),
+      })
+    );
+    expect(onError).not.toHaveBeenCalled();
+    abort();
+  });
+
+  it("does not call onComplete if aborted immediately", async () => {
+    const onComplete = vi.fn();
+    const abort = generateChoicesMock("q-uuid-0001", {
+      onStatus: vi.fn(),
+      onComplete,
+      onError: vi.fn(),
+    });
+    abort();
+    await new Promise((r) => setTimeout(r, 1000));
+    expect(onComplete).not.toHaveBeenCalled();
   });
 });
