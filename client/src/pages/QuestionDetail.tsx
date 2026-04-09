@@ -121,23 +121,25 @@ export default function QuestionDetail({ practiceMode, questionUuid: propUuid, o
     !submitMutation.isPending;
 
   return (
-    <div className="pb-24">
-      <header className="sticky top-0 z-20 flex items-center justify-between h-14 bg-surface-card border-b border-border px-4 -mx-4 lg:-mx-0">
-        <button
-          type="button"
-          className="text-text-primary"
-          onClick={() => navigate(-1)}
-        >
-          <ArrowLeft size={20} />
-        </button>
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-xs text-text-caption">
-            {questionUuid?.slice(0, 8)}
-          </span>
-          <span className="badge-topic">{question.topicName}</span>
-          <StarRating level={question.difficulty} />
-        </div>
-      </header>
+    <div className={practiceMode ? "pb-4" : "pb-24"}>
+      {!practiceMode && (
+        <header className="sticky top-0 z-20 flex items-center justify-between h-14 bg-surface-card border-b border-border px-4 -mx-4 lg:-mx-0">
+          <button
+            type="button"
+            className="text-text-primary"
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft size={20} />
+          </button>
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-xs text-text-caption">
+              {questionUuid?.slice(0, 8)}
+            </span>
+            <span className="badge-topic">{question.topicName}</span>
+            <StarRating level={question.difficulty} />
+          </div>
+        </header>
+      )}
 
       <section className="card-base mt-4">
         <p className="text-body">{question.stem}</p>
@@ -205,8 +207,11 @@ export default function QuestionDetail({ practiceMode, questionUuid: propUuid, o
         onClose={() => setAiSheetOpen(false)}
       />
 
-      <div className="fixed bottom-0 inset-x-0 lg:left-55 bg-surface-card border-t border-border p-4 z-20">
-        <div className="mx-auto max-w-180">
+      <div className={practiceMode
+        ? "sticky bottom-0 bg-surface-card border-t border-border p-4 z-20"
+        : "fixed bottom-0 inset-x-0 lg:left-55 bg-surface-card border-t border-border p-4 z-20"
+      }>
+        <div className={practiceMode ? "" : "mx-auto max-w-180"}>
           <button
             type="button"
             className={`w-full h-12 rounded-lg text-base font-bold ${
