@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+
+<th:block layout:fragment="title">회원 상세</th:block>
+
+<th:block layout:fragment="content">
+
+    <!-- 뒤로가기 -->
+    <div class="mb-4">
+        <a th:href="@{/admin/members}" class="btn btn-sm btn-ghost">
+            <i data-lucide="arrow-left" class="size-4"></i>목록으로
+        </a>
+    </div>
+
+    <!-- 기본 정보 -->
+    <div class="card bg-base-100 shadow mb-4">
+        <div class="card-body">
+            <h2 class="card-title text-base">기본 정보</h2>
+            <div class="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                    <span class="text-base-content/60">닉네임</span>
+                    <p class="font-semibold" th:text="${member.nickname}">닉네임</p>
+                </div>
+                <div>
+                    <span class="text-base-content/60">UUID</span>
+                    <p class="font-mono text-xs" th:text="${member.memberUuid}">uuid</p>
+                </div>
+                <div>
+                    <span class="text-base-content/60">상태</span>
+                    <p>
+                        <span class="badge badge-sm"
+                              th:classappend="${member.status.name() == 'ACTIVE'} ? 'badge-success' :
+                                              ${member.status.name() == 'SUSPENDED'} ? 'badge-error' :
+                                              ${member.status.name() == 'WITHDRAWN'} ? 'badge-ghost' : 'badge-warning'"
+                              th:text="${member.status.name()}">ACTIVE</span>
+                    </p>
+                </div>
+                <div>
+                    <span class="text-base-content/60">역할</span>
+                    <p><span class="badge badge-outline badge-sm" th:text="${member.role.name()}">USER</span></p>
+                </div>
+                <div>
+                    <span class="text-base-content/60">인증 방식</span>
+                    <p th:text="${member.authProvider.name()}">ANONYMOUS</p>
+                </div>
+                <div>
+                    <span class="text-base-content/60">이메일</span>
+                    <p th:text="${member.email != null ? member.email : '-'}">-</p>
+                </div>
+                <div>
+                    <span class="text-base-content/60">가입일</span>
+                    <p th:text="${member.createdAt != null ? #temporals.format(member.createdAt, 'yyyy-MM-dd HH:mm') : '-'}">-</p>
+                </div>
+                <div>
+                    <span class="text-base-content/60">마지막 접속</span>
+                    <p th:text="${member.lastSeenAt != null ? #temporals.format(member.lastSeenAt, 'yyyy-MM-dd HH:mm') : '-'}">-</p>
+                </div>
+                <div>
+                    <span class="text-base-content/60">마지막 IP</span>
+                    <p class="font-mono text-xs" th:text="${member.lastLoginIp != null ? member.lastLoginIp : '-'}">-</p>
+                </div>
+                <div>
+                    <span class="text-base-content/60">테스트 계정</span>
+                    <p th:text="${member.isTestAccount ? '예' : '아니오'}">아니오</p>
+                </div>
+                <div th:if="${member.suspendUntil != null}">
+                    <span class="text-base-content/60">제재 만료</span>
+                    <p class="text-error" th:text="${#temporals.format(member.suspendUntil, 'yyyy-MM-dd HH:mm')}">-</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 제재 액션 -->
+    <div class="card bg-base-100 shadow mb-4" th:if="${member.status.name() != 'WITHDRAWN'}">
+        <div class="card-body">
+            <h2 class="card-title text-base">제재 관리</h2>
+            <div class="flex gap-2">
+                <!-- 제재 중이면 해제 버튼 -->
+                <button th:if="${member.status.name() == 'SUSPENDED'}"
+                        class="btn btn-sm btn-success"
+                        onclick="unsuspendMember()">
+                    <i data-lucide="shield-check" class="size-4"></i>제재 해제
+                </button>
+                <!-- 제재 중이 아니면 제재 버튼 -->
+                <button th:if="${member.status.name() != 'SUSPENDED'}"
+                        class="btn btn-sm btn-error"
+                        onclick="document.getElementById('suspendModal').showModal()">
+                    <i data-lucide="shield-ban" class="size-4"></i>제재
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 제재 모달 -->
+    <dialog id="suspendModal" class="modal">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg mb-4">회원 제재</h3>
+            <div class="form-control mb-4">
+                <label class="label label-text">제재 사유</label>
+                <textarea id="suspendReason" class="textarea textarea-bordered w-full" rows="3"
+                          placeholder="제재 사유를 입력하세요"></textarea>
+            </div>
+            <div class="form-control mb-4">
+                <label class="label label-text">제재 만료 일시</label>
+                <input type="datetime-local" id="suspendUntil" class="input input-bordered w-full"/>
+            </div>
+            <div class="modal-action">
+                <form method="dialog">
+                    <button class="btn btn-ghost">취소</button>
+                </form>
+                <button class="btn btn-error" onclick="suspendMember()">제재 적용</button>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- 제재 이력 -->
+    <div class="card bg-base-100 shadow mb-4">
+        <div class="card-body">
+            <h2 class="card-title text-base">제재 이력</h2>
+            <div class="overflow-x-auto">
+                <table class="table table-sm">
+                    <thead>
+                    <tr>
+                        <th>일시</th>
+                        <th>액션</th>
+                        <th>사유</th>
+                        <th>만료일</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="h : ${member.suspendHistories}">
+                        <td class="text-xs" th:text="${#temporals.format(h.actedAt, 'yyyy-MM-dd HH:mm')}">-</td>
+                        <td>
+                            <span class="badge badge-sm"
+                                  th:classappend="${h.action.name() == 'SUSPENDED'} ? 'badge-error' : 'badge-success'"
+                                  th:text="${h.action.name()}">SUSPENDED</span>
+                        </td>
+                        <td class="text-xs" th:text="${h.reason != null ? h.reason : '-'}">-</td>
+                        <td class="text-xs"
+                            th:text="${h.suspendUntil != null ? #temporals.format(h.suspendUntil, 'yyyy-MM-dd HH:mm') : '-'}">-</td>
+                    </tr>
+                    <tr th:if="${member.suspendHistories.isEmpty()}">
+                        <td colspan="4" class="text-center text-base-content/50 py-6">제재 이력이 없습니다.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 제출 이력 -->
+    <div class="card bg-base-100 shadow mb-4">
+        <div class="card-body">
+            <h2 class="card-title text-base">제출 이력</h2>
+            <div class="stats stats-horizontal shadow mb-4" th:if="${submissions != null}">
+                <div class="stat">
+                    <div class="stat-title">총 제출</div>
+                    <div class="stat-value text-lg" th:text="${submissions.size()}">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-title">정답</div>
+                    <div class="stat-value text-lg text-success"
+                         th:text="${#lists.size(submissions.?[isCorrect == true])}">0</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-title">정답률</div>
+                    <div class="stat-value text-lg"
+                         th:text="${submissions.size() > 0 ? (#numbers.formatDecimal(#lists.size(submissions.?[isCorrect == true]) * 100.0 / submissions.size(), 1, 1) + '%') : '-'}">-</div>
+                </div>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="table table-sm">
+                    <thead>
+                    <tr>
+                        <th>문제 UUID</th>
+                        <th class="w-20">결과</th>
+                        <th class="w-36">제출일</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="s : ${submissions}">
+                        <td class="font-mono text-xs" th:text="${s.questionUuid}">uuid</td>
+                        <td>
+                            <span class="badge badge-sm"
+                                  th:classappend="${s.isCorrect} ? 'badge-success' : 'badge-error'"
+                                  th:text="${s.isCorrect ? '정답' : '오답'}">정답</span>
+                        </td>
+                        <td class="text-xs"
+                            th:text="${s.submittedAt != null ? #temporals.format(s.submittedAt, 'yyyy-MM-dd HH:mm') : '-'}">-</td>
+                    </tr>
+                    <tr th:if="${submissions == null or submissions.isEmpty()}">
+                        <td colspan="3" class="text-center text-base-content/50 py-6">제출 이력이 없습니다.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</th:block>
+
+<th:block layout:fragment="js">
+    <script>
+        lucide.createIcons();
+
+        const memberUuid = '[[${member.memberUuid}]]';
+
+        function suspendMember() {
+            const reason = document.getElementById('suspendReason').value;
+            const suspendUntil = document.getElementById('suspendUntil').value;
+            if (!suspendUntil) {
+                alert('제재 만료 일시를 입력해주세요.');
+                return;
+            }
+            fetch(`/admin/members/${memberUuid}/suspend`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    reason: reason,
+                    suspendUntil: suspendUntil + ':00'
+                })
+            }).then(res => {
+                if (res.ok) location.reload();
+                else alert('제재 처리 중 오류가 발생했습니다.');
+            });
+        }
+
+        function unsuspendMember() {
+            if (!confirm('제재를 해제하시겠습니까?')) return;
+            fetch(`/admin/members/${memberUuid}/unsuspend`, {
+                method: 'POST'
+            }).then(res => {
+                if (res.ok) location.reload();
+                else alert('해제 처리 중 오류가 발생했습니다.');
+            });
+        }
+    </script>
+</th:block>
+</html>

@@ -84,6 +84,12 @@
                     </a>
                 </li>
                 <li>
+                    <a th:href="@{/admin/members}" th:classappend="${currentMenu == 'members'} ? 'active'">
+                        <i data-lucide="users" class="size-5"></i>
+                        회원 관리
+                    </a>
+                </li>
+                <li>
                     <a th:href="@{/admin/questions}" th:classappend="${currentMenu == 'questions'} ? 'active'">
                         <i data-lucide="book-open" class="size-5"></i>
                         문제 관리
