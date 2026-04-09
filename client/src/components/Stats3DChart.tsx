@@ -57,8 +57,8 @@ export default function Stats3DChart({
     container.appendChild(renderer.domElement);
 
     // Lights — r183 물리 기반 조명은 r128보다 강도를 높여야 동일 밝기
-    scene.add(new THREE.AmbientLight(0xffffff, 2.2));
-    const sun = new THREE.DirectionalLight(0xffffff, 1.5);
+    scene.add(new THREE.AmbientLight(0xffffff, 2.8));
+    const sun = new THREE.DirectionalLight(0xffffff, 1.8);
     sun.position.set(5, 10, 7);
     sun.castShadow = true;
     scene.add(sun);
