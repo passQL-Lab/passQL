@@ -122,12 +122,6 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
     choices.length > 0 &&
     !submitMutation.isPending;
 
-  const stemSection = (
-    <section className="card-base mt-4">
-      <p className="text-body">{question.stem}</p>
-    </section>
-  );
-
   const schemaSection = question.schemaDisplay ? (
     <section className="mt-3">
       <button
@@ -198,68 +192,51 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
     </button>
   );
 
-  if (practiceMode) {
-    return (
-      <div className="flex flex-col h-full">
-        {/* Sticky: 문제 지문 (토글) + 스키마 (토글) */}
-        <div className="sticky top-0 z-10 bg-surface px-1 pb-2">
+  return (
+    <div className="flex flex-col h-full">
+      {/* 헤더: 일반 모드에서만 뒤로가기 + 메타 정보 */}
+      {!practiceMode && (
+        <header className="flex items-center justify-between h-14 px-4">
           <button
             type="button"
-            className="card-base w-full text-left flex items-start gap-2 mt-2"
-            onClick={() => setStemOpen((prev) => !prev)}
+            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-border transition-colors"
+            onClick={() => navigate(-1)}
           >
-            <BookOpen size={16} className="text-brand mt-0.5 flex-shrink-0" />
-            {stemOpen ? (
-              <p className="text-body text-sm">{question.stem}</p>
-            ) : (
-              <p className="text-body text-sm truncate">{question.stem}</p>
-            )}
+            <ArrowLeft size={18} className="text-text-secondary" />
           </button>
-          {schemaSection}
-        </div>
+          <div className="flex items-center gap-2">
+            <span className="badge-topic">{question.topicName}</span>
+            <StarRating level={question.difficulty} />
+          </div>
+        </header>
+      )}
 
-        {/* 스크롤: 선택지 */}
-        <div className="flex-1 overflow-y-auto px-1">
-          {choicesSection}
-        </div>
-
-        {/* 하단 고정: 버튼만 */}
-        <div className="px-4 pb-4 pt-2">
-          {submitButton}
-        </div>
-
-        <AiExplanationSheet
-          isOpen={aiSheetOpen}
-          isLoading={explainMutation.isPending}
-          text={aiText}
-          onClose={() => setAiSheetOpen(false)}
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div className="pb-24">
-      <header className="sticky top-0 z-20 flex items-center justify-between h-14 bg-surface-card border-b border-border px-4 -mx-4 lg:-mx-0">
+      {/* Sticky: 문제 지문 (토글) + 스키마 (토글) */}
+      <div className="sticky top-0 z-10 bg-surface px-1 pb-2">
         <button
           type="button"
-          className="text-text-primary"
-          onClick={() => navigate(-1)}
+          className="card-base w-full text-left flex items-start gap-2 mt-2"
+          onClick={() => setStemOpen((prev) => !prev)}
         >
-          <ArrowLeft size={20} />
+          <BookOpen size={16} className="text-brand mt-0.5 flex-shrink-0" />
+          {stemOpen ? (
+            <p className="text-body text-sm">{question.stem}</p>
+          ) : (
+            <p className="text-body text-sm truncate">{question.stem}</p>
+          )}
         </button>
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-xs text-text-caption">
-            {questionUuid?.slice(0, 8)}
-          </span>
-          <span className="badge-topic">{question.topicName}</span>
-          <StarRating level={question.difficulty} />
-        </div>
-      </header>
+        {schemaSection}
+      </div>
 
-      {stemSection}
-      {schemaSection}
-      {choicesSection}
+      {/* 스크롤: 선택지 */}
+      <div className="flex-1 overflow-y-auto px-1">
+        {choicesSection}
+      </div>
+
+      {/* 하단: 버튼 */}
+      <div className="px-4 pb-4 pt-2">
+        {submitButton}
+      </div>
 
       <AiExplanationSheet
         isOpen={aiSheetOpen}
@@ -267,12 +244,6 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
         text={aiText}
         onClose={() => setAiSheetOpen(false)}
       />
-
-      <div className="fixed bottom-0 inset-x-0 lg:left-55 bg-surface-card border-t border-border p-4 z-20">
-        <div className="mx-auto max-w-180">
-          {submitButton}
-        </div>
-      </div>
     </div>
   );
 }
