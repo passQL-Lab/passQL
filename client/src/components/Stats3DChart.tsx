@@ -37,7 +37,7 @@ export default function Stats3DChart({ categories, onCategoryClick }: Stats3DCha
     const tooltip = tooltipRef.current;
     if (!container || !tooltip || categories.length === 0) return;
 
-    // Disable color management to match r128 behavior (brighter colors)
+    // Match r128 rendering: no color management, linear output
     THREE.ColorManagement.enabled = false;
 
     // Scene
@@ -49,7 +49,7 @@ export default function Stats3DChart({ categories, onCategoryClick }: Stats3DCha
     renderer.setSize(container.clientWidth, container.clientHeight);
     renderer.setPixelRatio(window.devicePixelRatio);
     renderer.shadowMap.enabled = true;
-    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.outputColorSpace = THREE.LinearSRGBColorSpace;
     renderer.toneMapping = THREE.NoToneMapping;
     container.appendChild(renderer.domElement);
 
