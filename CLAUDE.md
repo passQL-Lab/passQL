@@ -14,19 +14,19 @@
 
 ## 주요 패키지 요약
 
-| 카테고리 | 패키지 |
-|----------|--------|
-| 상태관리 | flutter_riverpod, riverpod_annotation, riverpod_generator |
-| 네트워크 | dio, retrofit, retrofit_generator |
-| 인증 | firebase_auth, google_sign_in, sign_in_with_apple, flutter_secure_storage |
-| 라우팅 | go_router |
-| 지도/위치 | google_maps_flutter, geolocator |
-| 알림/푸시 | firebase_messaging, flutter_local_notifications |
-| Firebase | firebase_core, firebase_remote_config, firebase_crashlytics |
-| 데이터 모델 | freezed_annotation, json_annotation |
-| UI | flutter_screenutil, flutter_svg, animations, shimmer, toggle_switch |
-| QR | qr_flutter (생성), mobile_scanner (스캔) |
-| 기타 | shared_preferences, flutter_dotenv, uuid, package_info_plus, device_info_plus, vibration, url_launcher, share_plus, font_awesome_flutter |
+| 카테고리    | 패키지                                                                                                                                   |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 상태관리    | flutter_riverpod, riverpod_annotation, riverpod_generator                                                                                |
+| 네트워크    | dio, retrofit, retrofit_generator                                                                                                        |
+| 인증        | firebase_auth, google_sign_in, sign_in_with_apple, flutter_secure_storage                                                                |
+| 라우팅      | go_router                                                                                                                                |
+| 지도/위치   | google_maps_flutter, geolocator                                                                                                          |
+| 알림/푸시   | firebase_messaging, flutter_local_notifications                                                                                          |
+| Firebase    | firebase_core, firebase_remote_config, firebase_crashlytics                                                                              |
+| 데이터 모델 | freezed_annotation, json_annotation                                                                                                      |
+| UI          | flutter_screenutil, flutter_svg, animations, shimmer, toggle_switch                                                                      |
+| QR          | qr_flutter (생성), mobile_scanner (스캔)                                                                                                 |
+| 기타        | shared_preferences, flutter_dotenv, uuid, package_info_plus, device_info_plus, vibration, url_launcher, share_plus, font_awesome_flutter |
 
 ## Project Structure
 
@@ -82,6 +82,7 @@ Flutter/Dart 코드 리뷰 시 참조. 위젯 best practice, 상태관리 패턴
 - **모르면 모른다고 말하기** — 확실하지 않은 내용을 추측하지 않는다
 - **답변은 항상 한국어로** — 코드/커맨드 제외 모든 응답은 한국어
 - **코드 주석 필수** — 실무 수준의 간결한 한국어 주석 작성 (WHY 중심, 과하지 않게)
+- **절대 이모지를 사용하지말고 아이콘 사용** - 앱아이콘이나, flutter awesome icon 사용
 
 ## Icon Policy
 
