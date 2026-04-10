@@ -1,11 +1,34 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-10T05:54:38Z",
-    "currentVersion": "0.0.39",
+    "lastUpdated": "2026-04-10T06:47:04Z",
+    "currentVersion": "0.0.40",
     "projectType": "basic",
-    "totalReleases": 10
+    "totalReleases": 11
   },
   "releases": [
+    {
+      "version": "0.0.40",
+      "project_type": "basic",
+      "date": "2026-04-10",
+      "pr_number": 65,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **New Features**\n  * 관리자 인터페이스에 대량 JSON 가이드 모달 추가\n\n* **Documentation**\n  * 대량 가져오기/내보내기 가이드 문서 추가\n  * 질문 등록 가이드 문서 추가",
+      "parsed_changes": {
+        "new_features": {
+          "title": "New Features",
+          "items": [
+            "관리자 인터페이스에 대량 JSON 가이드 모달 추가"
+          ]
+        },
+        "documentation": {
+          "title": "Documentation",
+          "items": [
+            "대량 가져오기/내보내기 가이드 문서 추가",
+            "질문 등록 가이드 문서 추가"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.39",
       "project_type": "basic",
