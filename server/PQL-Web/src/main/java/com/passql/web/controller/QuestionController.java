@@ -5,6 +5,7 @@ import com.passql.question.dto.ExecuteResult;
 import com.passql.question.dto.QuestionDetail;
 import com.passql.question.dto.QuestionSummary;
 import com.passql.question.dto.RecommendationsResponse;
+import com.passql.question.dto.SubmitRequest;
 import com.passql.question.dto.SubmitResult;
 import com.passql.question.dto.TodayQuestionResponse;
 import com.passql.question.service.QuestionService;
@@ -73,12 +74,8 @@ public class QuestionController implements QuestionControllerDocs {
     public ResponseEntity<SubmitResult> submit(
         @PathVariable UUID questionUuid,
         @RequestHeader(value = "X-Member-UUID") UUID memberUuid,
-        @RequestBody Map<String, String> body
+        @RequestBody SubmitRequest request
     ) {
-        String selectedChoiceKey = body.get("selectedChoiceKey");
-        if (selectedChoiceKey == null) {
-            selectedChoiceKey = body.get("selectedKey");
-        }
-        return ResponseEntity.ok(submissionService.submit(memberUuid, questionUuid, selectedChoiceKey));
+        return ResponseEntity.ok(submissionService.submit(memberUuid, questionUuid, request.selectedChoiceKey()));
     }
 }

@@ -5,6 +5,7 @@ import com.passql.question.dto.ExecuteResult;
 import com.passql.question.dto.QuestionDetail;
 import com.passql.question.dto.QuestionSummary;
 import com.passql.question.dto.RecommendationsResponse;
+import com.passql.question.dto.SubmitRequest;
 import com.passql.question.dto.SubmitResult;
 import com.passql.question.dto.TodayQuestionResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -83,13 +84,14 @@ public interface QuestionControllerDocs {
   @ApiLogs({
       @ApiLog(date = "2026.04.07", author = Author.SUHSAECHAN, issueNumber = 1, description = "문제 제출 API 추가"),
       @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 22, description = "PathVariable: Long id → UUID questionUuid. Header: X-User-UUID(String) → X-Member-UUID(UUID). Body: selectedKey → selectedChoiceKey (구 selectedKey 한시적 fallback 지원)"),
+      @ApiLog(date = "2026.04.10", author = Author.SUHSAECHAN, issueNumber = 57, description = "Request Body를 Map → SubmitRequest DTO로 변경하여 Swagger 스키마 정확도 개선"),
   })
   @Operation(summary = "문제 제출",
       description = "선택지 제출 후 정답 여부 반환. 헤더 X-Member-UUID(UUID) 필수. " +
-          "Body: { \"selectedChoiceKey\": \"A\" } (구 필드명 selectedKey 도 한시적으로 수용).")
+          "Body: { \"selectedChoiceKey\": \"A\" }")
   ResponseEntity<SubmitResult> submit(
       @PathVariable UUID questionUuid,
       @RequestHeader(value = "X-Member-UUID") UUID memberUuid,
-      @RequestBody Map<String, String> body
+      @RequestBody SubmitRequest request
   );
 }
