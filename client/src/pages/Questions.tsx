@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { ChevronRight, ChevronDown, ArrowLeft } from "lucide-react";
 import { useQuestions } from "../hooks/useQuestions";
@@ -14,7 +14,7 @@ export default function Questions() {
   const [difficulty, setDifficulty] = useState<number | undefined>();
   const [diffOpen, setDiffOpen] = useState(false);
 
-  const { data: topics, isLoading: topicsLoading, isError: topicsError } = useTopics();
+  const { data: topics, isLoading: topicsLoading, isError: topicsError, refetch: refetchTopics } = useTopics();
   const { data, isLoading, isError, refetch } = useQuestions(
     topic !== undefined ? { page, size: 10, topic, difficulty } : { enabled: false },
   );
@@ -31,11 +31,6 @@ export default function Questions() {
     setSearchParams({});
   }
 
-  useEffect(() => {
-    setPage(0);
-    setDifficulty(undefined);
-  }, [topic]);
-
   // 카테고리 그리드 뷰
   if (topic === undefined) {
     return (
@@ -44,7 +39,7 @@ export default function Questions() {
         <p className="text-secondary">토픽을 선택하세요</p>
 
         {topicsError ? (
-          <ErrorFallback onRetry={() => window.location.reload()} />
+          <ErrorFallback onRetry={() => void refetchTopics()} />
         ) : topicsLoading ? (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {Array.from({ length: 9 }, (_, i) => (
@@ -144,6 +139,8 @@ export default function Questions() {
             <div key={i} className="card-base h-24 animate-pulse bg-border" />
           ))}
         </div>
+      ) : data?.empty ? (
+        <p className="text-secondary text-center py-8">이 토픽에는 아직 등록된 문제가 없습니다.</p>
       ) : (
         <section className="space-y-3">
           {data?.content.map((q) => (
