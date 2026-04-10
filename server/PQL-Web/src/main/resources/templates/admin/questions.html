@@ -51,6 +51,10 @@
                 <a th:href="@{/admin/questions}" class="btn btn-sm btn-ghost">초기화</a>
 
                 <div class="ml-auto flex gap-2">
+                    <button type="button" class="btn btn-sm btn-ghost" onclick="openBulkGuideModal()" title="대량 JSON 가이드">
+                        <i data-lucide="help-circle" class="size-4"></i>
+                        가이드
+                    </button>
                     <button type="button" class="btn btn-sm btn-outline" onclick="openImportFileDialog()">
                         <i data-lucide="upload" class="size-4"></i>
                         JSON 가져오기
@@ -227,6 +231,97 @@
         <form method="dialog" class="modal-backdrop"><button>close</button></form>
     </dialog>
 
+    <!-- 대량 JSON 가이드 모달 -->
+    <dialog id="bulkGuideModal" class="modal">
+        <div class="modal-box w-11/12 max-w-3xl max-h-[80vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-lg">대량 JSON 내보내기/가져오기 가이드</h3>
+                <div class="flex gap-2">
+                    <a href="/docs/question-bulk-guide.md" download="question-bulk-guide.md"
+                       class="btn btn-sm btn-outline">
+                        <i data-lucide="download" class="size-4"></i>
+                        MD 파일 다운로드
+                    </a>
+                    <button type="button" class="btn btn-sm btn-ghost" onclick="document.getElementById('bulkGuideModal').close()">
+                        <i data-lucide="x" class="size-4"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- topicCode 목록 -->
+            <div class="mb-4">
+                <p class="font-semibold text-sm mb-2">topicCode 목록</p>
+                <div class="overflow-x-auto">
+                    <table class="table table-xs table-zebra">
+                        <thead><tr><th>topicCode</th><th>표시명</th></tr></thead>
+                        <tbody>
+                            <tr th:each="t : ${topics}">
+                                <td class="font-mono" th:text="${t.code}">-</td>
+                                <td th:text="${t.displayName}">-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- JSON 배열 스키마 -->
+            <div class="mb-4">
+                <p class="font-semibold text-sm mb-2">JSON 배열 스키마</p>
+                <div class="mockup-code text-xs">
+<pre class="p-4">[
+  {
+    "questionUuid":   "xxxxxxxx-...",           // 있으면 기존 문제 업데이트, 없거나 null이면 신규 등록
+    "topicCode":      "sql_basic_select",       // 위 목록에서 선택 (필수)
+    "difficulty":     3,                        // 1~5 정수 (필수)
+    "executionMode":  "EXECUTABLE",             // EXECUTABLE | CONCEPT_ONLY (필수)
+    "stem":           "지문 전체 텍스트",          // 필수
+    "hint":           "힌트 한 줄",               // 선택
+    "schemaDdl":      "CREATE TABLE ...",       // EXECUTABLE 필수, CONCEPT_ONLY면 null
+    "schemaSampleData": "INSERT INTO ...",      // 선택
+    "schemaIntent":   "테이블 의도 한 줄",         // 선택
+    "answerSql":      "SELECT ..."              // EXECUTABLE 필수, CONCEPT_ONLY면 null
+  },
+  { ... }
+]</pre>
+                </div>
+            </div>
+
+            <!-- 주요 규칙 -->
+            <div class="mb-4">
+                <p class="font-semibold text-sm mb-2">주요 규칙</p>
+                <ul class="list-disc list-inside text-sm space-y-1">
+                    <li>JSON 파일은 <strong>배열</strong> 형태여야 합니다 <code>[{...}, {...}]</code></li>
+                    <li>한 번에 최대 <strong>100건</strong>까지 가져올 수 있습니다</li>
+                    <li>내보내기는 최대 <strong>500건</strong>까지 지원합니다</li>
+                    <li><code>questionUuid</code>가 있으면 기존 문제를 <strong>업데이트</strong>, 없으면 <strong>신규 등록</strong></li>
+                    <li><code>questionUuid</code>를 제거하면 <strong>복제/이관</strong> 용도로 활용 가능</li>
+                    <li><code>EXECUTABLE</code> 문제는 가져오기 시 <strong>Sandbox 자동 검증</strong> (DDL + 샘플데이터 적용 후 answerSql 실행 테스트)</li>
+                    <li><code>CONCEPT_ONLY</code> 문제는 Sandbox 검증을 건너뜁니다 (SKIP)</li>
+                    <li>검증 후 <strong>"전체 등록"</strong> 또는 <strong>"성공한 것만 등록"</strong>을 선택할 수 있습니다</li>
+                </ul>
+            </div>
+
+            <!-- AI 프롬프트 -->
+            <div class="mb-4">
+                <p class="font-semibold text-sm mb-2">AI 변환 프롬프트 <span class="text-base-content/50 font-normal">(복사 후 AI에게 문제 데이터 붙여넣기)</span></p>
+                <div class="relative">
+                    <textarea id="bulkGuidePromptText" rows="10" readonly
+                              class="textarea textarea-bordered w-full font-mono text-xs bg-base-200"></textarea>
+                </div>
+                <p id="bulkCopySuccessMsg" class="text-success text-xs mt-1 hidden">복사됐습니다.</p>
+            </div>
+
+            <div class="modal-action">
+                <button type="button" class="btn btn-sm btn-ghost" onclick="copyBulkPrompt()">
+                    <i data-lucide="copy" class="size-4"></i>
+                    AI 프롬프트 복사
+                </button>
+                <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('bulkGuideModal').close()">닫기</button>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop"><button>close</button></form>
+    </dialog>
+
     <!-- 가져오기 검증 결과 모달 -->
     <dialog id="importValidationModal" class="modal">
         <div class="modal-box w-11/12 max-w-5xl max-h-[85vh]">
@@ -248,6 +343,52 @@
 <script th:src="@{/js/admin/question-import-export.js}"></script>
 <script>
     lucide.createIcons();
+
+    // ── 대량 JSON 가이드 모달 ────────────────────────────────────
+    const BULK_AI_PROMPT = `아래 SQLD 문제 데이터를 passQL 대량 JSON 명세로 변환해줘.
+
+출력은 JSON 배열 코드블록 하나만. 다른 설명 없이.
+
+필드 규칙:
+- topicCode: 다음 중 하나만 사용
+  data_modeling / sql_basic_select / sql_ddl_dml_tcl / sql_function / sql_join / sql_subquery / sql_group_aggregate / sql_window / sql_hierarchy_pivot
+- difficulty: 1~5 정수 (개념 암기=1~2, SQL 실행 추적=3, 복합 조건/JOIN=4, 윈도우/계층=5)
+- executionMode: "EXECUTABLE" (SQL 실행 결과를 묻는 문제) 또는 "CONCEPT_ONLY" (개념/이론)
+- stem: 지문 전체 텍스트 (선택지 A/B/C/D 제외)
+- hint: 핵심해설/함정포인트 기반 한 줄 힌트. 없으면 null
+- schemaDdl: EXECUTABLE이면 CREATE TABLE 문. 문제에 없으면 선택지에서 유추해서 생성. CONCEPT_ONLY면 null
+- schemaSampleData: EXECUTABLE이면 INSERT 문 목록. 문제에 데이터가 없으면 실행 가능한 최소 데이터 유추 생성. CONCEPT_ONLY면 null
+- schemaIntent: 이 테이블/데이터가 어떤 개념을 테스트하는지 한 줄 설명. CONCEPT_ONLY면 null
+- answerSql: EXECUTABLE이면 정답 번호에 해당하는 SELECT 쿼리. CONCEPT_ONLY면 null
+
+주의사항:
+- 출력 형식은 JSON 배열: [{...}, {...}, ...]
+- questionUuid는 포함하지 않음 (신규 등록용)
+- schemaDdl, schemaSampleData 문자열 내 줄바꿈은 \\n으로 표현
+- answerSql은 선택지 중 정답 SQL을 그대로 복사
+- SQLD MariaDB/Oracle 호환 SQL 작성
+
+--- 문제 데이터 ---
+[여기에 문제들을 붙여넣기]`;
+
+    function openBulkGuideModal() {
+        document.getElementById('bulkGuidePromptText').value = BULK_AI_PROMPT;
+        document.getElementById('bulkCopySuccessMsg').classList.add('hidden');
+        document.getElementById('bulkGuideModal').showModal();
+        lucide.createIcons();
+    }
+
+    function copyBulkPrompt() {
+        navigator.clipboard.writeText(BULK_AI_PROMPT).then(() => {
+            const msg = document.getElementById('bulkCopySuccessMsg');
+            msg.classList.remove('hidden');
+            setTimeout(() => msg.classList.add('hidden'), 2000);
+        }).catch(() => {
+            const ta = document.getElementById('bulkGuidePromptText');
+            ta.select();
+            document.execCommand('copy');
+        });
+    }
 
     function openDeleteModal(btn) {
         const uuid = btn.dataset.uuid;
