@@ -14,26 +14,23 @@ interface ParsedTable {
 
 export function parseSchemaDisplay(schemaDisplay: string): ParsedTable[] {
   if (!schemaDisplay.trim()) return [];
-  return schemaDisplay
-    .split("\n")
-    .map((line) => line.trim())
-    .filter(Boolean)
-    .map((line) => {
-      const match = line.match(/^(\w+)\s*\((.+)\)$/);
-      if (!match) return null;
-      const [, tableName, colsStr] = match;
-      const columns = colsStr.split(",").map((part) => {
-        const tokens = part.trim().split(/\s+/);
-        const name = tokens[0] ?? "";
-        const type = tokens[1] ?? "";
-        const constraintToken = tokens[2]?.toUpperCase() ?? "";
-        const constraint: "PK" | "FK" | null =
-          constraintToken === "PK" ? "PK" : constraintToken === "FK" ? "FK" : null;
-        return { name, type, constraint };
-      });
-      return { tableName, columns };
-    })
-    .filter((t): t is ParsedTable => t !== null);
+  const results: ParsedTable[] = [];
+  for (const line of schemaDisplay.split("\n").map((l) => l.trim()).filter(Boolean)) {
+    const match = line.match(/^(\w+)\s*\((.+)\)$/);
+    if (!match) continue;
+    const [, tableName, colsStr] = match;
+    const columns: ParsedColumn[] = colsStr.split(",").map((part) => {
+      const tokens = part.trim().split(/\s+/);
+      const name = tokens[0] ?? "";
+      const type = tokens[1] ?? "";
+      const constraintToken = tokens[2]?.toUpperCase() ?? "";
+      const constraint: "PK" | "FK" | null =
+        constraintToken === "PK" ? "PK" : constraintToken === "FK" ? "FK" : null;
+      return { name, type, constraint };
+    });
+    results.push({ tableName, columns });
+  }
+  return results;
 }
 
 export function parseSampleData(schemaSampleData: string): Map<string, string[][]> {
