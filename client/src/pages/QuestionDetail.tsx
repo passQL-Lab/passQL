@@ -1,20 +1,20 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
-import { ArrowLeft, ChevronUp, ChevronDown, BookOpen } from "lucide-react";
+import { ArrowLeft, ChevronUp, ChevronDown, BookOpen, RefreshCw } from "lucide-react";
 import { StarRating } from "../components/StarRating";
 import { ChoiceCard } from "../components/ChoiceCard";
 import AiExplanationSheet from "../components/AiExplanationSheet";
 import { SchemaViewer } from "../components/SchemaViewer";
 import { SqlPlayground } from "../components/SqlPlayground";
-import { executeChoice } from "../api/questions";
+import { executeChoice, generateChoices } from "../api/questions";
 import {
   useQuestionDetail,
   useExecuteChoice,
   useSubmitAnswer,
 } from "../hooks/useQuestionDetail";
 import { explainError } from "../api/ai";
-import type { ExecuteResult } from "../types/api";
+import type { ChoiceItem, ExecuteResult } from "../types/api";
 
 interface QuestionDetailProps {
   readonly practiceMode?: boolean;
@@ -40,10 +40,44 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
   const [aiSheetOpen, setAiSheetOpen] = useState(false);
   const [aiText, setAiText] = useState("");
 
+  // SSE로 생성된 선택지 (choiceSets[]가 비어있을 때 채워짐)
+  const [sseChoices, setSseChoices] = useState<readonly ChoiceItem[] | null>(null);
+  const [sseChoiceSetId, setSseChoiceSetId] = useState<string | null>(null);
+  const [sseStatus, setSseStatus] = useState<string | null>(null);
+  const [sseError, setSseError] = useState<{ code: string; retryable: boolean } | null>(null);
+  // 재시도 트리거용 카운터
+  const [sseRetryCount, setSseRetryCount] = useState(0);
+
   const activeChoiceSet = question?.choiceSets?.find((cs) => cs.status === "OK");
-  const choices = activeChoiceSet?.items ?? [];
-  // 제출 시 BE에 전달할 choiceSetId (SSE 미사용 시 ADMIN_SEED choiceSet UUID 사용)
-  const choiceSetId = activeChoiceSet?.choiceSetUuid ?? "";
+  // SSE로 받은 선택지가 있으면 우선 사용, 없으면 GET 응답의 choiceSets 사용
+  const choices = sseChoices ?? activeChoiceSet?.items ?? [];
+  const choiceSetId = sseChoiceSetId ?? activeChoiceSet?.choiceSetUuid ?? "";
+
+  // choiceSets[]가 비어있을 때 자동으로 SSE 선택지 생성 호출
+  const needsSseGeneration = question != null && activeChoiceSet == null && sseChoices == null;
+  useEffect(() => {
+    if (!needsSseGeneration || !questionUuid) return;
+
+    setSseError(null);
+    setSseStatus("선택지 생성 중...");
+
+    const cleanup = generateChoices(questionUuid, {
+      onStatus: (event) => setSseStatus(event.message),
+      onComplete: (response) => {
+        setSseChoices(response.choices);
+        setSseChoiceSetId(response.choiceSetId);
+        setSseStatus(null);
+      },
+      onError: (event) => {
+        setSseError({ code: event.code, retryable: event.retryable });
+        setSseStatus(null);
+      },
+    });
+
+    return cleanup;
+  // sseRetryCount를 의존성에 포함해 재시도 시 재실행
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [needsSseGeneration, questionUuid, sseRetryCount]);
 
   const explainMutation = useMutation({
     mutationFn: explainError,
@@ -152,9 +186,32 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
   ) : null;
 
   const choicesSection = choices.length === 0 ? (
-    <div className="mt-4 card-base text-center py-8">
-      <p className="text-text-caption">선택지가 아직 준비되지 않았어요</p>
-      <p className="text-xs text-text-caption mt-1">잠시 후 다시 시도해주세요</p>
+    <div className="mt-4 card-base text-center py-8 space-y-2">
+      {sseError ? (
+        <>
+          <p className="text-text-caption text-sm">선택지 생성에 실패했어요</p>
+          {sseError.retryable && (
+            <button
+              type="button"
+              className="flex items-center gap-1.5 mx-auto text-brand text-sm font-medium"
+              onClick={() => {
+                setSseChoices(null);
+                setSseChoiceSetId(null);
+                setSseError(null);
+                setSseRetryCount((c) => c + 1);
+              }}
+            >
+              <RefreshCw size={14} />
+              다시 시도
+            </button>
+          )}
+        </>
+      ) : (
+        <>
+          <div className="w-6 h-6 border-2 border-accent-light border-t-brand rounded-full animate-spin mx-auto" />
+          <p className="text-text-caption text-sm">{sseStatus ?? "선택지 준비 중..."}</p>
+        </>
+      )}
     </div>
   ) : (
     <section className="mt-4 space-y-3">
