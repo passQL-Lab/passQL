@@ -1,3 +1,9 @@
 package com.passql.application.dto;
 
-public record GreetingResponse(String message) {}
+import com.passql.application.constant.GreetingMessageType;
+
+public record GreetingResponse(
+        String nickname,
+        String message,
+        GreetingMessageType messageType
+) {}

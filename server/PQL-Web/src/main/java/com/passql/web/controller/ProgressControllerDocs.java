@@ -17,6 +17,7 @@ public interface ProgressControllerDocs {
   @ApiLogs({
       @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 4, description = "진도 요약 조회 API"),
       @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 22, description = "Submission PK 를 UUID 로 재작성. memberUuid(UUID) 기준 집계. 응답 DTO: ProgressResponse{solvedCount, correctRate(0.0~1.0 둘째자리 반올림), streakDays(하루 그레이스)}"),
+      @ApiLog(date = "2026.04.10", author = Author.SUHSAECHAN, issueNumber = 52, description = "합격 준비도(readiness) 블록 응답에 추가 — Accuracy × Coverage × Recency 3요소 곱셈 + D-day 기반 toneKey. 기존 3필드 보존."),
   })
   @Operation(
       summary = "진도 요약 조회",
@@ -30,7 +31,18 @@ public interface ProgressControllerDocs {
           - solvedCount: 푼 문제 수 (distinct questionUuid 기준)
           - correctRate: 정답률 (0.0~1.0, 마지막 시도 기준, 소수 둘째자리 반올림)
           - streakDays: 연속 학습 일수 (하루 그레이스 — 오늘 미제출이어도 어제까지 연속이면 유지)
-          - 제출 이력 0건이면 {0, 0.0, 0}
+          - 제출 이력 0건이면 solvedCount=0, correctRate=0.0, streakDays=0
+
+          ## readiness (합격 준비도 블록)
+          - score: Accuracy × Coverage × Recency (0.0~1.0, 소수 둘째자리)
+          - accuracy: 최근 50시도의 정답률
+          - coverage: 최근 14일 내 푼 활성 토픽 수 / 활성 토픽 전체 수
+          - recency: 마지막 학습일 기반 감쇠 계수 (0.70~1.00)
+          - lastStudiedAt: 마지막 시도 시각 (ISO-8601), 미시도시 null
+          - recentAttemptCount: 최근 50 윈도우 실제 시도 수
+          - coveredTopicCount / activeTopicCount: 커버리지 분자/분모
+          - daysUntilExam: 선택된 시험 일정 기준 D-day (없으면 null)
+          - toneKey: 카피 톤 키 (NO_EXAM / ONBOARDING / POST_EXAM / TODAY / SPRINT / PUSH / STEADY / EARLY)
           """
   )
   ResponseEntity<ProgressResponse> getProgress(

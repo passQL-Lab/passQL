@@ -1,11 +1,41 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-09T16:09:59Z",
-    "currentVersion": "0.0.34",
+    "lastUpdated": "2026-04-10T02:39:22Z",
+    "currentVersion": "0.0.36",
     "projectType": "basic",
-    "totalReleases": 6
+    "totalReleases": 7
   },
   "releases": [
+    {
+      "version": "0.0.36",
+      "project_type": "basic",
+      "date": "2026-04-10",
+      "pr_number": 56,
+      "raw_summary": "## Summary by CodeRabbit\n\n* **New Features**\n  * 홈 화면 인사말에 사용자 이름 포함 및 상황별 메시지 유형 제공\n  * 합격 준비도 점수 신규 추가: 정답률, 학습 범위, 최근 학습 활동을 바탕으로 한 종합 준비도 제공\n  * 시험일까지 남은 일수와 응시 기록에 따른 개인화된 메시지 톤 제공\n\n* **Bug Fixes**\n  * 회원 정보 미조회 시 안정적인 기본값 폴백 처리 개선\n\n* **Documentation**\n  * API 명세 업데이트",
+      "parsed_changes": {
+        "new_features": {
+          "title": "New Features",
+          "items": [
+            "홈 화면 인사말에 사용자 이름 포함 및 상황별 메시지 유형 제공",
+            "합격 준비도 점수 신규 추가: 정답률, 학습 범위, 최근 학습 활동을 바탕으로 한 종합 준비도 제공",
+            "시험일까지 남은 일수와 응시 기록에 따른 개인화된 메시지 톤 제공"
+          ]
+        },
+        "bug_fixes": {
+          "title": "Bug Fixes",
+          "items": [
+            "회원 정보 미조회 시 안정적인 기본값 폴백 처리 개선"
+          ]
+        },
+        "documentation": {
+          "title": "Documentation",
+          "items": [
+            "API 명세 업데이트"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.34",
       "project_type": "basic",
