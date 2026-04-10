@@ -183,17 +183,23 @@
     initQuestionJsonLoader({ confirmOverwrite: true });
 
     // 실행 모드 전환 시 스키마 섹션 표시/숨김
+    function updateSchemaVisibility() {
+        const schemaSection = document.getElementById('schemaSection');
+        if (!schemaSection) return;
+        const checked = document.querySelector('input[name="executionMode"]:checked');
+        if (checked && checked.value === 'CONCEPT_ONLY') {
+            schemaSection.classList.add('hidden');
+        } else {
+            schemaSection.classList.remove('hidden');
+        }
+    }
+
     document.querySelectorAll('input[name="executionMode"]').forEach(radio => {
-        radio.addEventListener('change', function () {
-            const schemaSection = document.getElementById('schemaSection');
-            if (!schemaSection) return;
-            if (this.value === 'EXECUTABLE') {
-                schemaSection.classList.remove('hidden');
-            } else {
-                schemaSection.classList.add('hidden');
-            }
-        });
+        radio.addEventListener('change', updateSchemaVisibility);
     });
+
+    // 페이지 로드 시 초기 상태 반영
+    updateSchemaVisibility();
 </script>
 </th:block>
 </html>

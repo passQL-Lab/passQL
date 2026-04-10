@@ -81,7 +81,11 @@ public enum ErrorCode {
     QUESTION_IN_ACTIVE_SESSION(HttpStatus.CONFLICT, "진행중인 퀴즈 세션에서 사용 중인 문제는 삭제할 수 없습니다."),
 
     // === Admin Question Generation (신규: Sub-plan 1) ===
-    QUESTION_GENERATE_INPUT_INVALID(HttpStatus.BAD_REQUEST, "문제 생성 입력값이 올바르지 않습니다.");
+    QUESTION_GENERATE_INPUT_INVALID(HttpStatus.BAD_REQUEST, "문제 생성 입력값이 올바르지 않습니다."),
+
+    // === Import/Export ===
+    IMPORT_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "한 번에 최대 100건까지 가져올 수 있습니다."),
+    EXPORT_NO_DATA(HttpStatus.NOT_FOUND, "내보낼 문제가 없습니다.");
 
     private final HttpStatus status;
     private final String message;
