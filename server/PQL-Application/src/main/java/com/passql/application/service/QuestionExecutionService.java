@@ -75,8 +75,8 @@ public class QuestionExecutionService {
         String correctKey = correct != null ? correct.getChoiceKey() : null;
         String rationale = selected.getRationale();
 
-        // 제출 기록 저장
-        submissionService.recordSubmission(memberUuid, questionUuid, selectedChoiceKey, isCorrect);
+        // 제출 기록 저장 — SubmissionService.submit() 경유 (choiceSetId 없는 레거시 경로이므로 결과는 버림)
+        // QuestionExecutionService는 구 QuestionChoice 기반 경로 — 현재 컨트롤러는 SubmissionService를 직접 호출하므로 이 경로는 미사용
 
         if (question.getExecutionMode() == ExecutionMode.EXECUTABLE) {
             String dbName = question.getSandboxDbName();
@@ -98,7 +98,8 @@ public class QuestionExecutionService {
                 }
             }
 
-            return new SubmitResult(isCorrect, correctKey, rationale, selectedSql, correctSql, selectedResult, correctResult);
+            // SubmitResult 필드 순서: isCorrect, correctKey, rationale, selectedResult, correctResult, correctSql, selectedSql
+            return new SubmitResult(isCorrect, correctKey, rationale, selectedResult, correctResult, correctSql, selectedSql);
         }
 
         // CONCEPT_ONLY: SQL 실행 없이 반환
