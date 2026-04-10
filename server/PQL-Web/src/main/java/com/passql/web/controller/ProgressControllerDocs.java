@@ -1,14 +1,17 @@
 package com.passql.web.controller;
 
 import com.passql.common.dto.Author;
+import com.passql.submission.dto.HeatmapResponse;
 import com.passql.submission.dto.ProgressResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.suhsaechan.suhapilog.annotation.ApiLog;
 import kr.suhsaechan.suhapilog.annotation.ApiLogs;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Tag(name = "Progress", description = "학습 진도 조회")
@@ -47,5 +50,31 @@ public interface ProgressControllerDocs {
   )
   ResponseEntity<ProgressResponse> getProgress(
       @RequestParam UUID memberUuid
+  );
+
+  @ApiLogs({
+      @ApiLog(date = "2026.04.10", author = Author.SUHSAECHAN, issueNumber = 42, description = "날짜별 학습 기록 히트맵 API 추가 — DATE(submitted_at) 기준 GROUP BY 집계, sparse array 반환"),
+  })
+  @Operation(
+      summary = "날짜별 학습 히트맵 조회",
+      description = """
+          ## 인증(JWT): **불필요** (추후 헤더 전환 예정)
+
+          ## 요청 파라미터
+          - memberUuid (UUID, required): 회원 식별자
+          - from (LocalDate, optional): 조회 시작일 (기본: 30일 전)
+          - to (LocalDate, optional): 조회 종료일 (기본: 오늘)
+
+          ## 반환값 (HeatmapResponse)
+          - entries: 날짜별 학습 기록 배열 (풀이 없는 날짜는 제외)
+            - date: 날짜 (LocalDate)
+            - solvedCount: 해당 날짜 풀이 수
+            - correctCount: 해당 날짜 정답 수
+          """
+  )
+  ResponseEntity<HeatmapResponse> getHeatmap(
+      @RequestParam UUID memberUuid,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
   );
 }

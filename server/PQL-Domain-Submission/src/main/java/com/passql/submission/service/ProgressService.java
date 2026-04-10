@@ -6,6 +6,8 @@ import com.passql.member.repository.MemberRepository;
 import com.passql.meta.dto.ExamScheduleResponse;
 import com.passql.meta.repository.TopicRepository;
 import com.passql.meta.service.ExamScheduleService;
+import com.passql.submission.dto.HeatmapEntry;
+import com.passql.submission.dto.HeatmapResponse;
 import com.passql.submission.dto.ProgressResponse;
 import com.passql.submission.dto.ReadinessResponse;
 import com.passql.submission.dto.RecentAttemptProjection;
@@ -22,6 +24,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -53,7 +56,7 @@ public class ProgressService {
     }
 
     private ReadinessResponse buildReadiness(UUID memberUuid) {
-        LocalDate today = LocalDate.now(ReadinessConstants.ZONE);
+        LocalDate today = LocalDate.now();
 
         // 최근 N개 시도 (정답 여부 + 시각) — 단일 쿼리
         List<RecentAttemptProjection> recentAttempts = submissionRepository.findRecentAttemptsByMemberUuid(
@@ -111,5 +114,36 @@ public class ProgressService {
             daysUntilExam,
             toneKey
         );
+    }
+
+    public HeatmapResponse getHeatmap(UUID memberUuid, LocalDate from, LocalDate to) {
+        if (!memberRepository.existsByMemberUuidAndIsDeletedFalse(memberUuid)) {
+            throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
+        }
+
+        LocalDate today = LocalDate.now();
+        LocalDate effectiveFrom = (from != null) ? from : today.minusDays(30);
+        LocalDate effectiveTo = (to != null) ? to : today;
+
+        if (effectiveFrom.isAfter(effectiveTo)) {
+            return new HeatmapResponse(Collections.emptyList());
+        }
+
+        LocalDateTime fromDateTime = effectiveFrom.atStartOfDay();
+        LocalDateTime toDateTimeExclusive = effectiveTo.plusDays(1).atStartOfDay();
+
+        List<Object[]> rows = submissionRepository.findHeatmapByMemberUuid(
+            memberUuid.toString(), fromDateTime, toDateTimeExclusive
+        );
+
+        List<HeatmapEntry> entries = rows.stream()
+            .map(row -> new HeatmapEntry(
+                ((java.sql.Date) row[0]).toLocalDate(),
+                ((Number) row[1]).intValue(),
+                ((Number) row[2]).intValue()
+            ))
+            .toList();
+
+        return new HeatmapResponse(entries);
     }
 }

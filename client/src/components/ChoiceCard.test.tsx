@@ -7,6 +7,8 @@ const mockChoice: ChoiceItem = {
   key: "A",
   kind: "SQL",
   body: "SELECT * FROM users",
+  isCorrect: true,
+  rationale: "correct query",
   sortOrder: 1,
 };
 
