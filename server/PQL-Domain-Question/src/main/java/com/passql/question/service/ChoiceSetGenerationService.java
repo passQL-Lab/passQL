@@ -61,11 +61,13 @@ public class ChoiceSetGenerationService {
         for (int attempts = 1; attempts <= MAX_ATTEMPTS; attempts++) {
             try {
                 lastResult = aiGatewayClient.generateChoiceSet(req);
+                // policy를 validator에 전달 — ODD_ONE_OUT 유형은 다른 검증 로직 적용
                 lastReport = sandboxValidator.validate(
                         lastResult.choices(),
                         question.getAnswerSql(),
                         question.getSchemaDdl(),
-                        question.getSchemaSampleData());
+                        question.getSchemaSampleData(),
+                        question.getChoiceSetPolicy());
 
                 if (lastReport.correctCount() == 1) {
                     return saveSuccess(question, source, memberUuid, prompt,

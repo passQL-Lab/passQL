@@ -2,6 +2,7 @@ package com.passql.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.passql.application.service.HomeService;
+import com.passql.application.service.QuestionExecutionService;
 import com.passql.common.exception.CustomException;
 import com.passql.common.exception.constant.ErrorCode;
 import com.passql.question.dto.ChoiceSetGenerateResponse;
@@ -86,7 +87,8 @@ public class QuestionController implements QuestionControllerDocs {
         if (sql == null || sql.isBlank()) {
             throw new CustomException(ErrorCode.INVALID_REQUEST);
         }
-        return ResponseEntity.ok(sandboxExecutor.execute(questionUuid.toString(), sql));
+        // questionUuid.toString()이 아닌 question의 sandboxDbName 기반으로 실행
+        return ResponseEntity.ok(questionExecutionService.executeChoice(questionUuid, sql));
     }
 
     @PostMapping(value = "/{questionUuid}/generate-choices", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
