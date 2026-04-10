@@ -107,7 +107,7 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
   );
 
   const handleSubmit = useCallback(() => {
-    if (!selectedKey || !question) return;
+    if (!selectedKey || !question || !choiceSetId) return;
     if (practiceMode && onPracticeSubmit) {
       onPracticeSubmit(selectedKey, choiceSetId);
       return;
@@ -158,6 +158,7 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
   const isSubmitReady =
     selectedKey !== null &&
     choices.length > 0 &&
+    choiceSetId !== "" &&
     !submitMutation.isPending;
 
   const schemaSection = question.schemaDisplay ? (
