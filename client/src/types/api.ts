@@ -7,7 +7,7 @@ export interface QuestionSummary {
   readonly topicCode: string;
   readonly topicName: string;
   readonly difficulty: number;
-  readonly executionMode: ExecutionMode;
+  readonly executionMode: ExecutionMode | null;
   readonly stemPreview: string;
   readonly createdAt: string;
 }
@@ -44,7 +44,7 @@ export interface QuestionDetail {
   readonly topicName: string;
   readonly subtopicName: string;
   readonly difficulty: number;
-  readonly executionMode: ExecutionMode;
+  readonly executionMode: ExecutionMode | null;
   readonly stem: string;
   readonly schemaDisplay: string;
   readonly schemaDdl: string;
