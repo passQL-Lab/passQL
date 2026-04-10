@@ -129,6 +129,28 @@ const MOCK_TOPICS: readonly TopicTree[] = [
   },
 ];
 
+// EXECUTABLE 문제 정답 실행 결과 (correctResult 용)
+const MOCK_CORRECT_EXECUTE_RESULT: ExecuteResult = {
+  status: "SUCCESS",
+  columns: ["name", "cnt"],
+  rows: [["홍길동", 2], ["김영희", 3], ["이철수", 1]],
+  rowCount: 3,
+  elapsedMs: 28,
+  errorCode: null,
+  errorMessage: null,
+};
+
+// EXECUTABLE 문제 오답 실행 결과 (selectedResult 용 — 오답 선택 시)
+const MOCK_WRONG_EXECUTE_RESULT: ExecuteResult = {
+  status: "SUCCESS",
+  columns: ["name", "cnt"],
+  rows: [["홍길동", 5], ["김영희", 1]],
+  rowCount: 2,
+  elapsedMs: 31,
+  errorCode: null,
+  errorMessage: null,
+};
+
 const MOCK_CHOICES: readonly ChoiceItem[] = [
   { key: "A", kind: "SQL", body: "SELECT c.name, COUNT(*) AS cnt\nFROM CUSTOMER c\nJOIN ORDERS o ON c.id = o.customer_id\nGROUP BY c.name", isCorrect: true, rationale: "CUSTOMER와 ORDERS를 customer_id로 JOIN한 후 c.name으로 GROUP BY하면 고객별 주문 수를 정확히 구할 수 있습니다.", sortOrder: 1 },
   { key: "B", kind: "SQL", body: "SELECT c.name, COUNT(*) AS cnt\nFROM CUSTOMER c\nJOIN ORDERS o ON c.id = o.cust_id\nGROUP BY c.name", isCorrect: false, rationale: "cust_id는 존재하지 않는 컬럼입니다.", sortOrder: 2 },
@@ -386,7 +408,28 @@ export function getMockResponse(path: string, method: string, body?: string): un
     const parsed = body ? JSON.parse(body) : {};
     const selectedKey = (parsed.selectedChoiceKey ?? "A") as string;
     const isCorrect = selectedKey === "A";
-    return { isCorrect, correctKey: "A", rationale: "CUSTOMER와 ORDERS를 customer_id로 JOIN한 후 c.name으로 GROUP BY하면 고객별 주문 수를 정확히 구할 수 있습니다." } satisfies SubmitResult;
+    const questionUuid = path.split("/")[2];
+
+    // UUID로 MOCK_QUESTIONS에서 executionMode 조회 (없으면 CONCEPT_ONLY 폴백)
+    const matchedQuestion = MOCK_QUESTIONS.find((q) => q.questionUuid === questionUuid);
+    const executionMode = matchedQuestion?.executionMode ?? "CONCEPT_ONLY";
+
+    const baseResult = {
+      isCorrect,
+      correctKey: "A",
+      rationale: "CUSTOMER와 ORDERS를 customer_id로 JOIN한 후 c.name으로 GROUP BY하면 고객별 주문 수를 정확히 구할 수 있습니다.",
+      executionMode,
+    };
+
+    if (executionMode === "EXECUTABLE") {
+      return {
+        ...baseResult,
+        selectedResult: isCorrect ? MOCK_CORRECT_EXECUTE_RESULT : MOCK_WRONG_EXECUTE_RESULT,
+        correctResult: MOCK_CORRECT_EXECUTE_RESULT,
+      } satisfies SubmitResult;
+    }
+
+    return baseResult satisfies SubmitResult;
   }
 
   // GET /progress/categories (specific before /progress)
