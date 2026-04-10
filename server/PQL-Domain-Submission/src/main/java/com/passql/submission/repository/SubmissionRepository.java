@@ -75,6 +75,31 @@ public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
         @Param("since") LocalDateTime since
     );
 
+    /**
+     * 히트맵용 날짜별 풀이/정답 수 집계.
+     *
+     * 기존 인덱스 idx_submission_member_submitted (member_uuid, submitted_at) 활용.
+     * to 파라미터는 exclusive upper bound — Service에서 (to + 1일).atStartOfDay()로 전달.
+     *
+     * @return Object[] = { java.sql.Date date, long solvedCount, long correctCount }
+     */
+    @Query(value =
+        "SELECT DATE(s.submitted_at) AS date, " +
+        "       COUNT(*)              AS solved_count, " +
+        "       SUM(s.is_correct)     AS correct_count " +
+        "FROM submission s " +
+        "WHERE s.member_uuid = :memberUuid " +
+        "  AND s.submitted_at >= :fromDate " +
+        "  AND s.submitted_at < :toDateExclusive " +
+        "GROUP BY DATE(s.submitted_at) " +
+        "ORDER BY date ASC",
+        nativeQuery = true)
+    List<Object[]> findHeatmapByMemberUuid(
+        @Param("memberUuid") String memberUuid,
+        @Param("fromDate") LocalDateTime fromDate,
+        @Param("toDateExclusive") LocalDateTime toDateExclusive
+    );
+
     @Modifying
     @Transactional
     void deleteByQuestionUuid(UUID questionUuid);
