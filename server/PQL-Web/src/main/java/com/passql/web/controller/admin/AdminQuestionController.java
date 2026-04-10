@@ -6,9 +6,10 @@ import com.passql.ai.dto.QuestionFullContextDto;
 import com.passql.meta.service.MetaService;
 import com.passql.question.constant.ChoiceSetPolicy;
 import com.passql.question.constant.ExecutionMode;
-import com.passql.question.dto.QuestionDetail;
+import com.passql.question.dto.*;
 import com.passql.question.entity.Question;
 import com.passql.question.service.QuestionGenerateService;
+import com.passql.question.service.QuestionImportExportService;
 import com.passql.question.service.QuestionService;
 import com.passql.web.service.AdminQuestionDeleteService;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -25,6 +28,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.passql.common.exception.CustomException;
 import com.passql.common.exception.constant.ErrorCode;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -37,6 +42,7 @@ public class AdminQuestionController {
 
     private final QuestionService questionService;
     private final QuestionGenerateService questionGenerateService;
+    private final QuestionImportExportService importExportService;
     private final MetaService metaService;
     private final AdminQuestionDeleteService adminQuestionDeleteService;
 
@@ -145,6 +151,59 @@ public class AdminQuestionController {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
         }
         return "redirect:/admin/questions";
+    }
+
+    // ── Import / Export ──────────────────────────────────────────
+
+    /**
+     * 필터 조건 기반 전체 내보내기 (JSON 파일 다운로드).
+     */
+    @GetMapping("/export")
+    @ResponseBody
+    public ResponseEntity<List<QuestionExportDto>> exportByFilter(
+            @RequestParam(required = false) String topic,
+            @RequestParam(required = false) Integer difficulty,
+            @RequestParam(required = false) String executionMode) {
+        List<QuestionExportDto> data = importExportService.exportByFilter(topic, difficulty, executionMode);
+        String filename = "passql-questions-" + LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) + ".json";
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(data);
+    }
+
+    /**
+     * 선택 UUID 기반 내보내기 (JSON 파일 다운로드).
+     */
+    @PostMapping("/export")
+    @ResponseBody
+    public ResponseEntity<List<QuestionExportDto>> exportByUuids(@RequestBody ExportRequest request) {
+        List<QuestionExportDto> data = importExportService.exportByUuids(request.questionUuids());
+        String filename = "passql-questions-" + LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) + ".json";
+        return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(data);
+    }
+
+    /**
+     * 배치 Sandbox 검증 (가져오기 전 미리보기).
+     */
+    @PostMapping("/import/validate")
+    @ResponseBody
+    public ResponseEntity<ImportValidationResult> validateImport(@RequestBody List<QuestionExportDto> items) {
+        ImportValidationResult result = importExportService.validateBatch(items);
+        return ResponseEntity.ok(result);
+    }
+
+    /**
+     * 검증 후 실제 등록/업데이트.
+     */
+    @PostMapping("/import")
+    @ResponseBody
+    public ResponseEntity<ImportResult> importBatch(@RequestBody ImportRequest request) {
+        ImportResult result = importExportService.importBatch(request);
+        return ResponseEntity.ok(result);
     }
 
     /**

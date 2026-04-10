@@ -1,11 +1,32 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-10T05:04:59Z",
-    "currentVersion": "0.0.38",
+    "lastUpdated": "2026-04-10T05:54:38Z",
+    "currentVersion": "0.0.39",
     "projectType": "basic",
-    "totalReleases": 9
+    "totalReleases": 10
   },
   "releases": [
+    {
+      "version": "0.0.39",
+      "project_type": "basic",
+      "date": "2026-04-10",
+      "pr_number": 63,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트 v0.0.39\n\n* **새로운 기능**\n  * 문제 일괄 가져오기/내보내기 기능 추가\n  * JSON 파일을 통한 문제 가져오기 및 검증 기능 추가\n  * 가져오기 전 상세 검증 결과 모달 제공\n  * 필터 기반 내보내기 및 선택 문제 내보내기 지원\n  * 복수 선택 체크박스 UI 개선\n  * 실행 모드별 스키마 영역 자동 표시/숨김 기능 추가",
+      "parsed_changes": {
+        "새로운_기능": {
+          "title": "새로운 기능",
+          "items": [
+            "문제 일괄 가져오기/내보내기 기능 추가",
+            "JSON 파일을 통한 문제 가져오기 및 검증 기능 추가",
+            "가져오기 전 상세 검증 결과 모달 제공",
+            "필터 기반 내보내기 및 선택 문제 내보내기 지원",
+            "복수 선택 체크박스 UI 개선",
+            "실행 모드별 스키마 영역 자동 표시/숨김 기능 추가"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.38",
       "project_type": "basic",
