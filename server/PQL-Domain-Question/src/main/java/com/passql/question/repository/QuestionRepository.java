@@ -53,4 +53,7 @@ public interface QuestionRepository extends JpaRepository<Question, UUID> {
 
     @Query("SELECT q.questionUuid FROM Question q WHERE q.isActive = true AND q.choiceSetPolicy = com.passql.question.constant.ChoiceSetPolicy.AI_ONLY")
     List<UUID> findActiveAiOnlyUuids();
+
+    @Query(value = "SELECT q.topic_uuid, COUNT(*) FROM question q WHERE q.is_active = true GROUP BY q.topic_uuid", nativeQuery = true)
+    List<Object[]> countActiveByTopic();
 }

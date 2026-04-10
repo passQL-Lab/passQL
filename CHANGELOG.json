@@ -1,11 +1,148 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-10T06:47:04Z",
-    "currentVersion": "0.0.40",
+    "lastUpdated": "2026-04-10T15:09:49Z",
+    "currentVersion": "0.0.49",
     "projectType": "basic",
-    "totalReleases": 11
+    "totalReleases": 15
   },
   "releases": [
+    {
+      "version": "0.0.49",
+      "project_type": "basic",
+      "date": "2026-04-10",
+      "pr_number": 84,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트 (v0.0.49)\n\n* **새로운 기능**\n  * 선택지 자동 생성 기능 추가\n  * 생성 진행 상황 실시간 표시\n  \n* **버그 수정**\n  * 선택지 생성 시 오류 처리 개선\n  * 생성 실패 시 재시도 기능 추가",
+      "parsed_changes": {
+        "새로운_기능": {
+          "title": "새로운 기능",
+          "items": [
+            "선택지 자동 생성 기능 추가",
+            "생성 진행 상황 실시간 표시"
+          ]
+        },
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "선택지 생성 시 오류 처리 개선",
+            "생성 실패 시 재시도 기능 추가"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
+    {
+      "version": "0.0.48",
+      "project_type": "basic",
+      "date": "2026-04-10",
+      "pr_number": 82,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **New Features**\n  * AI가 생성한 학습 분석 코멘트 추가\n  * 주제별 학습 통계 및 시각화 개선\n  * 선택지 생성 기능 (스트리밍 지원)\n  * SQL 실행 결과 비교 기능\n\n* **Improvements**\n  * 스키마 뷰어 레이아웃 및 간격 개선\n  * 통계 대시보드 컴포넌트 개선\n\n* **Chores**\n  * 버전 업데이트 (v0.0.48)",
+      "parsed_changes": {
+        "new_features": {
+          "title": "New Features",
+          "items": [
+            "AI가 생성한 학습 분석 코멘트 추가",
+            "주제별 학습 통계 및 시각화 개선",
+            "선택지 생성 기능 (스트리밍 지원)",
+            "SQL 실행 결과 비교 기능"
+          ]
+        },
+        "improvements": {
+          "title": "Improvements",
+          "items": [
+            "스키마 뷰어 레이아웃 및 간격 개선",
+            "통계 대시보드 컴포넌트 개선"
+          ]
+        },
+        "chores": {
+          "title": "Chores",
+          "items": [
+            "버전 업데이트 (v0.0.48)"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
+    {
+      "version": "0.0.45",
+      "project_type": "basic",
+      "date": "2026-04-10",
+      "pr_number": 76,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새로운 기능**\n  * 실행 가능한 문제에 SQL 실행기 추가\n  * 문제 카테고리 그리드를 통한 주제별 탐색 지원\n  * 스키마 및 샘플 데이터 시각화 기능 추가\n  * 실행 결과를 표로 표시하는 결과 테이블 컴포넌트\n  * 주제별 학습 통계 및 AI 코멘트 생성 기능\n\n* **개선 사항**\n  * 답안 피드백 화면 재설계\n  * 버전 정보 업데이트 (v0.0.45)",
+      "parsed_changes": {
+        "새로운_기능": {
+          "title": "새로운 기능",
+          "items": [
+            "실행 가능한 문제에 SQL 실행기 추가",
+            "문제 카테고리 그리드를 통한 주제별 탐색 지원",
+            "스키마 및 샘플 데이터 시각화 기능 추가",
+            "실행 결과를 표로 표시하는 결과 테이블 컴포넌트",
+            "주제별 학습 통계 및 AI 코멘트 생성 기능"
+          ]
+        },
+        "개선_사항": {
+          "title": "개선 사항",
+          "items": [
+            "답안 피드백 화면 재설계",
+            "버전 정보 업데이트 (v0.0.45)"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
+    {
+      "version": "0.0.43",
+      "project_type": "basic",
+      "date": "2026-04-10",
+      "pr_number": 72,
+      "raw_summary": "## Summary by CodeRabbit\n\n## Release Notes v0.0.43\n\n**New Features**\n- Added 30-day learning heatmap calendar showing daily progress\n- Introduced exam readiness score card with preparation metrics\n- Created category-based practice sessions with step-by-step result summary\n- Enhanced home page with personalized greeting and today's recommended question\n- Added similar question suggestions in answer feedback sections\n- Implemented mobile joystick control for interactive 3D statistics chart\n- Redesigned stats page with radar chart and category performance analysis\n\n**Bug Fixes**\n- Corrected API request field naming to camelCase convention\n\n**Chores**\n- Updated application version to 0.0.43\n- Updated favicon to PNG format\n- Added recharts visualization library dependency",
+      "parsed_changes": {
+        "added_30_day_learning_heatmap_calendar_showing_daily_progress": {
+          "title": "Added 30-day learning heatmap calendar showing daily progress",
+          "items": []
+        },
+        "introduced_exam_readiness_score_card_with_preparation_metrics": {
+          "title": "Introduced exam readiness score card with preparation metrics",
+          "items": []
+        },
+        "created_category_based_practice_sessions_with_step_by_step_result_summary": {
+          "title": "Created category-based practice sessions with step-by-step result summary",
+          "items": []
+        },
+        "enhanced_home_page_with_personalized_greeting_and_today_s_recommended_question": {
+          "title": "Enhanced home page with personalized greeting and today's recommended question",
+          "items": []
+        },
+        "added_similar_question_suggestions_in_answer_feedback_sections": {
+          "title": "Added similar question suggestions in answer feedback sections",
+          "items": []
+        },
+        "implemented_mobile_joystick_control_for_interactive_3d_statistics_chart": {
+          "title": "Implemented mobile joystick control for interactive 3D statistics chart",
+          "items": []
+        },
+        "redesigned_stats_page_with_radar_chart_and_category_performance_analysis": {
+          "title": "Redesigned stats page with radar chart and category performance analysis",
+          "items": []
+        },
+        "corrected_api_request_field_naming_to_camelcase_convention": {
+          "title": "Corrected API request field naming to camelCase convention",
+          "items": []
+        },
+        "updated_application_version_to_0_0_43": {
+          "title": "Updated application version to 0.0.43",
+          "items": []
+        },
+        "updated_favicon_to_png_format": {
+          "title": "Updated favicon to PNG format",
+          "items": []
+        },
+        "added_recharts_visualization_library_dependency": {
+          "title": "Added recharts visualization library dependency",
+          "items": []
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.40",
       "project_type": "basic",

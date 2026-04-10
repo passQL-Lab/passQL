@@ -3,6 +3,7 @@ package com.passql.web.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.passql.application.service.HomeService;
 import com.passql.common.exception.CustomException;
+import com.passql.common.exception.constant.ErrorCode;
 import com.passql.question.dto.ChoiceSetGenerateResponse;
 import com.passql.question.dto.ExecuteResult;
 import com.passql.question.dto.QuestionDetail;
@@ -82,6 +83,9 @@ public class QuestionController implements QuestionControllerDocs {
         @RequestBody Map<String, String> body
     ) {
         String sql = body.get("sql");
+        if (sql == null || sql.isBlank()) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
         return ResponseEntity.ok(sandboxExecutor.execute(questionUuid.toString(), sql));
     }
 

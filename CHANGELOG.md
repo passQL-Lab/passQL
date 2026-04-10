@@ -1,7 +1,85 @@
 # Changelog
 
-**현재 버전:** 0.0.40  
-**마지막 업데이트:** 2026-04-10T06:47:04Z  
+**현재 버전:** 0.0.49  
+**마지막 업데이트:** 2026-04-10T15:09:49Z  
+
+---
+
+## [0.0.49] - 2026-04-10
+
+**PR:** #84  
+
+**새로운 기능**
+- 선택지 자동 생성 기능 추가
+- 생성 진행 상황 실시간 표시
+
+**버그 수정**
+- 선택지 생성 시 오류 처리 개선
+- 생성 실패 시 재시도 기능 추가
+
+---
+
+## [0.0.48] - 2026-04-10
+
+**PR:** #82  
+
+**New Features**
+- AI가 생성한 학습 분석 코멘트 추가
+- 주제별 학습 통계 및 시각화 개선
+- 선택지 생성 기능 (스트리밍 지원)
+- SQL 실행 결과 비교 기능
+
+**Improvements**
+- 스키마 뷰어 레이아웃 및 간격 개선
+- 통계 대시보드 컴포넌트 개선
+
+**Chores**
+- 버전 업데이트 (v0.0.48)
+
+---
+
+## [0.0.45] - 2026-04-10
+
+**PR:** #76  
+
+**새로운 기능**
+- 실행 가능한 문제에 SQL 실행기 추가
+- 문제 카테고리 그리드를 통한 주제별 탐색 지원
+- 스키마 및 샘플 데이터 시각화 기능 추가
+- 실행 결과를 표로 표시하는 결과 테이블 컴포넌트
+- 주제별 학습 통계 및 AI 코멘트 생성 기능
+
+**개선 사항**
+- 답안 피드백 화면 재설계
+- 버전 정보 업데이트 (v0.0.45)
+
+---
+
+## [0.0.43] - 2026-04-10
+
+**PR:** #72  
+
+**Added 30-day learning heatmap calendar showing daily progress**
+
+**Introduced exam readiness score card with preparation metrics**
+
+**Created category-based practice sessions with step-by-step result summary**
+
+**Enhanced home page with personalized greeting and today's recommended question**
+
+**Added similar question suggestions in answer feedback sections**
+
+**Implemented mobile joystick control for interactive 3D statistics chart**
+
+**Redesigned stats page with radar chart and category performance analysis**
+
+**Corrected API request field naming to camelCase convention**
+
+**Updated application version to 0.0.43**
+
+**Updated favicon to PNG format**
+
+**Added recharts visualization library dependency**
 
 ---
 

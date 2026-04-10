@@ -19,6 +19,7 @@ import com.passql.submission.repository.ExecutionLogRepository;
 import com.passql.submission.repository.SubmissionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,7 +30,7 @@ import java.util.UUID;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class SubmissionService {
     private final SubmissionRepository submissionRepository;
     private final QuestionChoiceSetRepository choiceSetRepository;
@@ -37,7 +38,10 @@ public class SubmissionService {
     private final QuestionRepository questionRepository;
     private final ExecutionLogRepository executionLogRepository;
     private final SandboxExecutor sandboxExecutor;
+    // AI 코멘트 캐시 무효화용 (submit 완료 시 evict)
+    private final RedisTemplate<String, Object> redisTemplate;
 
+    @Transactional
     public SubmitResult submit(UUID memberUuid, UUID questionUuid, UUID choiceSetId, String selectedChoiceKey) {
         // 1. ChoiceSet 조회
         QuestionChoiceSet choiceSet = choiceSetRepository.findById(choiceSetId)
@@ -93,6 +97,9 @@ public class SubmissionService {
             }
         }
 
+        // 7. AI 코멘트 캐시 무효화 (새 Submission 발생 시 즉시 evict)
+        redisTemplate.delete("ai-comment:" + memberUuid);
+
         return new SubmitResult(
                 isCorrect,
                 correct != null ? correct.getChoiceKey() : null,
@@ -104,17 +111,14 @@ public class SubmissionService {
         );
     }
 
-    @Transactional(readOnly = true)
     public List<Submission> getSubmissionsByMember(UUID memberUuid) {
         return submissionRepository.findByMemberUuidOrderBySubmittedAtDesc(memberUuid);
     }
 
-    @Transactional(readOnly = true)
     public List<ExecutionLog> getRecentLogs() {
         return executionLogRepository.findTop20ByOrderByExecutedAtDesc();
     }
 
-    @Transactional(readOnly = true)
     public MonitorStats getStats24h() {
         LocalDateTime since = LocalDateTime.now().minusHours(24);
         List<ExecutionLog> logs = executionLogRepository.findByExecutedAtAfter(since);

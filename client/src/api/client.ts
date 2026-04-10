@@ -44,6 +44,7 @@ export async function apiFetch<T>(
       log("RES", method, path, mock);
       return mock as T;
     }
+    if (IS_DEV) console.warn(`[MOCK MISS] ${method} ${path} — mock 핸들러 없음, 실제 API로 fallthrough`);
   }
 
   const controller = new AbortController();

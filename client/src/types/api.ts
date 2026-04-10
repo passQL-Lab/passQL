@@ -4,16 +4,39 @@ export type ChoiceKind = "SQL" | "TEXT";
 
 export interface QuestionSummary {
   readonly questionUuid: string;
+  readonly topicCode: string;
   readonly topicName: string;
   readonly difficulty: number;
+  readonly executionMode: ExecutionMode;
   readonly stemPreview: string;
+  readonly createdAt: string;
 }
 
 export interface ChoiceItem {
   readonly key: string;
   readonly kind: ChoiceKind;
   readonly body: string;
+  readonly isCorrect: boolean;
+  readonly rationale: string;
   readonly sortOrder: number;
+}
+
+export type ChoiceSetSource =
+  | "AI_RUNTIME"
+  | "AI_PREFETCH"
+  | "AI_ADMIN_PREVIEW"
+  | "ADMIN_SEED"
+  | "ADMIN_CURATED";
+
+export type ChoiceSetStatus = "OK" | "DISABLED" | "REPORTED" | "DRAFT" | "FAILED";
+
+export interface ChoiceSetSummary {
+  readonly choiceSetUuid: string;
+  readonly source: ChoiceSetSource;
+  readonly status: ChoiceSetStatus;
+  readonly sandboxValidationPassed: boolean;
+  readonly createdAt: string;
+  readonly items: readonly ChoiceItem[];
 }
 
 export interface QuestionDetail {
@@ -24,12 +47,43 @@ export interface QuestionDetail {
   readonly executionMode: ExecutionMode;
   readonly stem: string;
   readonly schemaDisplay: string;
+  readonly schemaDdl: string;
+  readonly schemaSampleData: string;
+  readonly schemaIntent: string;
+  readonly answerSql: string;
+  readonly hint: string;
+  readonly choiceSets: readonly ChoiceSetSummary[];
 }
 
 export interface SubmitResult {
   readonly isCorrect: boolean;
   readonly correctKey: string;
   readonly rationale: string;
+  // EXECUTABLE 문제일 때만 non-null, CONCEPT_ONLY는 null
+  readonly selectedResult: ExecuteResult | null;
+  readonly correctResult: ExecuteResult | null;
+  readonly selectedSql: string | null;
+  readonly correctSql: string | null;
+}
+
+// === SSE (선택지 생성) ===
+export type SseStatusPhase = "generating" | "validating";
+
+export interface SseStatusEvent {
+  readonly phase: SseStatusPhase;
+  readonly message: string;
+}
+
+export interface SseErrorEvent {
+  readonly code: string;
+  readonly message: string;
+  readonly retryable: boolean;
+}
+
+export interface ChoiceSetGenerateResponse {
+  readonly choiceSetId: string;
+  // isCorrect, rationale은 사용자 정답 노출 방지를 위해 제외됨
+  readonly choices: readonly ChoiceItem[];
 }
 
 export interface ExecuteResult {
@@ -55,31 +109,101 @@ export interface Page<T> {
 }
 
 // === Progress ===
+export type ToneKey =
+  | "NO_EXAM"
+  | "ONBOARDING"
+  | "POST_EXAM"
+  | "TODAY"
+  | "SPRINT"
+  | "PUSH"
+  | "STEADY"
+  | "EARLY";
+
+export interface ReadinessResponse {
+  readonly score: number;
+  readonly accuracy: number;
+  readonly coverage: number;
+  readonly recency: number;
+  readonly lastStudiedAt: string | null;
+  readonly recentAttemptCount: number;
+  readonly coveredTopicCount: number;
+  readonly activeTopicCount: number;
+  readonly daysUntilExam: number | null;
+  readonly toneKey: ToneKey;
+}
+
 export interface ProgressResponse {
   readonly solvedCount: number;
   readonly correctRate: number;
   readonly streakDays: number;
+  readonly readiness: ReadinessResponse | null;
+}
+
+export interface CategoryStats {
+  readonly code: string;
+  readonly displayName: string;
+  readonly correctRate: number;
+  readonly solvedCount: number;
+}
+
+// === Topic Analysis (Issue #79) ===
+export interface TopicStat {
+  readonly topicUuid: string;
+  readonly displayName: string;
+  readonly totalQuestionCount: number;
+  readonly correctRate: number;
+  readonly solvedCount: number;
+}
+
+export interface TopicAnalysisResponse {
+  readonly topicStats: readonly TopicStat[];
+}
+
+export interface AiCommentResponse {
+  readonly comment: string;
+  readonly generatedAt: string;
+}
+
+// === Heatmap ===
+export interface HeatmapEntry {
+  readonly date: string;
+  readonly solvedCount: number;
+  readonly correctCount: number;
+}
+
+export interface HeatmapResponse {
+  readonly entries: readonly HeatmapEntry[];
 }
 
 // === Meta ===
 export interface SubtopicItem {
   readonly code: string;
   readonly displayName: string;
+  readonly sortOrder: number;
+  readonly isActive: boolean;
 }
 
 export interface TopicTree {
+  readonly topicUuid: string;
   readonly code: string;
   readonly displayName: string;
+  readonly sortOrder: number;
+  readonly isActive: boolean;
   readonly subtopics: readonly SubtopicItem[];
 }
 
 export interface ConceptTag {
+  readonly conceptTagUuid: string;
   readonly tagKey: string;
   readonly labelKo: string;
   readonly category: string;
   readonly description: string;
   readonly isActive: boolean;
   readonly sortOrder: number;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly createdBy: string;
+  readonly updatedBy: string;
 }
 
 // === AI ===
@@ -119,12 +243,12 @@ export interface NicknameRegenerateResponse {
 export interface ExplainErrorPayload {
   readonly questionUuid: string;
   readonly sql: string;
-  readonly error_message: string;
+  readonly errorMessage: string;
 }
 
 export interface DiffExplainPayload {
-  readonly question_id: number;
-  readonly selected_key: string;
+  readonly questionUuid: string;
+  readonly selectedChoiceKey: string;
 }
 
 // === Today / Recommendations ===
@@ -138,8 +262,12 @@ export interface RecommendationsResponse {
 }
 
 // === Home ===
+export type GreetingMessageType = "GENERAL" | "EXAM_DAY" | "URGENT" | "COUNTDOWN";
+
 export interface GreetingResponse {
+  readonly nickname: string;
   readonly message: string;
+  readonly messageType: GreetingMessageType;
 }
 
 // === ExamSchedule ===
@@ -151,26 +279,25 @@ export interface ExamScheduleResponse {
   readonly isSelected: boolean;
 }
 
-// === AI 선택지 생성 SSE ===
-export type ChoiceGenerationPhase = "generating" | "validating";
-
-export interface ChoiceGenerationStatus {
-  readonly phase: ChoiceGenerationPhase;
-  readonly message: string;
-}
-
-export interface ChoiceSetComplete {
-  readonly choiceSetId: string;
-  readonly choices: readonly ChoiceItem[];
-}
-
-export interface ChoiceGenerationError {
-  readonly code: string;
-  readonly message: string;
-  readonly retryable: boolean;
-}
-
-export interface SubmitPayload {
-  readonly choiceSetId: string;
+// === Practice ===
+export interface PracticeQuestionResult {
+  readonly questionUuid: string;
+  readonly isCorrect: boolean;
   readonly selectedChoiceKey: string;
+  readonly durationMs: number;
 }
+
+export interface PracticeSubmitPayload {
+  readonly topicCode: string;
+  readonly results: readonly PracticeQuestionResult[];
+}
+
+export interface PracticeAnalysis {
+  readonly correctCount: number;
+  readonly totalCount: number;
+  readonly totalDurationMs: number;
+  readonly greeting: string;
+  readonly analysis: string;
+  readonly tip: string;
+}
+

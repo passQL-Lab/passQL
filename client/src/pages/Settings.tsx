@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Copy, Check, RefreshCw } from "lucide-react";
 import { useMemberStore } from "../stores/memberStore";
+import logo from "../assets/logo/logo.png";
 import { useRegenerateNickname } from "../hooks/useMember";
 
 export default function Settings() {
@@ -73,9 +74,9 @@ export default function Settings() {
         </div>
       </div>
 
-      <div className="text-center mt-8 space-y-1">
-        <p className="text-[13px]" style={{ color: "#D1D5DB" }}>passQL</p>
-        <p className="text-xs" style={{ color: "#D1D5DB" }}>Powered by Vite + React</p>
+      <div className="text-center mt-8 space-y-2">
+        <img src={logo} alt="passQL" className="h-5 w-auto mx-auto" />
+        <p className="text-xs text-text-caption">© 2026 passQL. All rights reserved.</p>
       </div>
     </div>
   );

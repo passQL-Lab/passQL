@@ -8,7 +8,7 @@
 > 매번 새로운 문제, 매번 진짜 실습.
 
 <!-- AUTO-VERSION-SECTION: DO NOT EDIT MANUALLY -->
-## 최신 버전 : v0.0.40 (2026-04-10)
+## 최신 버전 : v0.0.49 (2026-04-10)
 
 [전체 버전 기록 보기](CHANGELOG.md)
 

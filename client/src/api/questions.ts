@@ -1,5 +1,4 @@
 import { apiFetch } from "./client";
-import { generateChoicesMock } from "./mock-data";
 import { getMemberUuid } from "../stores/memberStore";
 import type {
   Page,
@@ -9,13 +8,10 @@ import type {
   ExecuteResult,
   TodayQuestionResponse,
   RecommendationsResponse,
-  ChoiceGenerationStatus,
-  ChoiceSetComplete,
-  ChoiceGenerationError,
+  SseStatusEvent,
+  SseErrorEvent,
+  ChoiceSetGenerateResponse,
 } from "../types/api";
-
-const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true";
-const BASE_URL = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? "/api";
 
 interface QuestionListParams {
   readonly page?: number;
@@ -63,6 +59,85 @@ export function fetchRecommendations(
   return apiFetch(`/questions/recommendations${qs ? `?${qs}` : ""}`);
 }
 
+// SSE로 AI 선택지를 생성하고 choiceSetId를 받는다.
+// EventSource는 커스텀 헤더를 지원하지 않으므로 fetch + ReadableStream 방식 사용.
+// 반환값: cleanup 함수 (컴포넌트 unmount 시 호출해 스트림을 중단).
+export function generateChoices(
+  questionUuid: string,
+  callbacks: {
+    readonly onStatus: (event: SseStatusEvent) => void;
+    readonly onComplete: (response: ChoiceSetGenerateResponse) => void;
+    readonly onError: (event: SseErrorEvent) => void;
+  },
+): () => void {
+  const abortController = new AbortController();
+
+  (async () => {
+    try {
+      const response = await fetch(
+        `/api/questions/${questionUuid}/generate-choices`,
+        {
+          method: "POST",
+          headers: {
+            "X-Member-UUID": getMemberUuid(),
+            Accept: "text/event-stream",
+          },
+          signal: abortController.signal,
+        },
+      );
+
+      // HTTP 에러 응답 처리 (4xx/5xx)
+      if (!response.ok) {
+        callbacks.onError({ code: `HTTP_${response.status}`, message: `서버 오류 (${response.status})`, retryable: response.status >= 500 });
+        return;
+      }
+
+      if (!response.body) return;
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        // SSE는 빈 줄(\n\n)로 이벤트를 구분
+        const chunks = buffer.split("\n\n");
+        buffer = chunks.pop() ?? "";
+
+        for (const chunk of chunks) {
+          const eventMatch = chunk.match(/^event: (\w+)/m);
+          const dataMatch = chunk.match(/^data: (.+)/m);
+          if (!eventMatch || !dataMatch) continue;
+
+          const eventName = eventMatch[1];
+          // 잘못된 JSON을 받으면 스트림 전체가 중단되지 않도록 방어
+          let data: unknown;
+          try {
+            data = JSON.parse(dataMatch[1]);
+          } catch {
+            callbacks.onError({ code: "PARSE_ERROR", message: "잘못된 응답 형식", retryable: false });
+            return;
+          }
+
+          if (eventName === "status") callbacks.onStatus(data as SseStatusEvent);
+          else if (eventName === "complete") callbacks.onComplete(data as ChoiceSetGenerateResponse);
+          else if (eventName === "error") callbacks.onError(data as SseErrorEvent);
+        }
+      }
+    } catch (err) {
+      // AbortError는 정상 cleanup이므로 무시
+      if (err instanceof Error && err.name !== "AbortError") {
+        callbacks.onError({ code: "STREAM_ERROR", message: err.message, retryable: true });
+      }
+    }
+  })();
+
+  return () => abortController.abort();
+}
+
 export function submitAnswer(
   questionUuid: string,
   choiceSetId: string,
@@ -73,143 +148,6 @@ export function submitAnswer(
     headers: { "X-Member-UUID": getMemberUuid() },
     body: JSON.stringify({ choiceSetId, selectedChoiceKey }),
   });
-}
-
-interface ChoiceGenerationCallbacks {
-  readonly onStatus: (status: ChoiceGenerationStatus) => void;
-  readonly onComplete: (result: ChoiceSetComplete) => void;
-  readonly onError: (error: ChoiceGenerationError) => void;
-}
-
-/**
- * POST /questions/{questionUuid}/generate-choices (SSE)
- * Returns a cleanup function — call it to abort the stream.
- */
-export function generateChoices(
-  questionUuid: string,
-  callbacks: ChoiceGenerationCallbacks,
-): () => void {
-  if (USE_MOCK) {
-    return generateChoicesMock(questionUuid, callbacks);
-  }
-
-  const controller = new AbortController();
-
-  (async () => {
-    try {
-      const res = await fetch(
-        `${BASE_URL}/questions/${questionUuid}/generate-choices`,
-        {
-          method: "POST",
-          headers: {
-            "X-Member-UUID": getMemberUuid(),
-            Accept: "text/event-stream",
-            "Content-Type": "application/json",
-          },
-          signal: controller.signal,
-        },
-      );
-
-      if (!res.ok || !res.body) {
-        callbacks.onError({
-          code: "HTTP_ERROR",
-          message: `서버 오류 (${res.status})`,
-          retryable: true,
-        });
-        return;
-      }
-
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = "";
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-
-        // SSE blocks are separated by "\n\n"
-        const blocks = buffer.split("\n\n");
-        buffer = blocks.pop() ?? "";
-
-        for (const block of blocks) {
-          const lines = block.split("\n");
-          let eventType = "";
-          let dataStr = "";
-
-          for (const line of lines) {
-            if (line.startsWith("event: ")) eventType = line.slice(7).trim();
-            if (line.startsWith("data: ")) dataStr = line.slice(6).trim();
-          }
-
-          if (!eventType || !dataStr) continue;
-
-          // Note: Assumes single-line event/data fields per SSE block.
-          // Multi-line data fields (multiple "data:" lines) are not supported.
-          let data: unknown;
-          try {
-            data = JSON.parse(dataStr);
-          } catch {
-            callbacks.onError({
-              code: "JSON_PARSE_ERROR",
-              message: "서버 응답 파싱 오류",
-              retryable: true,
-            });
-            continue;
-          }
-
-          if (eventType === "status") {
-            const status = data as ChoiceGenerationStatus;
-            if (!status.phase || !status.message) {
-              callbacks.onError({ code: "INVALID_RESPONSE", message: "서버 응답 형식 오류", retryable: false });
-              continue;
-            }
-            callbacks.onStatus(status);
-          } else if (eventType === "complete") {
-            const complete = data as ChoiceSetComplete;
-            if (!complete.choiceSetId || !complete.choices) {
-              callbacks.onError({ code: "INVALID_RESPONSE", message: "서버 응답 형식 오류", retryable: false });
-              continue;
-            }
-            callbacks.onComplete(complete);
-          } else if (eventType === "error") {
-            callbacks.onError(data as ChoiceGenerationError);
-          }
-        }
-      }
-
-      // After the while loop, process any remaining buffer
-      if (buffer.trim()) {
-        const lines = buffer.split("\n");
-        let eventType = "";
-        let dataStr = "";
-        for (const line of lines) {
-          if (line.startsWith("event: ")) eventType = line.slice(7).trim();
-          if (line.startsWith("data: ")) dataStr = line.slice(6).trim();
-        }
-        if (eventType && dataStr) {
-          try {
-            const data = JSON.parse(dataStr) as unknown;
-            if (eventType === "status") callbacks.onStatus(data as ChoiceGenerationStatus);
-            else if (eventType === "complete") callbacks.onComplete(data as ChoiceSetComplete);
-            else if (eventType === "error") callbacks.onError(data as ChoiceGenerationError);
-          } catch {
-            // Ignore malformed trailing data
-          }
-        }
-      }
-    } catch (err) {
-      if (err instanceof DOMException && err.name === "AbortError") return;
-      callbacks.onError({
-        code: "NETWORK_ERROR",
-        message: "네트워크 오류가 발생했습니다",
-        retryable: true,
-      });
-    }
-  })();
-
-  return () => controller.abort();
 }
 
 export function executeChoice(

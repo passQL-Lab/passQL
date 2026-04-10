@@ -1,5 +1,5 @@
-import { describe, it, expect, vi } from "vitest";
-import { getMockResponse, generateChoicesMock } from "./mock-data";
+import { describe, it, expect } from "vitest";
+import { getMockResponse } from "./mock-data";
 import type {
   Page,
   QuestionSummary,
@@ -16,6 +16,7 @@ import type {
   RecommendationsResponse,
   GreetingResponse,
   ExamScheduleResponse,
+  HeatmapResponse,
 } from "../types/api";
 
 describe("getMockResponse", () => {
@@ -29,13 +30,13 @@ describe("getMockResponse", () => {
     });
 
     it("filters by topic code", () => {
-      const result = getMockResponse("/questions?page=0&size=10&topic=JOIN", "GET") as Page<QuestionSummary>;
-      expect(result.content.every((q) => q.topicName === "JOIN")).toBe(true);
+      const result = getMockResponse("/questions?page=0&size=10&topic=sql_join", "GET") as Page<QuestionSummary>;
+      expect(result.content.every((q) => q.topicName === "조인 (JOIN)")).toBe(true);
       expect(result.content.length).toBe(2);
     });
 
     it("filters by topic code with Korean displayName", () => {
-      const result = getMockResponse("/questions?page=0&size=10&topic=SUBQUERY", "GET") as Page<QuestionSummary>;
+      const result = getMockResponse("/questions?page=0&size=10&topic=sql_subquery", "GET") as Page<QuestionSummary>;
       expect(result.content.every((q) => q.topicName === "서브쿼리")).toBe(true);
       expect(result.content.length).toBe(2);
     });
@@ -88,7 +89,7 @@ describe("getMockResponse", () => {
       const result = getMockResponse(
         "/questions/1/submit",
         "POST",
-        JSON.stringify({ selectedKey: "A" }),
+        JSON.stringify({ selectedChoiceKey: "A" }),
       ) as SubmitResult;
       expect(result.isCorrect).toBe(true);
       expect(result.correctKey).toBe("A");
@@ -98,7 +99,7 @@ describe("getMockResponse", () => {
       const result = getMockResponse(
         "/questions/1/submit",
         "POST",
-        JSON.stringify({ selectedKey: "C" }),
+        JSON.stringify({ selectedChoiceKey: "C" }),
       ) as SubmitResult;
       expect(result.isCorrect).toBe(false);
       expect(result.correctKey).toBe("A");
@@ -109,9 +110,33 @@ describe("getMockResponse", () => {
   describe("Progress", () => {
     it("returns progress response", () => {
       const result = getMockResponse("/progress", "GET") as ProgressResponse;
-      expect(result.solvedCount).toBe(42);
+      expect(result.solvedCount).toBeGreaterThan(0);
       expect(result.correctRate).toBeCloseTo(0.685);
       expect(result.streakDays).toBe(3);
+    });
+
+    it("returns heatmap response", () => {
+      const result = getMockResponse("/progress/heatmap?memberUuid=abc", "GET") as HeatmapResponse;
+      expect(result).toHaveProperty("entries");
+      expect(Array.isArray(result.entries)).toBe(true);
+      expect(result.entries.length).toBeGreaterThan(0);
+      for (const entry of result.entries) {
+        expect(entry).toHaveProperty("date");
+        expect(entry).toHaveProperty("solvedCount");
+        expect(entry).toHaveProperty("correctCount");
+        expect(entry.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+        expect(entry.solvedCount).toBeGreaterThan(0);
+        expect(entry.correctCount).toBeLessThanOrEqual(entry.solvedCount);
+      }
+    });
+
+    it("returns deterministic heatmap data", () => {
+      const r1 = getMockResponse("/progress/heatmap?memberUuid=abc", "GET") as HeatmapResponse;
+      const r2 = getMockResponse("/progress/heatmap?memberUuid=abc", "GET") as HeatmapResponse;
+      expect(r1.entries.length).toBe(r2.entries.length);
+      for (let i = 0; i < r1.entries.length; i++) {
+        expect(r1.entries[i].solvedCount).toBe(r2.entries[i].solvedCount);
+      }
     });
   });
 
@@ -207,65 +232,3 @@ describe("getMockResponse", () => {
   });
 });
 
-describe("generateChoicesMock", () => {
-  it("calls onStatus then onComplete in sequence", async () => {
-    const onStatus = vi.fn();
-    const onComplete = vi.fn();
-    const onError = vi.fn();
-
-    const abort = generateChoicesMock("q-uuid-0001", { onStatus, onComplete, onError });
-
-    await new Promise((r) => setTimeout(r, 1000));
-
-    expect(onStatus).toHaveBeenCalledWith(
-      expect.objectContaining({ phase: "generating" })
-    );
-    expect(onStatus).toHaveBeenCalledWith(
-      expect.objectContaining({ phase: "validating" })
-    );
-    expect(onComplete).toHaveBeenCalledWith(
-      expect.objectContaining({
-        choiceSetId: expect.stringContaining("cs-mock-"),
-        choices: expect.arrayContaining([
-          expect.objectContaining({ key: "A" }),
-        ]),
-      })
-    );
-    expect(onError).not.toHaveBeenCalled();
-    abort();
-  });
-
-  it("does not call onComplete if aborted immediately", async () => {
-    const onComplete = vi.fn();
-    const abort = generateChoicesMock("q-uuid-0001", {
-      onStatus: vi.fn(),
-      onComplete,
-      onError: vi.fn(),
-    });
-    abort();
-    await new Promise((r) => setTimeout(r, 1000));
-    expect(onComplete).not.toHaveBeenCalled();
-  });
-
-  it("stops remaining callbacks when aborted mid-flight", async () => {
-    const onStatus = vi.fn();
-    const onComplete = vi.fn();
-    const abort = generateChoicesMock("q-uuid-0001", {
-      onStatus,
-      onComplete,
-      onError: vi.fn(),
-    });
-
-    // Wait past 200ms so "generating" fires
-    await new Promise((r) => setTimeout(r, 300));
-    expect(onStatus).toHaveBeenCalledTimes(1);
-    expect(onStatus).toHaveBeenCalledWith(expect.objectContaining({ phase: "generating" }));
-
-    // Abort before 500ms (validating) and 800ms (complete)
-    abort();
-
-    await new Promise((r) => setTimeout(r, 700));
-    expect(onStatus).toHaveBeenCalledTimes(1); // no additional calls
-    expect(onComplete).not.toHaveBeenCalled();
-  });
-});

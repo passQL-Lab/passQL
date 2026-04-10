@@ -75,8 +75,11 @@ public interface QuestionControllerDocs {
   @ApiLogs({
       @ApiLog(date = "2026.04.07", author = Author.SUHSAECHAN, issueNumber = 1, description = "SQL 실행(테스트) API 추가"),
       @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 22, description = "PathVariable: Long id → UUID questionUuid"),
+      @ApiLog(date = "2026.04.10", author = Author.SUHSAECHAN, issueNumber = 70, description = "QuestionExecutionService 경유로 전환: sandboxDbName 기반 실행, CONCEPT_ONLY 에러 처리 추가"),
   })
-  @Operation(summary = "SQL 실행 (테스트)")
+  @Operation(summary = "SQL 실행",
+      description = "EXECUTABLE 문제만 허용. body: { \"sql\": \"SELECT ...\" }. " +
+          "CONCEPT_ONLY 문제에 호출 시 400 INVALID_EXECUTION_MODE 반환.")
   ResponseEntity<ExecuteResult> executeChoice(
       @PathVariable UUID questionUuid,
       @RequestBody Map<String, String> body
