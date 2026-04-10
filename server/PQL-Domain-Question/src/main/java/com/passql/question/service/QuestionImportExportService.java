@@ -42,7 +42,9 @@ public class QuestionImportExportService {
     public List<QuestionExportDto> exportByFilter(String topicCode, Integer difficulty, String executionMode) {
         UUID topicUuid = null;
         if (topicCode != null && !topicCode.isBlank()) {
-            topicUuid = topicRepository.findByCode(topicCode).map(Topic::getTopicUuid).orElse(null);
+            topicUuid = topicRepository.findByCode(topicCode)
+                    .map(Topic::getTopicUuid)
+                    .orElseThrow(() -> new CustomException(ErrorCode.TOPIC_NOT_FOUND));
         }
         ExecutionMode mode = parseExecutionModeSafe(executionMode);
 
