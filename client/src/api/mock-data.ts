@@ -22,18 +22,111 @@ import type {
 } from "../types/api";
 
 const MOCK_TOPICS: readonly TopicTree[] = [
-  { topicUuid: "topic-uuid-001", code: "JOIN", displayName: "JOIN", sortOrder: 1, isActive: true, subtopics: [{ code: "INNER_JOIN", displayName: "INNER JOIN", sortOrder: 1, isActive: true }, { code: "LEFT_JOIN", displayName: "LEFT JOIN", sortOrder: 2, isActive: true }] },
-  { topicUuid: "topic-uuid-002", code: "SUBQUERY", displayName: "서브쿼리", sortOrder: 2, isActive: true, subtopics: [] },
-  { topicUuid: "topic-uuid-003", code: "GROUP_BY", displayName: "GROUP BY", sortOrder: 3, isActive: true, subtopics: [] },
-  { topicUuid: "topic-uuid-004", code: "DDL", displayName: "DDL", sortOrder: 4, isActive: true, subtopics: [] },
-  { topicUuid: "topic-uuid-005", code: "CONSTRAINT", displayName: "제약조건", sortOrder: 5, isActive: true, subtopics: [] },
-  { topicUuid: "topic-uuid-006", code: "WHERE", displayName: "WHERE", sortOrder: 6, isActive: true, subtopics: [] },
-  { topicUuid: "topic-uuid-007", code: "ORDER_BY", displayName: "ORDER BY", sortOrder: 7, isActive: true, subtopics: [] },
-  { topicUuid: "topic-uuid-008", code: "DML", displayName: "DML", sortOrder: 8, isActive: true, subtopics: [] },
-  { topicUuid: "topic-uuid-009", code: "WINDOW", displayName: "윈도우 함수", sortOrder: 9, isActive: true, subtopics: [] },
-  { topicUuid: "topic-uuid-010", code: "INDEX", displayName: "인덱스", sortOrder: 10, isActive: true, subtopics: [] },
-  { topicUuid: "topic-uuid-011", code: "TRANSACTION", displayName: "트랜잭션", sortOrder: 11, isActive: true, subtopics: [] },
-  { topicUuid: "topic-uuid-012", code: "NORMALIZATION", displayName: "정규화", sortOrder: 12, isActive: true, subtopics: [] },
+  {
+    topicUuid: "topic-uuid-001",
+    code: "data_modeling",
+    displayName: "데이터 모델링의 이해",
+    sortOrder: 1,
+    isActive: true,
+    subtopics: [],
+  },
+  {
+    topicUuid: "topic-uuid-002",
+    code: "sql_basic_select",
+    displayName: "SELECT 기본",
+    sortOrder: 2,
+    isActive: true,
+    subtopics: [
+      { code: "select_basic", displayName: "SELECT 문 구조", sortOrder: 1, isActive: true },
+      { code: "where_clause", displayName: "WHERE 절", sortOrder: 2, isActive: true },
+      { code: "order_by", displayName: "ORDER BY", sortOrder: 3, isActive: true },
+    ],
+  },
+  {
+    topicUuid: "topic-uuid-003",
+    code: "sql_ddl_dml_tcl",
+    displayName: "DDL / DML / TCL",
+    sortOrder: 3,
+    isActive: true,
+    subtopics: [
+      { code: "ddl", displayName: "DDL (CREATE/ALTER/DROP)", sortOrder: 1, isActive: true },
+      { code: "dml", displayName: "DML (INSERT/UPDATE/DELETE)", sortOrder: 2, isActive: true },
+      { code: "tcl", displayName: "TCL (COMMIT/ROLLBACK)", sortOrder: 3, isActive: true },
+      { code: "constraint", displayName: "제약조건", sortOrder: 4, isActive: true },
+    ],
+  },
+  {
+    topicUuid: "topic-uuid-004",
+    code: "sql_function",
+    displayName: "SQL 함수 (문자/숫자/날짜/NULL)",
+    sortOrder: 4,
+    isActive: true,
+    subtopics: [
+      { code: "string_func", displayName: "문자 함수", sortOrder: 1, isActive: true },
+      { code: "numeric_func", displayName: "숫자 함수", sortOrder: 2, isActive: true },
+      { code: "date_func", displayName: "날짜 함수", sortOrder: 3, isActive: true },
+      { code: "null_func", displayName: "NULL 관련 함수", sortOrder: 4, isActive: true },
+    ],
+  },
+  {
+    topicUuid: "topic-uuid-005",
+    code: "sql_join",
+    displayName: "조인 (JOIN)",
+    sortOrder: 5,
+    isActive: true,
+    subtopics: [
+      { code: "inner_join", displayName: "INNER JOIN", sortOrder: 1, isActive: true },
+      { code: "outer_join", displayName: "OUTER JOIN", sortOrder: 2, isActive: true },
+      { code: "self_join", displayName: "SELF JOIN", sortOrder: 3, isActive: true },
+      { code: "cross_join", displayName: "CROSS JOIN", sortOrder: 4, isActive: true },
+    ],
+  },
+  {
+    topicUuid: "topic-uuid-006",
+    code: "sql_subquery",
+    displayName: "서브쿼리",
+    sortOrder: 6,
+    isActive: true,
+    subtopics: [
+      { code: "scalar_subquery", displayName: "스칼라 서브쿼리", sortOrder: 1, isActive: true },
+      { code: "inline_view", displayName: "인라인 뷰", sortOrder: 2, isActive: true },
+      { code: "correlated_subquery", displayName: "상관 서브쿼리", sortOrder: 3, isActive: true },
+    ],
+  },
+  {
+    topicUuid: "topic-uuid-007",
+    code: "sql_group_aggregate",
+    displayName: "그룹함수 / 집계",
+    sortOrder: 7,
+    isActive: true,
+    subtopics: [
+      { code: "group_by", displayName: "GROUP BY", sortOrder: 1, isActive: true },
+      { code: "having", displayName: "HAVING", sortOrder: 2, isActive: true },
+      { code: "aggregate_func", displayName: "집계 함수", sortOrder: 3, isActive: true },
+    ],
+  },
+  {
+    topicUuid: "topic-uuid-008",
+    code: "sql_window",
+    displayName: "윈도우 함수",
+    sortOrder: 8,
+    isActive: true,
+    subtopics: [
+      { code: "rank_func", displayName: "순위 함수 (RANK/ROW_NUMBER)", sortOrder: 1, isActive: true },
+      { code: "window_aggregate", displayName: "윈도우 집계", sortOrder: 2, isActive: true },
+    ],
+  },
+  {
+    topicUuid: "topic-uuid-009",
+    code: "sql_hierarchy_pivot",
+    displayName: "계층 쿼리 / PIVOT",
+    sortOrder: 9,
+    isActive: true,
+    subtopics: [
+      { code: "connect_by", displayName: "계층 쿼리 (CONNECT BY)", sortOrder: 1, isActive: true },
+      { code: "pivot", displayName: "PIVOT / UNPIVOT", sortOrder: 2, isActive: true },
+    ],
+  },
 ];
 
 const MOCK_CHOICES: readonly ChoiceItem[] = [
