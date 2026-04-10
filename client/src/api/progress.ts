@@ -3,9 +3,8 @@ import { getMemberUuid } from "../stores/memberStore";
 import type { ProgressSummary, HeatmapEntry } from "../types/api";
 
 export function fetchProgress(): Promise<ProgressSummary> {
-  return apiFetch("/progress", {
-    headers: { "X-User-UUID": getMemberUuid() },
-  });
+  const params = new URLSearchParams({ memberUuid: getMemberUuid() });
+  return apiFetch(`/progress?${params}`);
 }
 
 export function fetchHeatmap(): Promise<HeatmapEntry[]> {

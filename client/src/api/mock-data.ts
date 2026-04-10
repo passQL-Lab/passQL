@@ -54,6 +54,18 @@ const MOCK_PROGRESS: ProgressSummary = {
   solved: 42,
   correctRate: 68.5,
   streakDays: 3,
+  readiness: {
+    score: 0.52,
+    accuracy: 0.685,
+    coverage: 0.6,
+    recency: 1.0,
+    lastStudiedAt: new Date().toISOString(),
+    recentAttemptCount: 42,
+    coveredTopicCount: 3,
+    activeTopicCount: 5,
+    daysUntilExam: 30,
+    toneKey: 'STEADY',
+  },
 };
 
 const MOCK_HEATMAP: readonly HeatmapEntry[] = [

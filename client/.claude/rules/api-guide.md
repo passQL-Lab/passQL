@@ -40,7 +40,7 @@ Frontend ──(/api)──> Backend(Spring) ──(x-api-key)──> AI Server(
 
 - `fetchTodayQuestion`: 오늘의 데일리 챌린지 문제 반환. 큐레이션 행(daily_challenge)이 있으면 그 문제, 없으면 활성 문제 풀에서 날짜 시드 기반 결정적 폴백. `memberUuid`가 주어지면 오늘 해당 문제 제출 여부를 `alreadySolvedToday`로 함께 반환. 활성 문제 0개면 `{ question: null, alreadySolvedToday: false }`.
 - `fetchRecommendations`: 활성 문제 풀에서 랜덤 N개 반환. size 기본 3, 최대 5 (초과 시 5로 clamp, 1 미만은 1). `excludeQuestionUuid` 미지정 시 데일리 챌린지 자동 제외.
-- `submitAnswer`: body 필드 `selectedChoiceKey` (구 필드명 `selectedKey` 한시적 fallback 지원). 인증 헤더 `X-Member-UUID` 필수.
+- `submitAnswer`: body 필드 `selectedChoiceKey`. DTO(`SubmitRequest`)로 변경됨 — 구 필드명 `selectedKey` fallback 지원 종료. 인증 헤더 `X-Member-UUID` 필수.
 
 ### AI (`src/api/ai.ts`)
 

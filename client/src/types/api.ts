@@ -57,10 +57,34 @@ export interface Page<T> {
 }
 
 // === Progress ===
+export type ToneKey =
+  | 'NO_EXAM'
+  | 'ONBOARDING'
+  | 'POST_EXAM'
+  | 'TODAY'
+  | 'SPRINT'
+  | 'PUSH'
+  | 'STEADY'
+  | 'EARLY';
+
+export interface ReadinessResponse {
+  readonly score: number;
+  readonly accuracy: number;
+  readonly coverage: number;
+  readonly recency: number;
+  readonly lastStudiedAt: string | null;
+  readonly recentAttemptCount: number;
+  readonly coveredTopicCount: number;
+  readonly activeTopicCount: number;
+  readonly daysUntilExam: number | null;
+  readonly toneKey: ToneKey;
+}
+
 export interface ProgressSummary {
   readonly solved: number;
   readonly correctRate: number;
   readonly streakDays: number;
+  readonly readiness: ReadinessResponse;
 }
 
 export interface HeatmapEntry {
