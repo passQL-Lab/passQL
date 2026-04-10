@@ -93,7 +93,7 @@ Frontend ──(/api)──> Backend(Spring) ──(x-api-key)──> AI Server(
 |------|--------|------|:----:|-----------|:----:|
 | `fetchGreeting(memberUuid)` | GET | `/home/greeting?memberUuid` | O (query param) | `GreetingResponse` | O |
 
-- `fetchGreeting`: 홈 화면 인사 메시지 반환. `GreetingResponse { message: string }`.
+- `fetchGreeting`: 홈 화면 인사 메시지 반환(#53). `GreetingResponse { nickname, message, messageType }`. `message`에 `{nickname}` 플레이스홀더 포함 — 프론트에서 치환. `messageType`: GENERAL/COUNTDOWN/URGENT/EXAM_DAY. D-day 구간에 따라 일반 메시지와 가중치 혼합. 회원 조회 실패 시 nickname="회원" + GENERAL 폴백.
 
 ### ExamSchedule (`src/api/examSchedules.ts`)
 
