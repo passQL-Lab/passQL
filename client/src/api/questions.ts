@@ -8,6 +8,9 @@ import type {
   ExecuteResult,
   TodayQuestionResponse,
   RecommendationsResponse,
+  SseStatusEvent,
+  SseErrorEvent,
+  ChoiceSetGenerateResponse,
 } from "../types/api";
 
 interface QuestionListParams {
@@ -56,14 +59,81 @@ export function fetchRecommendations(
   return apiFetch(`/questions/recommendations${qs ? `?${qs}` : ""}`);
 }
 
+// SSE로 AI 선택지를 생성하고 choiceSetId를 받는다.
+// EventSource는 커스텀 헤더를 지원하지 않으므로 fetch + ReadableStream 방식 사용.
+// 반환값: cleanup 함수 (컴포넌트 unmount 시 호출해 스트림을 중단).
+export function generateChoices(
+  questionUuid: string,
+  callbacks: {
+    readonly onStatus: (event: SseStatusEvent) => void;
+    readonly onComplete: (response: ChoiceSetGenerateResponse) => void;
+    readonly onError: (event: SseErrorEvent) => void;
+  },
+): () => void {
+  const abortController = new AbortController();
+
+  (async () => {
+    try {
+      const response = await fetch(
+        `/api/questions/${questionUuid}/generate-choices`,
+        {
+          method: "POST",
+          headers: {
+            "X-Member-UUID": getMemberUuid(),
+            Accept: "text/event-stream",
+          },
+          signal: abortController.signal,
+        },
+      );
+
+      if (!response.body) return;
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        // SSE는 빈 줄(\n\n)로 이벤트를 구분
+        const chunks = buffer.split("\n\n");
+        buffer = chunks.pop() ?? "";
+
+        for (const chunk of chunks) {
+          const eventMatch = chunk.match(/^event: (\w+)/m);
+          const dataMatch = chunk.match(/^data: (.+)/m);
+          if (!eventMatch || !dataMatch) continue;
+
+          const eventName = eventMatch[1];
+          const data = JSON.parse(dataMatch[1]);
+
+          if (eventName === "status") callbacks.onStatus(data as SseStatusEvent);
+          else if (eventName === "complete") callbacks.onComplete(data as ChoiceSetGenerateResponse);
+          else if (eventName === "error") callbacks.onError(data as SseErrorEvent);
+        }
+      }
+    } catch (err) {
+      // AbortError는 정상 cleanup이므로 무시
+      if (err instanceof Error && err.name !== "AbortError") {
+        callbacks.onError({ code: "STREAM_ERROR", message: err.message, retryable: true });
+      }
+    }
+  })();
+
+  return () => abortController.abort();
+}
+
 export function submitAnswer(
   questionUuid: string,
+  choiceSetId: string,
   selectedChoiceKey: string,
 ): Promise<SubmitResult> {
   return apiFetch(`/questions/${questionUuid}/submit`, {
     method: "POST",
     headers: { "X-Member-UUID": getMemberUuid() },
-    body: JSON.stringify({ selectedChoiceKey }),
+    body: JSON.stringify({ choiceSetId, selectedChoiceKey }),
   });
 }
 
