@@ -1,6 +1,7 @@
 package com.passql.web.controller;
 
 import com.passql.application.service.HomeService;
+import com.passql.application.service.QuestionExecutionService;
 import com.passql.question.dto.ExecuteResult;
 import com.passql.question.dto.QuestionDetail;
 import com.passql.question.dto.QuestionSummary;
@@ -9,8 +10,6 @@ import com.passql.question.dto.SubmitRequest;
 import com.passql.question.dto.SubmitResult;
 import com.passql.question.dto.TodayQuestionResponse;
 import com.passql.question.service.QuestionService;
-import com.passql.question.service.SandboxExecutor;
-import com.passql.submission.service.SubmissionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -27,8 +26,7 @@ public class QuestionController implements QuestionControllerDocs {
 
     private final QuestionService questionService;
     private final HomeService homeService;
-    private final SandboxExecutor sandboxExecutor;
-    private final SubmissionService submissionService;
+    private final QuestionExecutionService questionExecutionService;
 
     @GetMapping
     public ResponseEntity<Page<QuestionSummary>> getQuestions(
@@ -67,7 +65,7 @@ public class QuestionController implements QuestionControllerDocs {
         @RequestBody Map<String, String> body
     ) {
         String sql = body.get("sql");
-        return ResponseEntity.ok(sandboxExecutor.execute(questionUuid.toString(), sql));
+        return ResponseEntity.ok(questionExecutionService.executeChoice(questionUuid, sql));
     }
 
     @PostMapping("/{questionUuid}/submit")
@@ -76,6 +74,6 @@ public class QuestionController implements QuestionControllerDocs {
         @RequestHeader(value = "X-Member-UUID") UUID memberUuid,
         @RequestBody SubmitRequest request
     ) {
-        return ResponseEntity.ok(submissionService.submit(memberUuid, questionUuid, request.selectedChoiceKey()));
+        return ResponseEntity.ok(questionExecutionService.submitWithResult(questionUuid, memberUuid, request.selectedChoiceKey()));
     }
 }

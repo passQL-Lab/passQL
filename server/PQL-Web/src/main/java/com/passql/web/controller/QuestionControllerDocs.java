@@ -74,8 +74,11 @@ public interface QuestionControllerDocs {
   @ApiLogs({
       @ApiLog(date = "2026.04.07", author = Author.SUHSAECHAN, issueNumber = 1, description = "SQL 실행(테스트) API 추가"),
       @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 22, description = "PathVariable: Long id → UUID questionUuid"),
+      @ApiLog(date = "2026.04.10", author = Author.SUHSAECHAN, issueNumber = 70, description = "QuestionExecutionService 경유로 전환: sandboxDbName 기반 실행, CONCEPT_ONLY 에러 처리 추가"),
   })
-  @Operation(summary = "SQL 실행 (테스트)")
+  @Operation(summary = "SQL 실행",
+      description = "EXECUTABLE 문제만 허용. body: { \"sql\": \"SELECT ...\" }. " +
+          "CONCEPT_ONLY 문제에 호출 시 400 INVALID_EXECUTION_MODE 반환.")
   ResponseEntity<ExecuteResult> executeChoice(
       @PathVariable UUID questionUuid,
       @RequestBody Map<String, String> body
@@ -85,10 +88,13 @@ public interface QuestionControllerDocs {
       @ApiLog(date = "2026.04.07", author = Author.SUHSAECHAN, issueNumber = 1, description = "문제 제출 API 추가"),
       @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 22, description = "PathVariable: Long id → UUID questionUuid. Header: X-User-UUID(String) → X-Member-UUID(UUID). Body: selectedKey → selectedChoiceKey (구 selectedKey 한시적 fallback 지원)"),
       @ApiLog(date = "2026.04.10", author = Author.SUHSAECHAN, issueNumber = 57, description = "Request Body를 Map → SubmitRequest DTO로 변경하여 Swagger 스키마 정확도 개선"),
+      @ApiLog(date = "2026.04.10", author = Author.SUHSAECHAN, issueNumber = 70, description = "QuestionExecutionService 경유로 전환: EXECUTABLE 문제는 selectedResult/correctResult 포함, CONCEPT_ONLY 는 SQL 실행 없이 키 비교만 수행"),
   })
   @Operation(summary = "문제 제출",
       description = "선택지 제출 후 정답 여부 반환. 헤더 X-Member-UUID(UUID) 필수. " +
-          "Body: { \"selectedChoiceKey\": \"A\" }")
+          "Body: { \"selectedChoiceKey\": \"A\" }. " +
+          "EXECUTABLE 문제: SubmitResult에 selectedSql, correctSql, selectedResult, correctResult 포함. " +
+          "CONCEPT_ONLY 문제: SQL 실행 없이 isCorrect, correctKey, rationale만 반환.")
   ResponseEntity<SubmitResult> submit(
       @PathVariable UUID questionUuid,
       @RequestHeader(value = "X-Member-UUID") UUID memberUuid,

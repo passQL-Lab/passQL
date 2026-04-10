@@ -26,6 +26,20 @@ public class SubmissionService {
     private final QuestionChoiceRepository questionChoiceRepository;
     private final ExecutionLogRepository executionLogRepository;
 
+    /**
+     * 제출 기록만 저장 (결과 실행은 QuestionExecutionService 책임).
+     */
+    public void recordSubmission(UUID memberUuid, UUID questionUuid, String selectedChoiceKey, boolean isCorrect) {
+        Submission submission = Submission.builder()
+                .memberUuid(memberUuid)
+                .questionUuid(questionUuid)
+                .selectedChoiceKey(selectedChoiceKey)
+                .isCorrect(isCorrect)
+                .submittedAt(LocalDateTime.now())
+                .build();
+        submissionRepository.save(submission);
+    }
+
     public SubmitResult submit(UUID memberUuid, UUID questionUuid, String selectedChoiceKey) {
         QuestionChoice selected = questionChoiceRepository
                 .findByQuestionUuidAndChoiceKey(questionUuid, selectedChoiceKey)
@@ -51,7 +65,11 @@ public class SubmissionService {
         return new SubmitResult(
                 isCorrect,
                 correct != null ? correct.getChoiceKey() : null,
-                selected.getRationale()
+                selected.getRationale(),
+                null,
+                null,
+                null,
+                null
         );
     }
 
