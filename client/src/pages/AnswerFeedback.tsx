@@ -4,7 +4,9 @@ import { Check, X, ChevronRight } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { diffExplain } from "../api/ai";
 import AiExplanationSheet from "../components/AiExplanationSheet";
+import { ResultTable } from "../components/ResultTable";
 import { useSimilarQuestions } from "../hooks/useSimilarQuestions";
+import type { ExecuteResult, ExecutionMode } from "../types/api";
 
 interface FeedbackState {
   readonly isCorrect: boolean;
@@ -14,6 +16,98 @@ interface FeedbackState {
   readonly selectedSql?: string;
   readonly correctSql?: string;
   readonly questionUuid: string;
+  readonly executionMode?: ExecutionMode;
+  readonly selectedResult?: ExecuteResult;
+  readonly correctResult?: ExecuteResult;
+}
+
+function SqlCompareBlock({
+  label,
+  choiceKey,
+  sql,
+  result,
+  isCorrect,
+}: {
+  label: string;
+  choiceKey: string;
+  sql?: string;
+  result?: ExecuteResult;
+  isCorrect: boolean;
+}) {
+  const borderColor = isCorrect
+    ? "var(--color-sem-success)"
+    : "var(--color-sem-error)";
+  const bgColor = isCorrect
+    ? "var(--color-sem-success-light)"
+    : "var(--color-sem-error-light)";
+  const badgeBg = isCorrect ? "#DCFCE7" : "#FEE2E2";
+  const badgeColor = isCorrect
+    ? "var(--color-sem-success-text)"
+    : "var(--color-sem-error-text)";
+
+  return (
+    <div
+      className="rounded-lg p-4 mb-4"
+      style={{ backgroundColor: bgColor, borderLeft: `4px solid ${borderColor}` }}
+    >
+      <div className="flex items-center gap-2 mb-2">
+        <span className="text-sm font-medium text-text-secondary">{label}</span>
+        <span
+          className="inline-flex items-center rounded-full px-3 py-0.5 text-sm font-bold"
+          style={{ backgroundColor: badgeBg, color: badgeColor }}
+        >
+          {choiceKey}
+        </span>
+      </div>
+      {sql && (
+        <pre className="text-sm font-mono leading-relaxed">
+          <code>{sql}</code>
+        </pre>
+      )}
+      {result && <ResultTable result={result} />}
+    </div>
+  );
+}
+
+function TextCompareBlock({
+  label,
+  choiceKey,
+  body,
+  isCorrect,
+}: {
+  label: string;
+  choiceKey: string;
+  body?: string;
+  isCorrect: boolean;
+}) {
+  const borderColor = isCorrect
+    ? "var(--color-sem-success)"
+    : "var(--color-sem-error)";
+  const bgColor = isCorrect
+    ? "var(--color-sem-success-light)"
+    : "var(--color-sem-error-light)";
+  const badgeBg = isCorrect ? "#DCFCE7" : "#FEE2E2";
+  const badgeColor = isCorrect
+    ? "var(--color-sem-success-text)"
+    : "var(--color-sem-error-text)";
+
+  return (
+    <div
+      className="rounded-lg p-4 mb-4"
+      style={{ backgroundColor: bgColor, borderLeft: `4px solid ${borderColor}` }}
+    >
+      <div className="flex items-center gap-2 mb-2">
+        <span className="text-sm font-medium text-text-secondary">{label}</span>
+        <span
+          className="inline-flex items-center rounded-full px-3 py-0.5 text-sm font-bold"
+          style={{ backgroundColor: badgeBg, color: badgeColor }}
+        >
+          {choiceKey}
+        </span>
+      </div>
+      {body && <p className="text-body text-sm">{body}</p>}
+    </div>
+  );
 }
 
 export default function AnswerFeedback() {
@@ -44,119 +138,110 @@ export default function AnswerFeedback() {
     return null;
   }
 
-  const { isCorrect, correctKey, rationale, selectedKey, selectedSql, correctSql } = state;
+  const {
+    isCorrect,
+    correctKey,
+    rationale,
+    selectedKey,
+    selectedSql,
+    correctSql,
+    executionMode,
+    selectedResult,
+    correctResult,
+  } = state;
+
+  const isExecutable = executionMode === "EXECUTABLE";
+
+  const headerSection = (
+    <div className="text-center pt-12 pb-8">
+      <div
+        className="mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-4"
+        style={{ backgroundColor: isCorrect ? "#DCFCE7" : "#FEE2E2" }}
+      >
+        {isCorrect ? (
+          <Check size={36} style={{ color: "var(--color-sem-success-text)" }} />
+        ) : (
+          <X size={36} style={{ color: "var(--color-sem-error-text)" }} />
+        )}
+      </div>
+      <h1
+        className="text-2xl font-bold"
+        style={{
+          color: isCorrect
+            ? "var(--color-sem-success-text)"
+            : "var(--color-sem-error-text)",
+        }}
+      >
+        {isCorrect ? "정답입니다!" : "오답이에요"}
+      </h1>
+      <p className="text-secondary mt-2">
+        {isCorrect
+          ? "정확히 맞혔어요! 다음 문제도 도전해보세요"
+          : `정답은 ${correctKey}예요. 해설을 확인해보세요`}
+      </p>
+    </div>
+  );
+
+  const comparisonSection = isExecutable ? (
+    <div className="card-base">
+      {!isCorrect && (
+        <SqlCompareBlock
+          label="내가 선택한 SQL"
+          choiceKey={selectedKey}
+          sql={selectedSql}
+          result={selectedResult}
+          isCorrect={false}
+        />
+      )}
+      <SqlCompareBlock
+        label="정답 SQL"
+        choiceKey={correctKey}
+        sql={correctSql}
+        result={correctResult}
+        isCorrect={true}
+      />
+      <div className="mt-4">
+        <p className="text-secondary text-sm mb-2">해설</p>
+        <p className="text-body leading-relaxed" style={{ color: "#374151" }}>
+          {rationale}
+        </p>
+      </div>
+      {!isCorrect && (
+        <button className="btn-primary w-full mt-4" type="button" onClick={handleAskAi}>
+          AI에게 자세히 물어보기
+        </button>
+      )}
+    </div>
+  ) : (
+    <div className="card-base">
+      {!isCorrect && (
+        <TextCompareBlock
+          label="내가 선택한 답"
+          choiceKey={selectedKey}
+          body={selectedSql}
+          isCorrect={false}
+        />
+      )}
+      <TextCompareBlock
+        label="정답"
+        choiceKey={correctKey}
+        body={correctSql}
+        isCorrect={true}
+      />
+      <div className="mt-4">
+        <p className="text-secondary text-sm mb-2">해설</p>
+        <p className="text-body leading-relaxed" style={{ color: "#374151" }}>
+          {rationale}
+        </p>
+      </div>
+    </div>
+  );
 
   return (
     <div className="min-h-screen bg-surface flex flex-col">
       <div className="flex-1 mx-auto max-w-180 w-full px-4 pb-24">
-        {isCorrect ? (
-          <>
-            <div className="text-center pt-12 pb-8">
-              <div
-                className="mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-4"
-                style={{ backgroundColor: "#DCFCE7" }}
-              >
-                <Check size={36} style={{ color: "var(--color-sem-success-text)" }} />
-              </div>
-              <h1 className="text-2xl font-bold" style={{ color: "var(--color-sem-success-text)" }}>
-                정답입니다!
-              </h1>
-              <p className="text-secondary mt-2">정확히 맞혔어요! 다음 문제도 도전해보세요</p>
-            </div>
-            <div className="card-base">
-              <p className="text-secondary text-sm mb-3">해설</p>
-              <div className="flex items-center gap-2 mb-3">
-                <span
-                  className="inline-flex items-center rounded-full px-3 py-0.5 text-sm font-bold"
-                  style={{ backgroundColor: "#DCFCE7", color: "var(--color-sem-success-text)" }}
-                >
-                  {correctKey}
-                </span>
-              </div>
-              {correctSql && (
-                <pre
-                  className="rounded-lg p-4 text-sm font-mono leading-relaxed mb-4"
-                  style={{
-                    backgroundColor: "var(--color-sem-success-light)",
-                    borderLeft: "4px solid var(--color-sem-success)",
-                  }}
-                >
-                  <code>{correctSql}</code>
-                </pre>
-              )}
-              <p className="text-body leading-relaxed" style={{ color: "#374151" }}>
-                {rationale}
-              </p>
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="text-center pt-12 pb-8">
-              <div
-                className="mx-auto w-20 h-20 rounded-full flex items-center justify-center mb-4"
-                style={{ backgroundColor: "#FEE2E2" }}
-              >
-                <X size={36} style={{ color: "var(--color-sem-error-text)" }} />
-              </div>
-              <h1 className="text-2xl font-bold" style={{ color: "var(--color-sem-error-text)" }}>
-                오답입니다
-              </h1>
-              <p className="text-secondary mt-2">다음엔 맞출 수 있어요. 해설을 확인해보세요</p>
-            </div>
-            <div className="card-base space-y-0">
-              {selectedSql && (
-                <div
-                  className="rounded-lg p-4 mb-4"
-                  style={{
-                    backgroundColor: "var(--color-sem-error-light)",
-                    borderLeft: "4px solid var(--color-sem-error)",
-                  }}
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-sm font-medium text-text-secondary">내가 선택한 답</span>
-                    <span
-                      className="inline-flex items-center rounded-full px-3 py-0.5 text-sm font-bold"
-                      style={{ backgroundColor: "#FEE2E2", color: "var(--color-sem-error-text)" }}
-                    >
-                      {selectedKey}
-                    </span>
-                  </div>
-                  <pre className="text-sm font-mono leading-relaxed">
-                    <code>{selectedSql}</code>
-                  </pre>
-                </div>
-              )}
-              {correctSql && (
-                <div
-                  className="rounded-lg p-4"
-                  style={{
-                    backgroundColor: "var(--color-sem-success-light)",
-                    borderLeft: "4px solid var(--color-sem-success)",
-                  }}
-                >
-                  <div className="flex items-center gap-2 mb-2">
-                    <span className="text-sm font-medium text-text-secondary">정답</span>
-                    <span
-                      className="inline-flex items-center rounded-full px-3 py-0.5 text-sm font-bold"
-                      style={{ backgroundColor: "#DCFCE7", color: "var(--color-sem-success-text)" }}
-                    >
-                      {correctKey}
-                    </span>
-                  </div>
-                  <pre className="text-sm font-mono leading-relaxed">
-                    <code>{correctSql}</code>
-                  </pre>
-                </div>
-              )}
-              <p className="text-body leading-relaxed mt-4" style={{ color: "#374151" }}>
-                {rationale}
-              </p>
-              <button className="btn-primary w-full mt-4" type="button" onClick={handleAskAi}>
-                AI에게 자세히 물어보기
-              </button>
-            </div>
-          </>
-        )}
+        {headerSection}
+        {comparisonSection}
         {similarQuery.data && similarQuery.data.length > 0 && (
           <section className="mt-6">
             <h2 className="text-secondary text-sm mb-3">유사 문제</h2>

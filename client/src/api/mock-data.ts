@@ -22,18 +22,111 @@ import type {
 } from "../types/api";
 
 const MOCK_TOPICS: readonly TopicTree[] = [
-  { topicUuid: "topic-uuid-001", code: "JOIN", displayName: "JOIN", sortOrder: 1, isActive: true, subtopics: [{ code: "INNER_JOIN", displayName: "INNER JOIN", sortOrder: 1, isActive: true }, { code: "LEFT_JOIN", displayName: "LEFT JOIN", sortOrder: 2, isActive: true }] },
-  { topicUuid: "topic-uuid-002", code: "SUBQUERY", displayName: "서브쿼리", sortOrder: 2, isActive: true, subtopics: [] },
-  { topicUuid: "topic-uuid-003", code: "GROUP_BY", displayName: "GROUP BY", sortOrder: 3, isActive: true, subtopics: [] },
-  { topicUuid: "topic-uuid-004", code: "DDL", displayName: "DDL", sortOrder: 4, isActive: true, subtopics: [] },
-  { topicUuid: "topic-uuid-005", code: "CONSTRAINT", displayName: "제약조건", sortOrder: 5, isActive: true, subtopics: [] },
-  { topicUuid: "topic-uuid-006", code: "WHERE", displayName: "WHERE", sortOrder: 6, isActive: true, subtopics: [] },
-  { topicUuid: "topic-uuid-007", code: "ORDER_BY", displayName: "ORDER BY", sortOrder: 7, isActive: true, subtopics: [] },
-  { topicUuid: "topic-uuid-008", code: "DML", displayName: "DML", sortOrder: 8, isActive: true, subtopics: [] },
-  { topicUuid: "topic-uuid-009", code: "WINDOW", displayName: "윈도우 함수", sortOrder: 9, isActive: true, subtopics: [] },
-  { topicUuid: "topic-uuid-010", code: "INDEX", displayName: "인덱스", sortOrder: 10, isActive: true, subtopics: [] },
-  { topicUuid: "topic-uuid-011", code: "TRANSACTION", displayName: "트랜잭션", sortOrder: 11, isActive: true, subtopics: [] },
-  { topicUuid: "topic-uuid-012", code: "NORMALIZATION", displayName: "정규화", sortOrder: 12, isActive: true, subtopics: [] },
+  {
+    topicUuid: "topic-uuid-001",
+    code: "data_modeling",
+    displayName: "데이터 모델링의 이해",
+    sortOrder: 1,
+    isActive: true,
+    subtopics: [],
+  },
+  {
+    topicUuid: "topic-uuid-002",
+    code: "sql_basic_select",
+    displayName: "SELECT 기본",
+    sortOrder: 2,
+    isActive: true,
+    subtopics: [
+      { code: "select_basic", displayName: "SELECT 문 구조", sortOrder: 1, isActive: true },
+      { code: "where_clause", displayName: "WHERE 절", sortOrder: 2, isActive: true },
+      { code: "order_by", displayName: "ORDER BY", sortOrder: 3, isActive: true },
+    ],
+  },
+  {
+    topicUuid: "topic-uuid-003",
+    code: "sql_ddl_dml_tcl",
+    displayName: "DDL / DML / TCL",
+    sortOrder: 3,
+    isActive: true,
+    subtopics: [
+      { code: "ddl", displayName: "DDL (CREATE/ALTER/DROP)", sortOrder: 1, isActive: true },
+      { code: "dml", displayName: "DML (INSERT/UPDATE/DELETE)", sortOrder: 2, isActive: true },
+      { code: "tcl", displayName: "TCL (COMMIT/ROLLBACK)", sortOrder: 3, isActive: true },
+      { code: "constraint", displayName: "제약조건", sortOrder: 4, isActive: true },
+    ],
+  },
+  {
+    topicUuid: "topic-uuid-004",
+    code: "sql_function",
+    displayName: "SQL 함수 (문자/숫자/날짜/NULL)",
+    sortOrder: 4,
+    isActive: true,
+    subtopics: [
+      { code: "string_func", displayName: "문자 함수", sortOrder: 1, isActive: true },
+      { code: "numeric_func", displayName: "숫자 함수", sortOrder: 2, isActive: true },
+      { code: "date_func", displayName: "날짜 함수", sortOrder: 3, isActive: true },
+      { code: "null_func", displayName: "NULL 관련 함수", sortOrder: 4, isActive: true },
+    ],
+  },
+  {
+    topicUuid: "topic-uuid-005",
+    code: "sql_join",
+    displayName: "조인 (JOIN)",
+    sortOrder: 5,
+    isActive: true,
+    subtopics: [
+      { code: "inner_join", displayName: "INNER JOIN", sortOrder: 1, isActive: true },
+      { code: "outer_join", displayName: "OUTER JOIN", sortOrder: 2, isActive: true },
+      { code: "self_join", displayName: "SELF JOIN", sortOrder: 3, isActive: true },
+      { code: "cross_join", displayName: "CROSS JOIN", sortOrder: 4, isActive: true },
+    ],
+  },
+  {
+    topicUuid: "topic-uuid-006",
+    code: "sql_subquery",
+    displayName: "서브쿼리",
+    sortOrder: 6,
+    isActive: true,
+    subtopics: [
+      { code: "scalar_subquery", displayName: "스칼라 서브쿼리", sortOrder: 1, isActive: true },
+      { code: "inline_view", displayName: "인라인 뷰", sortOrder: 2, isActive: true },
+      { code: "correlated_subquery", displayName: "상관 서브쿼리", sortOrder: 3, isActive: true },
+    ],
+  },
+  {
+    topicUuid: "topic-uuid-007",
+    code: "sql_group_aggregate",
+    displayName: "그룹함수 / 집계",
+    sortOrder: 7,
+    isActive: true,
+    subtopics: [
+      { code: "group_by", displayName: "GROUP BY", sortOrder: 1, isActive: true },
+      { code: "having", displayName: "HAVING", sortOrder: 2, isActive: true },
+      { code: "aggregate_func", displayName: "집계 함수", sortOrder: 3, isActive: true },
+    ],
+  },
+  {
+    topicUuid: "topic-uuid-008",
+    code: "sql_window",
+    displayName: "윈도우 함수",
+    sortOrder: 8,
+    isActive: true,
+    subtopics: [
+      { code: "rank_func", displayName: "순위 함수 (RANK/ROW_NUMBER)", sortOrder: 1, isActive: true },
+      { code: "window_aggregate", displayName: "윈도우 집계", sortOrder: 2, isActive: true },
+    ],
+  },
+  {
+    topicUuid: "topic-uuid-009",
+    code: "sql_hierarchy_pivot",
+    displayName: "계층 쿼리 / PIVOT",
+    sortOrder: 9,
+    isActive: true,
+    subtopics: [
+      { code: "connect_by", displayName: "계층 쿼리 (CONNECT BY)", sortOrder: 1, isActive: true },
+      { code: "pivot", displayName: "PIVOT / UNPIVOT", sortOrder: 2, isActive: true },
+    ],
+  },
 ];
 
 const MOCK_CHOICES: readonly ChoiceItem[] = [
@@ -44,26 +137,106 @@ const MOCK_CHOICES: readonly ChoiceItem[] = [
 ];
 
 const MOCK_QUESTIONS: readonly QuestionSummary[] = [
-  // JOIN (2)
-  { questionUuid: "q-uuid-0001", topicCode: "JOIN", topicName: "JOIN", difficulty: 2, executionMode: "CONCEPT_ONLY", stemPreview: "고객별 주문 수를 구하는 올바른 SQL은?", createdAt: "2026-04-07T12:00:00" },
-  { questionUuid: "q-uuid-0006", topicCode: "JOIN", topicName: "JOIN", difficulty: 3, executionMode: "EXECUTABLE", stemPreview: "LEFT JOIN과 INNER JOIN의 결과 차이를 올바르게 설명한 것은?", createdAt: "2026-04-07T12:00:00" },
-  // 서브쿼리 (2)
-  { questionUuid: "q-uuid-0002", topicCode: "SUBQUERY", topicName: "서브쿼리", difficulty: 3, executionMode: "EXECUTABLE", stemPreview: "서브쿼리를 사용하여 평균 이상 주문한 고객을 조회하는 SQL은?", createdAt: "2026-04-07T12:00:00" },
-  { questionUuid: "q-uuid-0009", topicCode: "SUBQUERY", topicName: "서브쿼리", difficulty: 2, executionMode: "CONCEPT_ONLY", stemPreview: "상관 서브쿼리와 비상관 서브쿼리의 차이를 올바르게 설명한 것은?", createdAt: "2026-04-07T12:00:00" },
-  // GROUP BY (2)
-  { questionUuid: "q-uuid-0003", topicCode: "GROUP_BY", topicName: "GROUP BY", difficulty: 2, executionMode: "EXECUTABLE", stemPreview: "부서별 평균 급여가 500만원 이상인 부서를 구하는 SQL은?", createdAt: "2026-04-07T12:00:00" },
-  { questionUuid: "q-uuid-0007", topicCode: "GROUP_BY", topicName: "GROUP BY", difficulty: 1, executionMode: "CONCEPT_ONLY", stemPreview: "GROUP BY와 HAVING의 실행 순서로 올바른 것은?", createdAt: "2026-04-07T12:00:00" },
-  // DDL (2)
-  { questionUuid: "q-uuid-0004", topicCode: "DDL", topicName: "DDL", difficulty: 1, executionMode: "EXECUTABLE", stemPreview: "외래키 제약조건을 포함한 테이블 생성 SQL로 올바른 것은?", createdAt: "2026-04-07T12:00:00" },
-  { questionUuid: "q-uuid-0008", topicCode: "DDL", topicName: "DDL", difficulty: 2, executionMode: "CONCEPT_ONLY", stemPreview: "CREATE TABLE 시 DEFAULT 제약조건 문법은?", createdAt: "2026-04-07T12:00:00" },
-  // 제약조건 (2)
-  { questionUuid: "q-uuid-0005", topicCode: "CONSTRAINT", topicName: "제약조건", difficulty: 3, executionMode: "CONCEPT_ONLY", stemPreview: "NOT NULL과 UNIQUE 제약조건의 차이를 올바르게 설명한 것은?", createdAt: "2026-04-07T12:00:00" },
-  { questionUuid: "q-uuid-0010", topicCode: "CONSTRAINT", topicName: "제약조건", difficulty: 1, executionMode: "CONCEPT_ONLY", stemPreview: "PRIMARY KEY와 UNIQUE 제약조건의 공통점과 차이점은?", createdAt: "2026-04-07T12:00:00" },
+  // sql_join (2)
+  {
+    questionUuid: "q-uuid-0001",
+    topicCode: "sql_join",
+    topicName: "조인 (JOIN)",
+    difficulty: 2,
+    executionMode: "CONCEPT_ONLY",
+    stemPreview: "고객별 주문 수를 구하는 올바른 SQL은?",
+    createdAt: "2026-04-07T12:00:00",
+  },
+  {
+    questionUuid: "q-uuid-0006",
+    topicCode: "sql_join",
+    topicName: "조인 (JOIN)",
+    difficulty: 3,
+    executionMode: "EXECUTABLE",
+    stemPreview: "LEFT JOIN과 INNER JOIN의 결과 차이를 올바르게 설명한 것은?",
+    createdAt: "2026-04-07T12:00:00",
+  },
+  // sql_subquery (2)
+  {
+    questionUuid: "q-uuid-0002",
+    topicCode: "sql_subquery",
+    topicName: "서브쿼리",
+    difficulty: 3,
+    executionMode: "EXECUTABLE",
+    stemPreview: "서브쿼리를 사용하여 평균 이상 주문한 고객을 조회하는 SQL은?",
+    createdAt: "2026-04-07T12:00:00",
+  },
+  {
+    questionUuid: "q-uuid-0009",
+    topicCode: "sql_subquery",
+    topicName: "서브쿼리",
+    difficulty: 2,
+    executionMode: "CONCEPT_ONLY",
+    stemPreview: "상관 서브쿼리와 비상관 서브쿼리의 차이를 올바르게 설명한 것은?",
+    createdAt: "2026-04-07T12:00:00",
+  },
+  // sql_group_aggregate (2)
+  {
+    questionUuid: "q-uuid-0003",
+    topicCode: "sql_group_aggregate",
+    topicName: "그룹함수 / 집계",
+    difficulty: 2,
+    executionMode: "EXECUTABLE",
+    stemPreview: "부서별 평균 급여가 500만원 이상인 부서를 구하는 SQL은?",
+    createdAt: "2026-04-07T12:00:00",
+  },
+  {
+    questionUuid: "q-uuid-0007",
+    topicCode: "sql_group_aggregate",
+    topicName: "그룹함수 / 집계",
+    difficulty: 1,
+    executionMode: "CONCEPT_ONLY",
+    stemPreview: "GROUP BY와 HAVING의 실행 순서로 올바른 것은?",
+    createdAt: "2026-04-07T12:00:00",
+  },
+  // sql_ddl_dml_tcl (2)
+  {
+    questionUuid: "q-uuid-0004",
+    topicCode: "sql_ddl_dml_tcl",
+    topicName: "DDL / DML / TCL",
+    difficulty: 1,
+    executionMode: "EXECUTABLE",
+    stemPreview: "외래키 제약조건을 포함한 테이블 생성 SQL로 올바른 것은?",
+    createdAt: "2026-04-07T12:00:00",
+  },
+  {
+    questionUuid: "q-uuid-0008",
+    topicCode: "sql_ddl_dml_tcl",
+    topicName: "DDL / DML / TCL",
+    difficulty: 2,
+    executionMode: "CONCEPT_ONLY",
+    stemPreview: "CREATE TABLE 시 DEFAULT 제약조건 문법은?",
+    createdAt: "2026-04-07T12:00:00",
+  },
+  // sql_basic_select (2)
+  {
+    questionUuid: "q-uuid-0005",
+    topicCode: "sql_basic_select",
+    topicName: "SELECT 기본",
+    difficulty: 1,
+    executionMode: "CONCEPT_ONLY",
+    stemPreview: "SELECT 문의 실행 순서를 올바르게 나열한 것은?",
+    createdAt: "2026-04-07T12:00:00",
+  },
+  {
+    questionUuid: "q-uuid-0010",
+    topicCode: "sql_basic_select",
+    topicName: "SELECT 기본",
+    difficulty: 1,
+    executionMode: "CONCEPT_ONLY",
+    stemPreview: "WHERE 절에서 LIKE 연산자의 와일드카드 사용법은?",
+    createdAt: "2026-04-07T12:00:00",
+  },
 ];
 
 const MOCK_QUESTION_DETAIL: QuestionDetail = {
   questionUuid: "q-uuid-0001",
-  topicName: "JOIN",
+  topicName: "조인 (JOIN)",
   subtopicName: "INNER JOIN",
   difficulty: 2,
   executionMode: "CONCEPT_ONLY",
@@ -176,8 +349,7 @@ export function getMockResponse(path: string, method: string, body?: string): un
     const page = Number(url.get("page") ?? 0);
     const size = Number(url.get("size") ?? 10);
     const topic = url.get("topic");
-    const topicDisplayName = topic ? MOCK_TOPICS.find((t) => t.code === topic)?.displayName : undefined;
-    const filtered = topicDisplayName ? MOCK_QUESTIONS.filter((q) => q.topicName === topicDisplayName) : topic ? [] : MOCK_QUESTIONS;
+    const filtered = topic ? MOCK_QUESTIONS.filter((q) => q.topicCode === topic) : MOCK_QUESTIONS;
     const start = page * size;
     const content = filtered.slice(start, start + size);
     return {
@@ -285,8 +457,8 @@ export function getMockResponse(path: string, method: string, body?: string): un
   // GET /ai/similar/:uuid
   if (method === "GET" && path.includes("/ai/similar/")) {
     return [
-      { questionUuid: "q-uuid-0006", stem: "LEFT JOIN과 INNER JOIN의 결과 차이는?", topicName: "JOIN", score: 0.92 },
-      { questionUuid: "q-uuid-0007", stem: "GROUP BY와 HAVING의 실행 순서는?", topicName: "GROUP BY", score: 0.85 },
+      { questionUuid: "q-uuid-0006", stem: "LEFT JOIN과 INNER JOIN의 결과 차이는?", topicName: "조인 (JOIN)", score: 0.92 },
+      { questionUuid: "q-uuid-0007", stem: "GROUP BY와 HAVING의 실행 순서는?", topicName: "그룹함수 / 집계", score: 0.85 },
     ] satisfies SimilarQuestion[];
   }
 

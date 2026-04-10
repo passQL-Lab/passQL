@@ -5,6 +5,9 @@ import { ArrowLeft, ChevronUp, ChevronDown, BookOpen } from "lucide-react";
 import { StarRating } from "../components/StarRating";
 import { ChoiceCard } from "../components/ChoiceCard";
 import AiExplanationSheet from "../components/AiExplanationSheet";
+import { SchemaViewer } from "../components/SchemaViewer";
+import { SqlPlayground } from "../components/SqlPlayground";
+import { executeChoice } from "../api/questions";
 import {
   useQuestionDetail,
   useExecuteChoice,
@@ -84,6 +87,7 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
             selectedSql: selectedChoice?.body,
             correctSql: correctChoice?.body,
             questionUuid,
+            executionMode: question.executionMode,
           },
         });
       },
@@ -138,30 +142,12 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
         )}
       </button>
       {schemaOpen && (
-        <div className="mt-2 space-y-3">
-          {question.schemaIntent && (
-            <p className="text-sm text-text-secondary">{question.schemaIntent}</p>
-          )}
-          <pre className="code-block">
-            <code>{question.schemaDisplay}</code>
-          </pre>
-          {question.schemaDdl && (
-            <div>
-              <p className="text-xs text-text-caption mb-1">DDL</p>
-              <pre className="code-block">
-                <code>{question.schemaDdl}</code>
-              </pre>
-            </div>
-          )}
-          {question.schemaSampleData && (
-            <div>
-              <p className="text-xs text-text-caption mb-1">샘플 데이터</p>
-              <pre className="code-block">
-                <code>{question.schemaSampleData}</code>
-              </pre>
-            </div>
-          )}
-        </div>
+        <SchemaViewer
+          schemaDisplay={question.schemaDisplay}
+          schemaDdl={question.schemaDdl}
+          schemaSampleData={question.schemaSampleData}
+          schemaIntent={question.schemaIntent}
+        />
       )}
     </section>
   ) : null;
@@ -243,9 +229,15 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
         {schemaSection}
       </div>
 
-      {/* 스크롤: 선택지 */}
+      {/* 스크롤: 선택지 + SQL 실행기 */}
       <div className="flex-1 overflow-y-auto px-1">
         {choicesSection}
+        {question.executionMode === "EXECUTABLE" && (
+          <SqlPlayground
+            questionUuid={questionUuid!}
+            onExecute={(sql) => executeChoice(questionUuid!, sql)}
+          />
+        )}
       </div>
 
       {/* 하단: 버튼 */}

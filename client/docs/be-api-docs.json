@@ -50,7 +50,7 @@
       "post": {
         "tags": ["Question"],
         "summary": "문제 제출",
-        "description": "선택지 제출 후 정답 여부 반환. 헤더 X-Member-UUID(UUID) 필수. Body: { \"selectedChoiceKey\": \"A\" } (구 필드명 selectedKey 도 한시적으로 수용).\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.07\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/1\" target=\"_blank\"\u003E#1\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EAI 서버 및 Spring 서버 초기 프로젝트 구성\u003C/td\u003E\u003Ctd\u003E문제 제출 API 추가\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.08\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/22\" target=\"_blank\"\u003E#22\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EEntity 스키마 보강 submission 테이블 및 question.is_active 컬럼 추가\u003C/td\u003E\u003Ctd\u003EPathVariable: Long id → UUID questionUuid. Header: X-User-UUID(String) → X-Member-UUID(UUID). Body: selectedKey → selectedChoiceKey (구 selectedKey 한시적 fallback 지원)\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
+        "description": "선택지 제출 후 정답 여부 반환. 헤더 X-Member-UUID(UUID) 필수. Body: { \"selectedChoiceKey\": \"A\" }\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.07\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/1\" target=\"_blank\"\u003E#1\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EAI 서버 및 Spring 서버 초기 프로젝트 구성\u003C/td\u003E\u003Ctd\u003E문제 제출 API 추가\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.08\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/22\" target=\"_blank\"\u003E#22\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EEntity 스키마 보강 submission 테이블 및 question.is_active 컬럼 추가\u003C/td\u003E\u003Ctd\u003EPathVariable: Long id → UUID questionUuid. Header: X-User-UUID(String) → X-Member-UUID(UUID). Body: selectedKey → selectedChoiceKey (구 selectedKey 한시적 fallback 지원)\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.10\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/57\" target=\"_blank\"\u003E#57\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003Esubmit 엔드포인트 404 반환 및 executionMode null 이슈\u003C/td\u003E\u003Ctd\u003ERequest Body를 Map → SubmitRequest DTO로 변경하여 Swagger 스키마 정확도 개선\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
         "operationId": "submit",
         "parameters": [
           {
@@ -76,10 +76,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "additionalProperties": {
-                  "type": "string"
-                }
+                "$ref": "#/components/schemas/SubmitRequest"
               }
             }
           },
@@ -479,6 +476,55 @@
         }
       }
     },
+    "/api/progress/heatmap": {
+      "get": {
+        "tags": ["Progress"],
+        "summary": "날짜별 학습 히트맵 조회",
+        "description": "## 인증(JWT): **불필요** (추후 헤더 전환 예정)\n\n## 요청 파라미터\n- memberUuid (UUID, required): 회원 식별자\n- from (LocalDate, optional): 조회 시작일 (기본: 30일 전)\n- to (LocalDate, optional): 조회 종료일 (기본: 오늘)\n\n## 반환값 (HeatmapResponse)\n- entries: 날짜별 학습 기록 배열 (풀이 없는 날짜는 제외)\n  - date: 날짜 (LocalDate)\n  - solvedCount: 해당 날짜 풀이 수\n  - correctCount: 해당 날짜 정답 수\n\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.10\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/42\" target=\"_blank\"\u003E#42\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003E날짜별 학습 기록 히트맵 API 요청\u003C/td\u003E\u003Ctd\u003E날짜별 학습 기록 히트맵 API 추가 — DATE(submitted_at) 기준 GROUP BY 집계, sparse array 반환\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
+        "operationId": "getHeatmap",
+        "parameters": [
+          {
+            "name": "memberUuid",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "from",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/HeatmapResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/meta/topics": {
       "get": {
         "tags": ["Meta"],
@@ -687,6 +733,18 @@
   },
   "components": {
     "schemas": {
+      "SubmitRequest": {
+        "type": "object",
+        "description": "문제 제출 요청",
+        "required": ["selectedChoiceKey"],
+        "properties": {
+          "selectedChoiceKey": {
+            "type": "string",
+            "description": "선택한 선택지 키",
+            "example": "A"
+          }
+        }
+      },
       "SubmitResult": {
         "type": "object",
         "properties": {
@@ -1111,6 +1169,34 @@
               "STEADY",
               "EARLY"
             ]
+          }
+        }
+      },
+      "HeatmapEntry": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "format": "date"
+          },
+          "solvedCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "correctCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
+      "HeatmapResponse": {
+        "type": "object",
+        "properties": {
+          "entries": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/HeatmapEntry"
+            }
           }
         }
       },
