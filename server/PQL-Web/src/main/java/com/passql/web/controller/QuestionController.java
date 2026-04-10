@@ -16,6 +16,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.passql.common.exception.CustomException;
+import com.passql.common.exception.constant.ErrorCode;
+
 import java.util.Map;
 import java.util.UUID;
 
@@ -65,6 +68,9 @@ public class QuestionController implements QuestionControllerDocs {
         @RequestBody Map<String, String> body
     ) {
         String sql = body.get("sql");
+        if (sql == null || sql.isBlank()) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
         return ResponseEntity.ok(questionExecutionService.executeChoice(questionUuid, sql));
     }
 

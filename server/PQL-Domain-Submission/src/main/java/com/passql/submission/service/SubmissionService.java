@@ -29,7 +29,7 @@ public class SubmissionService {
     /**
      * 제출 기록만 저장 (결과 실행은 QuestionExecutionService 책임).
      */
-    public void recordSubmission(UUID memberUuid, UUID questionUuid, String selectedChoiceKey, boolean isCorrect) {
+    public void recordSubmission(UUID memberUuid, UUID questionUuid, String selectedChoiceKey, Boolean isCorrect) {
         Submission submission = Submission.builder()
                 .memberUuid(memberUuid)
                 .questionUuid(questionUuid)
