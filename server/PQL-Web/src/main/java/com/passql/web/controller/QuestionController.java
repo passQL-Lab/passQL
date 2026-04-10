@@ -42,6 +42,7 @@ public class QuestionController implements QuestionControllerDocs {
     private final QuestionService questionService;
     private final HomeService homeService;
     private final SandboxExecutor sandboxExecutor;
+    private final QuestionExecutionService questionExecutionService;
     private final SubmissionService submissionService;
     private final ChoiceSetResolver choiceSetResolver;
     private final QuestionChoiceSetItemRepository choiceSetItemRepository;
