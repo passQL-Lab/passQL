@@ -1,11 +1,34 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-10T02:39:22Z",
-    "currentVersion": "0.0.36",
+    "lastUpdated": "2026-04-10T04:36:24Z",
+    "currentVersion": "0.0.37",
     "projectType": "basic",
-    "totalReleases": 7
+    "totalReleases": 8
   },
   "releases": [
+    {
+      "version": "0.0.37",
+      "project_type": "basic",
+      "date": "2026-04-10",
+      "pr_number": 59,
+      "raw_summary": "## Summary by CodeRabbit\n\n* **개선사항**\n  * 문제 제출 API 요청의 유효성 검증을 강화하여 데이터 처리의 안정성 개선\n  * 질문 생성 프로세스에서 실행 모드를 표준화하여 일관된 동작 보장\n\n* **버전**\n  * v0.0.37로 업데이트",
+      "parsed_changes": {
+        "개선사항": {
+          "title": "개선사항",
+          "items": [
+            "문제 제출 API 요청의 유효성 검증을 강화하여 데이터 처리의 안정성 개선",
+            "질문 생성 프로세스에서 실행 모드를 표준화하여 일관된 동작 보장"
+          ]
+        },
+        "버전": {
+          "title": "버전",
+          "items": [
+            "v0.0.37로 업데이트"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.36",
       "project_type": "basic",
