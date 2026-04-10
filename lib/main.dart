@@ -4,15 +4,21 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import 'core/app_theme.dart';
+import 'presentation/providers/member_store.dart';
 import 'router/app_router.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: '.env');
 
+  // 앱 렌더링 전 UUID 등록 완료
+  final container = ProviderContainer();
+  await container.read(memberStoreProvider.notifier).getOrRegister();
+
   runApp(
-    const ProviderScope(
-      child: PassqlApp(),
+    UncontrolledProviderScope(
+      container: container,
+      child: const PassqlApp(),
     ),
   );
 }
