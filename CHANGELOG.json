@@ -1,11 +1,38 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-10T11:54:51Z",
-    "currentVersion": "0.0.43",
+    "lastUpdated": "2026-04-10T14:02:00Z",
+    "currentVersion": "0.0.45",
     "projectType": "basic",
-    "totalReleases": 12
+    "totalReleases": 13
   },
   "releases": [
+    {
+      "version": "0.0.45",
+      "project_type": "basic",
+      "date": "2026-04-10",
+      "pr_number": 76,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새로운 기능**\n  * 실행 가능한 문제에 SQL 실행기 추가\n  * 문제 카테고리 그리드를 통한 주제별 탐색 지원\n  * 스키마 및 샘플 데이터 시각화 기능 추가\n  * 실행 결과를 표로 표시하는 결과 테이블 컴포넌트\n  * 주제별 학습 통계 및 AI 코멘트 생성 기능\n\n* **개선 사항**\n  * 답안 피드백 화면 재설계\n  * 버전 정보 업데이트 (v0.0.45)",
+      "parsed_changes": {
+        "새로운_기능": {
+          "title": "새로운 기능",
+          "items": [
+            "실행 가능한 문제에 SQL 실행기 추가",
+            "문제 카테고리 그리드를 통한 주제별 탐색 지원",
+            "스키마 및 샘플 데이터 시각화 기능 추가",
+            "실행 결과를 표로 표시하는 결과 테이블 컴포넌트",
+            "주제별 학습 통계 및 AI 코멘트 생성 기능"
+          ]
+        },
+        "개선_사항": {
+          "title": "개선 사항",
+          "items": [
+            "답안 피드백 화면 재설계",
+            "버전 정보 업데이트 (v0.0.45)"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.43",
       "project_type": "basic",

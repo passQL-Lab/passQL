@@ -1,62 +1,105 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { ChevronRight, ChevronDown } from "lucide-react";
+import { Link, useSearchParams } from "react-router-dom";
+import { ChevronRight, ChevronDown, ArrowLeft } from "lucide-react";
 import { useQuestions } from "../hooks/useQuestions";
 import { useTopics } from "../hooks/useTopics";
 import { StarRating } from "../components/StarRating";
 import ErrorFallback from "../components/ErrorFallback";
 
 export default function Questions() {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const topic = searchParams.get("topic") || undefined;
+
   const [page, setPage] = useState(0);
-  const [topic, setTopic] = useState<string | undefined>();
   const [difficulty, setDifficulty] = useState<number | undefined>();
-  const [topicOpen, setTopicOpen] = useState(false);
   const [diffOpen, setDiffOpen] = useState(false);
 
-  const { data: topics } = useTopics();
-  const { data, isLoading, isError, refetch } = useQuestions({ page, size: 10, topic, difficulty });
+  const { data: topics, isLoading: topicsLoading, isError: topicsError, refetch: refetchTopics } = useTopics();
+  const { data, isLoading, isError, refetch } = useQuestions(
+    topic !== undefined ? { page, size: 10, topic, difficulty } : { enabled: false },
+  );
 
-  return (
-    <div className="py-6 space-y-0">
-      <h1 className="text-h1 mb-4">문제</h1>
-      {/* 1. Filter bar */}
-      <section className="flex gap-3 mb-4 relative">
-        <div className="relative">
-          <button
-            className={`filter-dropdown ${topic ? "filter-dropdown--active" : ""}`}
-            type="button"
-            onClick={() => { setTopicOpen(!topicOpen); setDiffOpen(false); }}
-          >
-            {topics?.find((t) => t.code === topic)?.displayName ?? "토픽"} <ChevronDown size={14} className="text-text-caption inline" />
-          </button>
-          {topicOpen && (
-            <div className="absolute top-full mt-1 left-0 bg-surface-card border border-border rounded-lg z-10 py-1 min-w-[140px]">
-              <button
-                type="button"
-                className="w-full text-left px-4 py-2 text-sm hover:bg-surface"
-                onClick={() => { setTopic(undefined); setTopicOpen(false); setPage(0); }}
-              >
-                전체
-              </button>
-              {topics?.map((t) => (
+  function selectTopic(code: string) {
+    setPage(0);
+    setDifficulty(undefined);
+    setDiffOpen(false);
+    setSearchParams({ topic: code });
+  }
+
+  function clearTopic() {
+    setPage(0);
+    setDifficulty(undefined);
+    setDiffOpen(false);
+    setSearchParams({});
+  }
+
+  // 카테고리 그리드 뷰
+  if (topic === undefined) {
+    return (
+      <div className="py-6 space-y-4">
+        <h1 className="text-h1">문제</h1>
+        <p className="text-secondary">토픽을 선택하세요</p>
+
+        {topicsError ? (
+          <ErrorFallback onRetry={() => void refetchTopics()} />
+        ) : topicsLoading ? (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {Array.from({ length: 9 }, (_, i) => (
+              <div key={i} className="card-base h-20 animate-pulse bg-border" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {topics
+              ?.filter((t) => t.isActive)
+              .toSorted((a, b) => a.sortOrder - b.sortOrder)
+              .map((t) => (
                 <button
                   key={t.code}
                   type="button"
-                  className="w-full text-left px-4 py-2 text-sm hover:bg-surface"
-                  onClick={() => { setTopic(t.code); setTopicOpen(false); setPage(0); }}
+                  className="card-base flex flex-col gap-2 cursor-pointer hover:bg-surface transition-colors text-left"
+                  onClick={() => selectTopic(t.code)}
                 >
-                  {t.displayName}
+                  <span className="text-body font-medium text-text-primary">{t.displayName}</span>
+                  {t.subtopics.length > 0 && (
+                    <span className="text-caption text-text-caption">
+                      {t.subtopics.length}개 서브토픽
+                    </span>
+                  )}
                 </button>
               ))}
-            </div>
-          )}
-        </div>
+          </div>
+        )}
+      </div>
+    );
+  }
 
+  // 문제 목록 뷰
+  const currentTopic = topics?.find((t) => t.code === topic);
+
+  return (
+    <div className="py-6 space-y-0">
+      {/* Back to categories */}
+      <button
+        type="button"
+        className="flex items-center gap-1 text-brand text-sm font-medium mb-4 hover:underline"
+        onClick={clearTopic}
+      >
+        <ArrowLeft size={14} />
+        토픽 전체
+      </button>
+
+      <h1 className="text-h1 mb-4">
+        {currentTopic?.displayName ?? topic}
+      </h1>
+
+      {/* Filter bar */}
+      <section className="flex gap-3 mb-4 relative">
         <div className="relative">
           <button
             className={`filter-dropdown ${difficulty ? "filter-dropdown--active" : ""}`}
             type="button"
-            onClick={() => { setDiffOpen(!diffOpen); setTopicOpen(false); }}
+            onClick={() => setDiffOpen(!diffOpen)}
           >
             {difficulty ? `난이도 ${difficulty}` : "난이도"} <ChevronDown size={14} className="text-text-caption inline" />
           </button>
@@ -84,12 +127,12 @@ export default function Questions() {
         </div>
       </section>
 
-      {/* 2. Result count */}
+      {/* Result count */}
       <p className="text-secondary mb-4">
         {isLoading ? "로딩 중..." : `${data?.totalElements ?? 0}문제`}
       </p>
 
-      {/* 3. Question card list */}
+      {/* Question card list */}
       {isError ? (
         <ErrorFallback onRetry={() => refetch()} />
       ) : isLoading ? (
@@ -98,6 +141,8 @@ export default function Questions() {
             <div key={i} className="card-base h-24 animate-pulse bg-border" />
           ))}
         </div>
+      ) : data?.empty ? (
+        <p className="text-secondary text-center py-8">이 토픽에는 아직 등록된 문제가 없습니다.</p>
       ) : (
         <section className="space-y-3">
           {data?.content.map((q) => (
@@ -118,7 +163,7 @@ export default function Questions() {
         </section>
       )}
 
-      {/* 4. Pagination */}
+      {/* Pagination */}
       {data && !data.last && (
         <div className="flex justify-center pt-6">
           <button

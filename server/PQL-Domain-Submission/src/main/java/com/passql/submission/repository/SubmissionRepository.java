@@ -103,4 +103,25 @@ public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
     @Modifying
     @Transactional
     void deleteByQuestionUuid(UUID questionUuid);
+
+    @Query(value = """
+        WITH latest AS (
+            SELECT s.question_uuid,
+                   q.topic_uuid,
+                   s.is_correct,
+                   ROW_NUMBER() OVER (PARTITION BY s.question_uuid ORDER BY s.submitted_at DESC, s.submission_uuid DESC) AS rn
+            FROM submission s
+            JOIN question q ON s.question_uuid = q.question_uuid
+            WHERE s.member_uuid = :memberUuid
+              AND s.submitted_at >= :since
+        )
+        SELECT topic_uuid,
+               COUNT(*) AS solved_count,
+               AVG(CASE WHEN is_correct = 1 THEN 1.0 ELSE 0.0 END) AS correct_rate
+        FROM latest
+        WHERE rn = 1
+        GROUP BY topic_uuid
+        """, nativeQuery = true)
+    List<Object[]> findTopicStatsAfter(@Param("memberUuid") String memberUuid,
+                                       @Param("since") LocalDateTime since);
 }

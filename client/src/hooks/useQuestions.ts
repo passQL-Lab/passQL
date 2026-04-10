@@ -6,12 +6,15 @@ interface UseQuestionsParams {
   readonly size?: number;
   readonly topic?: string;
   readonly difficulty?: number;
+  readonly enabled?: boolean;
 }
 
 export function useQuestions(params: UseQuestionsParams = {}) {
+  const { enabled = true, ...fetchParams } = params;
   return useQuery({
-    queryKey: ["questions", params],
-    queryFn: () => fetchQuestions(params),
+    queryKey: ["questions", fetchParams],
+    queryFn: () => fetchQuestions(fetchParams),
     staleTime: 1000 * 30,
+    enabled,
   });
 }

@@ -24,6 +24,12 @@ public class AppInitializer implements ApplicationRunner {
     @Value("${gemini.api-key:}")
     private String geminiApiKeyFromYml;
 
+    @Value("${sandbox.pool.concurrency:30}")
+    private int sandboxConcurrencyFromYml;
+
+    @Value("${sandbox.pool.wait-seconds:60}")
+    private int sandboxWaitSecondsFromYml;
+
     private final AppSettingRepository appSettingRepository;
     private final StringRedisTemplate redisTemplate;
 
@@ -31,6 +37,8 @@ public class AppInitializer implements ApplicationRunner {
     @Transactional
     public void run(ApplicationArguments args) {
         syncGeminiApiKey();
+        syncSettingFromYml("sandbox.pool.concurrency", String.valueOf(sandboxConcurrencyFromYml));
+        syncSettingFromYml("sandbox.pool.wait_seconds", String.valueOf(sandboxWaitSecondsFromYml));
     }
 
     /**
@@ -67,5 +75,34 @@ public class AppInitializer implements ApplicationRunner {
         appSettingRepository.save(setting);
         redisTemplate.opsForValue().set(REDIS_PREFIX + "ai.gemini_api_key", geminiApiKeyFromYml);
         log.info("[AppInitializer] ai.gemini_api_key yml → DB 적재 및 Redis 워밍업 완료");
+    }
+
+    /**
+     * 설정값 동기화 공통 메서드.
+     *
+     * 우선순위:
+     * 1. DB에 값이 있으면 → Redis 워밍업 (DB가 진원)
+     * 2. DB가 비어있으면 → yml 기본값을 DB에 저장 후 Redis 적재
+     * 3. DB 행 자체가 없으면 → 경고만 (마이그레이션 누락)
+     */
+    private void syncSettingFromYml(String key, String ymlValue) {
+        Optional<AppSetting> opt = appSettingRepository.findBySettingKey(key);
+        if (opt.isEmpty()) {
+            log.warn("[AppInitializer] {} 행이 DB에 없음 — 마이그레이션 확인 필요", key);
+            return;
+        }
+
+        AppSetting setting = opt.get();
+
+        if (StringUtils.hasText(setting.getValueText())) {
+            redisTemplate.opsForValue().set(REDIS_PREFIX + key, setting.getValueText());
+            log.info("[AppInitializer] {} Redis 워밍업 완료 (DB → Redis)", key);
+            return;
+        }
+
+        setting.setValueText(ymlValue);
+        appSettingRepository.save(setting);
+        redisTemplate.opsForValue().set(REDIS_PREFIX + key, ymlValue);
+        log.info("[AppInitializer] {} yml 기본값({}) → DB 적재 및 Redis 워밍업 완료", key, ymlValue);
     }
 }
