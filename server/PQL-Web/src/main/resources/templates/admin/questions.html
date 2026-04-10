@@ -51,6 +51,18 @@
                 <a th:href="@{/admin/questions}" class="btn btn-sm btn-ghost">초기화</a>
 
                 <div class="ml-auto flex gap-2">
+                    <button type="button" class="btn btn-sm btn-outline" onclick="openImportFileDialog()">
+                        <i data-lucide="upload" class="size-4"></i>
+                        JSON 가져오기
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline" onclick="exportByFilter()">
+                        <i data-lucide="download" class="size-4"></i>
+                        필터 전체 내보내기
+                    </button>
+                    <button type="button" id="exportSelectedBtn" class="btn btn-sm btn-outline" onclick="exportSelected()" disabled>
+                        <i data-lucide="check-square" class="size-4"></i>
+                        <span id="exportSelectedLabel">선택 내보내기</span>
+                    </button>
                     <a th:href="@{/admin/questions/register}" class="btn btn-sm btn-primary">
                         <i data-lucide="pencil" class="size-4"></i>
                         직접 등록
@@ -59,6 +71,7 @@
                         <i data-lucide="sparkles" class="size-4"></i>
                         AI 생성
                     </a>
+                    <input type="file" id="importFileInput" accept=".json" class="hidden" onchange="handleImportFile(event)"/>
                 </div>
             </form>
         </div>
@@ -81,6 +94,7 @@
                 <table class="table table-sm">
                     <thead>
                     <tr>
+                        <th class="w-10"><input type="checkbox" id="selectAllCheckbox" class="checkbox checkbox-xs" onchange="toggleSelectAll(this)"/></th>
                         <th class="w-16">ID</th>
                         <th>지문 (50자)</th>
                         <th class="w-28">토픽</th>
@@ -92,6 +106,7 @@
                     </thead>
                     <tbody>
                     <tr th:each="q : ${questions}" th:if="${questions != null and !questions.isEmpty()}">
+                        <td><input type="checkbox" class="checkbox checkbox-xs question-checkbox" th:data-uuid="${q.questionUuid}" onchange="onCheckboxChange()"/></td>
                         <td class="font-mono text-xs" th:text="${#strings.substring(q.questionUuid.toString(), 0, 8)}">xxxxxxxx</td>
                         <td class="max-w-xs truncate text-sm" th:text="${q.stemPreview}">
                             다음 중 employees 테이블에서 부서별 평균 급여를...
@@ -133,7 +148,7 @@
 
                     <!-- Empty state -->
                     <tr th:if="${questions == null or questions.isEmpty()}">
-                        <td colspan="7" class="text-center text-base-content/50 py-12">
+                        <td colspan="8" class="text-center text-base-content/50 py-12">
                             <i data-lucide="file-x" class="size-10 mx-auto mb-2 opacity-40"></i>
                             <p>문제가 없습니다.</p>
                         </td>
@@ -141,6 +156,7 @@
 
                     <!-- Placeholder data -->
                     <tr th:if="${questions == null}">
+                        <td><input type="checkbox" class="checkbox checkbox-xs" disabled/></td>
                         <td class="font-mono text-xs">1</td>
                         <td class="text-sm">다음 중 employees 테이블에서 부서별 평균 급여를 구하는...</td>
                         <td><span class="badge badge-outline badge-sm">SELECT</span></td>
@@ -155,6 +171,7 @@
                         </td>
                     </tr>
                     <tr th:if="${questions == null}">
+                        <td><input type="checkbox" class="checkbox checkbox-xs" disabled/></td>
                         <td class="font-mono text-xs">2</td>
                         <td class="text-sm">GROUP BY와 HAVING을 사용하여 조건을 만족하는 그룹만...</td>
                         <td><span class="badge badge-outline badge-sm">GROUP_BY</span></td>
@@ -210,9 +227,25 @@
         <form method="dialog" class="modal-backdrop"><button>close</button></form>
     </dialog>
 
+    <!-- 가져오기 검증 결과 모달 -->
+    <dialog id="importValidationModal" class="modal">
+        <div class="modal-box w-11/12 max-w-5xl max-h-[85vh]">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-lg">JSON 가져오기 검증 결과</h3>
+                <button type="button" class="btn btn-sm btn-ghost" onclick="document.getElementById('importValidationModal').close()">
+                    <i data-lucide="x" class="size-4"></i>
+                </button>
+            </div>
+            <div id="importModalBody"></div>
+            <div class="modal-action" id="importModalActions"></div>
+        </div>
+        <form method="dialog" class="modal-backdrop"><button>close</button></form>
+    </dialog>
+
 </th:block>
 
 <th:block layout:fragment="js">
+<script th:src="@{/js/admin/question-import-export.js}"></script>
 <script>
     lucide.createIcons();
 
