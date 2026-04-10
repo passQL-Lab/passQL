@@ -457,8 +457,8 @@ export function getMockResponse(path: string, method: string, body?: string): un
   // GET /ai/similar/:uuid
   if (method === "GET" && path.includes("/ai/similar/")) {
     return [
-      { questionUuid: "q-uuid-0006", stem: "LEFT JOIN과 INNER JOIN의 결과 차이는?", topicName: "JOIN", score: 0.92 },
-      { questionUuid: "q-uuid-0007", stem: "GROUP BY와 HAVING의 실행 순서는?", topicName: "GROUP BY", score: 0.85 },
+      { questionUuid: "q-uuid-0006", stem: "LEFT JOIN과 INNER JOIN의 결과 차이는?", topicName: "조인 (JOIN)", score: 0.92 },
+      { questionUuid: "q-uuid-0007", stem: "GROUP BY와 HAVING의 실행 순서는?", topicName: "그룹함수 / 집계", score: 0.85 },
     ] satisfies SimilarQuestion[];
   }
 
