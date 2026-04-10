@@ -84,10 +84,34 @@ export interface Page<T> {
 }
 
 // === Progress ===
+export type ToneKey =
+  | "NO_EXAM"
+  | "ONBOARDING"
+  | "POST_EXAM"
+  | "TODAY"
+  | "SPRINT"
+  | "PUSH"
+  | "STEADY"
+  | "EARLY";
+
+export interface ReadinessResponse {
+  readonly score: number;
+  readonly accuracy: number;
+  readonly coverage: number;
+  readonly recency: number;
+  readonly lastStudiedAt: string | null;
+  readonly recentAttemptCount: number;
+  readonly coveredTopicCount: number;
+  readonly activeTopicCount: number;
+  readonly daysUntilExam: number | null;
+  readonly toneKey: ToneKey;
+}
+
 export interface ProgressResponse {
   readonly solvedCount: number;
   readonly correctRate: number;
   readonly streakDays: number;
+  readonly readiness: ReadinessResponse | null;
 }
 
 export interface CategoryStats {
@@ -195,8 +219,12 @@ export interface RecommendationsResponse {
 }
 
 // === Home ===
+export type GreetingMessageType = "GENERAL" | "EXAM_DAY" | "URGENT" | "COUNTDOWN";
+
 export interface GreetingResponse {
+  readonly nickname: string;
   readonly message: string;
+  readonly messageType: GreetingMessageType;
 }
 
 // === ExamSchedule ===

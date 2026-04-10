@@ -82,7 +82,7 @@ Frontend ──(/api)──> Backend(Spring) ──(x-api-key)──> AI Server(
 | `fetchCategoryStats()` | GET | `/progress/categories?memberUuid` | O (query param) | `CategoryStats[]` | 미문서화 |
 | `fetchHeatmap(memberUuid, from?, to?)` | GET | `/progress/heatmap?memberUuid&from&to` | O (query param) | `HeatmapResponse` | 미구현 |
 
-- `fetchProgress`: 응답 필드 `solvedCount`(int64, distinct questionUuid 기준), `correctRate`(double, 0.0~1.0 둘째자리 반올림, 마지막 시도 기준), `streakDays`(int32, 하루 그레이스 -- 오늘 미제출이어도 어제까지 연속이면 유지). 제출 이력 0건이면 `{ 0, 0.0, 0 }`.
+- `fetchProgress`: 응답 필드 `solvedCount`(int64, distinct questionUuid 기준), `correctRate`(double, 0.0~1.0 둘째자리 반올림, 마지막 시도 기준), `streakDays`(int32, 하루 그레이스 -- 오늘 미제출이어도 어제까지 연속이면 유지). 제출 이력 0건이면 `{ 0, 0.0, 0 }`. `readiness` 블록 추가(#52): `ReadinessResponse { score, accuracy, coverage, recency, lastStudiedAt, recentAttemptCount, coveredTopicCount, activeTopicCount, daysUntilExam, toneKey }`. score = Accuracy x Coverage x Recency (0.0~1.0). toneKey: NO_EXAM/ONBOARDING/POST_EXAM/TODAY/SPRINT/PUSH/STEADY/EARLY.
 - `fetchHeatmap`: [미구현] 날짜별 학습 기록. `HeatmapResponse { entries: HeatmapEntry[] }`, `HeatmapEntry { date, solvedCount, correctCount }`. 현재 mock 데이터로 동작.
 
 ### Meta (`src/api/meta.ts`)
@@ -101,7 +101,7 @@ Frontend ──(/api)──> Backend(Spring) ──(x-api-key)──> AI Server(
 | --------------------------- | ------ | --------------------------- | :-------------: | ------------------ | :--: |
 | `fetchGreeting(memberUuid)` | GET    | `/home/greeting?memberUuid` | O (query param) | `GreetingResponse` |  O   |
 
-- `fetchGreeting`: 홈 화면 인사 메시지 반환. 선택된 시험 일정이 있으면 D-day 포함 메시지, 없으면 기본 인사 메시지. `GreetingResponse { message: string }`.
+- `fetchGreeting`: 홈 화면 인사 메시지 반환(#53). `GreetingResponse { nickname, message, messageType }`. `message`에 `{nickname}` 플레이스홀더 포함 -- 프론트에서 치환. `messageType`: GENERAL/COUNTDOWN/URGENT/EXAM_DAY. D-day 구간에 따라 일반 메시지와 가중치 혼합. 회원 조회 실패 시 nickname="회원" + GENERAL 폴백.
 
 ### ExamSchedule (`src/api/examSchedules.ts`)
 

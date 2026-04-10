@@ -452,7 +452,7 @@
       "get": {
         "tags": ["Progress"],
         "summary": "진도 요약 조회",
-        "description": "## 인증(JWT): **불필요** (추후 헤더 전환 예정)\n\n## 요청 파라미터\n- memberUuid (UUID, required): 회원 식별자\n\n## 반환값 (ProgressResponse)\n- solvedCount: 푼 문제 수 (distinct questionUuid 기준)\n- correctRate: 정답률 (0.0~1.0, 마지막 시도 기준, 소수 둘째자리 반올림)\n- streakDays: 연속 학습 일수 (하루 그레이스 — 오늘 미제출이어도 어제까지 연속이면 유지)\n- 제출 이력 0건이면 {0, 0.0, 0}\n\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.08\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/4\" target=\"_blank\"\u003E#4\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EDeploy 20260406-v0.0.9 by Cassiiopeia · Pull Request #4 · passQL-Lab/passQL · GitHub\u003C/td\u003E\u003Ctd\u003E진도 요약 조회 API\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.08\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/22\" target=\"_blank\"\u003E#22\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EEntity 스키마 보강 submission 테이블 및 question.is_active 컬럼 추가\u003C/td\u003E\u003Ctd\u003ESubmission PK 를 UUID 로 재작성. memberUuid(UUID) 기준 집계. 응답 DTO: ProgressResponse{solvedCount, correctRate(0.0~1.0 둘째자리 반올림), streakDays(하루 그레이스)}\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
+        "description": "## 인증(JWT): **불필요** (추후 헤더 전환 예정)\n\n## 요청 파라미터\n- memberUuid (UUID, required): 회원 식별자\n\n## 반환값 (ProgressResponse)\n- solvedCount: 푼 문제 수 (distinct questionUuid 기준)\n- correctRate: 정답률 (0.0~1.0, 마지막 시도 기준, 소수 둘째자리 반올림)\n- streakDays: 연속 학습 일수 (하루 그레이스 — 오늘 미제출이어도 어제까지 연속이면 유지)\n- 제출 이력 0건이면 solvedCount=0, correctRate=0.0, streakDays=0\n\n## readiness (합격 준비도 블록)\n- score: Accuracy × Coverage × Recency (0.0~1.0, 소수 둘째자리)\n- accuracy: 최근 50시도의 정답률\n- coverage: 최근 14일 내 푼 활성 토픽 수 / 활성 토픽 전체 수\n- recency: 마지막 학습일 기반 감쇠 계수 (0.70~1.00)\n- lastStudiedAt: 마지막 시도 시각 (ISO-8601), 미시도시 null\n- recentAttemptCount: 최근 50 윈도우 실제 시도 수\n- coveredTopicCount / activeTopicCount: 커버리지 분자/분모\n- daysUntilExam: 선택된 시험 일정 기준 D-day (없으면 null)\n- toneKey: 카피 톤 키 (NO_EXAM / ONBOARDING / POST_EXAM / TODAY / SPRINT / PUSH / STEADY / EARLY)\n\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.08\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/4\" target=\"_blank\"\u003E#4\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EDeploy 20260406-v0.0.9 by Cassiiopeia · Pull Request #4 · passQL-Lab/passQL · GitHub\u003C/td\u003E\u003Ctd\u003E진도 요약 조회 API\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.08\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/22\" target=\"_blank\"\u003E#22\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EEntity 스키마 보강 submission 테이블 및 question.is_active 컬럼 추가\u003C/td\u003E\u003Ctd\u003ESubmission PK 를 UUID 로 재작성. memberUuid(UUID) 기준 집계. 응답 DTO: ProgressResponse{solvedCount, correctRate(0.0~1.0 둘째자리 반올림), streakDays(하루 그레이스)}\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.10\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/52\" target=\"_blank\"\u003E#52\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003E홈 진도율을 합격 준비도(Readiness)로 대체\u003C/td\u003E\u003Ctd\u003E합격 준비도(readiness) 블록 응답에 추가 — Accuracy × Coverage × Recency 3요소 곱셈 + D-day 기반 toneKey. 기존 3필드 보존.\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
         "operationId": "getProgress",
         "parameters": [
           {
@@ -560,7 +560,7 @@
       "get": {
         "tags": ["Home"],
         "summary": "홈 화면 인사 메시지 조회",
-        "description": "## 인증(JWT): **불필요**\n\n## 요청 파라미터\n- **`memberUuid`** (required): 회원 UUID\n\n## 반환값 (GreetingResponse)\n- **`message`**: 인사 메시지 문자열\n- 선택된 시험 일정이 있으면 D-day 포함 메시지 반환\n- 선택된 일정이 없으면 기본 인사 메시지 반환\n\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.09\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/39\" target=\"_blank\"\u003E#39\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003E실시간 AI 선택지 세트 생성 및 프리페치 아키텍처\u003C/td\u003E\u003Ctd\u003E홈 화면 인사 메시지 조회 API 추가\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
+        "description": "## 인증(JWT): **불필요**\n\n## 요청 파라미터\n- **`memberUuid`** (optional): 회원 UUID. null이거나 존재하지 않으면 '회원' 닉네임으로 폴백한다.\n\n## 반환값 (GreetingResponse)\n- **`nickname`**: 회원 닉네임. 조회 실패/비로그인/닉네임 공백 시 `\"회원\"`.\n- **`message`**: 인사 메시지 템플릿. `{nickname}` 플레이스홀더를 포함하므로 프론트에서 치환해 렌더링한다. 이모지는 포함되지 않는다.\n- **`messageType`**: `GENERAL` / `COUNTDOWN` / `URGENT` / `EXAM_DAY` 중 하나. 프론트는 이 값으로 아이콘/톤을 분기할 수 있다.\n\n## 메시지 선택 규칙\n- 선택된 시험 일정이 없거나 D-30 초과 / 시험 종료 → `GENERAL`\n- D-8 ~ D-30 → `COUNTDOWN` (카운트다운 40% / 일반 60% 혼합)\n- D-4 ~ D-7 → `URGENT` (긴급 50% / 일반 50% 혼합)\n- D-1 ~ D-3 → `URGENT` (긴급 70% / 일반 30% 혼합)\n- D-0 (시험 당일) → `EXAM_DAY` (100%)\n\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.09\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/39\" target=\"_blank\"\u003E#39\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003E실시간 AI 선택지 세트 생성 및 프리페치 아키텍처\u003C/td\u003E\u003Ctd\u003E홈 화면 인사 메시지 조회 API 추가\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.10\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/53\" target=\"_blank\"\u003E#53\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003E환영 메시지 응답 닉네임 분리, 이모지 제거, D-day 메시지 혼합 등 스키마 개선 필요\u003C/td\u003E\u003Ctd\u003EGreeting 응답 스키마 변경: nickname 분리, 이모지 제거, messageType 추가, D-day 구간에 일반 메시지 가중치 혼합, 회원 조회 실패 fallback\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
         "operationId": "getGreeting",
         "parameters": [
           {
@@ -809,12 +809,6 @@
             "type": "integer",
             "format": "int32"
           },
-          "first": {
-            "type": "boolean"
-          },
-          "last": {
-            "type": "boolean"
-          },
           "size": {
             "type": "integer",
             "format": "int32"
@@ -832,6 +826,12 @@
           "sort": {
             "$ref": "#/components/schemas/SortObject"
           },
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
+          },
           "empty": {
             "type": "boolean"
           }
@@ -840,6 +840,9 @@
       "PageableObject": {
         "type": "object",
         "properties": {
+          "unpaged": {
+            "type": "boolean"
+          },
           "paged": {
             "type": "boolean"
           },
@@ -850,9 +853,6 @@
           "pageNumber": {
             "type": "integer",
             "format": "int32"
-          },
-          "unpaged": {
-            "type": "boolean"
           },
           "offset": {
             "type": "integer",
@@ -896,10 +896,10 @@
       "SortObject": {
         "type": "object",
         "properties": {
-          "sorted": {
+          "unsorted": {
             "type": "boolean"
           },
-          "unsorted": {
+          "sorted": {
             "type": "boolean"
           },
           "empty": {
@@ -1054,6 +1054,63 @@
           "streakDays": {
             "type": "integer",
             "format": "int32"
+          },
+          "readiness": {
+            "$ref": "#/components/schemas/ReadinessResponse"
+          }
+        }
+      },
+      "ReadinessResponse": {
+        "type": "object",
+        "properties": {
+          "score": {
+            "type": "number",
+            "format": "double"
+          },
+          "accuracy": {
+            "type": "number",
+            "format": "double"
+          },
+          "coverage": {
+            "type": "number",
+            "format": "double"
+          },
+          "recency": {
+            "type": "number",
+            "format": "double"
+          },
+          "lastStudiedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "recentAttemptCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "coveredTopicCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "activeTopicCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "daysUntilExam": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "toneKey": {
+            "type": "string",
+            "enum": [
+              "NO_EXAM",
+              "ONBOARDING",
+              "POST_EXAM",
+              "TODAY",
+              "SPRINT",
+              "PUSH",
+              "STEADY",
+              "EARLY"
+            ]
           }
         }
       },
@@ -1177,8 +1234,15 @@
       "GreetingResponse": {
         "type": "object",
         "properties": {
+          "nickname": {
+            "type": "string"
+          },
           "message": {
             "type": "string"
+          },
+          "messageType": {
+            "type": "string",
+            "enum": ["GENERAL", "COUNTDOWN", "URGENT", "EXAM_DAY"]
           }
         }
       },

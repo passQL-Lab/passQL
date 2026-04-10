@@ -18,7 +18,6 @@ import type {
   ExamScheduleResponse,
   ChoiceItem,
   HeatmapResponse,
-  PracticeAnalysis,
   CategoryStats,
 } from "../types/api";
 
@@ -103,7 +102,9 @@ const MOCK_RECOMMENDATIONS: RecommendationsResponse = {
 };
 
 const MOCK_GREETING: GreetingResponse = {
-  message: "SQLD 시험까지 D-14! 오늘도 화이팅하세요",
+  nickname: "용감한 판다",
+  message: "{nickname}님, SQLD 시험까지 D-14! 오늘도 화이팅하세요",
+  messageType: "COUNTDOWN",
 };
 
 const MOCK_EXAM_SCHEDULES: readonly ExamScheduleResponse[] = [
@@ -126,6 +127,18 @@ const MOCK_PROGRESS: ProgressResponse = {
   solvedCount: MOCK_CATEGORY_STATS.reduce((sum, c) => sum + c.solvedCount, 0),
   correctRate: 0.685,
   streakDays: 3,
+  readiness: {
+    score: 0.42,
+    accuracy: 0.685,
+    coverage: 0.75,
+    recency: 0.82,
+    lastStudiedAt: "2026-04-10T09:00:00",
+    recentAttemptCount: 38,
+    coveredTopicCount: 9,
+    activeTopicCount: 12,
+    daysUntilExam: 30,
+    toneKey: "STEADY",
+  },
 };
 
 function buildMockHeatmap(): HeatmapResponse {
@@ -275,38 +288,6 @@ export function getMockResponse(path: string, method: string, body?: string): un
       { questionUuid: "q-uuid-0006", stem: "LEFT JOIN과 INNER JOIN의 결과 차이는?", topicName: "JOIN", score: 0.92 },
       { questionUuid: "q-uuid-0007", stem: "GROUP BY와 HAVING의 실행 순서는?", topicName: "GROUP BY", score: 0.85 },
     ] satisfies SimilarQuestion[];
-  }
-
-  // POST /practice/generate
-  if (method === "POST" && path === "/practice/generate") {
-    const parsed = body ? JSON.parse(body) : {};
-    const topicCode = parsed.topicCode as string;
-    const topicDisplayName = MOCK_TOPICS.find((t) => t.code === topicCode)?.displayName;
-    const filtered = topicDisplayName
-      ? MOCK_QUESTIONS.filter((q) => q.topicName === topicDisplayName)
-      : MOCK_QUESTIONS;
-    const questions: QuestionSummary[] = [];
-    for (let i = 0; i < 10; i++) {
-      const src = filtered.length > 0 ? filtered[i % filtered.length] : MOCK_QUESTIONS[i % MOCK_QUESTIONS.length];
-      questions.push({ ...src, questionUuid: `practice-${topicCode}-${i + 1}` });
-    }
-    return { sessionId: `session-${Date.now()}`, questions };
-  }
-
-  // POST /practice/submit
-  if (method === "POST" && path === "/practice/submit") {
-    const parsed = body ? JSON.parse(body) : {};
-    const results = (parsed.results ?? []) as readonly { isCorrect: boolean; durationMs: number }[];
-    const correctCount = results.filter((r) => r.isCorrect).length;
-    const totalDurationMs = results.reduce((sum, r) => sum + r.durationMs, 0);
-    return {
-      correctCount,
-      totalCount: results.length,
-      totalDurationMs,
-      greeting: correctCount >= 9 ? "완벽해요!" : correctCount >= 7 ? "꽤 잘했어요!" : correctCount >= 5 ? "괜찮아요!" : "다시 도전해봐요!",
-      analysis: "INNER JOIN과 테이블 별칭은 이미 익숙하게 쓰고 있어요. 다만 OUTER JOIN에서 NULL 처리가 아직 어색한 것 같아요.",
-      tip: "LEFT JOIN + WHERE col IS NULL 패턴을 연습해보세요.",
-    } satisfies PracticeAnalysis;
   }
 
   return null;
