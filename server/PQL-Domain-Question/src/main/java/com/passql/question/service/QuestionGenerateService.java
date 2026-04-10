@@ -156,6 +156,7 @@ public class QuestionGenerateService {
                 .topicUuid(topicUuid)
                 .subtopicUuid(subtopicUuid)
                 .difficulty(difficulty)
+                .executionMode(ExecutionMode.CONCEPT_ONLY)
                 .dialect(Dialect.MARIADB)
                 .stem(stem)
                 .schemaDdl(schemaDdl)
