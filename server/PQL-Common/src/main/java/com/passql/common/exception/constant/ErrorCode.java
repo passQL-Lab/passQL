@@ -69,6 +69,7 @@ public enum ErrorCode {
     // === Sandbox Validation (신규: Sub-plan 1) ===
     SANDBOX_SETUP_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "샌드박스 환경 구성에 실패했습니다."),
     SANDBOX_ANSWER_SQL_FAILED(HttpStatus.UNPROCESSABLE_ENTITY, "기준 정답 SQL 실행에 실패했습니다."),
+    INVALID_EXECUTION_MODE(HttpStatus.BAD_REQUEST, "SQL 실행이 지원되지 않는 문제 유형입니다."),
 
     // === Quiz Session (신규: Sub-plan 1) ===
     QUIZ_SESSION_NOT_FOUND(HttpStatus.NOT_FOUND, "퀴즈 세션을 찾을 수 없습니다."),

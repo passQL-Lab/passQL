@@ -11,6 +11,7 @@ import com.passql.submission.entity.Submission;
 import com.passql.submission.repository.ExecutionLogRepository;
 import com.passql.submission.repository.SubmissionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,12 +21,29 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class SubmissionService {
     private final SubmissionRepository submissionRepository;
     private final QuestionChoiceRepository questionChoiceRepository;
     private final ExecutionLogRepository executionLogRepository;
+    private final RedisTemplate<String, Object> redisTemplate;
 
+    /**
+     * 제출 기록만 저장 (결과 실행은 QuestionExecutionService 책임).
+     */
+    @Transactional
+    public void recordSubmission(UUID memberUuid, UUID questionUuid, String selectedChoiceKey, Boolean isCorrect) {
+        Submission submission = Submission.builder()
+                .memberUuid(memberUuid)
+                .questionUuid(questionUuid)
+                .selectedChoiceKey(selectedChoiceKey)
+                .isCorrect(isCorrect)
+                .submittedAt(LocalDateTime.now())
+                .build();
+        submissionRepository.save(submission);
+    }
+
+    @Transactional
     public SubmitResult submit(UUID memberUuid, UUID questionUuid, String selectedChoiceKey) {
         QuestionChoice selected = questionChoiceRepository
                 .findByQuestionUuidAndChoiceKey(questionUuid, selectedChoiceKey)
@@ -48,24 +66,28 @@ public class SubmissionService {
                 .build();
         submissionRepository.save(submission);
 
+        // AI 코멘트 캐시 무효화 (새 Submission 발생 시 즉시 evict)
+        redisTemplate.delete("ai-comment:" + memberUuid);
+
         return new SubmitResult(
                 isCorrect,
                 correct != null ? correct.getChoiceKey() : null,
-                selected.getRationale()
+                selected.getRationale(),
+                null,
+                null,
+                null,
+                null
         );
     }
 
-    @Transactional(readOnly = true)
     public List<Submission> getSubmissionsByMember(UUID memberUuid) {
         return submissionRepository.findByMemberUuidOrderBySubmittedAtDesc(memberUuid);
     }
 
-    @Transactional(readOnly = true)
     public List<ExecutionLog> getRecentLogs() {
         return executionLogRepository.findTop20ByOrderByExecutedAtDesc();
     }
 
-    @Transactional(readOnly = true)
     public MonitorStats getStats24h() {
         LocalDateTime since = LocalDateTime.now().minusHours(24);
         List<ExecutionLog> logs = executionLogRepository.findByExecutedAtAfter(since);

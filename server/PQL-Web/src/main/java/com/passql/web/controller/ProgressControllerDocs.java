@@ -1,8 +1,10 @@
 package com.passql.web.controller;
 
+import com.passql.ai.dto.AiCommentResponse;
 import com.passql.common.dto.Author;
 import com.passql.submission.dto.HeatmapResponse;
 import com.passql.submission.dto.ProgressResponse;
+import com.passql.submission.dto.TopicAnalysisResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.suhsaechan.suhapilog.annotation.ApiLog;
@@ -17,64 +19,114 @@ import java.util.UUID;
 @Tag(name = "Progress", description = "학습 진도 조회")
 public interface ProgressControllerDocs {
 
-  @ApiLogs({
-      @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 4, description = "진도 요약 조회 API"),
-      @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 22, description = "Submission PK 를 UUID 로 재작성. memberUuid(UUID) 기준 집계. 응답 DTO: ProgressResponse{solvedCount, correctRate(0.0~1.0 둘째자리 반올림), streakDays(하루 그레이스)}"),
-      @ApiLog(date = "2026.04.10", author = Author.SUHSAECHAN, issueNumber = 52, description = "합격 준비도(readiness) 블록 응답에 추가 — Accuracy × Coverage × Recency 3요소 곱셈 + D-day 기반 toneKey. 기존 3필드 보존."),
-  })
-  @Operation(
-      summary = "진도 요약 조회",
-      description = """
-          ## 인증(JWT): **불필요** (추후 헤더 전환 예정)
+    @ApiLogs({
+        @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 4, description = "진도 요약 조회 API"),
+        @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 22, description = "Submission PK 를 UUID 로 재작성. memberUuid(UUID) 기준 집계. 응답 DTO: ProgressResponse{solvedCount, correctRate(0.0~1.0 둘째자리 반올림), streakDays(하루 그레이스)}"),
+        @ApiLog(date = "2026.04.10", author = Author.SUHSAECHAN, issueNumber = 52, description = "합격 준비도(readiness) 블록 응답에 추가 — Accuracy × Coverage × Recency 3요소 곱셈 + D-day 기반 toneKey. 기존 3필드 보존."),
+    })
+    @Operation(
+        summary = "진도 요약 조회",
+        description = """
+            ## 인증(JWT): **불필요** (추후 헤더 전환 예정)
 
-          ## 요청 파라미터
-          - memberUuid (UUID, required): 회원 식별자
+            ## 요청 파라미터
+            - memberUuid (UUID, required): 회원 식별자
 
-          ## 반환값 (ProgressResponse)
-          - solvedCount: 푼 문제 수 (distinct questionUuid 기준)
-          - correctRate: 정답률 (0.0~1.0, 마지막 시도 기준, 소수 둘째자리 반올림)
-          - streakDays: 연속 학습 일수 (하루 그레이스 — 오늘 미제출이어도 어제까지 연속이면 유지)
-          - 제출 이력 0건이면 solvedCount=0, correctRate=0.0, streakDays=0
+            ## 반환값 (ProgressResponse)
+            - solvedCount: 푼 문제 수 (distinct questionUuid 기준)
+            - correctRate: 정답률 (0.0~1.0, 마지막 시도 기준, 소수 둘째자리 반올림)
+            - streakDays: 연속 학습 일수 (하루 그레이스 — 오늘 미제출이어도 어제까지 연속이면 유지)
+            - 제출 이력 0건이면 solvedCount=0, correctRate=0.0, streakDays=0
 
-          ## readiness (합격 준비도 블록)
-          - score: Accuracy × Coverage × Recency (0.0~1.0, 소수 둘째자리)
-          - accuracy: 최근 50시도의 정답률
-          - coverage: 최근 14일 내 푼 활성 토픽 수 / 활성 토픽 전체 수
-          - recency: 마지막 학습일 기반 감쇠 계수 (0.70~1.00)
-          - lastStudiedAt: 마지막 시도 시각 (ISO-8601), 미시도시 null
-          - recentAttemptCount: 최근 50 윈도우 실제 시도 수
-          - coveredTopicCount / activeTopicCount: 커버리지 분자/분모
-          - daysUntilExam: 선택된 시험 일정 기준 D-day (없으면 null)
-          - toneKey: 카피 톤 키 (NO_EXAM / ONBOARDING / POST_EXAM / TODAY / SPRINT / PUSH / STEADY / EARLY)
-          """
-  )
-  ResponseEntity<ProgressResponse> getProgress(
-      @RequestParam UUID memberUuid
-  );
+            ## readiness (합격 준비도 블록)
+            - score: Accuracy × Coverage × Recency (0.0~1.0, 소수 둘째자리)
+            - accuracy: 최근 50시도의 정답률
+            - coverage: 최근 14일 내 푼 활성 토픽 수 / 활성 토픽 전체 수
+            - recency: 마지막 학습일 기반 감쇠 계수 (0.70~1.00)
+            - lastStudiedAt: 마지막 시도 시각 (ISO-8601), 미시도시 null
+            - recentAttemptCount: 최근 50 윈도우 실제 시도 수
+            - coveredTopicCount / activeTopicCount: 커버리지 분자/분모
+            - daysUntilExam: 선택된 시험 일정 기준 D-day (없으면 null)
+            - toneKey: 카피 톤 키 (NO_EXAM / ONBOARDING / POST_EXAM / TODAY / SPRINT / PUSH / STEADY / EARLY)
+            """
+    )
+    ResponseEntity<ProgressResponse> getProgress(
+        @RequestParam UUID memberUuid
+    );
 
-  @ApiLogs({
-      @ApiLog(date = "2026.04.10", author = Author.SUHSAECHAN, issueNumber = 42, description = "날짜별 학습 기록 히트맵 API 추가 — DATE(submitted_at) 기준 GROUP BY 집계, sparse array 반환"),
-  })
-  @Operation(
-      summary = "날짜별 학습 히트맵 조회",
-      description = """
-          ## 인증(JWT): **불필요** (추후 헤더 전환 예정)
+    @ApiLogs({
+        @ApiLog(date = "2026.04.10", author = Author.SUHSAECHAN, issueNumber = 42, description = "날짜별 학습 기록 히트맵 API 추가 — DATE(submitted_at) 기준 GROUP BY 집계, sparse array 반환"),
+    })
+    @Operation(
+        summary = "날짜별 학습 히트맵 조회",
+        description = """
+            ## 인증(JWT): **불필요** (추후 헤더 전환 예정)
 
-          ## 요청 파라미터
-          - memberUuid (UUID, required): 회원 식별자
-          - from (LocalDate, optional): 조회 시작일 (기본: 30일 전)
-          - to (LocalDate, optional): 조회 종료일 (기본: 오늘)
+            ## 요청 파라미터
+            - memberUuid (UUID, required): 회원 식별자
+            - from (LocalDate, optional): 조회 시작일 (기본: 30일 전)
+            - to (LocalDate, optional): 조회 종료일 (기본: 오늘)
 
-          ## 반환값 (HeatmapResponse)
-          - entries: 날짜별 학습 기록 배열 (풀이 없는 날짜는 제외)
-            - date: 날짜 (LocalDate)
-            - solvedCount: 해당 날짜 풀이 수
-            - correctCount: 해당 날짜 정답 수
-          """
-  )
-  ResponseEntity<HeatmapResponse> getHeatmap(
-      @RequestParam UUID memberUuid,
-      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
-      @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
-  );
+            ## 반환값 (HeatmapResponse)
+            - entries: 날짜별 학습 기록 배열 (풀이 없는 날짜는 제외)
+              - date: 날짜 (LocalDate)
+              - solvedCount: 해당 날짜 풀이 수
+              - correctCount: 해당 날짜 정답 수
+            """
+    )
+    ResponseEntity<HeatmapResponse> getHeatmap(
+        @RequestParam UUID memberUuid,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
+    );
+
+    @ApiLogs({
+        @ApiLog(date = "2026.04.10", author = Author.SUHSAECHAN, issueNumber = 71, description = "토픽별 정답률/문제수 분석 API 추가"),
+    })
+    @Operation(
+        summary = "토픽별 분석 조회",
+        description = """
+            ## 인증(JWT): **불필요** (추후 헤더 전환 예정)
+
+            ## 요청 파라미터
+            - memberUuid (UUID, required): 회원 식별자
+
+            ## 반환값 (TopicAnalysisResponse)
+            - topicStats: 토픽별 집계 목록
+              - topicUuid: 토픽 식별자
+              - displayName: 토픽 표시명
+              - totalQuestionCount: 해당 토픽 전체 활성 문제 수 (막대그래프용)
+              - correctRate: 최근 7일 정답률 (0.0~1.0, 문제별 최근 시도 기준, 레이더차트용)
+              - solvedCount: 최근 7일 내 푼 문제 수
+            - Submission 없는 토픽도 correctRate=0.0, solvedCount=0으로 포함
+            """
+    )
+    ResponseEntity<TopicAnalysisResponse> getTopicAnalysis(
+        @RequestParam UUID memberUuid
+    );
+
+    @ApiLogs({
+        @ApiLog(date = "2026.04.10", author = Author.SUHSAECHAN, issueNumber = 71, description = "AI 영역 분석 코멘트 API 추가 (Redis 캐시 24h TTL, Submission 저장 시 evict)"),
+    })
+    @Operation(
+        summary = "AI 영역 분석 코멘트 조회",
+        description = """
+            ## 인증(JWT): **불필요** (추후 헤더 전환 예정)
+
+            ## 요청 파라미터
+            - memberUuid (UUID, required): 회원 식별자
+
+            ## 반환값 (AiCommentResponse)
+            - comment: AI 생성 한국어 코멘트 (2~3문장, 약점 영역 파악 + 집중 학습 추천)
+            - generatedAt: 코멘트 생성(캐시 저장) 시각
+
+            ## 캐싱
+            - Redis key: ai-comment:{memberUuid}, TTL 24시간
+            - 새 Submission 저장 시 즉시 캐시 무효화 → 다음 호출 시 재생성
+            - AI 호출 latency를 고려해 프론트엔드에서 비동기 로딩 권장
+            """
+    )
+    ResponseEntity<AiCommentResponse> getAiComment(
+        @RequestParam UUID memberUuid
+    );
 }
