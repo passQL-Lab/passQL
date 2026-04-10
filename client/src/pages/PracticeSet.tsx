@@ -51,18 +51,22 @@ export default function PracticeSet() {
   return (
     <div className="flex flex-col h-screen max-w-120 mx-auto w-full">
       <div className="px-4 pt-3 pb-2">
-        <div className="flex items-center justify-between mb-2">
-          <button
-            type="button"
-            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-border transition-colors"
-            onClick={() => navigate("/")}
-          >
-            <Home size={18} className="text-text-secondary" />
-          </button>
-          <span className="text-sm font-semibold text-text-secondary">
+        <div className="grid grid-cols-3 items-center mb-2">
+          <div className="justify-self-start">
+            <button
+              type="button"
+              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-border transition-colors"
+              onClick={() => navigate("/")}
+            >
+              <Home size={18} className="text-text-secondary" />
+            </button>
+          </div>
+          <span className="text-sm font-semibold text-text-secondary text-center">
             {currentIndex + 1} / {totalQuestions}
           </span>
-          <span className="badge-topic">{topicName}</span>
+          <div className="justify-self-end">
+            <span className="badge-topic">{topicName}</span>
+          </div>
         </div>
         <div className="w-full h-1.5 bg-border rounded-full overflow-hidden">
           <div
