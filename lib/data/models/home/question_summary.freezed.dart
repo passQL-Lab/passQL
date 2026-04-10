@@ -22,10 +22,12 @@ QuestionSummary _$QuestionSummaryFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$QuestionSummary {
   String get questionUuid => throw _privateConstructorUsedError;
+  String? get topicCode => throw _privateConstructorUsedError;
   String? get topicName => throw _privateConstructorUsedError;
   String? get stemPreview => throw _privateConstructorUsedError;
   int? get difficulty => throw _privateConstructorUsedError;
   String? get executionMode => throw _privateConstructorUsedError;
+  String? get createdAt => throw _privateConstructorUsedError;
 
   /// Serializes this QuestionSummary to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -46,10 +48,12 @@ abstract class $QuestionSummaryCopyWith<$Res> {
   @useResult
   $Res call({
     String questionUuid,
+    String? topicCode,
     String? topicName,
     String? stemPreview,
     int? difficulty,
     String? executionMode,
+    String? createdAt,
   });
 }
 
@@ -69,10 +73,12 @@ class _$QuestionSummaryCopyWithImpl<$Res, $Val extends QuestionSummary>
   @override
   $Res call({
     Object? questionUuid = null,
+    Object? topicCode = freezed,
     Object? topicName = freezed,
     Object? stemPreview = freezed,
     Object? difficulty = freezed,
     Object? executionMode = freezed,
+    Object? createdAt = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -80,6 +86,10 @@ class _$QuestionSummaryCopyWithImpl<$Res, $Val extends QuestionSummary>
                 ? _value.questionUuid
                 : questionUuid // ignore: cast_nullable_to_non_nullable
                       as String,
+            topicCode: freezed == topicCode
+                ? _value.topicCode
+                : topicCode // ignore: cast_nullable_to_non_nullable
+                      as String?,
             topicName: freezed == topicName
                 ? _value.topicName
                 : topicName // ignore: cast_nullable_to_non_nullable
@@ -95,6 +105,10 @@ class _$QuestionSummaryCopyWithImpl<$Res, $Val extends QuestionSummary>
             executionMode: freezed == executionMode
                 ? _value.executionMode
                 : executionMode // ignore: cast_nullable_to_non_nullable
+                      as String?,
+            createdAt: freezed == createdAt
+                ? _value.createdAt
+                : createdAt // ignore: cast_nullable_to_non_nullable
                       as String?,
           )
           as $Val,
@@ -113,10 +127,12 @@ abstract class _$$QuestionSummaryImplCopyWith<$Res>
   @useResult
   $Res call({
     String questionUuid,
+    String? topicCode,
     String? topicName,
     String? stemPreview,
     int? difficulty,
     String? executionMode,
+    String? createdAt,
   });
 }
 
@@ -135,10 +151,12 @@ class __$$QuestionSummaryImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? questionUuid = null,
+    Object? topicCode = freezed,
     Object? topicName = freezed,
     Object? stemPreview = freezed,
     Object? difficulty = freezed,
     Object? executionMode = freezed,
+    Object? createdAt = freezed,
   }) {
     return _then(
       _$QuestionSummaryImpl(
@@ -146,6 +164,10 @@ class __$$QuestionSummaryImplCopyWithImpl<$Res>
             ? _value.questionUuid
             : questionUuid // ignore: cast_nullable_to_non_nullable
                   as String,
+        topicCode: freezed == topicCode
+            ? _value.topicCode
+            : topicCode // ignore: cast_nullable_to_non_nullable
+                  as String?,
         topicName: freezed == topicName
             ? _value.topicName
             : topicName // ignore: cast_nullable_to_non_nullable
@@ -162,6 +184,10 @@ class __$$QuestionSummaryImplCopyWithImpl<$Res>
             ? _value.executionMode
             : executionMode // ignore: cast_nullable_to_non_nullable
                   as String?,
+        createdAt: freezed == createdAt
+            ? _value.createdAt
+            : createdAt // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -172,10 +198,12 @@ class __$$QuestionSummaryImplCopyWithImpl<$Res>
 class _$QuestionSummaryImpl implements _QuestionSummary {
   const _$QuestionSummaryImpl({
     required this.questionUuid,
+    this.topicCode,
     this.topicName,
     this.stemPreview,
     this.difficulty,
     this.executionMode,
+    this.createdAt,
   });
 
   factory _$QuestionSummaryImpl.fromJson(Map<String, dynamic> json) =>
@@ -184,6 +212,8 @@ class _$QuestionSummaryImpl implements _QuestionSummary {
   @override
   final String questionUuid;
   @override
+  final String? topicCode;
+  @override
   final String? topicName;
   @override
   final String? stemPreview;
@@ -191,10 +221,12 @@ class _$QuestionSummaryImpl implements _QuestionSummary {
   final int? difficulty;
   @override
   final String? executionMode;
+  @override
+  final String? createdAt;
 
   @override
   String toString() {
-    return 'QuestionSummary(questionUuid: $questionUuid, topicName: $topicName, stemPreview: $stemPreview, difficulty: $difficulty, executionMode: $executionMode)';
+    return 'QuestionSummary(questionUuid: $questionUuid, topicCode: $topicCode, topicName: $topicName, stemPreview: $stemPreview, difficulty: $difficulty, executionMode: $executionMode, createdAt: $createdAt)';
   }
 
   @override
@@ -204,6 +236,8 @@ class _$QuestionSummaryImpl implements _QuestionSummary {
             other is _$QuestionSummaryImpl &&
             (identical(other.questionUuid, questionUuid) ||
                 other.questionUuid == questionUuid) &&
+            (identical(other.topicCode, topicCode) ||
+                other.topicCode == topicCode) &&
             (identical(other.topicName, topicName) ||
                 other.topicName == topicName) &&
             (identical(other.stemPreview, stemPreview) ||
@@ -211,7 +245,9 @@ class _$QuestionSummaryImpl implements _QuestionSummary {
             (identical(other.difficulty, difficulty) ||
                 other.difficulty == difficulty) &&
             (identical(other.executionMode, executionMode) ||
-                other.executionMode == executionMode));
+                other.executionMode == executionMode) &&
+            (identical(other.createdAt, createdAt) ||
+                other.createdAt == createdAt));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -219,10 +255,12 @@ class _$QuestionSummaryImpl implements _QuestionSummary {
   int get hashCode => Object.hash(
     runtimeType,
     questionUuid,
+    topicCode,
     topicName,
     stemPreview,
     difficulty,
     executionMode,
+    createdAt,
   );
 
   /// Create a copy of QuestionSummary
@@ -245,10 +283,12 @@ class _$QuestionSummaryImpl implements _QuestionSummary {
 abstract class _QuestionSummary implements QuestionSummary {
   const factory _QuestionSummary({
     required final String questionUuid,
+    final String? topicCode,
     final String? topicName,
     final String? stemPreview,
     final int? difficulty,
     final String? executionMode,
+    final String? createdAt,
   }) = _$QuestionSummaryImpl;
 
   factory _QuestionSummary.fromJson(Map<String, dynamic> json) =
@@ -257,6 +297,8 @@ abstract class _QuestionSummary implements QuestionSummary {
   @override
   String get questionUuid;
   @override
+  String? get topicCode;
+  @override
   String? get topicName;
   @override
   String? get stemPreview;
@@ -264,6 +306,8 @@ abstract class _QuestionSummary implements QuestionSummary {
   int? get difficulty;
   @override
   String? get executionMode;
+  @override
+  String? get createdAt;
 
   /// Create a copy of QuestionSummary
   /// with the given fields replaced by the non-null parameter values.
