@@ -50,7 +50,7 @@ export default function Home() {
         <p className="text-secondary mt-1">{displayName}</p>
       </section>
 
-      <section className="grid grid-cols-2 gap-3 mb-4">
+      <section className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
         {today?.question ? (
           <Link to={`/questions/${today.question.questionUuid}`} className="block">
             <div className="card-base h-full flex flex-col gap-2 cursor-pointer hover:bg-surface transition-colors">
