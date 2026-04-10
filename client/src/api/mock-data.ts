@@ -137,26 +137,106 @@ const MOCK_CHOICES: readonly ChoiceItem[] = [
 ];
 
 const MOCK_QUESTIONS: readonly QuestionSummary[] = [
-  // JOIN (2)
-  { questionUuid: "q-uuid-0001", topicCode: "JOIN", topicName: "JOIN", difficulty: 2, executionMode: "CONCEPT_ONLY", stemPreview: "고객별 주문 수를 구하는 올바른 SQL은?", createdAt: "2026-04-07T12:00:00" },
-  { questionUuid: "q-uuid-0006", topicCode: "JOIN", topicName: "JOIN", difficulty: 3, executionMode: "EXECUTABLE", stemPreview: "LEFT JOIN과 INNER JOIN의 결과 차이를 올바르게 설명한 것은?", createdAt: "2026-04-07T12:00:00" },
-  // 서브쿼리 (2)
-  { questionUuid: "q-uuid-0002", topicCode: "SUBQUERY", topicName: "서브쿼리", difficulty: 3, executionMode: "EXECUTABLE", stemPreview: "서브쿼리를 사용하여 평균 이상 주문한 고객을 조회하는 SQL은?", createdAt: "2026-04-07T12:00:00" },
-  { questionUuid: "q-uuid-0009", topicCode: "SUBQUERY", topicName: "서브쿼리", difficulty: 2, executionMode: "CONCEPT_ONLY", stemPreview: "상관 서브쿼리와 비상관 서브쿼리의 차이를 올바르게 설명한 것은?", createdAt: "2026-04-07T12:00:00" },
-  // GROUP BY (2)
-  { questionUuid: "q-uuid-0003", topicCode: "GROUP_BY", topicName: "GROUP BY", difficulty: 2, executionMode: "EXECUTABLE", stemPreview: "부서별 평균 급여가 500만원 이상인 부서를 구하는 SQL은?", createdAt: "2026-04-07T12:00:00" },
-  { questionUuid: "q-uuid-0007", topicCode: "GROUP_BY", topicName: "GROUP BY", difficulty: 1, executionMode: "CONCEPT_ONLY", stemPreview: "GROUP BY와 HAVING의 실행 순서로 올바른 것은?", createdAt: "2026-04-07T12:00:00" },
-  // DDL (2)
-  { questionUuid: "q-uuid-0004", topicCode: "DDL", topicName: "DDL", difficulty: 1, executionMode: "EXECUTABLE", stemPreview: "외래키 제약조건을 포함한 테이블 생성 SQL로 올바른 것은?", createdAt: "2026-04-07T12:00:00" },
-  { questionUuid: "q-uuid-0008", topicCode: "DDL", topicName: "DDL", difficulty: 2, executionMode: "CONCEPT_ONLY", stemPreview: "CREATE TABLE 시 DEFAULT 제약조건 문법은?", createdAt: "2026-04-07T12:00:00" },
-  // 제약조건 (2)
-  { questionUuid: "q-uuid-0005", topicCode: "CONSTRAINT", topicName: "제약조건", difficulty: 3, executionMode: "CONCEPT_ONLY", stemPreview: "NOT NULL과 UNIQUE 제약조건의 차이를 올바르게 설명한 것은?", createdAt: "2026-04-07T12:00:00" },
-  { questionUuid: "q-uuid-0010", topicCode: "CONSTRAINT", topicName: "제약조건", difficulty: 1, executionMode: "CONCEPT_ONLY", stemPreview: "PRIMARY KEY와 UNIQUE 제약조건의 공통점과 차이점은?", createdAt: "2026-04-07T12:00:00" },
+  // sql_join (2)
+  {
+    questionUuid: "q-uuid-0001",
+    topicCode: "sql_join",
+    topicName: "조인 (JOIN)",
+    difficulty: 2,
+    executionMode: "CONCEPT_ONLY",
+    stemPreview: "고객별 주문 수를 구하는 올바른 SQL은?",
+    createdAt: "2026-04-07T12:00:00",
+  },
+  {
+    questionUuid: "q-uuid-0006",
+    topicCode: "sql_join",
+    topicName: "조인 (JOIN)",
+    difficulty: 3,
+    executionMode: "EXECUTABLE",
+    stemPreview: "LEFT JOIN과 INNER JOIN의 결과 차이를 올바르게 설명한 것은?",
+    createdAt: "2026-04-07T12:00:00",
+  },
+  // sql_subquery (2)
+  {
+    questionUuid: "q-uuid-0002",
+    topicCode: "sql_subquery",
+    topicName: "서브쿼리",
+    difficulty: 3,
+    executionMode: "EXECUTABLE",
+    stemPreview: "서브쿼리를 사용하여 평균 이상 주문한 고객을 조회하는 SQL은?",
+    createdAt: "2026-04-07T12:00:00",
+  },
+  {
+    questionUuid: "q-uuid-0009",
+    topicCode: "sql_subquery",
+    topicName: "서브쿼리",
+    difficulty: 2,
+    executionMode: "CONCEPT_ONLY",
+    stemPreview: "상관 서브쿼리와 비상관 서브쿼리의 차이를 올바르게 설명한 것은?",
+    createdAt: "2026-04-07T12:00:00",
+  },
+  // sql_group_aggregate (2)
+  {
+    questionUuid: "q-uuid-0003",
+    topicCode: "sql_group_aggregate",
+    topicName: "그룹함수 / 집계",
+    difficulty: 2,
+    executionMode: "EXECUTABLE",
+    stemPreview: "부서별 평균 급여가 500만원 이상인 부서를 구하는 SQL은?",
+    createdAt: "2026-04-07T12:00:00",
+  },
+  {
+    questionUuid: "q-uuid-0007",
+    topicCode: "sql_group_aggregate",
+    topicName: "그룹함수 / 집계",
+    difficulty: 1,
+    executionMode: "CONCEPT_ONLY",
+    stemPreview: "GROUP BY와 HAVING의 실행 순서로 올바른 것은?",
+    createdAt: "2026-04-07T12:00:00",
+  },
+  // sql_ddl_dml_tcl (2)
+  {
+    questionUuid: "q-uuid-0004",
+    topicCode: "sql_ddl_dml_tcl",
+    topicName: "DDL / DML / TCL",
+    difficulty: 1,
+    executionMode: "EXECUTABLE",
+    stemPreview: "외래키 제약조건을 포함한 테이블 생성 SQL로 올바른 것은?",
+    createdAt: "2026-04-07T12:00:00",
+  },
+  {
+    questionUuid: "q-uuid-0008",
+    topicCode: "sql_ddl_dml_tcl",
+    topicName: "DDL / DML / TCL",
+    difficulty: 2,
+    executionMode: "CONCEPT_ONLY",
+    stemPreview: "CREATE TABLE 시 DEFAULT 제약조건 문법은?",
+    createdAt: "2026-04-07T12:00:00",
+  },
+  // sql_basic_select (2)
+  {
+    questionUuid: "q-uuid-0005",
+    topicCode: "sql_basic_select",
+    topicName: "SELECT 기본",
+    difficulty: 1,
+    executionMode: "CONCEPT_ONLY",
+    stemPreview: "SELECT 문의 실행 순서를 올바르게 나열한 것은?",
+    createdAt: "2026-04-07T12:00:00",
+  },
+  {
+    questionUuid: "q-uuid-0010",
+    topicCode: "sql_basic_select",
+    topicName: "SELECT 기본",
+    difficulty: 1,
+    executionMode: "CONCEPT_ONLY",
+    stemPreview: "WHERE 절에서 LIKE 연산자의 와일드카드 사용법은?",
+    createdAt: "2026-04-07T12:00:00",
+  },
 ];
 
 const MOCK_QUESTION_DETAIL: QuestionDetail = {
   questionUuid: "q-uuid-0001",
-  topicName: "JOIN",
+  topicName: "조인 (JOIN)",
   subtopicName: "INNER JOIN",
   difficulty: 2,
   executionMode: "CONCEPT_ONLY",
@@ -269,8 +349,7 @@ export function getMockResponse(path: string, method: string, body?: string): un
     const page = Number(url.get("page") ?? 0);
     const size = Number(url.get("size") ?? 10);
     const topic = url.get("topic");
-    const topicDisplayName = topic ? MOCK_TOPICS.find((t) => t.code === topic)?.displayName : undefined;
-    const filtered = topicDisplayName ? MOCK_QUESTIONS.filter((q) => q.topicName === topicDisplayName) : topic ? [] : MOCK_QUESTIONS;
+    const filtered = topic ? MOCK_QUESTIONS.filter((q) => q.topicCode === topic) : MOCK_QUESTIONS;
     const start = page * size;
     const content = filtered.slice(start, start + size);
     return {
