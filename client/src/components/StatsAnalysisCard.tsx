@@ -1,57 +1,28 @@
 import { Lightbulb } from "lucide-react";
-import type { CategoryStats } from "../types/api";
 
 interface StatsAnalysisCardProps {
-  readonly categories: readonly CategoryStats[];
+  // AI가 생성한 코멘트 텍스트. null이면 로딩/미생성 상태
+  readonly comment: string | null;
+  // 로딩 중 여부 (skeleton 표시)
+  readonly isLoading?: boolean;
 }
 
-function buildAnalysis(categories: readonly CategoryStats[]): string {
-  if (categories.length === 0) return "";
-
-  const avgRate =
-    categories.reduce((sum, c) => sum + c.correctRate, 0) / categories.length;
-
-  const untried = categories.filter((c) => c.solvedCount === 0);
-  const weak = categories.filter(
-    (c) => c.solvedCount > 0 && c.correctRate < avgRate,
-  );
-
-  const lines: string[] = [];
-
-  if (avgRate >= 0.8) {
-    lines.push("전반적으로 높은 수준의 실력을 갖추고 있어요.");
-  } else if (avgRate >= 0.5) {
-    lines.push("전반적으로 안정적인 실력을 보여주고 있어요.");
-  } else {
-    lines.push("아직 성장 중이에요. 꾸준히 풀면 금방 늘어요.");
-  }
-
-  if (weak.length > 0) {
-    const names = weak
-      .sort((a, b) => a.correctRate - b.correctRate)
-      .slice(0, 3)
-      .map((c) => c.displayName);
-    lines.push(
-      `실력을 더 높이고 싶다면 ${names.join(", ")} 카테고리를 집중적으로 학습해보세요.`,
+export default function StatsAnalysisCard({ comment, isLoading }: StatsAnalysisCardProps) {
+  if (isLoading) {
+    return (
+      <div className="card-base flex gap-3">
+        <div className="w-8 h-8 rounded-lg bg-border animate-pulse shrink-0" />
+        <div className="flex-1 space-y-2 py-1">
+          <div className="h-3 bg-border rounded animate-pulse w-1/4" />
+          <div className="h-3 bg-border rounded animate-pulse w-full" />
+          <div className="h-3 bg-border rounded animate-pulse w-3/4" />
+        </div>
+      </div>
     );
   }
 
-  if (untried.length > 0) {
-    const names = untried.slice(0, 3).map((c) => c.displayName);
-    lines.push(
-      `아직 시도하지 않은 영역이 있어요. ${names.join(", ")}도 한번 풀어보세요.`,
-    );
-  }
-
-  if (weak.length === 0 && untried.length === 0) {
-    lines.push("모든 영역에서 고른 실력을 보여주고 있어요. 이 페이스를 유지하세요!");
-  }
-
-  return lines.join(" ");
-}
-
-export default function StatsAnalysisCard({ categories }: StatsAnalysisCardProps) {
-  const text = buildAnalysis(categories);
+  // AI 코멘트가 없으면 섹션 자체를 숨김 처리
+  if (!comment) return null;
 
   return (
     <div className="card-base flex gap-3">
@@ -59,8 +30,8 @@ export default function StatsAnalysisCard({ categories }: StatsAnalysisCardProps
         <Lightbulb size={16} className="text-brand" />
       </div>
       <div>
-        <h3 className="text-sm font-bold text-text-primary mb-1">영역 분석</h3>
-        <p className="text-sm text-text-secondary leading-relaxed">{text}</p>
+        <h3 className="text-sm font-bold text-text-primary mb-1">AI 영역 분석</h3>
+        <p className="text-sm text-text-secondary leading-relaxed">{comment}</p>
       </div>
     </div>
   );

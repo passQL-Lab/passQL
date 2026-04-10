@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { useProgress } from "../hooks/useProgress";
-import { fetchCategoryStats } from "../api/progress";
+import { fetchTopicAnalysis, fetchAiComment } from "../api/progress";
 import ErrorFallback from "../components/ErrorFallback";
 import StatsAnalysisCard from "../components/StatsAnalysisCard";
 import StatsRadarChart from "../components/StatsRadarChart";
@@ -13,14 +13,24 @@ export default function Stats() {
     isError,
     refetch,
   } = useProgress();
-  const { data: categories } = useQuery({
-    queryKey: ["categoryStats"],
-    queryFn: fetchCategoryStats,
+
+  // 토픽별 정답률/풀이 수 (레이더·막대 차트)
+  const { data: topicAnalysis } = useQuery({
+    queryKey: ["topicAnalysis"],
+    queryFn: fetchTopicAnalysis,
     staleTime: 1000 * 60 * 5,
+  });
+
+  // AI 코멘트 (Redis 24h 캐싱 — 제출 시 서버에서 자동 무효화)
+  const { data: aiComment, isLoading: aiCommentLoading } = useQuery({
+    queryKey: ["aiComment"],
+    queryFn: fetchAiComment,
+    staleTime: 1000 * 60 * 60, // 1시간 — 서버 캐시 TTL(24h) 내에서는 재요청 불필요
   });
 
   const readiness = progress?.readiness;
   const readinessPercent = readiness ? Math.round(readiness.score * 100) : null;
+  const topicStats = topicAnalysis?.topicStats ?? [];
 
   if (progressLoading) {
     return (
@@ -45,6 +55,7 @@ export default function Stats() {
         </p>
       </div>
 
+      {/* 상단 요약 카드 */}
       <div className="card-base flex items-center divide-x divide-border">
         {[
           { value: `${progress?.solvedCount ?? 0}문제`, label: "푼 문제" },
@@ -64,11 +75,15 @@ export default function Stats() {
         ))}
       </div>
 
-      {categories && categories.length > 0 ? (
+      {topicStats.length > 0 ? (
         <>
-          <StatsAnalysisCard categories={categories} />
-          <StatsRadarChart categories={categories} />
-          <StatsBarChart categories={categories} />
+          {/* AI 영역 분석 코멘트 */}
+          <StatsAnalysisCard
+            comment={aiComment?.comment ?? null}
+            isLoading={aiCommentLoading}
+          />
+          <StatsRadarChart topicStats={topicStats} />
+          <StatsBarChart topicStats={topicStats} />
         </>
       ) : (
         <div className="card-base text-center py-12">
