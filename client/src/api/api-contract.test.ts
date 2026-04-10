@@ -108,31 +108,30 @@ describe("AI API 계약", () => {
 
 describe("Questions API 계약", () => {
   describe("submitAnswer — POST /questions/{uuid}/submit", () => {
-    it("body에 selectedChoiceKey만 포함한다 (choiceSetId 없음)", async () => {
+    it("body에 choiceSetId와 selectedChoiceKey를 포함한다", async () => {
       const { submitAnswer } = await import("./questions");
 
-      await submitAnswer("q-uuid-004", "B");
+      await submitAnswer("q-uuid-004", "cs-uuid-001", "B");
 
       const [url, options] = mockFetch.mock.calls[0];
       const body = JSON.parse(options.body);
 
       expect(url).toContain("/questions/q-uuid-004/submit");
-      expect(body).toEqual({ selectedChoiceKey: "B" });
-      expect(body).not.toHaveProperty("choiceSetId");
+      expect(body).toEqual({ choiceSetId: "cs-uuid-001", selectedChoiceKey: "B" });
     });
 
     it("X-Member-UUID 헤더를 포함한다", async () => {
       const { submitAnswer } = await import("./questions");
 
-      await submitAnswer("q-uuid-004", "A");
+      await submitAnswer("q-uuid-004", "cs-uuid-001", "A");
 
       const [, options] = mockFetch.mock.calls[0];
       expect(options.headers["X-Member-UUID"]).toBe("test-member-uuid");
     });
 
-    it("2개 파라미터만 받는다 (choiceSetId 파라미터 제거됨)", async () => {
+    it("3개 파라미터를 받는다 (questionUuid, choiceSetId, selectedChoiceKey)", async () => {
       const { submitAnswer } = await import("./questions");
-      expect(submitAnswer.length).toBe(2);
+      expect(submitAnswer.length).toBe(3);
     });
   });
 
@@ -178,10 +177,11 @@ describe("Progress API 계약", () => {
   });
 });
 
-describe("generateChoices 제거 확인", () => {
-  it("questions 모듈에서 generateChoices가 export되지 않는다", async () => {
+describe("generateChoices — POST /questions/{uuid}/generate-choices", () => {
+  it("questions 모듈에서 generateChoices가 export된다", async () => {
     const questions = await import("./questions");
-    expect(questions).not.toHaveProperty("generateChoices");
+    expect(questions).toHaveProperty("generateChoices");
+    expect(typeof questions.generateChoices).toBe("function");
   });
 });
 

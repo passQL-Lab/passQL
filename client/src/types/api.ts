@@ -59,9 +59,31 @@ export interface SubmitResult {
   readonly isCorrect: boolean;
   readonly correctKey: string;
   readonly rationale: string;
-  readonly executionMode?: ExecutionMode;
-  readonly selectedResult?: ExecuteResult;
-  readonly correctResult?: ExecuteResult;
+  // EXECUTABLE 문제일 때만 non-null, CONCEPT_ONLY는 null
+  readonly selectedResult: ExecuteResult | null;
+  readonly correctResult: ExecuteResult | null;
+  readonly selectedSql: string | null;
+  readonly correctSql: string | null;
+}
+
+// === SSE (선택지 생성) ===
+export type SseStatusPhase = "generating" | "validating";
+
+export interface SseStatusEvent {
+  readonly phase: SseStatusPhase;
+  readonly message: string;
+}
+
+export interface SseErrorEvent {
+  readonly code: string;
+  readonly message: string;
+  readonly retryable: boolean;
+}
+
+export interface ChoiceSetGenerateResponse {
+  readonly choiceSetId: string;
+  // isCorrect, rationale은 사용자 정답 노출 방지를 위해 제외됨
+  readonly choices: readonly ChoiceItem[];
 }
 
 export interface ExecuteResult {
@@ -122,6 +144,24 @@ export interface CategoryStats {
   readonly displayName: string;
   readonly correctRate: number;
   readonly solvedCount: number;
+}
+
+// === Topic Analysis (Issue #79) ===
+export interface TopicStat {
+  readonly topicUuid: string;
+  readonly displayName: string;
+  readonly totalQuestionCount: number;
+  readonly correctRate: number;
+  readonly solvedCount: number;
+}
+
+export interface TopicAnalysisResponse {
+  readonly topicStats: readonly TopicStat[];
+}
+
+export interface AiCommentResponse {
+  readonly comment: string;
+  readonly generatedAt: string;
 }
 
 // === Heatmap ===

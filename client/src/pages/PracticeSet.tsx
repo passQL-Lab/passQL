@@ -36,14 +36,22 @@ export default function PracticeSet() {
   const isLast = displayIndex >= totalQuestions - 1;
 
   const handleSelect = useCallback(
-    async (selectedChoiceKey: string) => {
+    async (selectedChoiceKey: string, choiceSetId: string) => {
       if (!displayQuestion) return;
       try {
-        const result = await submitAnswer(displayQuestion.questionUuid, selectedChoiceKey);
+        const result = await submitAnswer(displayQuestion.questionUuid, choiceSetId, selectedChoiceKey);
         setFeedback(result);
         submitAndAdvance(displayQuestion.questionUuid, result.isCorrect, selectedChoiceKey);
       } catch {
-        const fallback: SubmitResult = { isCorrect: false, correctKey: "?", rationale: "" };
+        const fallback: SubmitResult = {
+          isCorrect: false,
+          correctKey: "?",
+          rationale: "",
+          selectedResult: null,
+          correctResult: null,
+          selectedSql: null,
+          correctSql: null,
+        };
         setFeedback(fallback);
         submitAndAdvance(displayQuestion.questionUuid, false, selectedChoiceKey);
       }

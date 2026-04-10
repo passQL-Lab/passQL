@@ -20,7 +20,7 @@ interface QuestionDetailProps {
   readonly practiceMode?: boolean;
   readonly practiceSubmitLabel?: string;
   readonly questionUuid?: string;
-  readonly onPracticeSubmit?: (selectedChoiceKey: string) => void;
+  readonly onPracticeSubmit?: (selectedChoiceKey: string, choiceSetId: string) => void;
 }
 
 export default function QuestionDetail({ practiceMode, practiceSubmitLabel, questionUuid: propUuid, onPracticeSubmit }: QuestionDetailProps = {}) {
@@ -42,6 +42,8 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
 
   const activeChoiceSet = question?.choiceSets?.find((cs) => cs.status === "OK");
   const choices = activeChoiceSet?.items ?? [];
+  // 제출 시 BE에 전달할 choiceSetId (SSE 미사용 시 ADMIN_SEED choiceSet UUID 사용)
+  const choiceSetId = activeChoiceSet?.choiceSetUuid ?? "";
 
   const explainMutation = useMutation({
     mutationFn: explainError,
@@ -73,26 +75,23 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
   const handleSubmit = useCallback(() => {
     if (!selectedKey || !question) return;
     if (practiceMode && onPracticeSubmit) {
-      onPracticeSubmit(selectedKey);
+      onPracticeSubmit(selectedKey, choiceSetId);
       return;
     }
-    submitMutation.mutate(selectedKey, {
+    submitMutation.mutate({ choiceSetId, selectedChoiceKey: selectedKey }, {
       onSuccess: (result) => {
-        const selectedChoice = choices.find((c) => c.key === selectedKey);
-        const correctChoice = choices.find((c) => c.key === result.correctKey);
         navigate(`/questions/${questionUuid}/result`, {
           state: {
             ...result,
             selectedKey,
-            selectedSql: selectedChoice?.body,
-            correctSql: correctChoice?.body,
             questionUuid,
+            // executionMode는 QuestionDetail에서 전달 (SubmitResult에서 제거됨)
             executionMode: question.executionMode,
           },
         });
       },
     });
-  }, [selectedKey, submitMutation, question, choices, questionUuid, navigate, practiceMode, onPracticeSubmit]);
+  }, [selectedKey, choiceSetId, submitMutation, question, questionUuid, navigate, practiceMode, onPracticeSubmit]);
 
   const handleAskAi = useCallback(
     (choiceKey: string, _errorCode: string, errorMessage: string) => {

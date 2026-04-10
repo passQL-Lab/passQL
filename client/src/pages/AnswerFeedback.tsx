@@ -13,12 +13,13 @@ interface FeedbackState {
   readonly correctKey: string;
   readonly rationale: string;
   readonly selectedKey: string;
-  readonly selectedSql?: string;
-  readonly correctSql?: string;
+  // BE SubmitResult에서 직접 제공 (CONCEPT_ONLY는 null)
+  readonly selectedSql: string | null;
+  readonly correctSql: string | null;
   readonly questionUuid: string;
   readonly executionMode?: ExecutionMode;
-  readonly selectedResult?: ExecuteResult;
-  readonly correctResult?: ExecuteResult;
+  readonly selectedResult: ExecuteResult | null;
+  readonly correctResult: ExecuteResult | null;
 }
 
 function SqlCompareBlock({
@@ -188,16 +189,16 @@ export default function AnswerFeedback() {
         <SqlCompareBlock
           label="내가 선택한 SQL"
           choiceKey={selectedKey}
-          sql={selectedSql}
-          result={selectedResult}
+          sql={selectedSql ?? undefined}
+          result={selectedResult ?? undefined}
           isCorrect={false}
         />
       )}
       <SqlCompareBlock
         label="정답 SQL"
         choiceKey={correctKey}
-        sql={correctSql}
-        result={correctResult}
+        sql={correctSql ?? undefined}
+        result={correctResult ?? undefined}
         isCorrect={true}
       />
       <div className="mt-4">
@@ -218,14 +219,14 @@ export default function AnswerFeedback() {
         <TextCompareBlock
           label="내가 선택한 답"
           choiceKey={selectedKey}
-          body={selectedSql}
+          body={selectedSql ?? undefined}
           isCorrect={false}
         />
       )}
       <TextCompareBlock
         label="정답"
         choiceKey={correctKey}
-        body={correctSql}
+        body={correctSql ?? undefined}
         isCorrect={true}
       />
       <div className="mt-4">
