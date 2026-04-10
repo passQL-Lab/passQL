@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
 import java.util.Map;
 import java.util.UUID;
@@ -82,13 +83,28 @@ public interface QuestionControllerDocs {
   );
 
   @ApiLogs({
+      @ApiLog(date = "2026.04.10", author = Author.SUHSAECHAN, issueNumber = 69,
+              description = "SSE 선택지 생성 엔드포인트 추가")
+  })
+  @Operation(summary = "AI 선택지 세트 생성 (SSE)",
+      description = "AI가 4지선다 선택지를 실시간 생성. SSE 이벤트: status(generating/validating), complete(choiceSetId+choices), error. " +
+          "생성된 세트는 DB에 저장되어 관리자 화면에서 조회 가능. 헤더 X-Member-UUID(UUID) 필수.")
+  SseEmitter generateChoices(
+      @PathVariable UUID questionUuid,
+      @RequestHeader(value = "X-Member-UUID") UUID memberUuid
+  );
+
+  @ApiLogs({
       @ApiLog(date = "2026.04.07", author = Author.SUHSAECHAN, issueNumber = 1, description = "문제 제출 API 추가"),
       @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 22, description = "PathVariable: Long id → UUID questionUuid. Header: X-User-UUID(String) → X-Member-UUID(UUID). Body: selectedKey → selectedChoiceKey (구 selectedKey 한시적 fallback 지원)"),
       @ApiLog(date = "2026.04.10", author = Author.SUHSAECHAN, issueNumber = 57, description = "Request Body를 Map → SubmitRequest DTO로 변경하여 Swagger 스키마 정확도 개선"),
+      @ApiLog(date = "2026.04.10", author = Author.SUHSAECHAN, issueNumber = 69,
+              description = "SubmitRequest에 choiceSetId 추가, SubmitResult에 ExecuteResult 비교 필드(selectedResult/correctResult/correctSql/selectedSql) 추가"),
   })
   @Operation(summary = "문제 제출",
-      description = "선택지 제출 후 정답 여부 반환. 헤더 X-Member-UUID(UUID) 필수. " +
-          "Body: { \"selectedChoiceKey\": \"A\" }")
+      description = "선택지 제출 후 정답 여부 + SQL 실행 결과 비교 반환. 헤더 X-Member-UUID(UUID) 필수. " +
+          "Body: { \"choiceSetId\": \"uuid\", \"selectedChoiceKey\": \"A\" }. " +
+          "EXECUTABLE 문제: selectedResult/correctResult에 양쪽 SQL 실행 결과 포함. CONCEPT_ONLY: null.")
   ResponseEntity<SubmitResult> submit(
       @PathVariable UUID questionUuid,
       @RequestHeader(value = "X-Member-UUID") UUID memberUuid,

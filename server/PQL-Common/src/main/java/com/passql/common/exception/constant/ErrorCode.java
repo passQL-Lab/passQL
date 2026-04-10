@@ -64,6 +64,7 @@ public enum ErrorCode {
     CHOICE_SET_VALIDATION_NO_CORRECT(HttpStatus.UNPROCESSABLE_ENTITY, "생성된 선택지 중 정답이 없습니다."),
     CHOICE_SET_VALIDATION_MULTIPLE_CORRECT(HttpStatus.UNPROCESSABLE_ENTITY, "생성된 선택지 중 정답이 여러 개입니다."),
     CHOICE_SET_NOT_FOUND(HttpStatus.NOT_FOUND, "선택지 세트를 찾을 수 없습니다."),
+    CHOICE_SET_ITEM_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 선택지를 찾을 수 없습니다."),
     CHOICE_SET_POLICY_NOT_IMPLEMENTED(HttpStatus.NOT_IMPLEMENTED, "해당 선택지 정책은 아직 지원되지 않습니다."),
 
     // === Sandbox Validation (신규: Sub-plan 1) ===
