@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 
 import '../presentation/pages/home/home_page.dart';
 import '../presentation/pages/questions/topic_list_page.dart';
+import '../presentation/pages/questions/chapter_page.dart';
 import '../presentation/pages/questions/question_detail_page.dart';
 import '../presentation/pages/result/result_page.dart';
 import '../presentation/pages/practice/practice_page.dart';
@@ -21,7 +22,7 @@ final _shellKey = GlobalKey<NavigatorState>(debugLabel: 'shell');
 /// 앱 전역 라우터.
 ///
 /// - ShellRoute: 바텀 탭 4개 (홈/문제/통계/설정)
-/// - 루트 라우트: 풀스크린 페이지 (문제 상세, 결과, 연습)
+/// - 루트 라우트: 풀스크린 페이지 (챕터, 문제 상세, 결과, 연습)
 abstract final class AppRouter {
   static final GoRouter router = GoRouter(
     navigatorKey: _rootKey,
@@ -55,6 +56,20 @@ abstract final class AppRouter {
         ],
       ),
 
+      // 풀스크린: 챕터 플로우 (/questions/chapter?topic=CODE&topicName=NAME)
+      // 반드시 /questions/:questionUuid 보다 먼저 정의 (정적 경로 우선)
+      GoRoute(
+        path: AppRoutes.questionChapter,
+        parentNavigatorKey: _rootKey,
+        builder: (_, state) {
+          final params = state.uri.queryParameters;
+          return ChapterPage(
+            topicCode: params['topic'] ?? '',
+            topicName: Uri.decodeComponent(params['topicName'] ?? '문제 풀기'),
+          );
+        },
+      ),
+
       // 풀스크린: 문제 상세 + 결과
       GoRoute(
         path: '/questions/:questionUuid',
@@ -71,7 +86,7 @@ abstract final class AppRouter {
         ],
       ),
 
-      // 풀스크린: 연습 모드 + 연습 결과
+      // 풀스크린: 연습 모드 + 연습/챕터 결과
       GoRoute(
         path: '/practice/:sessionId',
         parentNavigatorKey: _rootKey,
@@ -82,7 +97,8 @@ abstract final class AppRouter {
           GoRoute(
             path: 'result',
             parentNavigatorKey: _rootKey,
-            builder: (_, _) => const PracticeResultPage(),
+            builder: (_, state) =>
+                PracticeResultPage(extra: state.extra),
           ),
         ],
       ),

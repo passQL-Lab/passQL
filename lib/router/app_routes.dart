@@ -8,6 +8,10 @@ abstract final class AppRoutes {
   static const String stats = '/stats';
   static const String settings = '/settings';
 
+  // 문제 탭 서브 라우트
+  /// 토픽 선택 후 챕터 플로우. topic(topicCode), topicName 쿼리 파라미터.
+  static const String questionChapter = '/questions/chapter';
+
   // 풀스크린
   /// 문제 상세. [uuid]는 questionUuid.
   static String questionDetail(String uuid) => '/questions/$uuid';
