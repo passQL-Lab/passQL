@@ -2,7 +2,6 @@ package com.passql.application.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.passql.ai.client.GeminiClient;
 import com.passql.ai.dto.AiCommentResponse;
 import com.passql.submission.dto.TopicAnalysisResponse;
@@ -27,9 +26,7 @@ public class AiCommentService {
     private final GeminiClient geminiClient;
     private final TopicAnalysisService topicAnalysisService;
     private final RedisTemplate<String, Object> redisTemplate;
-
-    private final ObjectMapper objectMapper = new ObjectMapper()
-            .registerModule(new JavaTimeModule());
+    private final ObjectMapper objectMapper;
 
     public AiCommentResponse getAiComment(UUID memberUuid) {
         String cacheKey = CACHE_KEY_PREFIX + memberUuid;
@@ -40,7 +37,7 @@ public class AiCommentService {
             try {
                 return objectMapper.readValue((String) cached, AiCommentResponse.class);
             } catch (JsonProcessingException e) {
-                log.warn("AI comment cache deserialization failed for {}, regenerating", memberUuid);
+                log.warn("AI comment cache deserialization failed for {}, regenerating", memberUuid, e);
             }
         }
 
@@ -72,7 +69,7 @@ public class AiCommentService {
             String json = objectMapper.writeValueAsString(response);
             redisTemplate.opsForValue().set(cacheKey, json, CACHE_TTL_HOURS, TimeUnit.HOURS);
         } catch (JsonProcessingException e) {
-            log.warn("Failed to cache AI comment for {}", memberUuid);
+            log.warn("Failed to cache AI comment for {}", memberUuid, e);
         }
 
         return response;
