@@ -53,13 +53,19 @@ public class QuestionExecutionService {
      * CONCEPT_ONLY: SQL 실행 없이 정답 키 비교만 수행.
      */
     public SubmitResult submitWithResult(UUID questionUuid, UUID memberUuid, String selectedChoiceKey) {
+        // null/blank 선택지 키 방어
+        if (selectedChoiceKey == null || selectedChoiceKey.isBlank()) {
+            throw new CustomException(ErrorCode.INVALID_INPUT_VALUE);
+        }
+
         Question question = questionService.getQuestionEntity(questionUuid);
 
         List<QuestionChoice> choices = questionChoiceRepository.findByQuestionUuidOrderBySortOrderAsc(questionUuid);
         QuestionChoice selected = choices.stream()
                 .filter(c -> selectedChoiceKey.equals(c.getChoiceKey()))
                 .findFirst()
-                .orElseThrow(() -> new CustomException(ErrorCode.QUESTION_NOT_FOUND));
+                // 선택지가 존재하지 않으면 잘못된 입력 — QUESTION_NOT_FOUND가 아님
+                .orElseThrow(() -> new CustomException(ErrorCode.CHOICE_SET_NOT_FOUND));
         QuestionChoice correct = choices.stream()
                 .filter(c -> Boolean.TRUE.equals(c.getIsCorrect()))
                 .findFirst()
@@ -81,10 +87,13 @@ public class QuestionExecutionService {
             ExecuteResult correctResult = null;
 
             if (dbName != null && !dbName.isBlank()) {
+                // 제출 경로도 executeChoice와 동일하게 안전성 검증 적용
                 if (selectedSql != null && !selectedSql.isBlank()) {
+                    sqlSafetyValidator.validate(selectedSql);
                     selectedResult = sandboxExecutor.execute(dbName, selectedSql);
                 }
                 if (correctSql != null && !correctSql.isBlank()) {
+                    sqlSafetyValidator.validate(correctSql);
                     correctResult = sandboxExecutor.execute(dbName, correctSql);
                 }
             }

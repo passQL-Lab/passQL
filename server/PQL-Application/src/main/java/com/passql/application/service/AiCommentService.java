@@ -4,12 +4,15 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.passql.ai.client.GeminiClient;
 import com.passql.ai.dto.AiCommentResponse;
+import com.passql.common.exception.CustomException;
+import com.passql.common.exception.constant.ErrorCode;
 import com.passql.submission.dto.TopicAnalysisResponse;
 import com.passql.submission.service.TopicAnalysisService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -18,6 +21,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AiCommentService {
 
     private static final String CACHE_KEY_PREFIX = "ai-comment:";
@@ -60,8 +64,14 @@ public class AiCommentService {
         String userPrompt = "[토픽별 정답률 데이터]\n" + topicJson +
                 "\n\n위 데이터를 바탕으로 약한 영역을 파악하고 집중 학습 추천 문구를 생성해주세요.";
 
-        // Gemini 호출
-        String comment = geminiClient.chat(systemPrompt, userPrompt, 0.7f, 300);
+        // Gemini 호출 — 실패 시 AI_UNAVAILABLE로 매핑
+        String comment;
+        try {
+            comment = geminiClient.chat(systemPrompt, userPrompt, 0.7f, 300);
+        } catch (Exception e) {
+            log.error("Gemini AI comment generation failed for {}", memberUuid, e);
+            throw new CustomException(ErrorCode.AI_UNAVAILABLE);
+        }
         AiCommentResponse response = new AiCommentResponse(comment.trim(), LocalDateTime.now());
 
         // Redis 저장
@@ -75,6 +85,7 @@ public class AiCommentService {
         return response;
     }
 
+    @Transactional
     public void evictCache(UUID memberUuid) {
         redisTemplate.delete(CACHE_KEY_PREFIX + memberUuid);
     }

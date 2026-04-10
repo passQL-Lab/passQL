@@ -1,5 +1,8 @@
 package com.passql.submission.service;
 
+import com.passql.common.exception.CustomException;
+import com.passql.common.exception.constant.ErrorCode;
+import com.passql.member.repository.MemberRepository;
 import com.passql.meta.entity.Topic;
 import com.passql.meta.repository.TopicRepository;
 import com.passql.question.repository.QuestionRepository;
@@ -24,8 +27,13 @@ public class TopicAnalysisService {
     private final SubmissionRepository submissionRepository;
     private final QuestionRepository questionRepository;
     private final TopicRepository topicRepository;
+    private final MemberRepository memberRepository;
 
     public TopicAnalysisResponse getTopicAnalysis(UUID memberUuid) {
+        // 존재하지 않는 회원 UUID 방어 (ProgressService.getHeatmap과 동일 패턴)
+        if (!memberRepository.existsById(memberUuid)) {
+            throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
+        }
         LocalDateTime since = LocalDateTime.now().minusDays(7);
 
         // 토픽별 정답률/풀이수 (최근 7일, 문제별 최근 시도 기준)

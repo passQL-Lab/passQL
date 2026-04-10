@@ -21,7 +21,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class SubmissionService {
     private final SubmissionRepository submissionRepository;
     private final QuestionChoiceRepository questionChoiceRepository;
@@ -31,6 +31,7 @@ public class SubmissionService {
     /**
      * 제출 기록만 저장 (결과 실행은 QuestionExecutionService 책임).
      */
+    @Transactional
     public void recordSubmission(UUID memberUuid, UUID questionUuid, String selectedChoiceKey, Boolean isCorrect) {
         Submission submission = Submission.builder()
                 .memberUuid(memberUuid)
@@ -42,6 +43,7 @@ public class SubmissionService {
         submissionRepository.save(submission);
     }
 
+    @Transactional
     public SubmitResult submit(UUID memberUuid, UUID questionUuid, String selectedChoiceKey) {
         QuestionChoice selected = questionChoiceRepository
                 .findByQuestionUuidAndChoiceKey(questionUuid, selectedChoiceKey)
@@ -78,17 +80,14 @@ public class SubmissionService {
         );
     }
 
-    @Transactional(readOnly = true)
     public List<Submission> getSubmissionsByMember(UUID memberUuid) {
         return submissionRepository.findByMemberUuidOrderBySubmittedAtDesc(memberUuid);
     }
 
-    @Transactional(readOnly = true)
     public List<ExecutionLog> getRecentLogs() {
         return executionLogRepository.findTop20ByOrderByExecutedAtDesc();
     }
 
-    @Transactional(readOnly = true)
     public MonitorStats getStats24h() {
         LocalDateTime since = LocalDateTime.now().minusHours(24);
         List<ExecutionLog> logs = executionLogRepository.findByExecutedAtAfter(since);

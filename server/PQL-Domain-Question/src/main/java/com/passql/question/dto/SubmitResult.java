@@ -1,7 +1,7 @@
 package com.passql.question.dto;
 
 public record SubmitResult(
-        boolean isCorrect,
+        Boolean isCorrect,
         String correctKey,
         String rationale,
         String selectedSql,

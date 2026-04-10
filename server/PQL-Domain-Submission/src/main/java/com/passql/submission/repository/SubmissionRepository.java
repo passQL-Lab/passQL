@@ -109,7 +109,7 @@ public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
             SELECT s.question_uuid,
                    q.topic_uuid,
                    s.is_correct,
-                   ROW_NUMBER() OVER (PARTITION BY s.question_uuid ORDER BY s.submitted_at DESC) AS rn
+                   ROW_NUMBER() OVER (PARTITION BY s.question_uuid ORDER BY s.submitted_at DESC, s.submission_uuid DESC) AS rn
             FROM submission s
             JOIN question q ON s.question_uuid = q.question_uuid
             WHERE s.member_uuid = :memberUuid
