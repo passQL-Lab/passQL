@@ -38,6 +38,8 @@ Frontend ──(/api)──> Backend(Spring) ──(x-api-key)──> AI Server(
 | `submitAnswer(questionUuid, selectedChoiceKey)`     | POST   | `/questions/{questionUuid}/submit`                    |   O (header)    | `SubmitResult`            |  O   |
 | `executeChoice(questionUuid, sql)`                  | POST   | `/questions/{questionUuid}/execute`                   |        -        | `ExecuteResult`           |  O   |
 
+- `fetchQuestions`: `QuestionSummary`에 `topicCode`, `executionMode`("EXECUTABLE"|"CONCEPT_ONLY"), `createdAt` 필드 추가됨.
+- `fetchQuestion`: 응답 `QuestionDetail`의 선택지 구조가 `choices: ChoiceItem[]` -> `choiceSets: ChoiceSetSummary[]`로 변경됨. `ChoiceSetSummary { choiceSetUuid, source, status, sandboxValidationPassed, createdAt, items: ChoiceItem[] }`. `ChoiceItem`에 `isCorrect`, `rationale` 필드 추가. 또한 `schemaDdl`, `schemaSampleData`, `schemaIntent`, `answerSql`, `hint` 필드 추가.
 - `fetchTodayQuestion`: 오늘의 데일리 챌린지 문제 반환. 큐레이션 행(daily_challenge)이 있으면 그 문제, 없으면 활성 문제 풀에서 날짜 시드 기반 결정적 폴백. `memberUuid`가 주어지면 오늘 해당 문제 제출 여부를 `alreadySolvedToday`로 함께 반환. 활성 문제 0개면 `{ question: null, alreadySolvedToday: false }`.
 - `fetchRecommendations`: 활성 문제 풀에서 랜덤 N개 반환. size 기본 3, 최대 5 (초과 시 5로 clamp, 1 미만은 1). `excludeQuestionUuid` 미지정 시 데일리 챌린지 자동 제외.
 - `submitAnswer`: body 필드 `selectedChoiceKey` (구 필드명 `selectedKey` 한시적 fallback 지원). 인증 헤더 `X-Member-UUID` 필수.
@@ -77,6 +79,7 @@ Frontend ──(/api)──> Backend(Spring) ──(x-api-key)──> AI Server(
 | 함수                        | 메서드 | 경로                   |      인증       | 응답 타입          | 상태 |
 | --------------------------- | ------ | ---------------------- | :-------------: | ------------------ | :--: |
 | `fetchProgress(memberUuid)` | GET    | `/progress?memberUuid` | O (query param) | `ProgressResponse` |  O   |
+| `fetchCategoryStats()` | GET | `/progress/categories?memberUuid` | O (query param) | `CategoryStats[]` | 미문서화 |
 | `fetchHeatmap(memberUuid, from?, to?)` | GET | `/progress/heatmap?memberUuid&from&to` | O (query param) | `HeatmapResponse` | 미구현 |
 
 - `fetchProgress`: 응답 필드 `solvedCount`(int64, distinct questionUuid 기준), `correctRate`(double, 0.0~1.0 둘째자리 반올림, 마지막 시도 기준), `streakDays`(int32, 하루 그레이스 -- 오늘 미제출이어도 어제까지 연속이면 유지). 제출 이력 0건이면 `{ 0, 0.0, 0 }`.
@@ -89,13 +92,16 @@ Frontend ──(/api)──> Backend(Spring) ──(x-api-key)──> AI Server(
 | `fetchTopics()` | GET    | `/meta/topics` |  -   | `TopicTree[]`  |  O   |
 | `fetchTags()`   | GET    | `/meta/tags`   |  -   | `ConceptTag[]` |  O   |
 
+- `fetchTopics`: `TopicTree`에 `topicUuid`(UUID), `sortOrder`, `isActive` 필드 추가. `SubtopicItem`에 `sortOrder`, `isActive` 필드 추가.
+- `fetchTags`: `ConceptTag`에 `conceptTagUuid`(UUID), audit 필드(`createdAt`, `updatedAt`, `createdBy`, `updatedBy`) 추가.
+
 ### Home (`src/api/home.ts`)
 
 | 함수                        | 메서드 | 경로                        |      인증       | 응답 타입          | 상태 |
 | --------------------------- | ------ | --------------------------- | :-------------: | ------------------ | :--: |
 | `fetchGreeting(memberUuid)` | GET    | `/home/greeting?memberUuid` | O (query param) | `GreetingResponse` |  O   |
 
-- `fetchGreeting`: 홈 화면 인사 메시지 반환. `GreetingResponse { message: string }`.
+- `fetchGreeting`: 홈 화면 인사 메시지 반환. 선택된 시험 일정이 있으면 D-day 포함 메시지, 없으면 기본 인사 메시지. `GreetingResponse { message: string }`.
 
 ### ExamSchedule (`src/api/examSchedules.ts`)
 

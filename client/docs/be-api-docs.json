@@ -7,8 +7,12 @@
   },
   "servers": [
     {
+      "url": "백엔드주소",
+      "description": "Production"
+    },
+    {
       "url": "http://localhost:8080",
-      "description": "Generated server url"
+      "description": "Local"
     }
   ],
   "tags": [
@@ -31,6 +35,10 @@
     {
       "name": "Progress",
       "description": "학습 진도 조회"
+    },
+    {
+      "name": "Home",
+      "description": "홈 화면"
     },
     {
       "name": "Member",
@@ -550,7 +558,9 @@
     },
     "/api/home/greeting": {
       "get": {
-        "tags": ["home-controller"],
+        "tags": ["Home"],
+        "summary": "홈 화면 인사 메시지 조회",
+        "description": "## 인증(JWT): **불필요**\n\n## 요청 파라미터\n- **`memberUuid`** (required): 회원 UUID\n\n## 반환값 (GreetingResponse)\n- **`message`**: 인사 메시지 문자열\n- 선택된 시험 일정이 있으면 D-day 포함 메시지 반환\n- 선택된 일정이 없으면 기본 인사 메시지 반환\n\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.09\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/39\" target=\"_blank\"\u003E#39\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003E실시간 AI 선택지 세트 생성 및 프리페치 아키텍처\u003C/td\u003E\u003Ctd\u003E홈 화면 인사 메시지 조회 API 추가\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
         "operationId": "getGreeting",
         "parameters": [
           {
@@ -792,12 +802,18 @@
             "type": "integer",
             "format": "int64"
           },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
           "numberOfElements": {
             "type": "integer",
             "format": "int32"
           },
-          "pageable": {
-            "$ref": "#/components/schemas/PageableObject"
+          "first": {
+            "type": "boolean"
+          },
+          "last": {
+            "type": "boolean"
           },
           "size": {
             "type": "integer",
@@ -816,12 +832,6 @@
           "sort": {
             "$ref": "#/components/schemas/SortObject"
           },
-          "first": {
-            "type": "boolean"
-          },
-          "last": {
-            "type": "boolean"
-          },
           "empty": {
             "type": "boolean"
           }
@@ -830,14 +840,14 @@
       "PageableObject": {
         "type": "object",
         "properties": {
-          "pageNumber": {
-            "type": "integer",
-            "format": "int32"
-          },
           "paged": {
             "type": "boolean"
           },
           "pageSize": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "pageNumber": {
             "type": "integer",
             "format": "int32"
           },
@@ -860,6 +870,9 @@
             "type": "string",
             "format": "uuid"
           },
+          "topicCode": {
+            "type": "string"
+          },
           "topicName": {
             "type": "string"
           },
@@ -867,18 +880,26 @@
             "type": "integer",
             "format": "int32"
           },
+          "executionMode": {
+            "type": "string",
+            "enum": ["EXECUTABLE", "CONCEPT_ONLY"]
+          },
           "stemPreview": {
             "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
       "SortObject": {
         "type": "object",
         "properties": {
-          "unsorted": {
+          "sorted": {
             "type": "boolean"
           },
-          "sorted": {
+          "unsorted": {
             "type": "boolean"
           },
           "empty": {
@@ -899,9 +920,51 @@
           "body": {
             "type": "string"
           },
+          "isCorrect": {
+            "type": "boolean"
+          },
+          "rationale": {
+            "type": "string"
+          },
           "sortOrder": {
             "type": "integer",
             "format": "int32"
+          }
+        }
+      },
+      "ChoiceSetSummary": {
+        "type": "object",
+        "properties": {
+          "choiceSetUuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "AI_RUNTIME",
+              "AI_PREFETCH",
+              "AI_ADMIN_PREVIEW",
+              "ADMIN_SEED",
+              "ADMIN_CURATED"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": ["OK", "DISABLED", "REPORTED", "DRAFT", "FAILED"]
+          },
+          "sandboxValidationPassed": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ChoiceItem"
+            }
           }
         }
       },
@@ -932,10 +995,25 @@
           "schemaDisplay": {
             "type": "string"
           },
-          "choices": {
+          "schemaDdl": {
+            "type": "string"
+          },
+          "schemaSampleData": {
+            "type": "string"
+          },
+          "schemaIntent": {
+            "type": "string"
+          },
+          "answerSql": {
+            "type": "string"
+          },
+          "hint": {
+            "type": "string"
+          },
+          "choiceSets": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ChoiceItem"
+              "$ref": "#/components/schemas/ChoiceSetSummary"
             }
           }
         }
@@ -1000,6 +1078,10 @@
       "TopicTree": {
         "type": "object",
         "properties": {
+          "topicUuid": {
+            "type": "string",
+            "format": "uuid"
+          },
           "code": {
             "type": "string"
           },

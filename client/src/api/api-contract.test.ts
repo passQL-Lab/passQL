@@ -207,7 +207,7 @@ describe("타입 계약 (컴파일 타임 검증 보조)", () => {
     expect(payload).not.toHaveProperty("selected_key");
   });
 
-  it("QuestionDetail에 choices 필드가 있다", () => {
+  it("QuestionDetail에 choiceSets 필드가 있다", () => {
     const detail: import("../types/api").QuestionDetail = {
       questionUuid: "q-uuid",
       topicName: "JOIN",
@@ -216,10 +216,22 @@ describe("타입 계약 (컴파일 타임 검증 보조)", () => {
       executionMode: "EXECUTABLE",
       stem: "test",
       schemaDisplay: "test",
-      choices: [{ key: "A", kind: "SQL", body: "SELECT 1", sortOrder: 1 }],
+      schemaDdl: "",
+      schemaSampleData: "",
+      schemaIntent: "",
+      answerSql: "",
+      hint: "",
+      choiceSets: [{
+        choiceSetUuid: "cs-uuid",
+        source: "ADMIN_SEED",
+        status: "OK",
+        sandboxValidationPassed: true,
+        createdAt: "2026-04-07T12:00:00",
+        items: [{ key: "A", kind: "SQL", body: "SELECT 1", isCorrect: true, rationale: "correct", sortOrder: 1 }],
+      }],
     };
-    expect(detail.choices).toHaveLength(1);
-    expect(detail.choices[0].key).toBe("A");
+    expect(detail.choiceSets).toHaveLength(1);
+    expect(detail.choiceSets[0].items[0].key).toBe("A");
   });
 
   it("HeatmapEntry와 HeatmapResponse 타입이 정의되어 있다", () => {

@@ -23,36 +23,43 @@ import type {
 } from "../types/api";
 
 const MOCK_TOPICS: readonly TopicTree[] = [
-  { code: "JOIN", displayName: "JOIN", subtopics: [{ code: "INNER_JOIN", displayName: "INNER JOIN" }, { code: "LEFT_JOIN", displayName: "LEFT JOIN" }] },
-  { code: "SUBQUERY", displayName: "서브쿼리", subtopics: [] },
-  { code: "GROUP_BY", displayName: "GROUP BY", subtopics: [] },
-  { code: "DDL", displayName: "DDL", subtopics: [] },
-  { code: "CONSTRAINT", displayName: "제약조건", subtopics: [] },
+  { topicUuid: "topic-uuid-001", code: "JOIN", displayName: "JOIN", sortOrder: 1, isActive: true, subtopics: [{ code: "INNER_JOIN", displayName: "INNER JOIN", sortOrder: 1, isActive: true }, { code: "LEFT_JOIN", displayName: "LEFT JOIN", sortOrder: 2, isActive: true }] },
+  { topicUuid: "topic-uuid-002", code: "SUBQUERY", displayName: "서브쿼리", sortOrder: 2, isActive: true, subtopics: [] },
+  { topicUuid: "topic-uuid-003", code: "GROUP_BY", displayName: "GROUP BY", sortOrder: 3, isActive: true, subtopics: [] },
+  { topicUuid: "topic-uuid-004", code: "DDL", displayName: "DDL", sortOrder: 4, isActive: true, subtopics: [] },
+  { topicUuid: "topic-uuid-005", code: "CONSTRAINT", displayName: "제약조건", sortOrder: 5, isActive: true, subtopics: [] },
+  { topicUuid: "topic-uuid-006", code: "WHERE", displayName: "WHERE", sortOrder: 6, isActive: true, subtopics: [] },
+  { topicUuid: "topic-uuid-007", code: "ORDER_BY", displayName: "ORDER BY", sortOrder: 7, isActive: true, subtopics: [] },
+  { topicUuid: "topic-uuid-008", code: "DML", displayName: "DML", sortOrder: 8, isActive: true, subtopics: [] },
+  { topicUuid: "topic-uuid-009", code: "WINDOW", displayName: "윈도우 함수", sortOrder: 9, isActive: true, subtopics: [] },
+  { topicUuid: "topic-uuid-010", code: "INDEX", displayName: "인덱스", sortOrder: 10, isActive: true, subtopics: [] },
+  { topicUuid: "topic-uuid-011", code: "TRANSACTION", displayName: "트랜잭션", sortOrder: 11, isActive: true, subtopics: [] },
+  { topicUuid: "topic-uuid-012", code: "NORMALIZATION", displayName: "정규화", sortOrder: 12, isActive: true, subtopics: [] },
 ];
 
 const MOCK_CHOICES: readonly ChoiceItem[] = [
-  { key: "A", kind: "SQL", body: "SELECT c.name, COUNT(*) AS cnt\nFROM CUSTOMER c\nJOIN ORDERS o ON c.id = o.customer_id\nGROUP BY c.name", sortOrder: 1 },
-  { key: "B", kind: "SQL", body: "SELECT c.name, COUNT(*) AS cnt\nFROM CUSTOMER c\nJOIN ORDERS o ON c.id = o.cust_id\nGROUP BY c.name", sortOrder: 2 },
-  { key: "C", kind: "SQL", body: "SELECT name, COUNT(*) AS cnt\nFROM CUSTOMER c\nJOIN ORDERS o ON c.id = o.customer_id\nGROUP BY name", sortOrder: 3 },
-  { key: "D", kind: "SQL", body: "SELECT c.name, SUM(o.amount) AS total\nFROM CUSTOMER c\nJOIN ORDERS o ON c.id = o.customer_id\nGROUP BY c.name", sortOrder: 4 },
+  { key: "A", kind: "SQL", body: "SELECT c.name, COUNT(*) AS cnt\nFROM CUSTOMER c\nJOIN ORDERS o ON c.id = o.customer_id\nGROUP BY c.name", isCorrect: true, rationale: "CUSTOMER와 ORDERS를 customer_id로 JOIN한 후 c.name으로 GROUP BY하면 고객별 주문 수를 정확히 구할 수 있습니다.", sortOrder: 1 },
+  { key: "B", kind: "SQL", body: "SELECT c.name, COUNT(*) AS cnt\nFROM CUSTOMER c\nJOIN ORDERS o ON c.id = o.cust_id\nGROUP BY c.name", isCorrect: false, rationale: "cust_id는 존재하지 않는 컬럼입니다.", sortOrder: 2 },
+  { key: "C", kind: "SQL", body: "SELECT name, COUNT(*) AS cnt\nFROM CUSTOMER c\nJOIN ORDERS o ON c.id = o.customer_id\nGROUP BY name", isCorrect: false, rationale: "GROUP BY name은 모호한 참조입니다.", sortOrder: 3 },
+  { key: "D", kind: "SQL", body: "SELECT c.name, SUM(o.amount) AS total\nFROM CUSTOMER c\nJOIN ORDERS o ON c.id = o.customer_id\nGROUP BY c.name", isCorrect: false, rationale: "SUM(amount)은 주문 수가 아닌 금액 합계입니다.", sortOrder: 4 },
 ];
 
 const MOCK_QUESTIONS: readonly QuestionSummary[] = [
   // JOIN (2)
-  { questionUuid: "q-uuid-0001", topicName: "JOIN", difficulty: 2, stemPreview: "고객별 주문 수를 구하는 올바른 SQL은?" },
-  { questionUuid: "q-uuid-0006", topicName: "JOIN", difficulty: 3, stemPreview: "LEFT JOIN과 INNER JOIN의 결과 차이를 올바르게 설명한 것은?" },
+  { questionUuid: "q-uuid-0001", topicCode: "JOIN", topicName: "JOIN", difficulty: 2, executionMode: "CONCEPT_ONLY", stemPreview: "고객별 주문 수를 구하는 올바른 SQL은?", createdAt: "2026-04-07T12:00:00" },
+  { questionUuid: "q-uuid-0006", topicCode: "JOIN", topicName: "JOIN", difficulty: 3, executionMode: "EXECUTABLE", stemPreview: "LEFT JOIN과 INNER JOIN의 결과 차이를 올바르게 설명한 것은?", createdAt: "2026-04-07T12:00:00" },
   // 서브쿼리 (2)
-  { questionUuid: "q-uuid-0002", topicName: "서브쿼리", difficulty: 3, stemPreview: "서브쿼리를 사용하여 평균 이상 주문한 고객을 조회하는 SQL은?" },
-  { questionUuid: "q-uuid-0009", topicName: "서브쿼리", difficulty: 2, stemPreview: "상관 서브쿼리와 비상관 서브쿼리의 차이를 올바르게 설명한 것은?" },
+  { questionUuid: "q-uuid-0002", topicCode: "SUBQUERY", topicName: "서브쿼리", difficulty: 3, executionMode: "EXECUTABLE", stemPreview: "서브쿼리를 사용하여 평균 이상 주문한 고객을 조회하는 SQL은?", createdAt: "2026-04-07T12:00:00" },
+  { questionUuid: "q-uuid-0009", topicCode: "SUBQUERY", topicName: "서브쿼리", difficulty: 2, executionMode: "CONCEPT_ONLY", stemPreview: "상관 서브쿼리와 비상관 서브쿼리의 차이를 올바르게 설명한 것은?", createdAt: "2026-04-07T12:00:00" },
   // GROUP BY (2)
-  { questionUuid: "q-uuid-0003", topicName: "GROUP BY", difficulty: 2, stemPreview: "부서별 평균 급여가 500만원 이상인 부서를 구하는 SQL은?" },
-  { questionUuid: "q-uuid-0007", topicName: "GROUP BY", difficulty: 1, stemPreview: "GROUP BY와 HAVING의 실행 순서로 올바른 것은?" },
+  { questionUuid: "q-uuid-0003", topicCode: "GROUP_BY", topicName: "GROUP BY", difficulty: 2, executionMode: "EXECUTABLE", stemPreview: "부서별 평균 급여가 500만원 이상인 부서를 구하는 SQL은?", createdAt: "2026-04-07T12:00:00" },
+  { questionUuid: "q-uuid-0007", topicCode: "GROUP_BY", topicName: "GROUP BY", difficulty: 1, executionMode: "CONCEPT_ONLY", stemPreview: "GROUP BY와 HAVING의 실행 순서로 올바른 것은?", createdAt: "2026-04-07T12:00:00" },
   // DDL (2)
-  { questionUuid: "q-uuid-0004", topicName: "DDL", difficulty: 1, stemPreview: "외래키 제약조건을 포함한 테이블 생성 SQL로 올바른 것은?" },
-  { questionUuid: "q-uuid-0008", topicName: "DDL", difficulty: 2, stemPreview: "CREATE TABLE 시 DEFAULT 제약조건 문법은?" },
+  { questionUuid: "q-uuid-0004", topicCode: "DDL", topicName: "DDL", difficulty: 1, executionMode: "EXECUTABLE", stemPreview: "외래키 제약조건을 포함한 테이블 생성 SQL로 올바른 것은?", createdAt: "2026-04-07T12:00:00" },
+  { questionUuid: "q-uuid-0008", topicCode: "DDL", topicName: "DDL", difficulty: 2, executionMode: "CONCEPT_ONLY", stemPreview: "CREATE TABLE 시 DEFAULT 제약조건 문법은?", createdAt: "2026-04-07T12:00:00" },
   // 제약조건 (2)
-  { questionUuid: "q-uuid-0005", topicName: "제약조건", difficulty: 3, stemPreview: "NOT NULL과 UNIQUE 제약조건의 차이를 올바르게 설명한 것은?" },
-  { questionUuid: "q-uuid-0010", topicName: "제약조건", difficulty: 1, stemPreview: "PRIMARY KEY와 UNIQUE 제약조건의 공통점과 차이점은?" },
+  { questionUuid: "q-uuid-0005", topicCode: "CONSTRAINT", topicName: "제약조건", difficulty: 3, executionMode: "CONCEPT_ONLY", stemPreview: "NOT NULL과 UNIQUE 제약조건의 차이를 올바르게 설명한 것은?", createdAt: "2026-04-07T12:00:00" },
+  { questionUuid: "q-uuid-0010", topicCode: "CONSTRAINT", topicName: "제약조건", difficulty: 1, executionMode: "CONCEPT_ONLY", stemPreview: "PRIMARY KEY와 UNIQUE 제약조건의 공통점과 차이점은?", createdAt: "2026-04-07T12:00:00" },
 ];
 
 const MOCK_QUESTION_DETAIL: QuestionDetail = {
@@ -63,19 +70,27 @@ const MOCK_QUESTION_DETAIL: QuestionDetail = {
   executionMode: "CONCEPT_ONLY",
   stem: "다음 SQL 중 고객별 주문 수를 올바르게 구하는 것은?",
   schemaDisplay: "CUSTOMER (id INT PK, name VARCHAR, email VARCHAR)\nORDERS (id INT PK, customer_id INT FK, amount INT, order_date DATE)",
-  choices: MOCK_CHOICES,
+  schemaDdl: "CREATE TABLE CUSTOMER (id INT PRIMARY KEY, name VARCHAR(50), email VARCHAR(100));\nCREATE TABLE ORDERS (id INT PRIMARY KEY, customer_id INT REFERENCES CUSTOMER(id), amount INT, order_date DATE);",
+  schemaSampleData: "CUSTOMER: (1, '홍길동', 'hong@test.com'), (2, '김영희', 'kim@test.com')\nORDERS: (1, 1, 50000, '2026-01-01'), (2, 1, 30000, '2026-01-15'), (3, 2, 70000, '2026-02-01')",
+  schemaIntent: "고객과 주문 테이블을 조인하여 고객별 주문 수를 집계",
+  answerSql: "SELECT c.name, COUNT(*) AS cnt FROM CUSTOMER c JOIN ORDERS o ON c.id = o.customer_id GROUP BY c.name",
+  hint: "JOIN 조건에서 올바른 외래키 컬럼명을 확인하세요.",
+  choiceSets: [{
+    choiceSetUuid: "cs-uuid-0001",
+    source: "ADMIN_SEED",
+    status: "OK",
+    sandboxValidationPassed: true,
+    createdAt: "2026-04-07T12:00:00",
+    items: MOCK_CHOICES,
+  }],
 };
 
-const MOCK_PROGRESS: ProgressResponse = {
-  solvedCount: 42,
-  correctRate: 0.685,
-  streakDays: 3,
-};
+// MOCK_PROGRESS는 MOCK_CATEGORY_STATS 이후에 정의됨 (solvedCount 합산 일치)
 
 const MOCK_TAGS: readonly ConceptTag[] = [
-  { tagKey: "join", labelKo: "JOIN", category: "SQL", description: "테이블 결합", isActive: true, sortOrder: 1 },
-  { tagKey: "group_by", labelKo: "GROUP BY", category: "SQL", description: "그룹 집계", isActive: true, sortOrder: 2 },
-  { tagKey: "aggregate", labelKo: "집계함수", category: "SQL", description: "COUNT, SUM 등", isActive: true, sortOrder: 3 },
+  { conceptTagUuid: "ct-uuid-001", tagKey: "join", labelKo: "JOIN", category: "SQL", description: "테이블 결합", isActive: true, sortOrder: 1, createdAt: "2026-04-07T12:00:00", updatedAt: "2026-04-07T12:00:00", createdBy: "admin", updatedBy: "admin" },
+  { conceptTagUuid: "ct-uuid-002", tagKey: "group_by", labelKo: "GROUP BY", category: "SQL", description: "그룹 집계", isActive: true, sortOrder: 2, createdAt: "2026-04-07T12:00:00", updatedAt: "2026-04-07T12:00:00", createdBy: "admin", updatedBy: "admin" },
+  { conceptTagUuid: "ct-uuid-003", tagKey: "aggregate", labelKo: "집계함수", category: "SQL", description: "COUNT, SUM 등", isActive: true, sortOrder: 3, createdAt: "2026-04-07T12:00:00", updatedAt: "2026-04-07T12:00:00", createdBy: "admin", updatedBy: "admin" },
 ];
 
 const MOCK_TODAY: TodayQuestionResponse = {
@@ -106,6 +121,12 @@ const MOCK_CATEGORY_STATS: readonly CategoryStats[] = MOCK_TOPICS.map((t, i) => 
   correctRate: MOCK_RATE_POOL[i % MOCK_RATE_POOL.length],
   solvedCount: MOCK_SOLVED_POOL[i % MOCK_SOLVED_POOL.length],
 }));
+
+const MOCK_PROGRESS: ProgressResponse = {
+  solvedCount: MOCK_CATEGORY_STATS.reduce((sum, c) => sum + c.solvedCount, 0),
+  correctRate: 0.685,
+  streakDays: 3,
+};
 
 function buildMockHeatmap(): HeatmapResponse {
   const pattern = [3, 0, 5, 2, 1, 0, 4, 6, 0, 1, 2, 3, 0, 0, 5, 1, 2, 0, 3, 4, 0, 1, 0, 6, 2, 3, 1, 0, 4, 2];

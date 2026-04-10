@@ -4,16 +4,39 @@ export type ChoiceKind = "SQL" | "TEXT";
 
 export interface QuestionSummary {
   readonly questionUuid: string;
+  readonly topicCode: string;
   readonly topicName: string;
   readonly difficulty: number;
+  readonly executionMode: ExecutionMode;
   readonly stemPreview: string;
+  readonly createdAt: string;
 }
 
 export interface ChoiceItem {
   readonly key: string;
   readonly kind: ChoiceKind;
   readonly body: string;
+  readonly isCorrect: boolean;
+  readonly rationale: string;
   readonly sortOrder: number;
+}
+
+export type ChoiceSetSource =
+  | "AI_RUNTIME"
+  | "AI_PREFETCH"
+  | "AI_ADMIN_PREVIEW"
+  | "ADMIN_SEED"
+  | "ADMIN_CURATED";
+
+export type ChoiceSetStatus = "OK" | "DISABLED" | "REPORTED" | "DRAFT" | "FAILED";
+
+export interface ChoiceSetSummary {
+  readonly choiceSetUuid: string;
+  readonly source: ChoiceSetSource;
+  readonly status: ChoiceSetStatus;
+  readonly sandboxValidationPassed: boolean;
+  readonly createdAt: string;
+  readonly items: readonly ChoiceItem[];
 }
 
 export interface QuestionDetail {
@@ -24,7 +47,12 @@ export interface QuestionDetail {
   readonly executionMode: ExecutionMode;
   readonly stem: string;
   readonly schemaDisplay: string;
-  readonly choices: readonly ChoiceItem[];
+  readonly schemaDdl: string;
+  readonly schemaSampleData: string;
+  readonly schemaIntent: string;
+  readonly answerSql: string;
+  readonly hint: string;
+  readonly choiceSets: readonly ChoiceSetSummary[];
 }
 
 export interface SubmitResult {
@@ -84,21 +112,31 @@ export interface HeatmapResponse {
 export interface SubtopicItem {
   readonly code: string;
   readonly displayName: string;
+  readonly sortOrder: number;
+  readonly isActive: boolean;
 }
 
 export interface TopicTree {
+  readonly topicUuid: string;
   readonly code: string;
   readonly displayName: string;
+  readonly sortOrder: number;
+  readonly isActive: boolean;
   readonly subtopics: readonly SubtopicItem[];
 }
 
 export interface ConceptTag {
+  readonly conceptTagUuid: string;
   readonly tagKey: string;
   readonly labelKo: string;
   readonly category: string;
   readonly description: string;
   readonly isActive: boolean;
   readonly sortOrder: number;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+  readonly createdBy: string;
+  readonly updatedBy: string;
 }
 
 // === AI ===
