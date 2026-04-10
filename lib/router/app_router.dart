@@ -65,7 +65,7 @@ abstract final class AppRouter {
           final params = state.uri.queryParameters;
           return ChapterPage(
             topicCode: params['topic'] ?? '',
-            topicName: Uri.decodeComponent(params['topicName'] ?? '문제 풀기'),
+            topicName: params['topicName'] ?? '문제 풀기',
           );
         },
       ),
