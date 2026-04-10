@@ -10,6 +10,16 @@ export default defineConfig({
       "/api": {
         target: (process.env.VITE_API_BASE_URL ?? "http://localhost:8080/api").replace(/\/api$/, ""),
         changeOrigin: true,
+        // SSE 스트리밍 버퍼링 방지 — generate-choices 등 text/event-stream 응답이 즉시 전달되어야 함
+        configure: (proxy) => {
+          proxy.on("proxyRes", (proxyRes) => {
+            const ct = proxyRes.headers["content-type"] ?? "";
+            if (ct.includes("text/event-stream")) {
+              proxyRes.headers["x-accel-buffering"] = "no";
+              proxyRes.headers["cache-control"] = "no-cache";
+            }
+          });
+        },
       },
     },
   },

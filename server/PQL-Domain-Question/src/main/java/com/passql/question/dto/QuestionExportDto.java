@@ -7,6 +7,7 @@ public record QuestionExportDto(
     String topicCode,
     Integer difficulty,
     String executionMode,
+    String choiceSetPolicy,
     String stem,
     String hint,
     String schemaDdl,

@@ -40,8 +40,9 @@ public class QuestionExecutionService {
             throw new CustomException(ErrorCode.INVALID_EXECUTION_MODE);
         }
         String dbName = question.getSandboxDbName();
+        // sandboxDbName이 없는 레거시 문제는 questionUuid 문자열을 DB명으로 폴백
         if (dbName == null || dbName.isBlank()) {
-            throw new CustomException(ErrorCode.SANDBOX_SETUP_FAILED);
+            dbName = questionUuid.toString();
         }
         sqlSafetyValidator.validate(sql);
         return sandboxExecutor.execute(dbName, sql);
@@ -86,6 +87,10 @@ public class QuestionExecutionService {
             ExecuteResult selectedResult = null;
             ExecuteResult correctResult = null;
 
+            // sandboxDbName이 없는 레거시 문제는 questionUuid 문자열을 DB명으로 폴백
+            if (dbName == null || dbName.isBlank()) {
+                dbName = questionUuid.toString();
+            }
             if (dbName != null && !dbName.isBlank()) {
                 // 제출 경로도 executeChoice와 동일하게 안전성 검증 적용
                 if (selectedSql != null && !selectedSql.isBlank()) {

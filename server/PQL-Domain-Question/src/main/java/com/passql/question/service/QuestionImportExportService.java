@@ -160,19 +160,23 @@ public class QuestionImportExportService {
                 continue;
             }
 
+            ChoiceSetPolicy policy = parseChoiceSetPolicySafe(item.choiceSetPolicy());
+
             if (item.questionUuid() != null && questionRepository.existsById(item.questionUuid())) {
                 questionService.updateQuestion(
                         item.questionUuid(), item.stem(), null,
                         item.schemaDdl(), item.schemaSampleData(), item.schemaIntent(),
                         item.answerSql(), item.hint(), item.difficulty(), mode,
                         topicUuid, null);
+                // choiceSetPolicy는 updateQuestion에 파라미터가 없으므로 별도 업데이트
+                questionService.updateChoiceSetPolicy(item.questionUuid(), policy);
                 updated++;
             } else {
                 questionGenerateService.createQuestionOnly(
                         topicUuid, null, item.difficulty(), mode,
                         item.stem(), item.schemaDdl(), item.schemaSampleData(),
                         item.schemaIntent(), item.answerSql(), item.hint(),
-                        ChoiceSetPolicy.AI_ONLY);
+                        policy);
                 created++;
             }
         }
@@ -287,6 +291,18 @@ public class QuestionImportExportService {
     }
 
     /**
+     * choiceSetPolicy 문자열을 안전하게 파싱. null이거나 유효하지 않으면 AI_ONLY 반환.
+     */
+    private ChoiceSetPolicy parseChoiceSetPolicySafe(String value) {
+        if (value == null || value.isBlank()) return ChoiceSetPolicy.AI_ONLY;
+        try {
+            return ChoiceSetPolicy.valueOf(value);
+        } catch (IllegalArgumentException e) {
+            return ChoiceSetPolicy.AI_ONLY;
+        }
+    }
+
+    /**
      * executionMode 문자열을 안전하게 파싱. 유효하지 않으면 null 반환.
      */
     private ExecutionMode parseExecutionModeSafe(String value) {
@@ -315,6 +331,7 @@ public class QuestionImportExportService {
                 topicCodeMap.getOrDefault(q.getTopicUuid(), null),
                 q.getDifficulty(),
                 q.getExecutionMode() != null ? q.getExecutionMode().name() : null,
+                q.getChoiceSetPolicy() != null ? q.getChoiceSetPolicy().name() : null,
                 q.getStem(),
                 q.getHint(),
                 q.getSchemaDdl(),
