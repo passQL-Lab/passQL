@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 import '../models/progress/progress_response.dart';
 import '../models/progress/heatmap_response.dart';
+import '../models/progress/category_stats.dart';
 
 part 'progress_api.g.dart';
 
@@ -19,5 +20,11 @@ abstract class ProgressApiClient {
     @Query('memberUuid') String memberUuid,
     @Query('from') String? from,
     @Query('to') String? to,
+  );
+
+  /// 카테고리별 학습 통계. (미문서화 — 에러 시 null 처리)
+  @GET('/progress/categories')
+  Future<List<CategoryStats>> getCategoryStats(
+    @Query('memberUuid') String memberUuid,
   );
 }
