@@ -11,6 +11,7 @@ import com.passql.submission.entity.Submission;
 import com.passql.submission.repository.ExecutionLogRepository;
 import com.passql.submission.repository.SubmissionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +26,7 @@ public class SubmissionService {
     private final SubmissionRepository submissionRepository;
     private final QuestionChoiceRepository questionChoiceRepository;
     private final ExecutionLogRepository executionLogRepository;
+    private final RedisTemplate<String, Object> redisTemplate;
 
     /**
      * 제출 기록만 저장 (결과 실행은 QuestionExecutionService 책임).
@@ -61,6 +63,9 @@ public class SubmissionService {
                 .submittedAt(LocalDateTime.now())
                 .build();
         submissionRepository.save(submission);
+
+        // AI 코멘트 캐시 무효화 (새 Submission 발생 시 즉시 evict)
+        redisTemplate.delete("ai-comment:" + memberUuid);
 
         return new SubmitResult(
                 isCorrect,
