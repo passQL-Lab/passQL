@@ -20,7 +20,7 @@ interface QuestionDetailProps {
   readonly practiceMode?: boolean;
   readonly practiceSubmitLabel?: string;
   readonly questionUuid?: string;
-  readonly onPracticeSubmit?: (selectedChoiceKey: string) => void;
+  readonly onPracticeSubmit?: (selectedChoiceKey: string, choiceSetId: string) => void;
 }
 
 export default function QuestionDetail({ practiceMode, practiceSubmitLabel, questionUuid: propUuid, onPracticeSubmit }: QuestionDetailProps = {}) {
@@ -75,7 +75,7 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
   const handleSubmit = useCallback(() => {
     if (!selectedKey || !question) return;
     if (practiceMode && onPracticeSubmit) {
-      onPracticeSubmit(selectedKey);
+      onPracticeSubmit(selectedKey, choiceSetId);
       return;
     }
     submitMutation.mutate({ choiceSetId, selectedChoiceKey: selectedKey }, {
