@@ -60,6 +60,13 @@ export default function Home() {
             시험이 얼마 남지 않았어요
           </p>
         )}
+        {greeting?.messageType === "COUNTDOWN" && (
+          <p className="text-sm font-medium mt-1" style={{ color: "var(--color-brand)" }}>
+            {progress?.readiness?.daysUntilExam != null
+              ? `시험 D-${progress.readiness.daysUntilExam}`
+              : "시험일이 다가오고 있어요"}
+          </p>
+        )}
       </section>
 
       <section className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
