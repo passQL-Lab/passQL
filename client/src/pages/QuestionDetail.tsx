@@ -53,8 +53,8 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
   const choices = sseChoices ?? activeChoiceSet?.items ?? [];
   const choiceSetId = sseChoiceSetId ?? activeChoiceSet?.choiceSetUuid ?? "";
 
-  // choiceSets[]가 비어있을 때 자동으로 SSE 선택지 생성 호출
-  const needsSseGeneration = question != null && activeChoiceSet == null && sseChoices == null;
+  // choiceSets[]가 비어있고 에러도 없을 때 자동으로 SSE 선택지 생성 호출
+  const needsSseGeneration = question != null && activeChoiceSet == null && sseChoices == null && !sseError;
   useEffect(() => {
     if (!needsSseGeneration || !questionUuid) return;
 
@@ -208,7 +208,7 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
         </>
       ) : (
         <>
-          <div className="w-6 h-6 border-2 border-accent-light border-t-brand rounded-full animate-spin mx-auto" />
+          <div role="status" aria-label="선택지 생성 중" className="w-6 h-6 border-2 border-accent-light border-t-brand rounded-full animate-spin mx-auto" />
           <p className="text-text-caption text-sm">{sseStatus ?? "선택지 준비 중..."}</p>
         </>
       )}
