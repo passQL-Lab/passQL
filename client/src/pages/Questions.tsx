@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { ChevronRight, ChevronDown, ArrowLeft } from "lucide-react";
 import { useQuestions } from "../hooks/useQuestions";
@@ -16,7 +16,7 @@ export default function Questions() {
 
   const { data: topics, isLoading: topicsLoading, isError: topicsError } = useTopics();
   const { data, isLoading, isError, refetch } = useQuestions(
-    topic !== undefined ? { page, size: 10, topic, difficulty } : { page: 0, size: 0 },
+    topic !== undefined ? { page, size: 10, topic, difficulty } : { enabled: false },
   );
 
   function selectTopic(code: string) {
@@ -30,6 +30,11 @@ export default function Questions() {
     setDifficulty(undefined);
     setSearchParams({});
   }
+
+  useEffect(() => {
+    setPage(0);
+    setDifficulty(undefined);
+  }, [topic]);
 
   // 카테고리 그리드 뷰
   if (topic === undefined) {
@@ -50,7 +55,7 @@ export default function Questions() {
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {topics
               ?.filter((t) => t.isActive)
-              .sort((a, b) => a.sortOrder - b.sortOrder)
+              .toSorted((a, b) => a.sortOrder - b.sortOrder)
               .map((t) => (
                 <button
                   key={t.code}
