@@ -86,6 +86,12 @@ export function generateChoices(
         },
       );
 
+      // HTTP 에러 응답 처리 (4xx/5xx)
+      if (!response.ok) {
+        callbacks.onError({ code: `HTTP_${response.status}`, message: `서버 오류 (${response.status})`, retryable: response.status >= 500 });
+        return;
+      }
+
       if (!response.body) return;
 
       const reader = response.body.getReader();
@@ -107,7 +113,14 @@ export function generateChoices(
           if (!eventMatch || !dataMatch) continue;
 
           const eventName = eventMatch[1];
-          const data = JSON.parse(dataMatch[1]);
+          // 잘못된 JSON을 받으면 스트림 전체가 중단되지 않도록 방어
+          let data: unknown;
+          try {
+            data = JSON.parse(dataMatch[1]);
+          } catch {
+            callbacks.onError({ code: "PARSE_ERROR", message: "잘못된 응답 형식", retryable: false });
+            return;
+          }
 
           if (eventName === "status") callbacks.onStatus(data as SseStatusEvent);
           else if (eventName === "complete") callbacks.onComplete(data as ChoiceSetGenerateResponse);

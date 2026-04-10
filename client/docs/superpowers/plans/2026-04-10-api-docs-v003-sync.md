@@ -13,6 +13,7 @@
 ## 변경 사항 요약
 
 ### 신규 API 엔드포인트
+
 | 엔드포인트 | 함수 | 응답 타입 |
 |-----------|------|---------|
 | `GET /progress/topic-analysis?memberUuid` | `fetchTopicAnalysis()` | `TopicAnalysisResponse` |
@@ -96,7 +97,7 @@ export interface AiCommentResponse {
 - [ ] **Step 3: 타입 컴파일 확인**
 
 ```bash
-cd /Users/luca/Documents/GitHub/passQL/client && npx tsc --noEmit 2>&1 | head -30
+cd client && npx tsc --noEmit 2>&1 | head -30
 ```
 
 Expected: 에러 없음
@@ -104,7 +105,7 @@ Expected: 에러 없음
 - [ ] **Step 4: 커밋**
 
 ```bash
-cd /Users/luca/Documents/GitHub/passQL/client
+cd client
 git add src/types/api.ts
 git commit -m "feat: SubmitResult 신규 필드 추가, TopicAnalysis/AiComment 타입 정의 #71"
 ```
@@ -207,7 +208,7 @@ export function fetchAiComment(): Promise<AiCommentResponse> {
 - [ ] **Step 5: 타입 컴파일 확인**
 
 ```bash
-cd /Users/luca/Documents/GitHub/passQL/client && npx tsc --noEmit 2>&1 | head -30
+cd client && npx tsc --noEmit 2>&1 | head -30
 ```
 
 Expected: 에러 없음
@@ -215,7 +216,7 @@ Expected: 에러 없음
 - [ ] **Step 6: 커밋**
 
 ```bash
-cd /Users/luca/Documents/GitHub/passQL/client
+cd client
 git add src/api/progress.ts
 git commit -m "feat: fetchTopicAnalysis, fetchAiComment API 함수 추가 #71"
 ```
@@ -347,7 +348,7 @@ if (executionMode === "EXECUTABLE") {
 - [ ] **Step 6: 타입 컴파일 확인**
 
 ```bash
-cd /Users/luca/Documents/GitHub/passQL/client && npx tsc --noEmit 2>&1 | head -30
+cd client && npx tsc --noEmit 2>&1 | head -30
 ```
 
 Expected: 에러 없음
@@ -355,7 +356,7 @@ Expected: 에러 없음
 - [ ] **Step 7: 기존 목 데이터 테스트 통과 확인**
 
 ```bash
-cd /Users/luca/Documents/GitHub/passQL/client && npx vitest run src/api/mock-data.test.ts 2>&1
+cd client && npx vitest run src/api/mock-data.test.ts 2>&1
 ```
 
 Expected: 모든 테스트 PASS
@@ -363,7 +364,7 @@ Expected: 모든 테스트 PASS
 - [ ] **Step 8: 커밋**
 
 ```bash
-cd /Users/luca/Documents/GitHub/passQL/client
+cd client
 git add src/api/mock-data.ts
 git commit -m "feat: topic-analysis/ai-comment 목 데이터 추가, SubmitResult selectedSql/correctSql 추가 #71"
 ```
@@ -378,7 +379,7 @@ git commit -m "feat: topic-analysis/ai-comment 목 데이터 추가, SubmitResul
 - [ ] **Step 1: 기존 api-contract 테스트 파일 확인**
 
 ```bash
-cd /Users/luca/Documents/GitHub/passQL/client && npx vitest run src/api/api-contract.test.ts 2>&1 | tail -20
+cd client && npx vitest run src/api/api-contract.test.ts 2>&1 | tail -20
 ```
 
 Expected: 모든 테스트 PASS (기존 테스트가 깨지지 않는지 확인)
@@ -418,7 +419,7 @@ describe("fetchAiComment — GET /progress/ai-comment", () => {
 - [ ] **Step 3: 테스트 실행 확인**
 
 ```bash
-cd /Users/luca/Documents/GitHub/passQL/client && npx vitest run src/api/api-contract.test.ts 2>&1 | tail -20
+cd client && npx vitest run src/api/api-contract.test.ts 2>&1 | tail -20
 ```
 
 Expected: 신규 2개 포함 모든 테스트 PASS
@@ -426,7 +427,7 @@ Expected: 신규 2개 포함 모든 테스트 PASS
 - [ ] **Step 4: 커밋**
 
 ```bash
-cd /Users/luca/Documents/GitHub/passQL/client
+cd client
 git add src/api/api-contract.test.ts
 git commit -m "test: fetchTopicAnalysis, fetchAiComment 컨트랙트 테스트 추가 #71"
 ```
@@ -471,7 +472,7 @@ Progress 섹션 설명에 추가:
 - [ ] **Step 4: 커밋**
 
 ```bash
-cd /Users/luca/Documents/GitHub/passQL/client
+cd client
 git add .claude/rules/api-guide.md
 git commit -m "docs: api-guide.md Progress 섹션 신규 엔드포인트 반영, heatmap 상태 업데이트 #71"
 ```
@@ -480,16 +481,16 @@ git commit -m "docs: api-guide.md Progress 섹션 신규 엔드포인트 반영,
 
 ## Self-Review
 
-### Spec Coverage
-- [x] `SubmitResult.selectedSql / correctSql` 추가 — Task 1
-- [x] `TopicAnalysisResponse / TopicStat / AiCommentResponse` 타입 — Task 1
-- [x] `fetchTopicAnalysis()` API 함수 — Task 2
-- [x] `fetchAiComment()` API 함수 — Task 2
-- [x] topic-analysis 목 데이터 — Task 3
-- [x] ai-comment 목 데이터 — Task 3
-- [x] SubmitResult 목 데이터 selectedSql/correctSql — Task 3
-- [x] API contract 테스트 — Task 4
-- [x] api-guide.md 문서 업데이트 — Task 5
+### Spec Coverage (미구현 — 후속 이슈 #71에서 작업 예정)
+- [ ] `SubmitResult.selectedSql / correctSql` 추가 — Task 1
+- [ ] `TopicAnalysisResponse / TopicStat / AiCommentResponse` 타입 — Task 1
+- [ ] `fetchTopicAnalysis()` API 함수 — Task 2
+- [ ] `fetchAiComment()` API 함수 — Task 2
+- [ ] topic-analysis 목 데이터 — Task 3
+- [ ] ai-comment 목 데이터 — Task 3
+- [ ] SubmitResult 목 데이터 selectedSql/correctSql — Task 3
+- [ ] API contract 테스트 — Task 4
+- [ ] api-guide.md 문서 업데이트 — Task 5
 
 ### Placeholder Check
 - 모든 코드 블록은 실제 구현 코드를 포함
