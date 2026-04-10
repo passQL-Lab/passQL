@@ -3,8 +3,14 @@
   background-color: var(--color-surface-card);
   border: 1px solid var(--color-border);
   border-radius: 16px;
-  padding: 24px;
+  padding: 16px;
   transition: transform 250ms var(--ease-smooth), background-color 250ms var(--ease-smooth);
+}
+
+@media (min-width: 640px) {
+  .card-base {
+    padding: 24px;
+  }
 }
 
 /* ── 2. Navigation (Mobile Bottom Tab) ── */
@@ -305,4 +311,14 @@ body {
   line-height: 1.7;
   color: var(--color-text-primary);
   background-color: var(--color-surface);
+}
+
+/* ── Slide-up animation ── */
+@keyframes slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.25s ease-out;
 }
