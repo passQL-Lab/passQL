@@ -8,7 +8,7 @@ import ErrorFallback from "../components/ErrorFallback";
 
 export default function Questions() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const topic = searchParams.get("topic") ?? undefined;
+  const topic = searchParams.get("topic") || undefined;
 
   const [page, setPage] = useState(0);
   const [difficulty, setDifficulty] = useState<number | undefined>();
@@ -22,12 +22,14 @@ export default function Questions() {
   function selectTopic(code: string) {
     setPage(0);
     setDifficulty(undefined);
+    setDiffOpen(false);
     setSearchParams({ topic: code });
   }
 
   function clearTopic() {
     setPage(0);
     setDifficulty(undefined);
+    setDiffOpen(false);
     setSearchParams({});
   }
 

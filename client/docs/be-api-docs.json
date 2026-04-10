@@ -736,6 +736,7 @@
       "SubmitRequest": {
         "type": "object",
         "description": "문제 제출 요청",
+        "required": ["selectedChoiceKey"],
         "properties": {
           "selectedChoiceKey": {
             "type": "string",
