@@ -17,7 +17,7 @@ export function useExecuteChoice(questionUuid: string) {
 
 export function useSubmitAnswer(questionUuid: string) {
   return useMutation({
-    mutationFn: (selectedChoiceKey: string) =>
-      submitAnswer(questionUuid, selectedChoiceKey),
+    mutationFn: ({ choiceSetId, selectedChoiceKey }: { choiceSetId: string; selectedChoiceKey: string }) =>
+      submitAnswer(questionUuid, choiceSetId, selectedChoiceKey),
   });
 }
