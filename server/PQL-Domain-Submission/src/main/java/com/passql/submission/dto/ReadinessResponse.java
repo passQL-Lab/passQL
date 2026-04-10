@@ -1,5 +1,7 @@
 package com.passql.submission.dto;
 
+import com.passql.submission.readiness.ToneKey;
+
 import java.time.LocalDateTime;
 
 /**
@@ -18,5 +20,5 @@ public record ReadinessResponse(
     int coveredTopicCount,
     int activeTopicCount,
     Integer daysUntilExam,
-    String toneKey
+    ToneKey toneKey
 ) {}
