@@ -23,6 +23,7 @@
     "topicCode":      "sql_basic_select",
     "difficulty":     3,
     "executionMode":  "EXECUTABLE",
+    "choiceSetPolicy": "AI_ONLY",
     "stem":           "지문 전체 텍스트",
     "hint":           "힌트 한 줄 (없으면 null)",
     "schemaDdl":      "CREATE TABLE ... (EXECUTABLE 필수, \n으로 줄바꿈)",
@@ -40,6 +41,7 @@
 - **topicCode** (필수): 위 목록에서 선택
 - **difficulty** (필수): 1~5 정수 (개념 암기=1~2, SQL 실행 추적=3, 복합 조건/JOIN=4, 윈도우/계층=5)
 - **executionMode** (필수): `EXECUTABLE` (SQL 실행 결과를 묻는 문제) 또는 `CONCEPT_ONLY` (개념/이론)
+- **choiceSetPolicy** (선택): `AI_ONLY` (기본값), `ODD_ONE_OUT` ("결과가 다른 것은?" 유형 — 4개 중 3개가 같은 결과, 1개만 다른 결과를 정답으로 판별), `CONCEPT_ONLY` (개념 문제용), `HYBRID`
 - **stem** (필수): 지문 전체 텍스트 (선택지 A/B/C/D 제외)
 - **hint** (선택): 핵심해설/함정포인트 기반 한 줄 힌트
 - **schemaDdl** (EXECUTABLE 필수): CREATE TABLE 문. 문제에 없으면 선택지에서 유추 생성. CONCEPT_ONLY면 null

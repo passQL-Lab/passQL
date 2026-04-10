@@ -269,7 +269,15 @@
         </div>
 
         <!-- 선택지 정책 -->
-        <input type="hidden" name="choiceSetPolicy" value="AI_ONLY"/>
+        <div class="form-control">
+            <label class="label label-text font-semibold">선택지 정책 (choiceSetPolicy)</label>
+            <select name="choiceSetPolicy" id="choiceSetPolicySelect" class="select select-bordered">
+                <option value="AI_ONLY" selected>AI_ONLY (기본 — AI가 선택지 생성)</option>
+                <option value="ODD_ONE_OUT">ODD_ONE_OUT ("결과가 다른 것은?" 유형)</option>
+                <option value="CURATED_ONLY">CURATED_ONLY (직접 작성 선택지만)</option>
+                <option value="HYBRID">HYBRID (AI + 직접 작성 혼합)</option>
+            </select>
+        </div>
 
         <!-- 제출 -->
         <div class="flex justify-end gap-2">

@@ -6,6 +6,7 @@ import com.passql.meta.entity.Subtopic;
 import com.passql.meta.entity.Topic;
 import com.passql.meta.repository.SubtopicRepository;
 import com.passql.meta.repository.TopicRepository;
+import com.passql.question.constant.ChoiceSetPolicy;
 import com.passql.question.constant.ChoiceSetSource;
 import com.passql.question.constant.ExecutionMode;
 import com.passql.question.dto.QuestionDetail;
@@ -175,6 +176,13 @@ public class QuestionService {
         q.setExecutionMode(executionMode);
         q.setTopicUuid(topicUuid);
         q.setSubtopicUuid(subtopicUuid);
+    }
+
+    @Transactional
+    public void updateChoiceSetPolicy(UUID questionUuid, ChoiceSetPolicy policy) {
+        Question q = questionRepository.findById(questionUuid)
+                .orElseThrow(() -> new CustomException(ErrorCode.QUESTION_NOT_FOUND));
+        q.setChoiceSetPolicy(policy);
     }
 
     private String topicName(UUID topicUuid) {

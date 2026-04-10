@@ -46,6 +46,18 @@ function applyJson(data) {
         }
     }
 
+    // 선택지 정책 — select(등록 폼) 또는 hidden input(AI 생성 폼) 모두 지원
+    if (data.choiceSetPolicy) {
+        const sel = document.getElementById('choiceSetPolicySelect');
+        if (sel) {
+            sel.value = data.choiceSetPolicy;
+        }
+        const hidden = document.getElementById('choiceSetPolicyHidden');
+        if (hidden) {
+            hidden.value = data.choiceSetPolicy;
+        }
+    }
+
     // 텍스트 필드
     const textMap = {
         stem: 'textarea[name="stem"]',

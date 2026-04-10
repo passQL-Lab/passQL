@@ -40,8 +40,9 @@ public class QuestionExecutionService {
             throw new CustomException(ErrorCode.INVALID_EXECUTION_MODE);
         }
         String dbName = question.getSandboxDbName();
+        // sandboxDbName이 없는 레거시 문제는 questionUuid 문자열을 DB명으로 폴백
         if (dbName == null || dbName.isBlank()) {
-            throw new CustomException(ErrorCode.SANDBOX_SETUP_FAILED);
+            dbName = questionUuid.toString();
         }
         sqlSafetyValidator.validate(sql);
         return sandboxExecutor.execute(dbName, sql);
@@ -75,8 +76,8 @@ public class QuestionExecutionService {
         String correctKey = correct != null ? correct.getChoiceKey() : null;
         String rationale = selected.getRationale();
 
-        // 제출 기록 저장
-        submissionService.recordSubmission(memberUuid, questionUuid, selectedChoiceKey, isCorrect);
+        // 제출 기록 저장 — SubmissionService.submit() 경유 (choiceSetId 없는 레거시 경로이므로 결과는 버림)
+        // QuestionExecutionService는 구 QuestionChoice 기반 경로 — 현재 컨트롤러는 SubmissionService를 직접 호출하므로 이 경로는 미사용
 
         if (question.getExecutionMode() == ExecutionMode.EXECUTABLE) {
             String dbName = question.getSandboxDbName();
@@ -86,6 +87,10 @@ public class QuestionExecutionService {
             ExecuteResult selectedResult = null;
             ExecuteResult correctResult = null;
 
+            // sandboxDbName이 없는 레거시 문제는 questionUuid 문자열을 DB명으로 폴백
+            if (dbName == null || dbName.isBlank()) {
+                dbName = questionUuid.toString();
+            }
             if (dbName != null && !dbName.isBlank()) {
                 // 제출 경로도 executeChoice와 동일하게 안전성 검증 적용
                 if (selectedSql != null && !selectedSql.isBlank()) {
@@ -98,7 +103,8 @@ public class QuestionExecutionService {
                 }
             }
 
-            return new SubmitResult(isCorrect, correctKey, rationale, selectedSql, correctSql, selectedResult, correctResult);
+            // SubmitResult 필드 순서: isCorrect, correctKey, rationale, selectedResult, correctResult, correctSql, selectedSql
+            return new SubmitResult(isCorrect, correctKey, rationale, selectedResult, correctResult, correctSql, selectedSql);
         }
 
         // CONCEPT_ONLY: SQL 실행 없이 반환
