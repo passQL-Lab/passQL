@@ -53,7 +53,7 @@ export function HeatmapCalendar({ entries }: HeatmapCalendarProps) {
           return (
             <div
               key={date}
-              className="w-7 h-7 rounded flex items-center justify-center text-[10px]"
+              className="w-6 h-6 rounded flex items-center justify-center text-[10px]"
               style={{
                 backgroundColor: HEATMAP_COLORS[level],
                 color: level >= 3 ? "#FFFFFF" : "#9CA3AF",
