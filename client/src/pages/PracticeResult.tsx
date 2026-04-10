@@ -82,7 +82,7 @@ export default function PracticeResult() {
   );
 
   const step2 = (
-    <div className="text-left w-full max-w-90">
+    <div className="text-left w-full max-w-90 px-2 sm:px-0">
       <p className="text-2xl font-bold text-center mb-5">{analysis.greeting}</p>
       {analysis.analysis && (
         <p className="text-body leading-relaxed">{analysis.analysis}</p>
@@ -133,7 +133,7 @@ export default function PracticeResult() {
   );
 
   return (
-    <div className="h-screen max-w-120 mx-auto">
+    <div className="h-screen max-w-120 mx-auto px-4 sm:px-0">
       <StepNavigator
         steps={[step1, step2, step3]}
         lastButtonLabel="다른 카테고리"
