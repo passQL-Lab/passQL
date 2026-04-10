@@ -1,48 +1,33 @@
-import { useMemo } from "react";
-import { useProgress, useHeatmap } from "../hooks/useProgress";
+import { useQuery } from "@tanstack/react-query";
+import { useProgress } from "../hooks/useProgress";
+import { fetchCategoryStats } from "../api/progress";
 import ErrorFallback from "../components/ErrorFallback";
-
-function getHeatmapStyle(rate: number): { bg: string; text: string } {
-  if (rate >= 86) return { bg: "#4F46E5", text: "#FFFFFF" };
-  if (rate >= 71) return { bg: "#818CF8", text: "#FFFFFF" };
-  if (rate >= 51) return { bg: "#C7D2FE", text: "#4F46E5" };
-  if (rate >= 31) return { bg: "#EEF2FF", text: "#4F46E5" };
-  return { bg: "#F5F5F5", text: "#6B7280" };
-}
+import StatsAnalysisCard from "../components/StatsAnalysisCard";
+import StatsRadarChart from "../components/StatsRadarChart";
+import StatsBarChart from "../components/StatsBarChart";
 
 export default function Stats() {
-  const { data: progress, isLoading: progressLoading, isError, refetch } = useProgress();
-  const { data: heatmap, isLoading: heatmapLoading } = useHeatmap();
+  const {
+    data: progress,
+    isLoading: progressLoading,
+    isError,
+    refetch,
+  } = useProgress();
+  const { data: categories } = useQuery({
+    queryKey: ["categoryStats"],
+    queryFn: fetchCategoryStats,
+    staleTime: 1000 * 60 * 5,
+  });
 
-  const heatmapGrid = useMemo(() => {
-    if (heatmapLoading || !heatmap || heatmap.length === 0) return null;
-    return (
-      <section>
-        <h2 className="text-h2 mb-4">토픽별 숙련도</h2>
-        <div className="grid grid-cols-3 lg:grid-cols-4 gap-2">
-          {heatmap.map((t) => {
-            const style = getHeatmapStyle(t.correctRate);
-            return (
-              <div
-                key={t.topicCode}
-                className="rounded-lg min-h-[48px] flex flex-col items-center justify-center py-2 px-1"
-                style={{ backgroundColor: style.bg, color: style.text }}
-              >
-                <span className="text-[13px] font-bold">{t.topicName}</span>
-                <span className="text-xs">{Math.round(t.correctRate)}%</span>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-    );
-  }, [heatmap, heatmapLoading]);
+  const readiness = progress?.readiness;
+  const readinessPercent = readiness ? Math.round(readiness.score * 100) : null;
 
   if (progressLoading) {
     return (
       <div className="py-6 space-y-6">
         <div className="h-24 rounded-xl bg-border animate-pulse" />
-        <div className="h-48 rounded-xl bg-border animate-pulse" />
+        <div className="h-20 rounded-xl bg-border animate-pulse" />
+        <div className="h-64 rounded-xl bg-border animate-pulse" />
       </div>
     );
   }
@@ -53,11 +38,23 @@ export default function Stats() {
 
   return (
     <div className="py-6 space-y-6">
-      <h1 className="text-h1 mb-6">학습 통계</h1>
+      <div>
+        <h1 className="text-h1">내 실력, 한눈에</h1>
+        <p className="text-secondary mt-1">
+          약한 영역을 눌러 바로 연습해보세요
+        </p>
+      </div>
+
       <div className="card-base flex items-center divide-x divide-border">
         {[
-          { value: String(progress?.solved ?? 0), label: "푼 문제" },
-          { value: `${Math.round(progress?.correctRate ?? 0)}%`, label: "정답률" },
+          { value: `${progress?.solvedCount ?? 0}문제`, label: "푼 문제" },
+          {
+            value:
+              readinessPercent != null
+                ? `${readinessPercent}%`
+                : `${Math.round((progress?.correctRate ?? 0) * 100)}%`,
+            label: readinessPercent != null ? "합격 준비도" : "정답률",
+          },
           { value: `${progress?.streakDays ?? 0}일`, label: "연속 학습" },
         ].map((m) => (
           <div key={m.label} className="flex-1 text-center py-2">
@@ -66,7 +63,21 @@ export default function Stats() {
           </div>
         ))}
       </div>
-      {heatmapGrid}
+
+      {categories && categories.length > 0 ? (
+        <>
+          <StatsAnalysisCard categories={categories} />
+          <StatsRadarChart categories={categories} />
+          <StatsBarChart categories={categories} />
+        </>
+      ) : (
+        <div className="card-base text-center py-12">
+          <p className="text-text-caption">아직 풀이 기록이 없어요</p>
+          <p className="text-xs text-text-caption mt-1">
+            문제를 풀면 여기에 실력이 나타나요
+          </p>
+        </div>
+      )}
     </div>
   );
 }

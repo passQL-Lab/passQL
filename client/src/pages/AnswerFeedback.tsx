@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
-import { Check, X } from "lucide-react";
+import { useNavigate, useLocation, Link } from "react-router-dom";
+import { Check, X, ChevronRight } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { diffExplain } from "../api/ai";
 import AiExplanationSheet from "../components/AiExplanationSheet";
+import { useSimilarQuestions } from "../hooks/useSimilarQuestions";
 
 interface FeedbackState {
   readonly isCorrect: boolean;
@@ -12,7 +13,7 @@ interface FeedbackState {
   readonly selectedKey: string;
   readonly selectedSql?: string;
   readonly correctSql?: string;
-  readonly questionId: number;
+  readonly questionUuid: string;
 }
 
 export default function AnswerFeedback() {
@@ -26,14 +27,15 @@ export default function AnswerFeedback() {
     mutationFn: diffExplain,
     onSuccess: (result) => setAiText(result.text),
   });
+  const similarQuery = useSimilarQuestions(state?.questionUuid ?? "");
 
   const handleAskAi = () => {
     if (!state) return;
     setAiSheetOpen(true);
     setAiText("");
     diffMutation.mutate({
-      questionId: state.questionId,
-      selectedKey: state.selectedKey,
+      questionUuid: state.questionUuid,
+      selectedChoiceKey: state.selectedKey,
     });
   };
 
@@ -154,6 +156,24 @@ export default function AnswerFeedback() {
               </button>
             </div>
           </>
+        )}
+        {similarQuery.data && similarQuery.data.length > 0 && (
+          <section className="mt-6">
+            <h2 className="text-secondary text-sm mb-3">유사 문제</h2>
+            <div className="space-y-2">
+              {similarQuery.data.map((q) => (
+                <Link key={q.questionUuid} to={`/questions/${q.questionUuid}`}>
+                  <div className="card-base flex items-center gap-3 cursor-pointer hover:bg-surface transition-colors">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-body truncate">{q.stem}</p>
+                      <span className="badge-topic">{q.topicName}</span>
+                    </div>
+                    <ChevronRight size={16} className="text-text-caption flex-shrink-0" />
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </section>
         )}
       </div>
 

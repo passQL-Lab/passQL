@@ -5,7 +5,7 @@ import type { AiResult, SimilarQuestion, ExplainErrorPayload, DiffExplainPayload
 export function explainError(payload: ExplainErrorPayload): Promise<AiResult> {
   return apiFetch("/ai/explain-error", {
     method: "POST",
-    headers: { "X-User-UUID": getMemberUuid() },
+    headers: { "X-Member-UUID": getMemberUuid() },
     body: JSON.stringify(payload),
   });
 }
@@ -13,11 +13,11 @@ export function explainError(payload: ExplainErrorPayload): Promise<AiResult> {
 export function diffExplain(payload: DiffExplainPayload): Promise<AiResult> {
   return apiFetch("/ai/diff-explain", {
     method: "POST",
-    headers: { "X-User-UUID": getMemberUuid() },
+    headers: { "X-Member-UUID": getMemberUuid() },
     body: JSON.stringify(payload),
   });
 }
 
-export function fetchSimilar(questionId: number, k = 5): Promise<SimilarQuestion[]> {
-  return apiFetch(`/ai/similar/${questionId}?k=${k}`);
+export function fetchSimilar(questionUuid: string, k = 5): Promise<SimilarQuestion[]> {
+  return apiFetch(`/ai/similar/${questionUuid}?k=${k}`);
 }

@@ -6,6 +6,8 @@ import type {
   QuestionDetail,
   SubmitResult,
   ExecuteResult,
+  TodayQuestionResponse,
+  RecommendationsResponse,
 } from "../types/api";
 
 interface QuestionListParams {
@@ -32,26 +34,44 @@ export function fetchQuestions(
   return apiFetch(`/questions?${query}`);
 }
 
-export function fetchQuestion(id: number): Promise<QuestionDetail> {
-  return apiFetch(`/questions/${id}`);
+export function fetchQuestion(questionUuid: string): Promise<QuestionDetail> {
+  return apiFetch(`/questions/${questionUuid}`);
+}
+
+export function fetchTodayQuestion(memberUuid?: string): Promise<TodayQuestionResponse> {
+  const query = new URLSearchParams();
+  if (memberUuid) query.set("memberUuid", memberUuid);
+  const qs = query.toString();
+  return apiFetch(`/questions/today${qs ? `?${qs}` : ""}`);
+}
+
+export function fetchRecommendations(
+  size?: number,
+  excludeQuestionUuid?: string,
+): Promise<RecommendationsResponse> {
+  const query = new URLSearchParams();
+  if (size != null) query.set("size", String(size));
+  if (excludeQuestionUuid) query.set("excludeQuestionUuid", excludeQuestionUuid);
+  const qs = query.toString();
+  return apiFetch(`/questions/recommendations${qs ? `?${qs}` : ""}`);
 }
 
 export function submitAnswer(
-  id: number,
-  selectedKey: string,
+  questionUuid: string,
+  selectedChoiceKey: string,
 ): Promise<SubmitResult> {
-  return apiFetch(`/questions/${id}/submit`, {
+  return apiFetch(`/questions/${questionUuid}/submit`, {
     method: "POST",
-    headers: { "X-User-UUID": getMemberUuid() },
-    body: JSON.stringify({ selectedKey }),
+    headers: { "X-Member-UUID": getMemberUuid() },
+    body: JSON.stringify({ selectedChoiceKey }),
   });
 }
 
 export function executeChoice(
-  id: number,
+  questionUuid: string,
   sql: string,
 ): Promise<ExecuteResult> {
-  return apiFetch(`/questions/${id}/execute`, {
+  return apiFetch(`/questions/${questionUuid}/execute`, {
     method: "POST",
     body: JSON.stringify({ sql }),
   });

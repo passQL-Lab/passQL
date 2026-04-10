@@ -1,14 +1,21 @@
 import { apiFetch } from "./client";
 import { getMemberUuid } from "../stores/memberStore";
-import type { ProgressSummary, HeatmapEntry } from "../types/api";
+import type { ProgressResponse, HeatmapResponse, CategoryStats } from "../types/api";
 
-export function fetchProgress(): Promise<ProgressSummary> {
-  const params = new URLSearchParams({ memberUuid: getMemberUuid() });
-  return apiFetch(`/progress?${params}`);
+export function fetchProgress(): Promise<ProgressResponse> {
+  const uuid = getMemberUuid();
+  return apiFetch(`/progress?memberUuid=${uuid}`);
 }
 
-export function fetchHeatmap(): Promise<HeatmapEntry[]> {
-  return apiFetch("/progress/heatmap", {
-    headers: { "X-User-UUID": getMemberUuid() },
-  });
+export function fetchCategoryStats(): Promise<readonly CategoryStats[]> {
+  const uuid = getMemberUuid();
+  return apiFetch(`/progress/categories?memberUuid=${uuid}`);
+}
+
+export function fetchHeatmap(memberUuid: string, from?: string, to?: string): Promise<HeatmapResponse> {
+  const query = new URLSearchParams();
+  query.set("memberUuid", memberUuid);
+  if (from) query.set("from", from);
+  if (to) query.set("to", to);
+  return apiFetch(`/progress/heatmap?${query}`);
 }

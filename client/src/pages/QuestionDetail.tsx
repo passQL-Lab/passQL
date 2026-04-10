@@ -1,72 +1,108 @@
 import { useState, useCallback, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
-import { ArrowLeft, ChevronUp, ChevronDown } from "lucide-react";
+import { ArrowLeft, ChevronUp, ChevronDown, BookOpen } from "lucide-react";
 import { StarRating } from "../components/StarRating";
 import { ChoiceCard } from "../components/ChoiceCard";
 import AiExplanationSheet from "../components/AiExplanationSheet";
-import { useQuestionDetail, useExecuteChoice, useSubmitAnswer } from "../hooks/useQuestionDetail";
+import {
+  useQuestionDetail,
+  useExecuteChoice,
+  useSubmitAnswer,
+} from "../hooks/useQuestionDetail";
 import { explainError } from "../api/ai";
 import type { ExecuteResult } from "../types/api";
 
-export default function QuestionDetail() {
-  const { id } = useParams<{ id: string }>();
-  const questionId = Number(id);
+interface QuestionDetailProps {
+  readonly practiceMode?: boolean;
+  readonly practiceSubmitLabel?: string;
+  readonly questionUuid?: string;
+  readonly onPracticeSubmit?: (selectedChoiceKey: string) => void;
+}
+
+export default function QuestionDetail({ practiceMode, practiceSubmitLabel, questionUuid: propUuid, onPracticeSubmit }: QuestionDetailProps = {}) {
+  const { questionUuid: paramUuid } = useParams<{ questionUuid: string }>();
+  const questionUuid = propUuid ?? paramUuid;
   const navigate = useNavigate();
-  const { data: question, isLoading } = useQuestionDetail(questionId);
-  const executeMutation = useExecuteChoice(questionId);
-  const submitMutation = useSubmitAnswer(questionId);
+  const { data: question, isLoading } = useQuestionDetail(questionUuid!);
+  const executeMutation = useExecuteChoice(questionUuid!);
+  const submitMutation = useSubmitAnswer(questionUuid!);
+
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [schemaOpen, setSchemaOpen] = useState(false);
+  const [stemOpen, setStemOpen] = useState(true);
   const [executeCache, setExecuteCache] = useState<Record<string, ExecuteResult>>({});
   const executeCacheRef = useRef(executeCache);
   executeCacheRef.current = executeCache;
   const [aiSheetOpen, setAiSheetOpen] = useState(false);
   const [aiText, setAiText] = useState("");
+
+  const activeChoiceSet = question?.choiceSets?.find((cs) => cs.status === "OK");
+  const choices = activeChoiceSet?.items ?? [];
+
   const explainMutation = useMutation({
     mutationFn: explainError,
     onSuccess: (result) => setAiText(result.text),
   });
 
-  const handleExecute = useCallback((choiceKey: string, sql: string) => {
-    if (executeCacheRef.current[choiceKey]) return;
-    executeMutation.mutate(sql, {
-      onSuccess: (result) => {
-        setExecuteCache((prev) => ({ ...prev, [choiceKey]: result }));
-      },
-    });
-  }, [executeMutation]);
+  const handleExecute = useCallback(
+    (choiceKey: string, sql: string) => {
+      if (executeCacheRef.current[choiceKey]) return;
+      executeMutation.mutate(sql, {
+        onSuccess: (result) => {
+          setExecuteCache((prev) => ({ ...prev, [choiceKey]: result }));
+        },
+      });
+    },
+    [executeMutation],
+  );
 
-  const handleSelect = useCallback((choiceKey: string, sql: string) => {
-    setSelectedKey(choiceKey);
-    if (!executeCacheRef.current[choiceKey]) {
-      handleExecute(choiceKey, sql);
-    }
-  }, [handleExecute]);
+  const handleSelect = useCallback(
+    (choiceKey: string, sql: string) => {
+      setSelectedKey(choiceKey);
+      if (question?.executionMode === "EXECUTABLE" && !executeCacheRef.current[choiceKey]) {
+        handleExecute(choiceKey, sql);
+      }
+    },
+    [handleExecute, question],
+  );
 
   const handleSubmit = useCallback(() => {
     if (!selectedKey || !question) return;
+    if (practiceMode && onPracticeSubmit) {
+      onPracticeSubmit(selectedKey);
+      return;
+    }
     submitMutation.mutate(selectedKey, {
       onSuccess: (result) => {
-        const selectedChoice = question.choices.find((c) => c.key === selectedKey);
-        const correctChoice = question.choices.find((c) => c.key === result.correctKey);
-        navigate(`/questions/${questionId}/result`, {
-          state: { ...result, selectedKey, selectedSql: selectedChoice?.body, correctSql: correctChoice?.body, questionId },
+        const selectedChoice = choices.find((c) => c.key === selectedKey);
+        const correctChoice = choices.find((c) => c.key === result.correctKey);
+        navigate(`/questions/${questionUuid}/result`, {
+          state: {
+            ...result,
+            selectedKey,
+            selectedSql: selectedChoice?.body,
+            correctSql: correctChoice?.body,
+            questionUuid,
+          },
         });
       },
     });
-  }, [selectedKey, submitMutation, question, questionId, navigate]);
+  }, [selectedKey, submitMutation, question, choices, questionUuid, navigate, practiceMode, onPracticeSubmit]);
 
-  const handleAskAi = useCallback((choiceKey: string, _errorCode: string, errorMessage: string) => {
-    setAiSheetOpen(true);
-    setAiText("");
-    const choice = question?.choices.find((c) => c.key === choiceKey);
-    explainMutation.mutate({
-      questionId,
-      sql: choice?.body ?? "",
-      errorMessage,
-    });
-  }, [question, questionId, explainMutation]);
+  const handleAskAi = useCallback(
+    (choiceKey: string, _errorCode: string, errorMessage: string) => {
+      setAiSheetOpen(true);
+      setAiText("");
+      const choice = choices.find((c) => c.key === choiceKey);
+      explainMutation.mutate({
+        questionUuid: questionUuid!,
+        sql: choice?.body ?? "",
+        errorMessage,
+      });
+    },
+    [choices, questionUuid, explainMutation],
+  );
 
   if (isLoading || !question) {
     return (
@@ -74,65 +110,155 @@ export default function QuestionDetail() {
         <div className="h-14 bg-border animate-pulse rounded" />
         <div className="h-24 bg-border animate-pulse rounded-xl" />
         <div className="space-y-3">
-          {Array.from({ length: 4 }, (_, i) => (<div key={i} className="h-40 bg-border animate-pulse rounded-xl" />))}
+          {Array.from({ length: 4 }, (_, i) => (
+            <div key={i} className="h-40 bg-border animate-pulse rounded-xl" />
+          ))}
         </div>
       </div>
     );
   }
 
-  return (
-    <div className="pb-24">
-      <header className="sticky top-0 z-20 flex items-center justify-between h-14 bg-surface-card border-b border-border px-4 -mx-4 lg:-mx-0">
-        <button type="button" className="text-text-primary" onClick={() => navigate(-1)}><ArrowLeft size={20} /></button>
-        <div className="flex items-center gap-2">
-          <span className="font-mono text-xs text-text-caption">Q{String(questionId).padStart(3, "0")}</span>
-          <span className="badge-topic">{question.topicCode}</span>
-          <StarRating level={question.difficulty} />
+  const isSubmitReady =
+    selectedKey !== null &&
+    choices.length > 0 &&
+    !submitMutation.isPending;
+
+  const schemaSection = question.schemaDisplay ? (
+    <section className="mt-3">
+      <button
+        type="button"
+        className="flex items-center gap-2 text-secondary text-sm w-full"
+        onClick={() => setSchemaOpen((prev) => !prev)}
+      >
+        <span>스키마 보기</span>
+        {schemaOpen ? (
+          <ChevronUp size={16} className="text-text-caption" />
+        ) : (
+          <ChevronDown size={16} className="text-text-caption" />
+        )}
+      </button>
+      {schemaOpen && (
+        <div className="mt-2 space-y-3">
+          {question.schemaIntent && (
+            <p className="text-sm text-text-secondary">{question.schemaIntent}</p>
+          )}
+          <pre className="code-block">
+            <code>{question.schemaDisplay}</code>
+          </pre>
+          {question.schemaDdl && (
+            <div>
+              <p className="text-xs text-text-caption mb-1">DDL</p>
+              <pre className="code-block">
+                <code>{question.schemaDdl}</code>
+              </pre>
+            </div>
+          )}
+          {question.schemaSampleData && (
+            <div>
+              <p className="text-xs text-text-caption mb-1">샘플 데이터</p>
+              <pre className="code-block">
+                <code>{question.schemaSampleData}</code>
+              </pre>
+            </div>
+          )}
         </div>
-      </header>
-      <section className="card-base mt-4"><p className="text-body">{question.stem}</p></section>
-      {question.schemaDisplay && (
-        <section className="mt-3">
-          <button type="button" className="flex items-center gap-2 text-secondary text-sm w-full" onClick={() => setSchemaOpen((prev) => !prev)}>
-            <span>스키마 보기</span>
-            {schemaOpen ? <ChevronUp size={16} className="text-text-caption" /> : <ChevronDown size={16} className="text-text-caption" />}
-          </button>
-          {schemaOpen && (<pre className="code-block mt-2"><code>{question.schemaDisplay}</code></pre>)}
-        </section>
       )}
-      <section className="mt-4 space-y-3">
-        {question.choices.map((choice) => (
-          <ChoiceCard
-            key={choice.key}
-            choice={choice}
-            isSelected={selectedKey === choice.key}
-            cached={executeCache[choice.key]}
-            isExecutable={question.executionMode === "EXECUTABLE"}
-            isExecuting={executeMutation.isPending && executeMutation.variables === choice.body}
-            onSelect={handleSelect}
-            onExecute={handleExecute}
-            onAskAi={handleAskAi}
-          />
-        ))}
-      </section>
+    </section>
+  ) : null;
+
+  const choicesSection = choices.length === 0 ? (
+    <div className="mt-4 card-base text-center py-8">
+      <p className="text-text-caption">선택지가 아직 준비되지 않았어요</p>
+      <p className="text-xs text-text-caption mt-1">잠시 후 다시 시도해주세요</p>
+    </div>
+  ) : (
+    <section className="mt-4 space-y-3">
+      {choices.map((choice) => (
+        <ChoiceCard
+          key={choice.key}
+          choice={choice}
+          isSelected={selectedKey === choice.key}
+          cached={executeCache[choice.key]}
+          isExecutable={question.executionMode === "EXECUTABLE"}
+          isExecuting={
+            executeMutation.isPending &&
+            executeMutation.variables === choice.body
+          }
+          onSelect={handleSelect}
+          onExecute={handleExecute}
+          onAskAi={handleAskAi}
+        />
+      ))}
+    </section>
+  );
+
+  const submitButton = (
+    <button
+      type="button"
+      className={`w-full h-12 rounded-lg text-base font-bold ${
+        isSubmitReady
+          ? "bg-brand text-white"
+          : "bg-border text-text-caption cursor-not-allowed"
+      }`}
+      disabled={!isSubmitReady}
+      onClick={handleSubmit}
+    >
+      {submitMutation.isPending ? "제출 중..." : (practiceSubmitLabel ?? "답안 제출하기")}
+    </button>
+  );
+
+  return (
+    <div className="flex flex-col h-full">
+      {/* 헤더: 일반 모드에서만 뒤로가기 + 메타 정보 */}
+      {!practiceMode && (
+        <header className="flex items-center justify-between h-14 px-4">
+          <button
+            type="button"
+            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-border transition-colors"
+            onClick={() => navigate(-1)}
+          >
+            <ArrowLeft size={18} className="text-text-secondary" />
+          </button>
+          <div className="flex items-center gap-2">
+            <span className="badge-topic">{question.topicName}</span>
+            <StarRating level={question.difficulty} />
+          </div>
+        </header>
+      )}
+
+      {/* Sticky: 문제 지문 (토글) + 스키마 (토글) */}
+      <div className="sticky top-0 z-10 bg-surface px-1 pb-2">
+        <button
+          type="button"
+          className="card-base w-full text-left flex items-start gap-2 mt-2"
+          onClick={() => setStemOpen((prev) => !prev)}
+        >
+          <BookOpen size={16} className="text-brand mt-0.5 shrink-0" />
+          {stemOpen ? (
+            <p className="text-body text-sm">{question.stem}</p>
+          ) : (
+            <p className="text-body text-sm truncate">{question.stem}</p>
+          )}
+        </button>
+        {schemaSection}
+      </div>
+
+      {/* 스크롤: 선택지 */}
+      <div className="flex-1 overflow-y-auto px-1">
+        {choicesSection}
+      </div>
+
+      {/* 하단: 버튼 */}
+      <div className="px-4 pb-4 pt-2">
+        {submitButton}
+      </div>
+
       <AiExplanationSheet
         isOpen={aiSheetOpen}
         isLoading={explainMutation.isPending}
         text={aiText}
         onClose={() => setAiSheetOpen(false)}
       />
-      <div className="fixed bottom-0 inset-x-0 lg:left-55 bg-surface-card border-t border-border p-4 z-20">
-        <div className="mx-auto max-w-180">
-          <button
-            type="button"
-            className={`w-full h-12 rounded-lg text-base font-bold ${selectedKey && !submitMutation.isPending ? "bg-brand text-white" : "bg-border text-text-caption cursor-not-allowed"}`}
-            disabled={!selectedKey || submitMutation.isPending}
-            onClick={handleSubmit}
-          >
-            {submitMutation.isPending ? "제출 중..." : "답안 제출하기"}
-          </button>
-        </div>
-      </div>
     </div>
   );
 }
