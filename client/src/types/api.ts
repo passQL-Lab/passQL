@@ -124,6 +124,24 @@ export interface CategoryStats {
   readonly solvedCount: number;
 }
 
+// === Topic Analysis (Issue #79) ===
+export interface TopicStat {
+  readonly topicUuid: string;
+  readonly displayName: string;
+  readonly totalQuestionCount: number;
+  readonly correctRate: number;
+  readonly solvedCount: number;
+}
+
+export interface TopicAnalysisResponse {
+  readonly topicStats: readonly TopicStat[];
+}
+
+export interface AiCommentResponse {
+  readonly comment: string;
+  readonly generatedAt: string;
+}
+
 // === Heatmap ===
 export interface HeatmapEntry {
   readonly date: string;

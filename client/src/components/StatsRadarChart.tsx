@@ -5,16 +5,16 @@ import {
   Radar,
   ResponsiveContainer,
 } from "recharts";
-import type { CategoryStats } from "../types/api";
+import type { TopicStat } from "../types/api";
 
 interface StatsRadarChartProps {
-  readonly categories: readonly CategoryStats[];
+  readonly topicStats: readonly TopicStat[];
 }
 
-export default function StatsRadarChart({ categories }: StatsRadarChartProps) {
-  const data = categories.map((cat) => ({
-    subject: cat.displayName,
-    value: Math.round(cat.correctRate * 100),
+export default function StatsRadarChart({ topicStats }: StatsRadarChartProps) {
+  const data = topicStats.map((stat) => ({
+    subject: stat.displayName,
+    value: Math.round(stat.correctRate * 100),
   }));
 
   return (
