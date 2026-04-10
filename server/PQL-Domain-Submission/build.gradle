@@ -11,4 +11,5 @@ dependencies {
     api project(':PQL-Common')
     api project(':PQL-Domain-Member')
     api project(':PQL-Domain-Question')
+    api project(':PQL-Domain-Meta')
 }
