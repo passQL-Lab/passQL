@@ -1,7 +1,35 @@
 # Changelog
 
-**현재 버전:** 0.0.40  
-**마지막 업데이트:** 2026-04-10T06:47:04Z  
+**현재 버전:** 0.0.43  
+**마지막 업데이트:** 2026-04-10T11:54:51Z  
+
+---
+
+## [0.0.43] - 2026-04-10
+
+**PR:** #72  
+
+**Added 30-day learning heatmap calendar showing daily progress**
+
+**Introduced exam readiness score card with preparation metrics**
+
+**Created category-based practice sessions with step-by-step result summary**
+
+**Enhanced home page with personalized greeting and today's recommended question**
+
+**Added similar question suggestions in answer feedback sections**
+
+**Implemented mobile joystick control for interactive 3D statistics chart**
+
+**Redesigned stats page with radar chart and category performance analysis**
+
+**Corrected API request field naming to camelCase convention**
+
+**Updated application version to 0.0.43**
+
+**Updated favicon to PNG format**
+
+**Added recharts visualization library dependency**
 
 ---
 
