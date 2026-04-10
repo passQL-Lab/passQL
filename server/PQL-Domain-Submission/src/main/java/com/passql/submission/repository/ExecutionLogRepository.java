@@ -2,6 +2,8 @@ package com.passql.submission.repository;
 
 import com.passql.submission.entity.ExecutionLog;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,4 +18,8 @@ public interface ExecutionLogRepository extends JpaRepository<ExecutionLog, UUID
     List<ExecutionLog> findByMemberUuidOrderByExecutedAtDesc(UUID memberUuid);
 
     List<ExecutionLog> findByQuestionUuidOrderByExecutedAtDesc(UUID questionUuid);
+
+    @Modifying
+    @Transactional
+    void deleteByQuestionUuid(UUID questionUuid);
 }

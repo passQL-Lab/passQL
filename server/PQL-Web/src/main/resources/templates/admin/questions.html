@@ -64,6 +64,16 @@
         </div>
     </div>
 
+    <!-- Flash messages -->
+    <div th:if="${successMessage}" class="alert alert-success mb-4">
+        <i data-lucide="check-circle" class="size-5"></i>
+        <span th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-error mb-4">
+        <i data-lucide="alert-circle" class="size-5"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
+
     <!-- 문제 목록 테이블 -->
     <div class="card bg-base-100 shadow">
         <div class="card-body p-0">
@@ -110,6 +120,13 @@
                                    class="btn btn-xs btn-ghost" title="편집">
                                     <i data-lucide="pencil" class="size-3"></i>
                                 </a>
+                                <button type="button" class="btn btn-xs btn-ghost text-error"
+                                        title="삭제"
+                                        th:data-uuid="${q.questionUuid}"
+                                        th:data-title="${q.stemPreview}"
+                                        onclick="openDeleteModal(this)">
+                                    <i data-lucide="trash-2" class="size-3"></i>
+                                </button>
                             </div>
                         </td>
                     </tr>
@@ -171,9 +188,42 @@
         </div>
     </div>
 
+    <!-- 삭제 확인 모달 -->
+    <dialog id="deleteModal" class="modal">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg text-error">문제를 삭제하시겠습니까?</h3>
+            <p class="py-4">
+                "<span id="deleteTargetTitle" class="font-medium"></span>" 을(를) 삭제합니다.
+            </p>
+            <p class="text-sm text-base-content/60">
+                이 작업은 되돌릴 수 없으며, 해당 문제의 제출 기록·실행 로그·선택지·태그·오늘의 문제 등록 이력이 모두 함께 삭제됩니다.
+                진행중인 퀴즈 세션에서 사용 중이면 삭제되지 않습니다.
+            </p>
+            <div class="modal-action">
+                <button class="btn" onclick="document.getElementById('deleteModal').close()">취소</button>
+                <form id="deleteForm" method="post">
+                    <input type="hidden" name="_method" value="delete"/>
+                    <button type="submit" class="btn btn-error">삭제</button>
+                </form>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop"><button>close</button></form>
+    </dialog>
+
 </th:block>
 
 <th:block layout:fragment="js">
-    <script>lucide.createIcons();</script>
+<script>
+    lucide.createIcons();
+
+    function openDeleteModal(btn) {
+        const uuid = btn.dataset.uuid;
+        const title = btn.dataset.title || '(제목 없음)';
+        document.getElementById('deleteTargetTitle').textContent = title;
+        const form = document.getElementById('deleteForm');
+        form.action = '/admin/questions/' + uuid;
+        document.getElementById('deleteModal').showModal();
+    }
+</script>
 </th:block>
 </html>

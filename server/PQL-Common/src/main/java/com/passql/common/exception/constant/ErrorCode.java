@@ -77,6 +77,9 @@ public enum ErrorCode {
     QUIZ_SESSION_CHOICE_SET_MISMATCH(HttpStatus.BAD_REQUEST, "제출한 선택지 세트가 현재 세션과 일치하지 않습니다."),
     QUIZ_SESSION_INSUFFICIENT_QUESTIONS(HttpStatus.UNPROCESSABLE_ENTITY, "세션을 생성할 문제가 부족합니다."),
 
+    // Admin Question Delete
+    QUESTION_IN_ACTIVE_SESSION(HttpStatus.CONFLICT, "진행중인 퀴즈 세션에서 사용 중인 문제는 삭제할 수 없습니다."),
+
     // === Admin Question Generation (신규: Sub-plan 1) ===
     QUESTION_GENERATE_INPUT_INVALID(HttpStatus.BAD_REQUEST, "문제 생성 입력값이 올바르지 않습니다.");
 

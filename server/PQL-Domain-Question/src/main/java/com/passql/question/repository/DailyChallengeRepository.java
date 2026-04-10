@@ -2,6 +2,8 @@ package com.passql.question.repository;
 
 import com.passql.question.entity.DailyChallenge;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -13,4 +15,8 @@ public interface DailyChallengeRepository extends JpaRepository<DailyChallenge, 
     Optional<DailyChallenge> findByChallengeDate(LocalDate challengeDate);
 
     List<DailyChallenge> findByChallengeDateBetweenOrderByChallengeDateAsc(LocalDate from, LocalDate to);
+
+    @Modifying
+    @Transactional
+    void deleteByQuestionUuid(UUID questionUuid);
 }

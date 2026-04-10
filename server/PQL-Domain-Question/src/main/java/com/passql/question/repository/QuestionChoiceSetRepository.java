@@ -4,6 +4,8 @@ import com.passql.question.constant.ChoiceSetSource;
 import com.passql.question.constant.ChoiceSetStatus;
 import com.passql.question.entity.QuestionChoiceSet;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
@@ -27,4 +29,8 @@ public interface QuestionChoiceSetRepository extends JpaRepository<QuestionChoic
     List<QuestionChoiceSet> findByQuestionUuidAndSourceOrderByCreatedAtDesc(UUID questionUuid, ChoiceSetSource source);
 
     List<QuestionChoiceSet> findByQuestionUuidOrderByCreatedAtDesc(UUID questionUuid);
+
+    @Modifying
+    @Transactional
+    void deleteByQuestionUuid(UUID questionUuid);
 }

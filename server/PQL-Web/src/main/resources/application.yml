@@ -1,6 +1,10 @@
 spring:
   application:
     name: passql
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: true
   profiles:
     active: prod
   flyway:
