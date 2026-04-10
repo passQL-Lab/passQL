@@ -148,6 +148,7 @@ export default function Stats3DChart({
     let dragMoved = false;
     let prevMouse = { x: 0, y: 0 };
     let hoveredBar: THREE.Mesh | null = null;
+    let touchStart = { x: 0, y: 0 };
 
     const onMouseDown = (e: MouseEvent) => {
       isDragging = true;
@@ -235,6 +236,32 @@ export default function Stats3DChart({
       }
     };
 
+    const onTouchStart = (e: TouchEvent) => {
+      const t = e.touches[0];
+      touchStart = { x: t.clientX, y: t.clientY };
+    };
+
+    const onTouchEnd = (e: TouchEvent) => {
+      const t = e.changedTouches[0];
+      const dx = t.clientX - touchStart.x;
+      const dy = t.clientY - touchStart.y;
+      // 이동 거리 10px 미만이면 탭으로 판정
+      if (Math.sqrt(dx * dx + dy * dy) > 10) return;
+
+      const rect = container.getBoundingClientRect();
+      const mouse = new THREE.Vector2(
+        ((t.clientX - rect.left) / rect.width) * 2 - 1,
+        -((t.clientY - rect.top) / rect.height) * 2 + 1,
+      );
+      const raycaster = new THREE.Raycaster();
+      raycaster.setFromCamera(mouse, camera);
+      const intersects = raycaster.intersectObjects(bars);
+      if (intersects.length > 0) {
+        const data = intersects[0].object.userData as CategoryStats;
+        onCategoryClick?.(data.code);
+      }
+    };
+
     const onWheel = (e: WheelEvent) => {
       spherical.radius = Math.max(
         5,
@@ -249,6 +276,8 @@ export default function Stats3DChart({
     container.addEventListener("mousemove", onMouseMove);
     container.addEventListener("click", onClick);
     container.addEventListener("wheel", onWheel);
+    container.addEventListener("touchstart", onTouchStart, { passive: true });
+    container.addEventListener("touchend", onTouchEnd);
 
     // Grow animation
     let progress = 0;
@@ -289,6 +318,8 @@ export default function Stats3DChart({
       container.removeEventListener("mousemove", onMouseMove);
       container.removeEventListener("click", onClick);
       container.removeEventListener("wheel", onWheel);
+      container.removeEventListener("touchstart", onTouchStart);
+      container.removeEventListener("touchend", onTouchEnd);
       renderer.dispose();
       container.removeChild(renderer.domElement);
     };
