@@ -87,6 +87,7 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
             selectedSql: selectedChoice?.body,
             correctSql: correctChoice?.body,
             questionUuid,
+            executionMode: question.executionMode,
           },
         });
       },
