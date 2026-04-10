@@ -56,7 +56,7 @@ public class ProgressService {
     }
 
     private ReadinessResponse buildReadiness(UUID memberUuid) {
-        LocalDate today = LocalDate.now(ReadinessConstants.ZONE);
+        LocalDate today = LocalDate.now();
 
         // 최근 N개 시도 (정답 여부 + 시각) — 단일 쿼리
         List<RecentAttemptProjection> recentAttempts = submissionRepository.findRecentAttemptsByMemberUuid(
