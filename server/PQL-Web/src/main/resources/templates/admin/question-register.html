@@ -135,7 +135,7 @@
                             <option value="">토픽 선택</option>
                             <option th:each="t : ${topics}"
                                     th:value="${t.topicUuid}"
-                                    th:attr="data-code=${t.code}"
+                                    th:data-code="${t.code}"
                                     th:text="${t.displayName}">-</option>
                         </select>
                     </div>
@@ -285,8 +285,10 @@
 </th:block>
 
 <th:block layout:fragment="js">
+<script th:src="@{/js/admin/question-json-loader.js}"></script>
 <script>
     lucide.createIcons();
+    initQuestionJsonLoader({ confirmOverwrite: false });
 
     // 실행 모드 전환 시 스키마 섹션 표시/숨김
     document.querySelectorAll('input[name="executionMode"]').forEach(radio => {
@@ -346,89 +348,6 @@
             ta.select();
             document.execCommand('copy');
         });
-    }
-
-    // ── JSON 불러오기 공통 적용 ─────────────────────────────────────
-    function applyJson(data) {
-        // topicCode → select option 매핑
-        if (data.topicCode) {
-            const sel = document.getElementById('topicSelect');
-            for (const opt of sel.options) {
-                if (opt.dataset.code === data.topicCode) {
-                    sel.value = opt.value;
-                    break;
-                }
-            }
-        }
-
-        // 난이도
-        if (data.difficulty != null) {
-            const rangeEl = document.querySelector('input[name="difficulty"]');
-            rangeEl.value = data.difficulty;
-            document.getElementById('difficultyLabel').textContent = 'Lv.' + data.difficulty;
-        }
-
-        // 실행 모드
-        if (data.executionMode) {
-            const radio = document.querySelector(`input[name="executionMode"][value="${data.executionMode}"]`);
-            if (radio) {
-                radio.checked = true;
-                radio.dispatchEvent(new Event('change'));
-            }
-        }
-
-        // 텍스트 필드
-        const textMap = {
-            stem: 'textarea[name="stem"]',
-            hint: 'input[name="hint"]',
-            schemaDdl: '#schemaDdl',
-            schemaSampleData: '#schemaSampleData',
-            schemaIntent: 'input[name="schemaIntent"]',
-            answerSql: '#answerSql'
-        };
-        for (const [key, selector] of Object.entries(textMap)) {
-            if (data[key] != null) {
-                const el = document.querySelector(selector);
-                if (el) el.value = data[key];
-            }
-        }
-    }
-
-    // ── 파일 불러오기 ───────────────────────────────────────────────
-    function loadJsonFile(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const data = JSON.parse(e.target.result);
-                applyJson(data);
-            } catch (err) {
-                alert('JSON 파싱 오류: ' + err.message);
-            }
-        };
-        reader.readAsText(file);
-        event.target.value = '';  // 같은 파일 재선택 허용
-    }
-
-    // ── 붙여넣기 모달 ───────────────────────────────────────────────
-    function openJsonPasteModal() {
-        document.getElementById('jsonPasteArea').value = '';
-        document.getElementById('jsonPasteError').classList.add('hidden');
-        document.getElementById('jsonPasteModal').showModal();
-    }
-
-    function applyJsonFromPaste() {
-        const raw = document.getElementById('jsonPasteArea').value.trim();
-        const errEl = document.getElementById('jsonPasteError');
-        try {
-            const data = JSON.parse(raw);
-            applyJson(data);
-            document.getElementById('jsonPasteModal').close();
-        } catch (err) {
-            errEl.textContent = 'JSON 파싱 오류: ' + err.message;
-            errEl.classList.remove('hidden');
-        }
     }
 
     // ── Sandbox 실행 테스트 ─────────────────────────────────────────

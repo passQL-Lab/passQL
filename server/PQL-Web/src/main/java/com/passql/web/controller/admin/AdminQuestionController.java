@@ -10,6 +10,7 @@ import com.passql.question.dto.QuestionDetail;
 import com.passql.question.entity.Question;
 import com.passql.question.service.QuestionGenerateService;
 import com.passql.question.service.QuestionService;
+import com.passql.web.service.AdminQuestionDeleteService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
@@ -19,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.passql.common.exception.CustomException;
 import com.passql.common.exception.constant.ErrorCode;
@@ -36,6 +38,7 @@ public class AdminQuestionController {
     private final QuestionService questionService;
     private final QuestionGenerateService questionGenerateService;
     private final MetaService metaService;
+    private final AdminQuestionDeleteService adminQuestionDeleteService;
 
     @GetMapping
     public String list(Model model,
@@ -131,6 +134,17 @@ public class AdminQuestionController {
         questionService.updateQuestion(uuid, stem, schemaDisplay, schemaDdl, schemaSampleData, schemaIntent,
                 answerSql, hint, difficulty, parseExecutionMode(executionMode), topicUuid, subtopicUuid);
         return "redirect:/admin/questions/" + uuid;
+    }
+
+    @DeleteMapping("/{uuid}")
+    public String delete(@PathVariable UUID uuid, RedirectAttributes redirectAttributes) {
+        try {
+            adminQuestionDeleteService.deleteQuestionCascade(uuid);
+            redirectAttributes.addFlashAttribute("successMessage", "문제가 삭제되었습니다.");
+        } catch (CustomException e) {
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+        return "redirect:/admin/questions";
     }
 
     /**

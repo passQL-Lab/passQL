@@ -7,12 +7,23 @@
 
 <th:block layout:fragment="content">
 
-    <div class="mb-4 flex items-center gap-2">
+    <div class="mb-4 flex items-center gap-2 flex-wrap">
         <a th:href="@{/admin/questions/{uuid}(uuid=${question.questionUuid})}" class="btn btn-sm btn-ghost">
             <i data-lucide="arrow-left" class="size-4"></i>
             상세로
         </a>
         <h2 class="text-lg font-bold">문제 편집</h2>
+        <div class="ml-auto flex gap-2">
+            <button type="button" class="btn btn-sm btn-outline" onclick="document.getElementById('jsonFileInput').click()">
+                <i data-lucide="upload" class="size-4"></i>
+                JSON 파일 불러오기
+            </button>
+            <button type="button" class="btn btn-sm btn-outline" onclick="openJsonPasteModal()">
+                <i data-lucide="clipboard-paste" class="size-4"></i>
+                JSON 붙여넣기
+            </button>
+            <input type="file" id="jsonFileInput" accept=".json" class="hidden" onchange="loadJsonFile(event)"/>
+        </div>
     </div>
 
     <form th:action="@{/admin/questions/{uuid}/edit(uuid=${question.questionUuid})}" method="post" class="space-y-4">
@@ -34,6 +45,7 @@
                             <option th:each="t : ${topics}"
                                     th:value="${t.topicUuid}"
                                     th:text="${t.displayName}"
+                                    th:data-code="${t.code}"
                                     th:selected="${question.topicUuid != null and question.topicUuid == t.topicUuid}">-</option>
                         </select>
                     </div>
@@ -89,38 +101,42 @@
                                   th:text="${question.stem}"></textarea>
                     </div>
 
-                    <div class="form-control">
-                        <label class="label"><span class="label-text font-medium">스키마 표시</span></label>
-                        <textarea name="schemaDisplay" rows="4"
-                                  class="textarea textarea-bordered w-full font-mono text-sm"
-                                  th:text="${question.schemaDisplay}"></textarea>
-                    </div>
+                    <div id="schemaSection">
+                        <div class="space-y-4">
+                            <div class="form-control">
+                                <label class="label"><span class="label-text font-medium">스키마 표시</span></label>
+                                <textarea name="schemaDisplay" rows="4"
+                                          class="textarea textarea-bordered w-full font-mono text-sm"
+                                          th:text="${question.schemaDisplay}"></textarea>
+                            </div>
 
-                    <div class="form-control">
-                        <label class="label"><span class="label-text font-medium">스키마 DDL</span></label>
-                        <textarea name="schemaDdl" rows="6"
-                                  class="textarea textarea-bordered w-full font-mono text-sm"
-                                  th:text="${question.schemaDdl}"></textarea>
-                    </div>
+                            <div class="form-control">
+                                <label class="label"><span class="label-text font-medium">스키마 DDL</span></label>
+                                <textarea name="schemaDdl" rows="6"
+                                          class="textarea textarea-bordered w-full font-mono text-sm"
+                                          th:text="${question.schemaDdl}"></textarea>
+                            </div>
 
-                    <div class="form-control">
-                        <label class="label"><span class="label-text font-medium">샘플 데이터</span></label>
-                        <textarea name="schemaSampleData" rows="3"
-                                  class="textarea textarea-bordered w-full font-mono text-sm"
-                                  th:text="${question.schemaSampleData}"></textarea>
-                    </div>
+                            <div class="form-control">
+                                <label class="label"><span class="label-text font-medium">샘플 데이터</span></label>
+                                <textarea name="schemaSampleData" rows="3"
+                                          class="textarea textarea-bordered w-full font-mono text-sm"
+                                          th:text="${question.schemaSampleData}"></textarea>
+                            </div>
 
-                    <div class="form-control">
-                        <label class="label"><span class="label-text font-medium">스키마 의도</span></label>
-                        <input type="text" name="schemaIntent" class="input input-bordered w-full"
-                               th:value="${question.schemaIntent}"/>
-                    </div>
+                            <div class="form-control">
+                                <label class="label"><span class="label-text font-medium">스키마 의도</span></label>
+                                <input type="text" name="schemaIntent" class="input input-bordered w-full"
+                                       th:value="${question.schemaIntent}"/>
+                            </div>
 
-                    <div class="form-control">
-                        <label class="label"><span class="label-text font-medium">정답 SQL</span></label>
-                        <textarea name="answerSql" rows="3"
-                                  class="textarea textarea-bordered w-full font-mono text-sm"
-                                  th:text="${question.answerSql}"></textarea>
+                            <div class="form-control">
+                                <label class="label"><span class="label-text font-medium">정답 SQL</span></label>
+                                <textarea name="answerSql" rows="3"
+                                          class="textarea textarea-bordered w-full font-mono text-sm"
+                                          th:text="${question.answerSql}"></textarea>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="form-control">
@@ -142,9 +158,42 @@
         </div>
     </form>
 
+    <!-- JSON 붙여넣기 모달 -->
+    <dialog id="jsonPasteModal" class="modal">
+        <div class="modal-box w-11/12 max-w-2xl">
+            <h3 class="font-bold text-lg mb-4">JSON 붙여넣기</h3>
+            <textarea id="jsonPasteArea" rows="12"
+                      class="textarea textarea-bordered w-full font-mono text-sm"
+                      placeholder='{"topicCode":"sql_basic_select","difficulty":3,...}'></textarea>
+            <p id="jsonPasteError" class="text-error text-sm mt-2 hidden"></p>
+            <div class="modal-action">
+                <button class="btn" onclick="document.getElementById('jsonPasteModal').close()">취소</button>
+                <button class="btn btn-primary" onclick="applyJsonFromPaste()">적용</button>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop"><button>close</button></form>
+    </dialog>
+
 </th:block>
 
 <th:block layout:fragment="js">
-    <script>lucide.createIcons();</script>
+<script th:src="@{/js/admin/question-json-loader.js}"></script>
+<script>
+    lucide.createIcons();
+    initQuestionJsonLoader({ confirmOverwrite: true });
+
+    // 실행 모드 전환 시 스키마 섹션 표시/숨김
+    document.querySelectorAll('input[name="executionMode"]').forEach(radio => {
+        radio.addEventListener('change', function () {
+            const schemaSection = document.getElementById('schemaSection');
+            if (!schemaSection) return;
+            if (this.value === 'EXECUTABLE') {
+                schemaSection.classList.remove('hidden');
+            } else {
+                schemaSection.classList.add('hidden');
+            }
+        });
+    });
+</script>
 </th:block>
 </html>
