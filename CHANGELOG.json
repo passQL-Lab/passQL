@@ -1,11 +1,43 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-10T14:02:00Z",
-    "currentVersion": "0.0.45",
+    "lastUpdated": "2026-04-10T15:02:51Z",
+    "currentVersion": "0.0.48",
     "projectType": "basic",
-    "totalReleases": 13
+    "totalReleases": 14
   },
   "releases": [
+    {
+      "version": "0.0.48",
+      "project_type": "basic",
+      "date": "2026-04-10",
+      "pr_number": 82,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **New Features**\n  * AI가 생성한 학습 분석 코멘트 추가\n  * 주제별 학습 통계 및 시각화 개선\n  * 선택지 생성 기능 (스트리밍 지원)\n  * SQL 실행 결과 비교 기능\n\n* **Improvements**\n  * 스키마 뷰어 레이아웃 및 간격 개선\n  * 통계 대시보드 컴포넌트 개선\n\n* **Chores**\n  * 버전 업데이트 (v0.0.48)",
+      "parsed_changes": {
+        "new_features": {
+          "title": "New Features",
+          "items": [
+            "AI가 생성한 학습 분석 코멘트 추가",
+            "주제별 학습 통계 및 시각화 개선",
+            "선택지 생성 기능 (스트리밍 지원)",
+            "SQL 실행 결과 비교 기능"
+          ]
+        },
+        "improvements": {
+          "title": "Improvements",
+          "items": [
+            "스키마 뷰어 레이아웃 및 간격 개선",
+            "통계 대시보드 컴포넌트 개선"
+          ]
+        },
+        "chores": {
+          "title": "Chores",
+          "items": [
+            "버전 업데이트 (v0.0.48)"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.45",
       "project_type": "basic",
