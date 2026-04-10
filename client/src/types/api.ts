@@ -59,6 +59,9 @@ export interface SubmitResult {
   readonly isCorrect: boolean;
   readonly correctKey: string;
   readonly rationale: string;
+  readonly executionMode?: ExecutionMode;
+  readonly selectedResult?: ExecuteResult;
+  readonly correctResult?: ExecuteResult;
 }
 
 export interface ExecuteResult {
