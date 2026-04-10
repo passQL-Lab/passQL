@@ -403,6 +403,18 @@ export function getMockResponse(path: string, method: string, body?: string): un
     } satisfies ExecuteResult;
   }
 
+  // POST /questions/:uuid/generate-choices
+  if (method === "POST" && path.includes("/generate-choices")) {
+    const questionUuid = path.split("/")[2];
+    const matchedQuestion = MOCK_QUESTIONS.find((q) => q.questionUuid === questionUuid);
+    const detail = { ...MOCK_QUESTION_DETAIL, questionUuid };
+    const items = detail.choiceSets[0]?.items ?? [];
+    return {
+      choiceSetId: matchedQuestion ? `mock-cs-${questionUuid}` : "mock-cs-default",
+      choices: items.map(({ key, kind, body, sortOrder }) => ({ key, kind, body, sortOrder })),
+    };
+  }
+
   // POST /questions/:uuid/submit
   if (method === "POST" && path.includes("/submit")) {
     const parsed = body ? JSON.parse(body) : {};
@@ -414,22 +426,30 @@ export function getMockResponse(path: string, method: string, body?: string): un
     const matchedQuestion = MOCK_QUESTIONS.find((q) => q.questionUuid === questionUuid);
     const executionMode = matchedQuestion?.executionMode ?? "CONCEPT_ONLY";
 
-    const baseResult = {
-      isCorrect,
-      correctKey: "A",
-      rationale: "CUSTOMER와 ORDERS를 customer_id로 JOIN한 후 c.name으로 GROUP BY하면 고객별 주문 수를 정확히 구할 수 있습니다.",
-      executionMode,
-    };
-
     if (executionMode === "EXECUTABLE") {
       return {
-        ...baseResult,
+        isCorrect,
+        correctKey: "A",
+        rationale: "CUSTOMER와 ORDERS를 customer_id로 JOIN한 후 c.name으로 GROUP BY하면 고객별 주문 수를 정확히 구할 수 있습니다.",
+        selectedSql: isCorrect
+          ? "SELECT c.name, COUNT(*) AS cnt FROM CUSTOMER c JOIN ORDERS o ON c.customer_id = o.customer_id GROUP BY c.name"
+          : "SELECT c.name, COUNT(*) AS cnt FROM CUSTOMER c JOIN ORDERS o ON c.cust_id = o.cust_id GROUP BY c.name",
+        correctSql: "SELECT c.name, COUNT(*) AS cnt FROM CUSTOMER c JOIN ORDERS o ON c.customer_id = o.customer_id GROUP BY c.name",
         selectedResult: isCorrect ? MOCK_CORRECT_EXECUTE_RESULT : MOCK_WRONG_EXECUTE_RESULT,
         correctResult: MOCK_CORRECT_EXECUTE_RESULT,
       } satisfies SubmitResult;
     }
 
-    return baseResult satisfies SubmitResult;
+    // CONCEPT_ONLY: SQL 실행 없이 정답 판별만 반환
+    return {
+      isCorrect,
+      correctKey: "A",
+      rationale: "CUSTOMER와 ORDERS를 customer_id로 JOIN한 후 c.name으로 GROUP BY하면 고객별 주문 수를 정확히 구할 수 있습니다.",
+      selectedResult: null,
+      correctResult: null,
+      selectedSql: null,
+      correctSql: null,
+    } satisfies SubmitResult;
   }
 
   // GET /progress/categories (specific before /progress)
