@@ -77,6 +77,7 @@ export default function Stats3DChart({
 
     // Bars
     const bars: THREE.Mesh[] = [];
+    const labels: THREE.Sprite[] = [];
     const cols = Math.min(categories.length, 3);
     const rows = Math.ceil(categories.length / cols);
     const spacing = 2.2;
@@ -104,22 +105,30 @@ export default function Stats3DChart({
       scene.add(mesh);
       bars.push(mesh);
 
-      // Name label
+      // Top label: name + rate (always visible)
       const canvas2d = document.createElement("canvas");
       canvas2d.width = 256;
-      canvas2d.height = 64;
+      canvas2d.height = 128;
       const ctx = canvas2d.getContext("2d")!;
-      ctx.fillStyle = "#6B7280";
-      ctx.font = "bold 26px sans-serif";
       ctx.textAlign = "center";
-      ctx.fillText(cat.displayName, 128, 40);
+      // Category name
+      ctx.fillStyle = "#111827";
+      ctx.font = "bold 26px sans-serif";
+      ctx.fillText(cat.displayName, 128, 48);
+      // Rate percentage
+      ctx.fillStyle = getColorHex(cat.correctRate);
+      ctx.font = "bold 30px sans-serif";
+      ctx.fillText(`${Math.round(cat.correctRate * 100)}%`, 128, 90);
+
       const texture = new THREE.CanvasTexture(canvas2d);
       const sprite = new THREE.Sprite(
         new THREE.SpriteMaterial({ map: texture }),
       );
-      sprite.position.set(x, -0.5, z);
-      sprite.scale.set(2, 0.5, 1);
+      sprite.position.set(x, height + 0.6, z);
+      sprite.scale.set(2, 1, 1);
+      sprite.userData = { isLabel: true, barIndex: i };
       scene.add(sprite);
+      labels.push(sprite);
     });
 
     // Camera
@@ -249,11 +258,14 @@ export default function Stats3DChart({
       if (progress < 1) {
         progress = Math.min(1, progress + 0.015);
         const eased = 1 - Math.pow(1 - progress, 3);
-        bars.forEach((bar) => {
+        bars.forEach((bar, idx) => {
           const h =
             (bar.userData as { targetHeight: number }).targetHeight * eased;
           bar.scale.y = eased;
           bar.position.y = h / 2;
+          if (labels[idx]) {
+            labels[idx].position.y = h + 0.6;
+          }
         });
       }
       renderer.render(scene, camera);
