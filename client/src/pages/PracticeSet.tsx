@@ -1,9 +1,12 @@
-import { useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useParams, useNavigate, Navigate } from "react-router-dom";
 import { Home } from "lucide-react";
 import { usePracticeStore } from "../stores/practiceStore";
+import { submitAnswer } from "../api/questions";
 import { getRandomMessage } from "../constants/microcopy";
 import QuestionDetail from "./QuestionDetail";
+import PracticeFeedbackBar from "../components/PracticeFeedbackBar";
+import type { SubmitResult } from "../types/api";
 
 function WaitingForQuestion({ topicName }: { readonly topicName: string }) {
   return (
@@ -25,26 +28,45 @@ export default function PracticeSet() {
   const topicName = usePracticeStore((s) => s.topicName);
   const submitAndAdvance = usePracticeStore((s) => s.submitAndAdvance);
 
-  const question = questions[currentIndex];
-  const totalQuestions = 10;
-  const isLast = currentIndex === totalQuestions - 1;
+  const [feedback, setFeedback] = useState<SubmitResult | null>(null);
+
+  const totalQuestions = questions.length;
+  const displayIndex = feedback ? currentIndex - 1 : currentIndex;
+  const displayQuestion = questions[displayIndex];
+  const isLast = displayIndex >= totalQuestions - 1;
 
   const handleSelect = useCallback(
-    (selectedChoiceKey: string) => {
-      if (!question) return;
-      // mock 정답 키는 "A" — 실제 API 연동 시 백엔드가 판별
-      const isCorrect = selectedChoiceKey === "A";
-      submitAndAdvance(question.questionUuid, isCorrect, selectedChoiceKey);
+    async (selectedChoiceKey: string) => {
+      if (!displayQuestion) return;
+      try {
+        const result = await submitAnswer(displayQuestion.questionUuid, selectedChoiceKey);
+        setFeedback(result);
+        submitAndAdvance(displayQuestion.questionUuid, result.isCorrect, selectedChoiceKey);
+      } catch {
+        const fallback: SubmitResult = { isCorrect: false, correctKey: "?", rationale: "" };
+        setFeedback(fallback);
+        submitAndAdvance(displayQuestion.questionUuid, false, selectedChoiceKey);
+      }
     },
-    [question, submitAndAdvance],
+    [displayQuestion, submitAndAdvance],
   );
+
+  const handleNext = useCallback(() => {
+    setFeedback(null);
+  }, []);
 
   if (!storeSessionId || storeSessionId !== sessionId) {
     return <Navigate to="/questions" replace />;
   }
 
-  if (currentIndex >= totalQuestions) {
-    navigate(`/practice/${sessionId}/result`, { replace: true });
+  const shouldNavigateToResult = !feedback && currentIndex >= totalQuestions;
+  useEffect(() => {
+    if (shouldNavigateToResult) {
+      navigate(`/practice/${sessionId}/result`, { replace: true });
+    }
+  }, [shouldNavigateToResult, navigate, sessionId]);
+
+  if (shouldNavigateToResult) {
     return null;
   }
 
@@ -62,7 +84,7 @@ export default function PracticeSet() {
             </button>
           </div>
           <span className="text-sm font-semibold text-text-secondary text-center">
-            {currentIndex + 1} / {totalQuestions}
+            {displayIndex + 1} / {totalQuestions}
           </span>
           <div className="justify-self-end">
             <span className="badge-topic">{topicName}</span>
@@ -71,16 +93,16 @@ export default function PracticeSet() {
         <div className="w-full h-1.5 bg-border rounded-full overflow-hidden">
           <div
             className="h-full bg-brand rounded-full transition-all duration-300"
-            style={{ width: `${((currentIndex + 1) / totalQuestions) * 100}%` }}
+            style={{ width: `${((displayIndex + 1) / totalQuestions) * 100}%` }}
           />
         </div>
       </div>
 
-      {question ? (
-        <div className="flex-1 overflow-y-auto px-4">
+      {displayQuestion ? (
+        <div className={`flex-1 overflow-y-auto px-4 ${feedback ? "pointer-events-none opacity-60" : ""}`}>
           <QuestionDetail
-            key={question.questionUuid}
-            questionUuid={question.questionUuid}
+            key={displayQuestion.questionUuid}
+            questionUuid={displayQuestion.questionUuid}
             practiceMode
             practiceSubmitLabel={isLast ? "결과 보기" : "다음 문제"}
             onPracticeSubmit={handleSelect}
@@ -88,6 +110,14 @@ export default function PracticeSet() {
         </div>
       ) : (
         <WaitingForQuestion topicName={topicName ?? ""} />
+      )}
+
+      {feedback && (
+        <PracticeFeedbackBar
+          result={feedback}
+          onNext={handleNext}
+          nextLabel={currentIndex >= totalQuestions ? "결과 보기" : "다음 문제"}
+        />
       )}
     </div>
   );

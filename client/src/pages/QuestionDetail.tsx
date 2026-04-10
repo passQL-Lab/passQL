@@ -138,24 +138,38 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
         )}
       </button>
       {schemaOpen && (
-        <pre className="code-block mt-2">
-          <code>{question.schemaDisplay}</code>
-        </pre>
+        <div className="mt-2 space-y-3">
+          {question.schemaIntent && (
+            <p className="text-sm text-text-secondary">{question.schemaIntent}</p>
+          )}
+          <pre className="code-block">
+            <code>{question.schemaDisplay}</code>
+          </pre>
+          {question.schemaDdl && (
+            <div>
+              <p className="text-xs text-text-caption mb-1">DDL</p>
+              <pre className="code-block">
+                <code>{question.schemaDdl}</code>
+              </pre>
+            </div>
+          )}
+          {question.schemaSampleData && (
+            <div>
+              <p className="text-xs text-text-caption mb-1">샘플 데이터</p>
+              <pre className="code-block">
+                <code>{question.schemaSampleData}</code>
+              </pre>
+            </div>
+          )}
+        </div>
       )}
     </section>
   ) : null;
 
   const choicesSection = choices.length === 0 ? (
-    <div className="mt-4 space-y-3">
-      {Array.from({ length: 4 }, (_, i) => (
-        <div key={i} className="card-base space-y-2">
-          <div className="flex items-center gap-3">
-            <div className="w-5 h-5 rounded-full bg-border animate-pulse" />
-            <div className="w-4 h-4 rounded bg-border animate-pulse" />
-          </div>
-          <div className="h-16 rounded-lg bg-border animate-pulse" />
-        </div>
-      ))}
+    <div className="mt-4 card-base text-center py-8">
+      <p className="text-text-caption">선택지가 아직 준비되지 않았어요</p>
+      <p className="text-xs text-text-caption mt-1">잠시 후 다시 시도해주세요</p>
     </div>
   ) : (
     <section className="mt-4 space-y-3">

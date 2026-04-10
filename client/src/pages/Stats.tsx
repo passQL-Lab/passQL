@@ -19,10 +19,8 @@ export default function Stats() {
     staleTime: 1000 * 60 * 5,
   });
 
-  // 최근 7일 정답 수 (임시: solvedCount 기반, 추후 백엔드 API 교체)
-  const recentCorrect = Math.round(
-    (progress?.solvedCount ?? 0) * (progress?.correctRate ?? 0),
-  );
+  const readiness = progress?.readiness;
+  const readinessPercent = readiness ? Math.round(readiness.score * 100) : null;
 
   if (progressLoading) {
     return (
@@ -49,9 +47,15 @@ export default function Stats() {
 
       <div className="card-base flex items-center divide-x divide-border">
         {[
-          { value: progress?.solvedCount ?? 0, label: "푼 문제" },
-          { value: recentCorrect, label: "최근 7일 정답" },
-          { value: progress?.streakDays ?? 0, label: "연속 학습" },
+          { value: `${progress?.solvedCount ?? 0}문제`, label: "푼 문제" },
+          {
+            value:
+              readinessPercent != null
+                ? `${readinessPercent}%`
+                : `${Math.round((progress?.correctRate ?? 0) * 100)}%`,
+            label: readinessPercent != null ? "합격 준비도" : "정답률",
+          },
+          { value: `${progress?.streakDays ?? 0}일`, label: "연속 학습" },
         ].map((m) => (
           <div key={m.label} className="flex-1 text-center py-2">
             <p className="text-h1 text-text-primary">{m.value}</p>

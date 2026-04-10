@@ -1,4 +1,5 @@
 import { Flame, ChevronRight } from "lucide-react";
+import { getReadinessCopy } from "../constants/readinessCopy";
 import { Link } from "react-router-dom";
 import { useProgress } from "../hooks/useProgress";
 import { useMember } from "../hooks/useMember";
@@ -45,9 +46,20 @@ export default function Home() {
     <div className="py-6 space-y-0">
       <section className="mb-6">
         <h1 className="text-h2">
-          {greeting?.message ?? `안녕하세요, ${displayName}`}
+          {greeting
+            ? greeting.message.replace("{nickname}", greeting.nickname)
+            : `안녕하세요, ${displayName}`}
         </h1>
-        <p className="text-secondary mt-1">{displayName}</p>
+        {greeting?.messageType === "EXAM_DAY" && (
+          <p className="text-sm font-medium mt-1" style={{ color: "var(--color-sem-error-text)" }}>
+            오늘 시험이에요!
+          </p>
+        )}
+        {greeting?.messageType === "URGENT" && (
+          <p className="text-sm font-medium mt-1" style={{ color: "var(--color-sem-warning-text)" }}>
+            시험이 얼마 남지 않았어요
+          </p>
+        )}
       </section>
 
       <section className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
@@ -109,19 +121,44 @@ export default function Home() {
         )}
       </section>
 
-      <section className="grid grid-cols-2 gap-3">
-        <div className="card-base flex flex-col items-start">
-          <span className="text-h1 text-brand">{solved}</span>
-          <span className="text-secondary mt-1">푼 문제</span>
-        </div>
-        <div className="card-base flex flex-col items-start">
-          <span className="text-h1 text-brand">{Math.round(correctRate * 100)}%</span>
-          <span className="text-secondary mt-1">정답률</span>
-          <div className="w-full mt-2 h-1 rounded-full bg-border">
-            <div className="h-full rounded-full bg-brand" style={{ width: `${correctRate * 100}%` }} />
+      {progress?.readiness ? (
+        <section className="card-base mb-4">
+          <div className="flex items-center justify-between mb-2">
+            <h2 className="text-secondary text-sm">합격 준비도</h2>
+            <span className="text-h1 text-brand">
+              {Math.round(progress.readiness.score * 100)}%
+            </span>
           </div>
-        </div>
-      </section>
+          <div className="w-full h-2 rounded-full bg-border mb-3">
+            <div
+              className="h-full rounded-full bg-brand transition-all"
+              style={{ width: `${progress.readiness.score * 100}%` }}
+            />
+          </div>
+          <p className="text-sm text-text-secondary">
+            {getReadinessCopy(progress.readiness.toneKey, progress.readiness.score)}
+          </p>
+          <div className="flex gap-4 mt-3 text-xs text-text-caption">
+            <span>정확도 {Math.round(progress.readiness.accuracy * 100)}%</span>
+            <span>커버리지 {Math.round(progress.readiness.coverage * 100)}%</span>
+            <span>최근도 {Math.round(progress.readiness.recency * 100)}%</span>
+          </div>
+        </section>
+      ) : (
+        <section className="grid grid-cols-2 gap-3 mb-4">
+          <div className="card-base flex flex-col items-start">
+            <span className="text-h1 text-brand">{solved}</span>
+            <span className="text-secondary mt-1">푼 문제</span>
+          </div>
+          <div className="card-base flex flex-col items-start">
+            <span className="text-h1 text-brand">{Math.round(correctRate * 100)}%</span>
+            <span className="text-secondary mt-1">정답률</span>
+            <div className="w-full mt-2 h-1 rounded-full bg-border">
+              <div className="h-full rounded-full bg-brand" style={{ width: `${correctRate * 100}%` }} />
+            </div>
+          </div>
+        </section>
+      )}
 
       {recommendations && recommendations.questions.length > 0 && (
         <section className="mt-6">
