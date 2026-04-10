@@ -37,7 +37,8 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
   const [aiSheetOpen, setAiSheetOpen] = useState(false);
   const [aiText, setAiText] = useState("");
 
-  const choices = question?.choices ?? [];
+  const activeChoiceSet = question?.choiceSets?.find((cs) => cs.status === "OK");
+  const choices = activeChoiceSet?.items ?? [];
 
   const explainMutation = useMutation({
     mutationFn: explainError,
