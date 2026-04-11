@@ -110,7 +110,7 @@ export default function Home() {
           ) : (
             // 미완료 상태: 데일리 챌린지 페이지로 이동
             <Link to="/daily-challenge" className="block">
-              <div className="card-base h-full flex flex-col gap-2 cursor-pointer hover:bg-surface transition-colors">
+              <div className="card-base shadow-sm h-full flex flex-col gap-2 cursor-pointer hover:bg-surface transition-colors">
                 <p className="text-secondary text-sm">오늘의 문제</p>
                 <p className="text-body text-sm truncate">
                   {today.question.stemPreview}
@@ -126,7 +126,7 @@ export default function Home() {
           )
         ) : (
           <Link to="/questions" className="block">
-            <div className="card-base h-full flex flex-col justify-center cursor-pointer hover:bg-surface transition-colors">
+            <div className="card-base shadow-sm h-full flex flex-col justify-center cursor-pointer hover:bg-surface transition-colors">
               <p className="text-secondary text-sm">문제 풀기</p>
               <p className="text-body text-sm">SQL 문제를 풀어보세요</p>
             </div>
@@ -134,21 +134,21 @@ export default function Home() {
         )}
 
         {schedule ? (
-          <div className="card-base h-full flex flex-col justify-center">
+          <div className="card-base shadow-sm h-full flex flex-col justify-center">
             <p className="text-secondary text-sm">
               {schedule.certType} {schedule.round}회
             </p>
             <p className="text-h2 text-brand mt-1">{schedule.examDate}</p>
           </div>
         ) : (
-          <div className="card-base h-full flex flex-col justify-center">
+          <div className="card-base shadow-sm h-full flex flex-col justify-center">
             <p className="text-secondary text-sm">시험 일정</p>
             <p className="text-caption">선택된 일정 없음</p>
           </div>
         )}
       </section>
 
-      <section className="card-base mb-4">
+      <section className="card-base shadow-sm mb-4">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-secondary text-sm">학습 현황</h2>
           {streak > 0 && (
@@ -173,7 +173,7 @@ export default function Home() {
       </section>
 
       {progress?.readiness ? (
-        <section className="card-base mb-4">
+        <section className="card-base shadow-sm mb-4">
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-secondary text-sm">합격 준비도</h2>
             <span className="text-h1 text-brand">
@@ -202,11 +202,11 @@ export default function Home() {
         </section>
       ) : (
         <section className="grid grid-cols-2 gap-3 mb-4">
-          <div className="card-base flex flex-col items-start">
+          <div className="card-base shadow-sm flex flex-col items-start">
             <span className="text-h1 text-brand">{solved}</span>
             <span className="text-secondary mt-1">푼 문제</span>
           </div>
-          <div className="card-base flex flex-col items-start">
+          <div className="card-base shadow-sm flex flex-col items-start">
             <span className="text-h1 text-brand">
               {Math.round(correctRate * 100)}%
             </span>
@@ -227,7 +227,7 @@ export default function Home() {
           <div className="space-y-2">
             {recommendations.questions.map((q) => (
               <Link key={q.questionUuid} to={`/questions/${q.questionUuid}`}>
-                <div className="card-base flex items-center gap-3 cursor-pointer hover:bg-surface transition-colors">
+                <div className="card-base shadow-sm flex items-center gap-3 cursor-pointer hover:bg-surface transition-colors">
                   <div className="flex-1 min-w-0">
                     <p className="text-body truncate">{q.stemPreview}</p>
                     <div className="flex items-center gap-2 mt-1">
