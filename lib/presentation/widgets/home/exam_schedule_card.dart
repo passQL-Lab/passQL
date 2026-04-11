@@ -11,19 +11,16 @@ class ExamScheduleCard extends StatelessWidget {
   final ExamScheduleResponse? schedule;
   final VoidCallback? onTap;
 
-  const ExamScheduleCard({
-    super.key,
-    this.schedule,
-    this.onTap,
-  });
+  const ExamScheduleCard({super.key, this.schedule, this.onTap});
 
   /// examDate(YYYY-MM-DD) → D-day 문자열.
   String _dday(String examDate) {
     try {
       final exam = DateTime.parse(examDate);
       final today = DateTime.now();
-      final diff =
-          exam.difference(DateTime(today.year, today.month, today.day)).inDays;
+      final diff = exam
+          .difference(DateTime(today.year, today.month, today.day))
+          .inDays;
       if (diff == 0) return 'D-Day';
       if (diff > 0) return 'D-$diff';
       return 'D+${diff.abs()}';
@@ -82,14 +79,14 @@ class ExamScheduleCard extends StatelessWidget {
                   color: AppColors.brandIndigo,
                 ),
               ),
-              SizedBox(height: 4.h),
+              SizedBox(height: 8.h),
               Text(
                 '${schedule!.certType} ${schedule!.round}회',
                 style: AppTextStyles.paragraph14Semibold.copyWith(
                   color: AppColors.textPrimary,
                 ),
               ),
-              SizedBox(height: 2.h),
+              SizedBox(height: 4.h),
               Text(
                 _formatDate(schedule!.examDate),
                 style: AppTextStyles.tag_12.copyWith(

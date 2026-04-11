@@ -11,11 +11,7 @@ class HeatmapWidget extends StatelessWidget {
   final HeatmapResponse? heatmap;
   final int streakDays;
 
-  const HeatmapWidget({
-    super.key,
-    this.heatmap,
-    this.streakDays = 0,
-  });
+  const HeatmapWidget({super.key, this.heatmap, this.streakDays = 0});
 
   /// 날짜 문자열 키로 빠른 조회를 위한 Map 생성.
   Map<String, HeatmapEntry> _buildEntryMap() {
@@ -72,8 +68,10 @@ class HeatmapWidget extends StatelessWidget {
               if (streakDays > 0) ...[
                 const Spacer(),
                 Container(
-                  padding:
-                      EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 10.w,
+                    vertical: 4.h,
+                  ),
                   decoration: BoxDecoration(
                     color: AppColors.warningLight,
                     borderRadius: BorderRadius.circular(999),
@@ -170,7 +168,6 @@ class HeatmapWidget extends StatelessWidget {
                             child: Text(
                               '${date.day}',
                               style: AppTextStyles.tag_10.copyWith(
-                                fontSize: 8.sp,
                                 color: isDeep
                                     ? Colors.white
                                     : AppColors.textCaption,
