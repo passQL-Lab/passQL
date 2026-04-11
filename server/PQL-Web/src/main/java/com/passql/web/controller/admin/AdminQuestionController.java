@@ -93,12 +93,27 @@ public class AdminQuestionController {
             @RequestParam(required = false) String choiceSetPolicy
     ) {
         ChoiceSetPolicy policy = parseChoiceSetPolicy(choiceSetPolicy);
+        ExecutionMode mode = parseExecutionMode(executionMode);
+
+        // 1:1 치환 가능한 Oracle 문법을 MariaDB 호환으로 변환 (NVL→IFNULL, SYSDATE→NOW())
+        String savedDdl       = importExportService.translateOracleToMariaDb(schemaDdl);
+        String savedSample    = importExportService.translateOracleToMariaDb(schemaSampleData);
+        String savedAnswerSql = importExportService.translateOracleToMariaDb(answerSql);
+
+        // 치환 후에도 Oracle 전용 문법이 남아있으면 CONCEPT_ONLY로 자동 전환
+        if (mode == ExecutionMode.EXECUTABLE) {
+            String oracleKeyword = importExportService.detectOracleOnlySyntax(savedAnswerSql, savedDdl, savedSample, stem);
+            if (oracleKeyword != null) {
+                log.info("[register] Oracle 전용 문법 감지 → CONCEPT_ONLY 자동 전환: keyword={}", oracleKeyword);
+                mode = ExecutionMode.CONCEPT_ONLY;
+            }
+        }
 
         Question question = questionGenerateService.createQuestionOnly(
                 topicUuid, subtopicUuid, difficulty,
-                parseExecutionMode(executionMode),
-                stem, schemaDdl, schemaSampleData, schemaIntent,
-                answerSql, hint, policy);
+                mode,
+                stem, savedDdl, savedSample, schemaIntent,
+                savedAnswerSql, hint, policy);
 
         return "redirect:/admin/questions/" + question.getQuestionUuid();
     }

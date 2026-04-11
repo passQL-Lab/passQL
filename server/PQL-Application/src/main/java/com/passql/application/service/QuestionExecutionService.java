@@ -10,6 +10,7 @@ import com.passql.question.entity.QuestionChoice;
 import com.passql.question.repository.QuestionChoiceRepository;
 import com.passql.question.service.QuestionService;
 import com.passql.question.service.SandboxExecutor;
+import com.passql.question.service.SandboxPool;
 import com.passql.question.service.SqlSafetyValidator;
 import com.passql.submission.service.SubmissionService;
 import lombok.RequiredArgsConstructor;
@@ -27,25 +28,46 @@ public class QuestionExecutionService {
     private final QuestionService questionService;
     private final SqlSafetyValidator sqlSafetyValidator;
     private final SandboxExecutor sandboxExecutor;
+    private final SandboxPool sandboxPool;
     private final SubmissionService submissionService;
     private final QuestionChoiceRepository questionChoiceRepository;
 
     /**
      * 선택지 SQL 실행 (자유 SQL 실행에도 재사용).
-     * EXECUTABLE 문제만 허용; sandboxDbName이 없으면 에러.
+     * EXECUTABLE 문제만 허용.
+     * <p>
+     * sandboxDbName이 있으면 해당 영구 DB에서 직접 실행.
+     * sandboxDbName이 없으면 SandboxPool에서 임시 DB를 생성 → DDL+샘플데이터 적용 → 실행 → drop.
+     * (레거시 문제 또는 sandbox_db_name 미설정 문제 모두 이 경로로 동작)
      */
     public ExecuteResult executeChoice(UUID questionUuid, String sql) {
         Question question = questionService.getQuestionEntity(questionUuid);
         if (question.getExecutionMode() != ExecutionMode.EXECUTABLE) {
             throw new CustomException(ErrorCode.INVALID_EXECUTION_MODE);
         }
-        String dbName = question.getSandboxDbName();
-        // sandboxDbName이 없는 레거시 문제는 questionUuid 문자열을 DB명으로 폴백
-        if (dbName == null || dbName.isBlank()) {
-            dbName = questionUuid.toString();
-        }
         sqlSafetyValidator.validate(sql);
-        return sandboxExecutor.execute(dbName, sql);
+
+        String dbName = question.getSandboxDbName();
+
+        if (dbName != null && !dbName.isBlank()) {
+            // 영구 sandbox DB가 지정된 경우 — 그대로 실행
+            return sandboxExecutor.execute(dbName, sql);
+        }
+
+        // sandbox_db_name 미설정: 임시 DB 생성 → DDL 적용 → 실행 → drop
+        String tempDb = sandboxPool.acquire();
+        try {
+            String setupSql = question.getSchemaDdl() != null ? question.getSchemaDdl() : "";
+            if (question.getSchemaSampleData() != null && !question.getSchemaSampleData().isBlank()) {
+                setupSql = setupSql + ";\n" + question.getSchemaSampleData();
+            }
+            if (!setupSql.isBlank()) {
+                sandboxExecutor.applyDdl(tempDb, setupSql);
+            }
+            return sandboxExecutor.execute(tempDb, sql);
+        } finally {
+            sandboxPool.release(tempDb);
+        }
     }
 
     /**

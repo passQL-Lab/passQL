@@ -1,11 +1,99 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-11T02:38:25Z",
-    "currentVersion": "0.0.56",
+    "lastUpdated": "2026-04-11T09:47:12Z",
+    "currentVersion": "0.0.61",
     "projectType": "basic",
-    "totalReleases": 20
+    "totalReleases": 23
   },
   "releases": [
+    {
+      "version": "0.0.61",
+      "project_type": "basic",
+      "date": "2026-04-11",
+      "pr_number": 105,
+      "raw_summary": "## Summary by CodeRabbit\n\n# 릴리스 노트 v0.0.61\n\n* **개선사항**\n  * 문제 선택지 생성 프롬프트 강화: AI가 순수 SQL SELECT 쿼리만 생성하도록 엄격히 개선\n  * 선택지 검증 강화: SQL 형식 사전 확인으로 유효하지 않은 선택지 자동 필터링\n  * 내부 이벤트 처리 안정성 개선\n\n* **Chores**\n  * 버전 v0.0.61로 업데이트",
+      "parsed_changes": {
+        "개선사항": {
+          "title": "개선사항",
+          "items": [
+            "문제 선택지 생성 프롬프트 강화: AI가 순수 SQL SELECT 쿼리만 생성하도록 엄격히 개선",
+            "선택지 검증 강화: SQL 형식 사전 확인으로 유효하지 않은 선택지 자동 필터링",
+            "내부 이벤트 처리 안정성 개선"
+          ]
+        },
+        "chores": {
+          "title": "Chores",
+          "items": [
+            "버전 v0.0.61로 업데이트"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
+    {
+      "version": "0.0.60",
+      "project_type": "basic",
+      "date": "2026-04-11",
+      "pr_number": 102,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새로운 기능**\n  * Oracle SQL 호환성 개선: Oracle 문법(NVL, SYSDATE)을 자동으로 MariaDB 호환 형식으로 변환합니다.\n  * 검증 실패 시 자동 폴백: 변환 후에도 Oracle 전용 문법이 감지되면 실행 모드를 자동으로 CONCEPT_ONLY로 다운그레이드합니다.\n\n* **문서 개선**\n  * 문제 등록 및 일괄 import 가이드를 명확하게 재작성했습니다.\n  * stem 작성 규칙 및 EXECUTABLE 문제 작성 가이드가 개선되었습니다.\n\n* **Chores**\n  * 버전 업데이트: v0.0.58 → v0.0.60",
+      "parsed_changes": {
+        "새로운_기능": {
+          "title": "새로운 기능",
+          "items": [
+            "Oracle SQL 호환성 개선: Oracle 문법(NVL, SYSDATE)을 자동으로 MariaDB 호환 형식으로 변환합니다.",
+            "검증 실패 시 자동 폴백: 변환 후에도 Oracle 전용 문법이 감지되면 실행 모드를 자동으로 CONCEPT_ONLY로 다운그레이드합니다."
+          ]
+        },
+        "문서_개선": {
+          "title": "문서 개선",
+          "items": [
+            "문제 등록 및 일괄 import 가이드를 명확하게 재작성했습니다.",
+            "stem 작성 규칙 및 EXECUTABLE 문제 작성 가이드가 개선되었습니다."
+          ]
+        },
+        "chores": {
+          "title": "Chores",
+          "items": [
+            "버전 업데이트: v0.0.58 → v0.0.60"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
+    {
+      "version": "0.0.58",
+      "project_type": "basic",
+      "date": "2026-04-11",
+      "pr_number": 99,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새로운 기능**\n  * 관리자 대시보드 추가: 질문 통계, 회원 통계, 오늘 제출 현황, AI 선택지 생성 호출 수, 24시간 에러율 표시\n  * 질문 대량 삭제 기능\n  * JSON 붙여넣기를 통한 질문 대량 가져오기\n  * 루트 URL을 관리자 대시보드로 자동 리다이렉트\n\n* **UI/UX 개선**\n  * 관리자 사이드바 네비게이션 업데이트 및 Swagger API 문서 링크 추가\n  * 관리자 질문 페이지 작업 버튼 통합 (JSON 드롭다운 추가)\n  * 대시보드 레이아웃 개선: 토픽별 문제 통계, 빠른 링크 추가\n  * 에러율 표시 기간을 24시간으로 명확화\n\n* **버그 수정**\n  * 질문 상세 페이지의 빈 상태 처리 단순화",
+      "parsed_changes": {
+        "새로운_기능": {
+          "title": "새로운 기능",
+          "items": [
+            "관리자 대시보드 추가: 질문 통계, 회원 통계, 오늘 제출 현황, AI 선택지 생성 호출 수, 24시간 에러율 표시",
+            "질문 대량 삭제 기능",
+            "JSON 붙여넣기를 통한 질문 대량 가져오기",
+            "루트 URL을 관리자 대시보드로 자동 리다이렉트"
+          ]
+        },
+        "ui_ux_개선": {
+          "title": "UI/UX 개선",
+          "items": [
+            "관리자 사이드바 네비게이션 업데이트 및 Swagger API 문서 링크 추가",
+            "관리자 질문 페이지 작업 버튼 통합 (JSON 드롭다운 추가)",
+            "대시보드 레이아웃 개선: 토픽별 문제 통계, 빠른 링크 추가",
+            "에러율 표시 기간을 24시간으로 명확화"
+          ]
+        },
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "질문 상세 페이지의 빈 상태 처리 단순화"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.56",
       "project_type": "basic",

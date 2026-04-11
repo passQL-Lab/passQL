@@ -179,6 +179,97 @@ function openImportFileDialog() {
     document.getElementById('importFileInput').click();
 }
 
+// ── JSON 붙여넣기 ────────────────────────────────────────────────
+
+/**
+ * JSON 붙여넣기 모달을 열고 textarea를 초기화한다.
+ */
+function openBulkPasteModal() {
+    const area = document.getElementById('bulkPasteArea');
+    const errEl = document.getElementById('bulkPasteError');
+    if (area) area.value = '';
+    if (errEl) { errEl.textContent = ''; errEl.classList.add('hidden'); }
+    document.getElementById('bulkPasteModal').showModal();
+}
+
+/**
+ * 붙여넣기 textarea의 내용을 파싱하여 기존 handleImportFile과 동일한
+ * 검증 플로우(importValidationModal)로 연결한다.
+ */
+async function applyBulkFromPaste() {
+    const area = document.getElementById('bulkPasteArea');
+    const errEl = document.getElementById('bulkPasteError');
+
+    const text = area ? area.value.trim() : '';
+    if (!text) {
+        showBulkPasteError('JSON을 입력해주세요.');
+        return;
+    }
+
+    let items;
+    try {
+        items = JSON.parse(text);
+    } catch (e) {
+        showBulkPasteError('JSON 파싱 오류: ' + e.message);
+        return;
+    }
+
+    if (!Array.isArray(items)) {
+        showBulkPasteError('JSON은 배열 형태여야 합니다. 예: [{...}, {...}]');
+        return;
+    }
+
+    if (items.length === 0) {
+        showBulkPasteError('빈 배열입니다.');
+        return;
+    }
+
+    if (items.length > 100) {
+        showBulkPasteError('한 번에 최대 100건까지 가져올 수 있습니다. (현재: ' + items.length + '건)');
+        return;
+    }
+
+    // 붙여넣기 모달을 닫고 검증 모달로 이동
+    document.getElementById('bulkPasteModal').close();
+    _importOriginalItems = items;
+
+    const modal = document.getElementById('importValidationModal');
+    const body = document.getElementById('importModalBody');
+    const actions = document.getElementById('importModalActions');
+
+    body.innerHTML = '<div class="flex justify-center py-12"><span class="loading loading-spinner loading-lg"></span><span class="ml-3">Sandbox 검증 중... (' + items.length + '건)</span></div>';
+    actions.innerHTML = '<button class="btn btn-ghost btn-sm" onclick="document.getElementById(\'importValidationModal\').close()">취소</button>';
+    modal.showModal();
+
+    try {
+        const resp = await fetch('/admin/questions/import/validate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(items)
+        });
+        if (!resp.ok) {
+            const err = await resp.json().catch(() => ({}));
+            body.innerHTML = '<div class="alert alert-error">' + escapeHtml(err.message || '검증 실패') + '</div>';
+            return;
+        }
+        _importValidationResult = await resp.json();
+        renderValidationModal(_importValidationResult);
+    } catch (e) {
+        body.innerHTML = '<div class="alert alert-error">검증 요청 오류: ' + escapeHtml(e.message) + '</div>';
+    }
+}
+
+/**
+ * 붙여넣기 모달의 에러 메시지를 표시한다.
+ */
+function showBulkPasteError(msg) {
+    const errEl = document.getElementById('bulkPasteError');
+    if (errEl) {
+        errEl.textContent = msg;
+        errEl.classList.remove('hidden');
+    }
+}
+
 async function handleImportFile(event) {
     const file = event.target.files[0];
     if (!file) return;
