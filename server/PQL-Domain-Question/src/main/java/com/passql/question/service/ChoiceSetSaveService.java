@@ -185,6 +185,52 @@ public class ChoiceSetSaveService {
     }
 
     /**
+     * MULTIPLE_CORRECT fallback 저장 — 샌드박스 검증 실패 시 AI isCorrect 기반으로 저장.
+     * sandboxValidationPassed=false로 기록해 데이터 품질 추적 가능하게 한다.
+     * CONCEPT_ONLY의 saveConceptSuccess()와 동일한 신뢰 전략 — AI isCorrect 직접 사용.
+     */
+    @Transactional
+    public QuestionChoiceSet saveWithAiCorrect(
+            Question question, ChoiceSetSource source, UUID memberUuid,
+            PromptTemplate prompt, GenerateChoiceSetResult result, int attempts) {
+
+        QuestionChoiceSet set = QuestionChoiceSet.builder()
+                .questionUuid(question.getQuestionUuid())
+                .source(source)
+                .status(ChoiceSetStatus.OK)
+                .generatedForMemberUuid(memberUuid)
+                .promptTemplateUuid(prompt.getPromptTemplateUuid())
+                .modelName(prompt.getModel())
+                .temperature(prompt.getTemperature())
+                .maxTokens(prompt.getMaxTokens())
+                .generationAttempts(attempts)
+                .sandboxValidationPassed(false) // 샌드박스 MULTIPLE_CORRECT 실패 후 AI 판단 fallback
+                .isReusable(false)
+                .totalElapsedMs(result.metadata() != null ? result.metadata().elapsedMs() : 0)
+                .build();
+        set = choiceSetRepository.saveAndFlush(set);
+
+        List<GeneratedChoiceDto> choices = result.choices();
+        for (int i = 0; i < choices.size(); i++) {
+            GeneratedChoiceDto c = choices.get(i);
+            QuestionChoiceSetItem item = QuestionChoiceSetItem.builder()
+                    .choiceSetUuid(set.getChoiceSetUuid())
+                    .choiceKey(c.key())
+                    .sortOrder(i)
+                    .kind(ChoiceKind.SQL)
+                    .body(c.body())
+                    .isCorrect(c.isCorrect()) // AI 판단 직접 사용
+                    .rationale(c.rationale())
+                    .build();
+            choiceSetItemRepository.save(item);
+        }
+
+        log.info("[choice-gen] ai-fallback success: questionUuid={}, attempts={}, setUuid={}",
+                question.getQuestionUuid(), attempts, set.getChoiceSetUuid());
+        return set;
+    }
+
+    /**
      * 선택지 세트 실패 저장.
      */
     @Transactional
