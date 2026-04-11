@@ -95,10 +95,10 @@ public class AdminQuestionController {
         ChoiceSetPolicy policy = parseChoiceSetPolicy(choiceSetPolicy);
         ExecutionMode mode = parseExecutionMode(executionMode);
 
-        // 1:1 치환 가능한 Oracle 문법을 MariaDB 호환으로 변환 (NVL→IFNULL, SYSDATE→NOW())
-        String savedDdl       = importExportService.translateOracleToMariaDb(schemaDdl);
-        String savedSample    = importExportService.translateOracleToMariaDb(schemaSampleData);
-        String savedAnswerSql = importExportService.translateOracleToMariaDb(answerSql);
+        // 1:1 치환 가능한 Oracle 문법을 PostgreSQL 호환으로 변환 (NVL→COALESCE, SYSDATE→NOW())
+        String savedDdl       = importExportService.translateOracleToPostgres(schemaDdl);
+        String savedSample    = importExportService.translateOracleToPostgres(schemaSampleData);
+        String savedAnswerSql = importExportService.translateOracleToPostgres(answerSql);
 
         // 치환 후에도 Oracle 전용 문법이 남아있으면 CONCEPT_ONLY로 자동 전환
         if (mode == ExecutionMode.EXECUTABLE) {

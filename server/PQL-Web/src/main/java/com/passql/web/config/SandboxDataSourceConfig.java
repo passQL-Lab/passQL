@@ -29,7 +29,7 @@ public class SandboxDataSourceConfig {
             .url(url)
             .username(username)
             .password(password)
-            .driverClassName("org.mariadb.jdbc.Driver")
+            .driverClassName("org.postgresql.Driver")
             .build();
     }
 }

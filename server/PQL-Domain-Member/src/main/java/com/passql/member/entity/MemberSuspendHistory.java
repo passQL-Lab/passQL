@@ -32,10 +32,10 @@ public class MemberSuspendHistory extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(columnDefinition = "CHAR(36)", updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false)
     private UUID memberSuspendHistoryUuid;
 
-    @Column(columnDefinition = "CHAR(36)", nullable = false)
+    @Column(nullable = false)
     private UUID memberUuid;
 
     @Enumerated(EnumType.STRING)

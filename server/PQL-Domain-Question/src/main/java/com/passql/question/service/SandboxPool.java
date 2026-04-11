@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * 샌드박스 임시 DB 풀 (MVP: create/drop 방식).
  * <p>
- * Semaphore로 동시 실행 수를 제한하여 MariaDB 연결 한도 초과를 방지한다.
+ * Semaphore로 동시 실행 수를 제한하여 PostgreSQL 연결 한도 초과를 방지한다.
  * concurrency/wait_seconds 값은 app_setting 테이블에서 실시간으로 읽는다.
  * <p>
  * acquire() — 슬롯 획득 후 임시 DB 생성
@@ -76,9 +76,12 @@ public class SandboxPool {
 
         String dbName = "sandbox_" + UUID.randomUUID().toString().replace("-", "").substring(0, 8);
         try {
-            try (Connection conn = adminDataSource.getConnection();
-                 Statement stmt = conn.createStatement()) {
-                stmt.execute("CREATE DATABASE IF NOT EXISTS `" + dbName + "`");
+            // PostgreSQL은 CREATE DATABASE를 트랜잭션 밖(autocommit=true)에서 실행해야 한다
+            try (Connection conn = adminDataSource.getConnection()) {
+                conn.setAutoCommit(true);
+                try (Statement stmt = conn.createStatement()) {
+                    stmt.execute("CREATE DATABASE \"" + dbName + "\"");
+                }
             }
             log.debug("[SandboxPool] acquired: {} (permits left={})", dbName, semaphore.availablePermits());
             return dbName;
@@ -95,9 +98,12 @@ public class SandboxPool {
      */
     public void release(String dbName) {
         try {
-            try (Connection conn = adminDataSource.getConnection();
-                 Statement stmt = conn.createStatement()) {
-                stmt.execute("DROP DATABASE IF EXISTS `" + dbName + "`");
+            // PostgreSQL: DROP DATABASE도 autocommit=true 필요, IF EXISTS 지원
+            try (Connection conn = adminDataSource.getConnection()) {
+                conn.setAutoCommit(true);
+                try (Statement stmt = conn.createStatement()) {
+                    stmt.execute("DROP DATABASE IF EXISTS \"" + dbName + "\"");
+                }
             }
         } catch (Exception e) {
             log.warn("[SandboxPool] release 실패 (무시): db={}, error={}", dbName, e.getMessage());
@@ -124,22 +130,23 @@ public class SandboxPool {
                 .url(url)
                 .username(username)
                 .password(password)
-                .driverClassName("org.mariadb.jdbc.Driver")
+                .driverClassName("org.postgresql.Driver")
                 .build();
     }
 
     private DataSource buildAdminDataSource() {
-        // createDataSource와 동일한 이유로 "?" 앞의 경로 부분에서만 DB명을 교체한다.
+        // urlTemplate은 "jdbc:postgresql://host:port/sandbox_{id}" 형태.
+        // admin 연결은 postgres 기본 DB를 사용한다.
         int qIdx = urlTemplate.indexOf("?");
         String urlWithoutParams = qIdx >= 0 ? urlTemplate.substring(0, qIdx) : urlTemplate;
         String params = qIdx >= 0 ? urlTemplate.substring(qIdx) : "";
         String baseUrl = urlWithoutParams.substring(0, urlWithoutParams.lastIndexOf("/") + 1);
-        String url = baseUrl + "mysql" + params;
+        String url = baseUrl + "postgres" + params;
         return DataSourceBuilder.create()
                 .url(url)
                 .username(username)
                 .password(password)
-                .driverClassName("org.mariadb.jdbc.Driver")
+                .driverClassName("org.postgresql.Driver")
                 .build();
     }
 }

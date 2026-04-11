@@ -4,6 +4,8 @@ import com.passql.common.entity.BaseEntity;
 import com.passql.question.constant.QuizSessionStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -29,14 +31,15 @@ public class QuizSession extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(columnDefinition = "CHAR(36)", updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false)
     private UUID sessionUuid;
 
-    @Column(columnDefinition = "CHAR(36)", nullable = false)
+    @Column(nullable = false)
     private UUID memberUuid;
 
     /** JSON 배열: ["questionUuid1", ..., "questionUuid10"] */
-    @Column(columnDefinition = "JSON", nullable = false)
+    @JdbcTypeCode(SqlTypes.JSON)  // Hibernate 6 + PostgreSQL jsonb 컬럼 호환
+    @Column(columnDefinition = "JSONB", nullable = false)
     private String questionOrderJson;
 
     @Column(nullable = false)
@@ -47,7 +50,7 @@ public class QuizSession extends BaseEntity {
     @Builder.Default
     private Integer totalQuestions = 10;
 
-    @Column(columnDefinition = "CHAR(36)")
+    
     private UUID topicUuid;
 
     private Integer difficultyMin;

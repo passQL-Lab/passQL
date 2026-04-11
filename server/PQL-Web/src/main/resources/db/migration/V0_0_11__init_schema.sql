@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS topic (
     code         VARCHAR(100) NOT NULL,
     display_name VARCHAR(255),
     sort_order   INT,
-    is_active    TINYINT(1),
+    is_active    BOOLEAN,
     PRIMARY KEY (code)
 );
 
@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS subtopic (
     topic_code   VARCHAR(100),
     display_name VARCHAR(255),
     sort_order   INT,
-    is_active    TINYINT(1),
+    is_active    BOOLEAN,
     PRIMARY KEY (code)
 );
 
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS concept_tag (
     label_ko    VARCHAR(255),
     category    VARCHAR(100),
     description TEXT,
-    is_active   TINYINT(1),
+    is_active   BOOLEAN,
     sort_order  INT,
     PRIMARY KEY (tag_key)
 );
@@ -43,14 +43,14 @@ CREATE TABLE IF NOT EXISTS concept_tag (
 -- concept_doc (BaseEntity: created_at, updated_at, created_by, updated_by)
 -- -------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS concept_doc (
-    id                BIGINT       NOT NULL AUTO_INCREMENT,
+    id                BIGINT       NOT NULL GENERATED ALWAYS AS IDENTITY,
     tag_key           VARCHAR(100),
     title             VARCHAR(255),
     body_md           TEXT,
     embedding_version VARCHAR(100),
-    is_active         TINYINT(1),
-    created_at        DATETIME(6),
-    updated_at        DATETIME(6),
+    is_active         BOOLEAN,
+    created_at        TIMESTAMP(6),
+    updated_at        TIMESTAMP(6),
     created_by        VARCHAR(255),
     updated_by        VARCHAR(255),
     PRIMARY KEY (id)
@@ -60,17 +60,17 @@ CREATE TABLE IF NOT EXISTS concept_doc (
 -- prompt_template
 -- -------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS prompt_template (
-    id                BIGINT       NOT NULL AUTO_INCREMENT,
+    id                BIGINT       NOT NULL GENERATED ALWAYS AS IDENTITY,
     key_name          VARCHAR(255),
     version           INT,
-    is_active         TINYINT(1),
+    is_active         BOOLEAN,
     model             VARCHAR(100),
     system_prompt     TEXT,
     user_template     TEXT,
     temperature       FLOAT,
     max_tokens        INT,
     note              VARCHAR(500),
-    extra_params_json JSON,
+    extra_params_json JSONB,
     PRIMARY KEY (id)
 );
 
@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS app_setting (
 -- question (BaseEntity)
 -- -------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS question (
-    id                  BIGINT       NOT NULL AUTO_INCREMENT,
+    id                  BIGINT       NOT NULL GENERATED ALWAYS AS IDENTITY,
     topic_code          VARCHAR(100),
     subtopic_code       VARCHAR(100),
     difficulty          INT,
@@ -101,9 +101,9 @@ CREATE TABLE IF NOT EXISTS question (
     schema_display      TEXT,
     schema_ddl          TEXT,
     explanation_summary TEXT,
-    extra_meta_json     JSON,
-    created_at          DATETIME(6),
-    updated_at          DATETIME(6),
+    extra_meta_json     JSONB,
+    created_at          TIMESTAMP(6),
+    updated_at          TIMESTAMP(6),
     created_by          VARCHAR(255),
     updated_by          VARCHAR(255),
     PRIMARY KEY (id)
@@ -113,12 +113,12 @@ CREATE TABLE IF NOT EXISTS question (
 -- question_choice
 -- -------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS question_choice (
-    id          BIGINT NOT NULL AUTO_INCREMENT,
+    id          BIGINT NOT NULL GENERATED ALWAYS AS IDENTITY,
     question_id BIGINT,
     choice_key  VARCHAR(100),
     kind        VARCHAR(50),
     body        TEXT,
-    is_correct  TINYINT(1),
+    is_correct  BOOLEAN,
     rationale   TEXT,
     sort_order  INT,
     PRIMARY KEY (id)

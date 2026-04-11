@@ -5,19 +5,20 @@
 -- =============================================================================
 
 ALTER TABLE member
-    ADD COLUMN suspend_until DATETIME(6) NULL COMMENT '제재 만료 시각 (NULL = 제재 없음 또는 영구 제재)';
+    ADD COLUMN IF NOT EXISTS suspend_until TIMESTAMP(6) NULL;
 
 CREATE TABLE IF NOT EXISTS member_suspend_history (
-    member_suspend_history_uuid CHAR(36)     NOT NULL,
-    member_uuid                 CHAR(36)     NOT NULL,
-    action                      VARCHAR(20)  NOT NULL COMMENT 'SUSPENDED | UNSUSPENDED',
+    member_suspend_history_uuid UUID     NOT NULL,
+    member_uuid                 UUID     NOT NULL,
+    action                      VARCHAR(20)  NOT NULL,
     reason                      VARCHAR(500) NULL,
-    suspend_until               DATETIME(6)  NULL     COMMENT '제재 시 설정된 만료 시각',
-    acted_at                    DATETIME(6)  NOT NULL,
-    created_at                  DATETIME(6)  NULL,
-    updated_at                  DATETIME(6)  NULL,
+    suspend_until               TIMESTAMP(6) NULL,
+    acted_at                    TIMESTAMP(6) NOT NULL,
+    created_at                  TIMESTAMP(6) NULL,
+    updated_at                  TIMESTAMP(6) NULL,
     created_by                  VARCHAR(255) NULL,
     updated_by                  VARCHAR(255) NULL,
-    PRIMARY KEY (member_suspend_history_uuid),
-    INDEX idx_suspend_history_member (member_uuid)
-) COMMENT = '회원 제재/해제 이력';
+    PRIMARY KEY (member_suspend_history_uuid)
+);
+
+CREATE INDEX IF NOT EXISTS idx_suspend_history_member ON member_suspend_history (member_uuid);
