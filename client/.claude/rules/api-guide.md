@@ -1,5 +1,7 @@
 # API 연동 가이드
 
+> **스키마 원본**: `docs/be-api-docs.json` (OpenAPI 3.1 스펙). API가 자주 변동되므로 필드 목록·enum 값은 이 파일이 최신 정보. 이 가이드는 **사용 방법 + 비즈니스 규칙**에 집중하며, 새 필드가 생기면 `be-api-docs.json`과 `src/types/api.ts`를 먼저 확인할 것.
+
 ## 아키텍처
 
 ```
@@ -40,7 +42,7 @@ Frontend ──(/api)──> Backend(Spring) ──(x-api-key)──> AI Server(
 | `generateChoices(questionUuid)`                     | POST   | `/questions/{questionUuid}/generate-choices`          |   O (header)    | SSE stream                |  O   |
 
 - `fetchQuestions`: `QuestionSummary`에 `topicCode`, `executionMode`("EXECUTABLE"|"CONCEPT_ONLY"), `createdAt` 필드 추가됨.
-- `fetchQuestion`: 응답 `QuestionDetail`의 선택지 구조가 `choices: ChoiceItem[]` -> `choiceSets: ChoiceSetSummary[]`로 변경됨. `ChoiceSetSummary { choiceSetUuid, source, status, sandboxValidationPassed, createdAt, items: ChoiceItem[] }`. `ChoiceItem`에 `isCorrect`, `rationale` 필드 추가. 또한 `schemaDdl`, `schemaSampleData`, `schemaIntent`, `answerSql`, `hint` 필드 추가.
+- `fetchQuestion`: 응답 `QuestionDetail` 주요 필드 — `choiceSetPolicy`(`"AI_ONLY" | "ODD_ONE_OUT" | "CURATED_ONLY" | "HYBRID" | "RESULT_MATCH"`), `executionMode`(`"EXECUTABLE" | "CONCEPT_ONLY"`), `schemaDisplay`(화면 표시용 스키마 텍스트), `schemaDdl`, `schemaSampleData`, `schemaIntent`, `answerSql`, `hint`. 선택지 구조: `choiceSets: ChoiceSetSummary[]` — `ChoiceSetSummary { choiceSetUuid, source, status, sandboxValidationPassed, createdAt, items: ChoiceItem[] }`. `ChoiceItem`에 `isCorrect`, `rationale` 포함. **`choiceSetPolicy` 렌더링 분기**: `RESULT_MATCH`는 선택지 `body`가 JSON 배열 결과 테이블이므로 `ResultMatchTable` 컴포넌트로 렌더링. `ODD_ONE_OUT`은 "결과가 다른 것은?" 유형. `AI_ONLY`/`HYBRID`는 일반 선택지.
 - `fetchTodayQuestion`: 오늘의 데일리 챌린지 문제 반환. 큐레이션 행(daily_challenge)이 있으면 그 문제, 없으면 활성 문제 풀에서 날짜 시드 기반 결정적 폴백. `memberUuid`가 주어지면 오늘 해당 문제 제출 여부를 `alreadySolvedToday`로 함께 반환. 활성 문제 0개면 `{ question: null, alreadySolvedToday: false }`.
 - `fetchRecommendations`: 활성 문제 풀에서 랜덤 N개 반환. size 기본 3, 최대 5 (초과 시 5로 clamp, 1 미만은 1). `excludeQuestionUuid` 미지정 시 데일리 챌린지 자동 제외.
 - `submitAnswer`: body 필드 `choiceSetId`(UUID, 필수) + `selectedChoiceKey`. 인증 헤더 `X-Member-UUID` 필수. 응답 `SubmitResult`에 `selectedResult`/`correctResult`(ExecuteResult), `correctSql`/`selectedSql` 필드 추가됨 — EXECUTABLE 문제에서 양쪽 SQL 실행 결과 비교 가능.

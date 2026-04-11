@@ -6,7 +6,8 @@ import { submitAnswer } from "../api/questions";
 import { getRandomMessage } from "../constants/microcopy";
 import QuestionDetail from "./QuestionDetail";
 import PracticeFeedbackBar from "../components/PracticeFeedbackBar";
-import type { SubmitResult } from "../types/api";
+import ChoiceReview from "../components/ChoiceReview";
+import type { ChoiceItem, SubmitResult } from "../types/api";
 
 function WaitingForQuestion({ topicName }: { readonly topicName: string }) {
   return (
@@ -29,6 +30,9 @@ export default function PracticeSet() {
   const submitAndAdvance = usePracticeStore((s) => s.submitAndAdvance);
 
   const [feedback, setFeedback] = useState<SubmitResult | null>(null);
+  // EXECUTABLE 문제 오답노트용 상태
+  const [reviewChoices, setReviewChoices] = useState<readonly ChoiceItem[] | null>(null);
+  const [reviewSelectedKey, setReviewSelectedKey] = useState<string | null>(null);
 
   const totalQuestions = questions.length;
   const displayIndex = feedback ? currentIndex - 1 : currentIndex;
@@ -36,8 +40,13 @@ export default function PracticeSet() {
   const isLast = displayIndex >= totalQuestions - 1;
 
   const handleSelect = useCallback(
-    async (selectedChoiceKey: string, choiceSetId: string) => {
+    async (selectedChoiceKey: string, choiceSetId: string, choices: readonly ChoiceItem[]) => {
       if (!displayQuestion) return;
+      // EXECUTABLE 문제면 오답노트 데이터 저장
+      if (choices[0]?.kind === "SQL") {
+        setReviewChoices(choices);
+        setReviewSelectedKey(selectedChoiceKey);
+      }
       try {
         const result = await submitAnswer(displayQuestion.questionUuid, choiceSetId, selectedChoiceKey);
         setFeedback(result);
@@ -61,6 +70,8 @@ export default function PracticeSet() {
 
   const handleNext = useCallback(() => {
     setFeedback(null);
+    setReviewChoices(null);
+    setReviewSelectedKey(null);
   }, []);
 
   if (!storeSessionId || storeSessionId !== sessionId) {
@@ -107,14 +118,25 @@ export default function PracticeSet() {
       </div>
 
       {displayQuestion ? (
-        <div className={`flex-1 overflow-y-auto px-4 ${feedback ? "pointer-events-none opacity-60" : ""}`}>
-          <QuestionDetail
-            key={displayQuestion.questionUuid}
-            questionUuid={displayQuestion.questionUuid}
-            practiceMode
-            practiceSubmitLabel={isLast ? "결과 보기" : "다음 문제"}
-            onPracticeSubmit={handleSelect}
-          />
+        <div className="flex-1 overflow-y-auto px-4">
+          {/* 풀이 중: 선택 가능 / 피드백 후: 흐리게 비활성화 */}
+          <div className={feedback ? "pointer-events-none opacity-60" : ""}>
+            <QuestionDetail
+              key={displayQuestion.questionUuid}
+              questionUuid={displayQuestion.questionUuid}
+              practiceMode
+              practiceSubmitLabel={isLast ? "결과 보기" : "다음 문제"}
+              onPracticeSubmit={handleSelect}
+            />
+          </div>
+          {/* EXECUTABLE 문제: 피드백 후 오답노트 SQL 실행 비교 */}
+          {feedback && reviewChoices && (
+            <ChoiceReview
+              choices={reviewChoices}
+              questionUuid={displayQuestion.questionUuid}
+              selectedKey={reviewSelectedKey ?? undefined}
+            />
+          )}
         </div>
       ) : (
         <WaitingForQuestion topicName={topicName ?? ""} />
