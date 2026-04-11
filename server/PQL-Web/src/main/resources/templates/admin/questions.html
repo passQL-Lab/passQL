@@ -68,7 +68,13 @@
                             <li>
                                 <button type="button" onclick="openImportFileDialog()">
                                     <i data-lucide="upload" class="size-4"></i>
-                                    JSON 가져오기
+                                    JSON 파일 가져오기
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" onclick="openBulkPasteModal()">
+                                    <i data-lucide="clipboard-paste" class="size-4"></i>
+                                    JSON 붙여넣기
                                 </button>
                             </li>
                             <li>
@@ -361,6 +367,33 @@
 
             <div class="modal-action">
                 <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('bulkGuideModal').close()">닫기</button>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop"><button>close</button></form>
+    </dialog>
+
+    <!-- JSON 붙여넣기 모달 (배열 텍스트 직접 입력) -->
+    <dialog id="bulkPasteModal" class="modal">
+        <div class="modal-box w-11/12 max-w-2xl">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-lg">JSON 붙여넣기</h3>
+                <button type="button" class="btn btn-sm btn-ghost" onclick="document.getElementById('bulkPasteModal').close()">
+                    <i data-lucide="x" class="size-4"></i>
+                </button>
+            </div>
+            <p class="text-sm text-base-content/60 mb-3">
+                대량 JSON 배열을 텍스트로 직접 붙여넣어 가져옵니다. <code>[{...}, {...}]</code> 형태의 배열이어야 합니다.
+            </p>
+            <textarea id="bulkPasteArea" rows="12"
+                      class="textarea textarea-bordered w-full font-mono text-xs"
+                      placeholder='[&#10;  {&#10;    "topicCode": "sql_join",&#10;    "difficulty": 3,&#10;    "executionMode": "EXECUTABLE",&#10;    ...&#10;  }&#10;]'></textarea>
+            <p id="bulkPasteError" class="text-error text-sm mt-2 hidden"></p>
+            <div class="modal-action">
+                <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('bulkPasteModal').close()">취소</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="applyBulkFromPaste()">
+                    <i data-lucide="check" class="size-4"></i>
+                    가져오기
+                </button>
             </div>
         </div>
         <form method="dialog" class="modal-backdrop"><button>close</button></form>
