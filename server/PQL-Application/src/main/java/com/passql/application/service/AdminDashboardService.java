@@ -7,8 +7,8 @@ import com.passql.meta.entity.Topic;
 import com.passql.meta.repository.TopicRepository;
 import com.passql.question.repository.QuestionRepository;
 import com.passql.submission.dto.MonitorStats;
-import com.passql.submission.repository.ExecutionLogRepository;
 import com.passql.submission.repository.SubmissionRepository;
+import com.passql.submission.service.SubmissionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,7 +33,7 @@ public class AdminDashboardService {
     private final QuestionRepository questionRepository;
     private final MemberRepository memberRepository;
     private final SubmissionRepository submissionRepository;
-    private final ExecutionLogRepository executionLogRepository;
+    private final SubmissionService submissionService;
     private final TopicRepository topicRepository;
 
     /**
@@ -41,39 +41,32 @@ public class AdminDashboardService {
      *
      * <p>쿼리 목록:
      * <ol>
-     *   <li>활성 문제 수 (count)</li>
+     *   <li>활성 문제 수 (count 쿼리)</li>
      *   <li>토픽별 문제 수 (native group-by)</li>
-     *   <li>토픽 목록 (displayName 조인용)</li>
-     *   <li>전체/활성/정지 회원 수</li>
-     *   <li>오늘 제출 건수 (24h 기준)</li>
-     *   <li>최근 24h 실행 로그 → 에러율 계산</li>
+     *   <li>활성 토픽 목록 (displayName 조인용)</li>
+     *   <li>전체/활성/정지 회원 수 (count 쿼리, 테스트 계정 제외)</li>
+     *   <li>오늘 제출 건수 (count 쿼리)</li>
+     *   <li>최근 24h 실행 로그 → 에러율 계산 (SubmissionService 위임)</li>
      * </ol>
      */
     public DashboardStats collect() {
         // --- 문제 통계 ---
-        // findByIsActiveTrue()는 이미 정의된 메서드이므로 size()로 집계
-        long totalQuestions = questionRepository.findByIsActiveTrue().size();
+        long totalQuestions = questionRepository.countByIsActiveTrue();
 
         List<DashboardStats.TopicQuestionCount> questionsByTopic = buildTopicCounts();
 
-        // --- 회원 통계 (테스트 계정 제외) ---
-        List<com.passql.member.entity.Member> allMembers = memberRepository
-                .findAll()
-                .stream()
-                .filter(m -> Boolean.FALSE.equals(m.getIsTestAccount()) && !m.isDeleted())
-                .toList();
-
-        long totalMembers    = allMembers.size();
-        long activeMembers   = allMembers.stream().filter(m -> m.getStatus() == MemberStatus.ACTIVE).count();
-        long suspendedMembers = allMembers.stream().filter(m -> m.getStatus() == MemberStatus.SUSPENDED).count();
+        // --- 회원 통계 (테스트 계정 제외, count 쿼리로 처리) ---
+        long totalMembers     = memberRepository.countByIsTestAccountFalseAndIsDeletedFalse();
+        long activeMembers    = memberRepository.countByIsTestAccountFalseAndIsDeletedFalseAndStatus(MemberStatus.ACTIVE);
+        long suspendedMembers = memberRepository.countByIsTestAccountFalseAndIsDeletedFalseAndStatus(MemberStatus.SUSPENDED);
 
         // --- 오늘 제출 건수 (오늘 00:00 이후) ---
         LocalDateTime todayStart = LocalDate.now().atStartOfDay();
         long todaySubmissions = submissionRepository.countBySubmittedAtAfter(todayStart);
 
-        // --- 최근 24시간 실행 로그 → 에러율 ---
-        MonitorStats monitorStats = buildMonitorStats();
-        long total24h  = monitorStats.successCount() + monitorStats.failCount();
+        // --- 최근 24시간 실행 로그 → 에러율 (SubmissionService 재사용) ---
+        MonitorStats monitorStats = submissionService.getStats24h();
+        long total24h = monitorStats.successCount() + monitorStats.failCount();
         double errorRate = total24h > 0
                 ? (monitorStats.failCount() * 100.0) / total24h
                 : 0.0;
@@ -94,44 +87,27 @@ public class AdminDashboardService {
      * 토픽별 활성 문제 수를 집계한다.
      *
      * <p>QuestionRepository의 native group-by 결과({@code Object[]})를
-     * 토픽 displayName과 조인해 정렬된 리스트로 반환한다.
+     * 활성 토픽 displayName과 조인해 정렬된 리스트로 반환한다.
+     * 비활성 토픽은 조인 대상에서 제외하며, 조인 실패 시 UUID 앞 8자리를 폴백으로 표시한다.
      */
     private List<DashboardStats.TopicQuestionCount> buildTopicCounts() {
-        // { topicUuid(String), count(Long) }
         List<Object[]> raw = questionRepository.countActiveByTopic();
 
-        // 토픽 UUID → displayName 맵
-        Map<UUID, String> topicNameMap = topicRepository.findAll()
+        // 활성 토픽만 대상으로 UUID → displayName 맵 구성
+        Map<UUID, String> topicNameMap = topicRepository.findByIsActiveTrueOrderBySortOrderAsc()
                 .stream()
                 .collect(Collectors.toMap(Topic::getTopicUuid, t ->
                         t.getDisplayName() != null ? t.getDisplayName() : t.getCode()));
 
         return raw.stream()
                 .map(row -> {
-                    String uuidStr  = row[0].toString();
-                    long    count   = ((Number) row[1]).longValue();
-                    UUID    uuid    = UUID.fromString(uuidStr);
-                    String  name    = topicNameMap.getOrDefault(uuid, uuidStr.substring(0, 8) + "…");
+                    String uuidStr = row[0].toString();
+                    long   count   = ((Number) row[1]).longValue();
+                    UUID   uuid    = UUID.fromString(uuidStr);
+                    String name    = topicNameMap.getOrDefault(uuid, uuidStr.substring(0, 8) + "…");
                     return new DashboardStats.TopicQuestionCount(uuidStr, name, count);
                 })
-                // 문제 수 내림차순 정렬
                 .sorted(Comparator.comparingLong(DashboardStats.TopicQuestionCount::count).reversed())
                 .collect(Collectors.toList());
-    }
-
-    /**
-     * 최근 24시간 실행 로그 통계를 반환한다.
-     * SubmissionService.getStats24h()와 동일한 로직이나, Service 간 의존성을 피해 직접 구현.
-     */
-    private MonitorStats buildMonitorStats() {
-        LocalDateTime since = LocalDateTime.now().minusHours(24);
-        var logs = executionLogRepository.findByExecutedAtAfter(since);
-        long successCount = logs.stream().filter(l -> "OK".equals(l.getStatus())).count();
-        long failCount    = logs.stream().filter(l -> !"OK".equals(l.getStatus())).count();
-        double avgMs      = logs.stream()
-                .filter(l -> l.getElapsedMs() != null)
-                .mapToLong(l -> l.getElapsedMs())
-                .average().orElse(0.0);
-        return new MonitorStats(successCount, failCount, avgMs, 0L);
     }
 }
