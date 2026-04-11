@@ -1,6 +1,8 @@
 // === Question ===
 export type ExecutionMode = "EXECUTABLE" | "CONCEPT_ONLY";
 export type ChoiceKind = "SQL" | "TEXT";
+// AI_ONLY: 일반 AI 생성 / ODD_ONE_OUT: "결과가 다른 것은?" 유형 / CURATED_ONLY/HYBRID: 미구현
+export type ChoiceSetPolicy = "AI_ONLY" | "ODD_ONE_OUT" | "CURATED_ONLY" | "HYBRID";
 
 export interface QuestionSummary {
   readonly questionUuid: string;
@@ -45,6 +47,7 @@ export interface QuestionDetail {
   readonly subtopicName: string;
   readonly difficulty: number;
   readonly executionMode: ExecutionMode;
+  readonly choiceSetPolicy: ChoiceSetPolicy;
   readonly stem: string;
   readonly schemaDisplay: string;
   readonly schemaDdl: string;

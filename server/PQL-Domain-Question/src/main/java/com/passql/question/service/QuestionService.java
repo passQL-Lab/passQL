@@ -86,6 +86,7 @@ public class QuestionService {
                 subtopicName(q.getSubtopicUuid()),
                 q.getDifficulty(),
                 q.getExecutionMode(),
+                q.getChoiceSetPolicy(),
                 q.getStem(),
                 q.getSchemaDisplay(),
                 q.getSchemaDdl(),

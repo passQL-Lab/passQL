@@ -52,6 +52,11 @@ public class SandboxValidator {
             String schemaSampleData,
             ChoiceSetPolicy policy
     ) {
+        // schemaDdl 없이는 sandbox 실행 불가 — 호출 전 보장되어야 하지만 방어적 체크
+        if (schemaDdl == null || schemaDdl.isBlank()) {
+            throw new CustomException(ErrorCode.SANDBOX_SETUP_FAILED, "스키마 DDL이 없어 샌드박스 검증을 실행할 수 없습니다.");
+        }
+
         String dbName = sandboxPool.acquire();
         try {
             // 1. 스키마 + 샘플 데이터 적용

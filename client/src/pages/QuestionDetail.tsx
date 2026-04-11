@@ -53,8 +53,14 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
   const choices = sseChoices ?? activeChoiceSet?.items ?? [];
   const choiceSetId = sseChoiceSetId ?? activeChoiceSet?.choiceSetUuid ?? "";
 
-  // choiceSets[]가 비어있고 에러도 없을 때 자동으로 SSE 선택지 생성 호출
-  const needsSseGeneration = question != null && activeChoiceSet == null && sseChoices == null && !sseError;
+  // EXECUTABLE 문제이고, choiceSets[]가 비어있고, 에러도 없을 때만 SSE 선택지 생성 호출
+  // CONCEPT_ONLY 문제는 서버에 answerSql/schemaDdl이 없으므로 AI 선택지 생성 불가
+  const needsSseGeneration =
+    question != null &&
+    question.executionMode === "EXECUTABLE" &&
+    activeChoiceSet == null &&
+    sseChoices == null &&
+    !sseError;
   useEffect(() => {
     if (!needsSseGeneration || !questionUuid) return;
 
@@ -188,7 +194,10 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
 
   const choicesSection = choices.length === 0 ? (
     <div className="mt-4 card-base text-center py-8 space-y-2">
-      {sseError ? (
+      {/* CONCEPT_ONLY 문제: 선택지가 아직 등록되지 않은 상태 */}
+      {question?.executionMode === "CONCEPT_ONLY" ? (
+        <p className="text-text-caption text-sm">선택지가 아직 준비되지 않았습니다</p>
+      ) : sseError ? (
         <>
           <p className="text-text-caption text-sm">선택지 생성에 실패했어요</p>
           {sseError.retryable && (
