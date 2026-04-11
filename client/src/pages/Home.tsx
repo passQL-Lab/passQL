@@ -7,7 +7,13 @@ import { useMemberStore } from "../stores/memberStore";
 import ErrorFallback from "../components/ErrorFallback";
 import { StarRating } from "../components/StarRating";
 import { HeatmapCalendar } from "../components/HeatmapCalendar";
-import { useGreeting, useTodayQuestion, useRecommendations, useSelectedSchedule, useHeatmap } from "../hooks/useHome";
+import {
+  useGreeting,
+  useTodayQuestion,
+  useRecommendations,
+  useSelectedSchedule,
+  useHeatmap,
+} from "../hooks/useHome";
 
 export default function Home() {
   const { data: progress, isLoading, isError, refetch } = useProgress();
@@ -51,12 +57,18 @@ export default function Home() {
             : `안녕하세요, ${displayName}`}
         </h1>
         {greeting?.messageType === "EXAM_DAY" && (
-          <p className="text-sm font-medium mt-1" style={{ color: "var(--color-sem-error-text)" }}>
+          <p
+            className="text-sm font-medium mt-1"
+            style={{ color: "var(--color-sem-error-text)" }}
+          >
             오늘 시험이에요!
           </p>
         )}
         {greeting?.messageType === "URGENT" && (
-          <p className="text-sm font-medium mt-1" style={{ color: "var(--color-sem-warning-text)" }}>
+          <p
+            className="text-sm font-medium mt-1"
+            style={{ color: "var(--color-sem-warning-text)" }}
+          >
             시험이 얼마 남지 않았어요
           </p>
         )}
@@ -68,10 +80,18 @@ export default function Home() {
             // 완료 상태: 성공 카드 스타일 (초록 left border + 배경)
             <div
               className="h-full flex flex-col gap-2 rounded-xl p-5 cursor-default"
-              style={{ backgroundColor: "var(--color-sem-success-light)", borderLeft: "4px solid var(--color-sem-success)" }}
+              style={{
+                backgroundColor: "var(--color-sem-success-light)",
+                borderLeft: "4px solid var(--color-sem-success)",
+              }}
             >
               <div className="flex items-center justify-between">
-                <p className="text-sm font-medium" style={{ color: "var(--color-sem-success-text)" }}>오늘의 문제</p>
+                <p
+                  className="text-sm font-medium"
+                  style={{ color: "var(--color-sem-success-text)" }}
+                >
+                  오늘의 문제
+                </p>
                 <div
                   className="w-6 h-6 rounded-full flex items-center justify-center"
                   style={{ backgroundColor: "var(--color-sem-success)" }}
@@ -79,7 +99,9 @@ export default function Home() {
                   <Check size={14} className="text-white" />
                 </div>
               </div>
-              <p className="text-body text-sm truncate">{today.question.stemPreview}</p>
+              <p className="text-body text-sm truncate">
+                {today.question.stemPreview}
+              </p>
               <div className="flex items-center gap-2 mt-auto">
                 <span className="badge-topic">{today.question.topicName}</span>
                 <StarRating level={today.question.difficulty} />
@@ -90,9 +112,13 @@ export default function Home() {
             <Link to="/daily-challenge" className="block">
               <div className="card-base h-full flex flex-col gap-2 cursor-pointer hover:bg-surface transition-colors">
                 <p className="text-secondary text-sm">오늘의 문제</p>
-                <p className="text-body text-sm truncate">{today.question.stemPreview}</p>
+                <p className="text-body text-sm truncate">
+                  {today.question.stemPreview}
+                </p>
                 <div className="flex items-center gap-2 mt-auto">
-                  <span className="badge-topic">{today.question.topicName}</span>
+                  <span className="badge-topic">
+                    {today.question.topicName}
+                  </span>
                   <StarRating level={today.question.difficulty} />
                 </div>
               </div>
@@ -109,7 +135,9 @@ export default function Home() {
 
         {schedule ? (
           <div className="card-base h-full flex flex-col justify-center">
-            <p className="text-secondary text-sm">{schedule.certType} {schedule.round}회</p>
+            <p className="text-secondary text-sm">
+              {schedule.certType} {schedule.round}회
+            </p>
             <p className="text-h2 text-brand mt-1">{schedule.examDate}</p>
           </div>
         ) : (
@@ -159,11 +187,16 @@ export default function Home() {
             />
           </div>
           <p className="text-sm text-text-secondary">
-            {getReadinessCopy(progress.readiness.toneKey, progress.readiness.score)}
+            {getReadinessCopy(
+              progress.readiness.toneKey,
+              progress.readiness.score,
+            )}
           </p>
           <div className="flex gap-4 mt-3 text-xs text-text-caption">
             <span>정확도 {Math.round(progress.readiness.accuracy * 100)}%</span>
-            <span>커버리지 {Math.round(progress.readiness.coverage * 100)}%</span>
+            <span>
+              커버리지 {Math.round(progress.readiness.coverage * 100)}%
+            </span>
             <span>최근도 {Math.round(progress.readiness.recency * 100)}%</span>
           </div>
         </section>
@@ -174,10 +207,15 @@ export default function Home() {
             <span className="text-secondary mt-1">푼 문제</span>
           </div>
           <div className="card-base flex flex-col items-start">
-            <span className="text-h1 text-brand">{Math.round(correctRate * 100)}%</span>
+            <span className="text-h1 text-brand">
+              {Math.round(correctRate * 100)}%
+            </span>
             <span className="text-secondary mt-1">정답률</span>
             <div className="w-full mt-2 h-1 rounded-full bg-border">
-              <div className="h-full rounded-full bg-brand" style={{ width: `${correctRate * 100}%` }} />
+              <div
+                className="h-full rounded-full bg-brand"
+                style={{ width: `${correctRate * 100}%` }}
+              />
             </div>
           </div>
         </section>
@@ -197,7 +235,10 @@ export default function Home() {
                       <StarRating level={q.difficulty} />
                     </div>
                   </div>
-                  <ChevronRight size={16} className="text-text-caption shrink-0" />
+                  <ChevronRight
+                    size={16}
+                    className="text-text-caption shrink-0"
+                  />
                 </div>
               </Link>
             ))}
