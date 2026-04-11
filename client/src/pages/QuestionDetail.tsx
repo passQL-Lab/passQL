@@ -169,7 +169,7 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
         }
       },
     });
-  }, [selectedKey, choiceSetId, choices, submitMutation, question, questionUuid, navigate, practiceMode, onPracticeSubmit, onSubmitSuccess]);
+  }, [selectedKey, choiceSetId, choices, submitMutation, question, questionUuid, navigate, practiceMode, onPracticeSubmit, onSubmitSuccess, queryClient]);
 
   const handleAskAi = useCallback(
     (choiceKey: string, _errorCode: string, errorMessage: string) => {
