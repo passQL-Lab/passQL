@@ -259,18 +259,12 @@ export default function AnswerFeedback() {
         onClose={() => setAiSheetOpen(false)}
       />
 
-      <div
-        className="fixed bottom-0 inset-x-0 p-4 z-20"
-        style={{
-          backgroundColor: isCorrect
-            ? "var(--color-sem-success-light)"
-            : "var(--color-sem-error-light)",
-        }}
-      >
-        <div className="mx-auto max-w-180">
+      {/* fixed bottom 액션 버튼 — QuestionDetail과 동일한 컨테이너 구조 */}
+      <div className="fixed bottom-0 inset-x-0 z-20 bg-surface-page border-t border-border">
+        <div className="mx-auto max-w-180 px-4 py-4">
           <button
             type="button"
-            className="w-full h-[52px] rounded-lg text-white font-bold text-base"
+            className="w-full h-12 rounded-lg text-white font-bold text-base"
             style={{
               backgroundColor: isCorrect
                 ? "var(--color-sem-success)"

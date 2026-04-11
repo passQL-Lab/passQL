@@ -181,7 +181,7 @@ class AiService:
             answer_sql=answer_sql,
             seed_choices=seed_choices,
             metadata=GenerationMetadata(
-                model=cfg.model,
+                model_name=cfg.model,
                 elapsed_ms=elapsed_ms,
                 raw_response_json=payload,
             ),
@@ -232,7 +232,7 @@ class AiService:
         return GenerateChoiceSetResponse(
             choices=choices,
             metadata=GenerationMetadata(
-                model=cfg.model,
+                model_name=cfg.model,
                 elapsed_ms=elapsed_ms,
                 raw_response_json=payload,
             ),

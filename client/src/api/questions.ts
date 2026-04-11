@@ -146,8 +146,13 @@ export function generateChoices(
         if (abortProcessing) break;
 
         if (done) {
-          // 스트림 종료 시 버퍼에 남은 마지막 청크도 처리
-          // (서버가 emitter.complete()를 호출하면 error 이벤트가 마지막 청크로 남을 수 있음)
+          // done: true와 함께 마지막 value가 함께 도착하는 경우 처리
+          // (Spring SseEmitter.complete() 직전 이벤트와 스트림 종료가 같은 청크로 오면 여기서 수신)
+          if (value) {
+            buffer += decoder.decode(value, { stream: false });
+          }
+          // 버퍼에 남은 마지막 이벤트 처리
+          // (서버가 emitter.complete()를 호출하면 complete 이벤트가 마지막 청크로 남을 수 있음)
           if (buffer.trim()) {
             buffer += "\n\n"; // 청크 구분자 강제 추가
             processBuffer();

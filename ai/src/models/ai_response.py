@@ -35,8 +35,11 @@ class GeneratedChoice(BaseModel):
 
 
 class GenerationMetadata(BaseModel):
-    """AI 호출 메타데이터"""
-    model: str
+    """AI 호출 메타데이터.
+    Java GenerationMetadataDto와 snake_case 키로 1:1 매핑.
+    model_name → Java modelName (SNAKE_CASE ObjectMapper 자동 변환)
+    """
+    model_name: str
     elapsed_ms: int
     prompt_tokens: Optional[int] = None
     completion_tokens: Optional[int] = None

@@ -40,7 +40,7 @@ public class TopicAnalysisService {
         Map<UUID, double[]> statMap = new HashMap<>(); // [solvedCount, correctRate]
         List<Object[]> statRows = submissionRepository.findTopicStatsAfter(memberUuid.toString(), since);
         for (Object[] row : statRows) {
-            UUID topicUuid = UUID.fromString((String) row[0]);
+            UUID topicUuid = UUID.fromString(row[0].toString());
             long solvedCount = ((Number) row[1]).longValue();
             double correctRate = ((Number) row[2]).doubleValue();
             statMap.put(topicUuid, new double[]{solvedCount, correctRate});
@@ -50,7 +50,7 @@ public class TopicAnalysisService {
         Map<UUID, Long> totalMap = new HashMap<>();
         List<Object[]> totalRows = questionRepository.countActiveByTopic();
         for (Object[] row : totalRows) {
-            UUID topicUuid = UUID.fromString((String) row[0]);
+            UUID topicUuid = UUID.fromString(row[0].toString());
             long totalCount = ((Number) row[1]).longValue();
             totalMap.put(topicUuid, totalCount);
         }
