@@ -107,13 +107,10 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
   );
 
   const handleSelect = useCallback(
-    (choiceKey: string, sql: string) => {
+    (choiceKey: string, _sql: string) => {
       setSelectedKey(choiceKey);
-      if (question?.executionMode === "EXECUTABLE" && !executeCacheRef.current[choiceKey]) {
-        handleExecute(choiceKey, sql);
-      }
     },
-    [handleExecute, question],
+    [],
   );
 
   const handleSubmit = useCallback(() => {
@@ -130,6 +127,8 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
           questionUuid,
           // executionMode는 QuestionDetail에서 전달 (SubmitResult에서 제거됨)
           executionMode: question.executionMode,
+          // EXECUTABLE 문제: 제출 후 오답노트에서 선택지 SQL 실행 비교용
+          choices: question.executionMode === "EXECUTABLE" ? choices : undefined,
         };
         if (onSubmitSuccess) {
           // 데일리 챌린지 등 호출자가 네비게이션 제어
@@ -239,7 +238,7 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
           choice={choice}
           isSelected={selectedKey === choice.key}
           cached={executeCache[choice.key]}
-          isExecutable={question.executionMode === "EXECUTABLE"}
+          isExecutable={false}
           isExecuting={
             executeMutation.isPending &&
             executeMutation.variables === choice.body
