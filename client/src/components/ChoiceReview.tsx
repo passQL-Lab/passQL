@@ -13,15 +13,23 @@ interface ChoiceReviewProps {
 export default function ChoiceReview({ choices, questionUuid, selectedKey }: ChoiceReviewProps) {
   // key → ExecuteResult | "loading"
   const [results, setResults] = useState<Record<string, ExecuteResult | "loading">>({});
+  // 실행 실패 시 사용자에게 표시할 에러 메시지 (key → errorMessage)
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // RESULT_MATCH 선택지(TEXT kind)는 SQL이 아니므로 실행 대상에서 제외
+  const sqlChoices = choices.filter((c) => c.kind === "SQL");
 
   const handleExecute = useCallback(async (choice: ChoiceItem) => {
     if (results[choice.key]) return;
+    setErrors((prev) => { const next = { ...prev }; delete next[choice.key]; return next; });
     setResults((prev) => ({ ...prev, [choice.key]: "loading" }));
     try {
       const result = await executeChoice(questionUuid, choice.body);
       setResults((prev) => ({ ...prev, [choice.key]: result }));
-    } catch {
-      // 실행 실패 시 조용히 로딩 해제
+    } catch (err) {
+      // 실행 실패 시 에러 메시지를 저장해 재시도 안내를 표시한다
+      const message = err instanceof Error ? err.message : "실행에 실패했습니다";
+      setErrors((prev) => ({ ...prev, [choice.key]: message }));
       setResults((prev) => {
         const next = { ...prev };
         delete next[choice.key];
@@ -30,14 +38,17 @@ export default function ChoiceReview({ choices, questionUuid, selectedKey }: Cho
     }
   }, [questionUuid, results]);
 
+  if (sqlChoices.length === 0) return null;
+
   return (
     <section className="mt-6 mb-40">
       <p className="text-secondary text-sm mb-3">SQL 실행 비교</p>
       <div className="space-y-3">
-        {choices.map((choice) => {
+        {sqlChoices.map((choice) => {
           const isSelected = choice.key === selectedKey;
           const result = results[choice.key];
           const isLoading = result === "loading";
+          const errorMessage = errors[choice.key];
 
           return (
             <div
@@ -57,17 +68,30 @@ export default function ChoiceReview({ choices, questionUuid, selectedKey }: Cho
                 {choice.body}
               </pre>
 
-              {/* 실행 버튼 */}
-              <div className="flex justify-end">
-                <button
-                  type="button"
-                  className="btn-compact"
-                  onClick={() => handleExecute(choice)}
-                  disabled={!!result}
-                >
-                  {isLoading ? "실행 중..." : "실행"}
-                </button>
-              </div>
+              {/* 실행 버튼 / 에러 안내 */}
+              {errorMessage ? (
+                <div className="flex items-center justify-between mt-1">
+                  <p className="text-sm" style={{ color: "var(--color-sem-error)" }}>{errorMessage}</p>
+                  <button
+                    type="button"
+                    className="btn-compact"
+                    onClick={() => handleExecute(choice)}
+                  >
+                    재시도
+                  </button>
+                </div>
+              ) : (
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    className="btn-compact"
+                    onClick={() => handleExecute(choice)}
+                    disabled={!!result}
+                  >
+                    {isLoading ? "실행 중..." : "실행"}
+                  </button>
+                </div>
+              )}
 
               {/* 실행 결과 */}
               {result && !isLoading && (

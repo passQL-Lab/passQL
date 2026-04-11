@@ -40,9 +40,12 @@ export const ChoiceCard = memo(function ChoiceCard({
   const isConceptText = choice.kind === "TEXT" && !isJsonArray(choice.body);
 
   return (
-    <button
-      type="button"
-      className="w-full text-left rounded-2xl p-4 transition-all duration-200"
+    // div[role=button]로 감싸야 내부 <button> (실행, AI에게 물어보기)이 중첩 버튼 위반 없이 동작한다
+    <div
+      role="button"
+      tabIndex={0}
+      aria-pressed={isSelected}
+      className="w-full text-left rounded-2xl p-4 transition-all duration-200 cursor-pointer"
       style={{
         backgroundColor: isSelected
           ? "var(--color-brand-light)"
@@ -51,6 +54,12 @@ export const ChoiceCard = memo(function ChoiceCard({
         borderLeft: `4px solid ${isSelected ? "var(--color-brand)" : "var(--color-border)"}`,
       }}
       onClick={() => onSelect(choice.key, choice.body)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onSelect(choice.key, choice.body);
+        }
+      }}
     >
       {isResultMatch ? (
         // RESULT_MATCH: JSON 결과 테이블 렌더링, 실행 버튼 없음
@@ -98,6 +107,6 @@ export const ChoiceCard = memo(function ChoiceCard({
           )}
         </>
       )}
-    </button>
+    </div>
   );
 });
