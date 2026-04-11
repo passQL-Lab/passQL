@@ -19,10 +19,14 @@ const router = createBrowserRouter([
       { index: true, element: <Home /> },
       { path: "questions", element: <CategoryCards /> },
       { path: "questions/:questionUuid", element: <QuestionDetail /> },
-      { path: "daily-challenge", element: <DailyChallenge /> },
       { path: "stats", element: <Stats /> },
       { path: "settings", element: <Settings /> },
     ],
+  },
+  // AppLayout 밖: 전체화면 몰입형 화면
+  {
+    path: "daily-challenge",
+    element: <DailyChallenge />,
   },
   {
     path: "questions/:questionUuid/result",
