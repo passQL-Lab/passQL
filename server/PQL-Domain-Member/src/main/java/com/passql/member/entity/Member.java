@@ -46,7 +46,7 @@ public class Member extends SoftDeletableBaseEntity {
     // === 식별 (코어) ===
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(columnDefinition = "CHAR(36)", updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false)
     private UUID memberUuid;
 
     @Column(length = 50, nullable = false)

@@ -8,6 +8,8 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.util.UUID;
 
@@ -27,7 +29,7 @@ public class PromptTemplate extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(columnDefinition = "CHAR(36)", updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false)
     private UUID promptTemplateUuid;
 
     @Column(nullable = false, length = 255)
@@ -55,6 +57,7 @@ public class PromptTemplate extends BaseEntity {
     @Column(length = 500)
     private String note;
 
-    @Column(columnDefinition = "JSON")
+    @JdbcTypeCode(SqlTypes.JSON)  // Hibernate 6 + PostgreSQL jsonb 컬럼 호환
+    @Column(columnDefinition = "JSONB")
     private String extraParamsJson;
 }

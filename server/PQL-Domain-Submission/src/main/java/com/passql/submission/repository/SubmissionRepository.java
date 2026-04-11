@@ -27,7 +27,8 @@ public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
     boolean existsByMemberUuidAndQuestionUuidAndSubmittedAtBetween(
             UUID memberUuid, UUID questionUuid, LocalDateTime start, LocalDateTime end);
 
-    @Query(value = "WITH latest AS (SELECT question_uuid, is_correct, ROW_NUMBER() OVER (PARTITION BY question_uuid ORDER BY submitted_at DESC) rn FROM submission WHERE member_uuid = :memberUuid) SELECT COALESCE(AVG(CASE WHEN is_correct=1 THEN 1.0 ELSE 0.0 END),0) FROM latest WHERE rn=1", nativeQuery = true)
+    // PostgreSQL: String → uuid 캐스트는 ::uuid가 아닌 CAST(:param AS uuid) 사용 (Hibernate 파라미터 파싱 호환)
+    @Query(value = "WITH latest AS (SELECT question_uuid, is_correct, ROW_NUMBER() OVER (PARTITION BY question_uuid ORDER BY submitted_at DESC) rn FROM submission WHERE member_uuid = CAST(:memberUuid AS uuid)) SELECT COALESCE(AVG(CASE WHEN is_correct=true THEN 1.0 ELSE 0.0 END),0) FROM latest WHERE rn=1", nativeQuery = true)
     Double calculateCorrectRateByMemberUuid(@Param("memberUuid") String memberUuid);
 
     @Query("SELECT DISTINCT FUNCTION('DATE', s.submittedAt) FROM Submission s WHERE s.memberUuid = :memberUuid ORDER BY FUNCTION('DATE', s.submittedAt) DESC")
@@ -66,9 +67,10 @@ public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
         "FROM submission s " +
         "JOIN question q ON q.question_uuid = s.question_uuid " +
         "JOIN topic t ON t.topic_uuid = q.topic_uuid " +
-        "WHERE s.member_uuid = :memberUuid " +
+        // PostgreSQL: CAST(:param AS uuid) 사용 (::uuid는 Hibernate 파라미터 파싱 오류 유발)
+        "WHERE s.member_uuid = CAST(:memberUuid AS uuid) " +
         "  AND s.submitted_at >= :since " +
-        "  AND t.is_active = 1",
+        "  AND t.is_active = true",
         nativeQuery = true)
     long countDistinctRecentActiveTopicsByMemberUuid(
         @Param("memberUuid") String memberUuid,
@@ -84,11 +86,12 @@ public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
      * @return Object[] = { java.sql.Date date, long solvedCount, long correctCount }
      */
     @Query(value =
+        // PostgreSQL: CAST(:param AS uuid) 사용, SUM(boolean) 불가 → CASE로 변환
         "SELECT DATE(s.submitted_at) AS date, " +
         "       COUNT(*)              AS solved_count, " +
-        "       SUM(s.is_correct)     AS correct_count " +
+        "       SUM(CASE WHEN s.is_correct THEN 1 ELSE 0 END) AS correct_count " +
         "FROM submission s " +
-        "WHERE s.member_uuid = :memberUuid " +
+        "WHERE s.member_uuid = CAST(:memberUuid AS uuid) " +
         "  AND s.submitted_at >= :fromDate " +
         "  AND s.submitted_at < :toDateExclusive " +
         "GROUP BY DATE(s.submitted_at) " +
@@ -107,6 +110,7 @@ public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
     @Transactional
     void deleteByQuestionUuid(UUID questionUuid);
 
+    // PostgreSQL: CAST(:param AS uuid) 사용 (::uuid는 Hibernate 파라미터 파싱 오류 유발)
     @Query(value = """
         WITH latest AS (
             SELECT s.question_uuid,
@@ -115,12 +119,12 @@ public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
                    ROW_NUMBER() OVER (PARTITION BY s.question_uuid ORDER BY s.submitted_at DESC, s.submission_uuid DESC) AS rn
             FROM submission s
             JOIN question q ON s.question_uuid = q.question_uuid
-            WHERE s.member_uuid = :memberUuid
+            WHERE s.member_uuid = CAST(:memberUuid AS uuid)
               AND s.submitted_at >= :since
         )
         SELECT topic_uuid,
                COUNT(*) AS solved_count,
-               AVG(CASE WHEN is_correct = 1 THEN 1.0 ELSE 0.0 END) AS correct_rate
+               AVG(CASE WHEN is_correct = true THEN 1.0 ELSE 0.0 END) AS correct_rate
         FROM latest
         WHERE rn = 1
         GROUP BY topic_uuid

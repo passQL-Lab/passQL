@@ -16,7 +16,7 @@ CREATE TABLE IF NOT EXISTS question_concept_tag (
 );
 
 -- ---------------------------------------------------------------------------
--- app_setting 시드 (13개) — PK: setting_key → ON DUPLICATE KEY UPDATE 안전
+-- app_setting 시드 (13개) — PK: setting_key → ON CONFLICT DO UPDATE
 -- ---------------------------------------------------------------------------
 INSERT INTO app_setting (setting_key, value_type, value_text, category, description)
 VALUES
@@ -33,52 +33,51 @@ VALUES
     ('ai.default_max_tokens',         'INT',    '1024',         'ai',        'AI 기본 최대 토큰'),
     ('question.default_page_size',    'INT',    '20',           'question',  '문제 목록 기본 페이지 크기'),
     ('question.max_difficulty',       'INT',    '5',            'question',  '문제 최대 난이도')
-ON DUPLICATE KEY UPDATE
-    value_type  = VALUES(value_type),
-    value_text  = VALUES(value_text),
-    category    = VALUES(category),
-    description = VALUES(description);
+ON CONFLICT (setting_key) DO UPDATE
+    SET value_type  = EXCLUDED.value_type,
+        value_text  = EXCLUDED.value_text,
+        category    = EXCLUDED.category,
+        description = EXCLUDED.description;
 
 -- ---------------------------------------------------------------------------
--- prompt_template 시드 (3종 v1)
--- PK가 AUTO_INCREMENT id이므로 INSERT ... SELECT WHERE NOT EXISTS 패턴으로 중복 방지
+-- prompt_template 시드 (3종 v1) — INSERT ... WHERE NOT EXISTS 패턴
 -- ---------------------------------------------------------------------------
 INSERT INTO prompt_template (key_name, version, is_active, model, system_prompt, user_template, temperature, max_tokens, note)
-SELECT 'explain_error', 1, 1, 'gemini-2.5-flash-lite',
+SELECT 'explain_error', 1, TRUE, 'gemini-2.5-flash-lite',
        '당신은 SQL 학습을 도와주는 전문 튜터입니다. 학습자가 SQL 문제를 틀렸을 때 오류 원인을 친절하고 명확하게 설명해 주세요. SQLD 시험 기준으로 설명하며, 핵심 개념(NULL 처리, 연산자 우선순위, 실행 순서 등)을 짚어주세요.',
        '문제: {{question_stem}}\n정답: {{correct_answer}}\n학습자 선택: {{selected_answer}}\n\n왜 틀렸는지 설명해 주세요.',
        0.5, 512, 'SQLD 오답 해설 프롬프트 v1'
 WHERE NOT EXISTS (SELECT 1 FROM prompt_template WHERE key_name = 'explain_error' AND version = 1);
 
 INSERT INTO prompt_template (key_name, version, is_active, model, system_prompt, user_template, temperature, max_tokens, note)
-SELECT 'diff_explain', 1, 1, 'gemini-2.5-flash-lite',
+SELECT 'diff_explain', 1, TRUE, 'gemini-2.5-flash-lite',
        '당신은 SQL 학습을 도와주는 전문 튜터입니다. 두 SQL 쿼리의 차이점을 비교 설명해 주세요. SQLD 시험에서 자주 출제되는 함정(RANK vs DENSE_RANK, UNION vs UNION ALL, LEFT/RIGHT OUTER JOIN 차이 등)을 중심으로 설명하세요.',
        '쿼리 A:\n{{query_a}}\n\n쿼리 B:\n{{query_b}}\n\n두 쿼리의 차이점과 각각의 실행 결과를 비교 설명해 주세요.',
        0.5, 768, 'SQL 쿼리 비교 설명 프롬프트 v1'
 WHERE NOT EXISTS (SELECT 1 FROM prompt_template WHERE key_name = 'diff_explain' AND version = 1);
 
 INSERT INTO prompt_template (key_name, version, is_active, model, system_prompt, user_template, temperature, max_tokens, note)
-SELECT 'similar', 1, 1, 'gemini-2.5-flash-lite',
+SELECT 'similar', 1, TRUE, 'gemini-2.5-flash-lite',
        '당신은 SQLD 시험 문제를 출제하는 전문가입니다. 주어진 문제와 유사한 난이도와 유형의 새로운 연습 문제를 생성해 주세요. 실제 SQLD 기출 스타일(함정 포함)로 작성하세요.',
        '다음 문제와 유사한 연습 문제를 1개 생성해 주세요.\n\n원본 문제:\n{{question_stem}}\n\n선택지:\n{{choices}}\n\n같은 개념을 다른 각도로 묻는 문제를 만들어 주세요.',
        0.8, 1024, '유사 문제 생성 프롬프트 v1'
 WHERE NOT EXISTS (SELECT 1 FROM prompt_template WHERE key_name = 'similar' AND version = 1);
 
 -- ---------------------------------------------------------------------------
--- topic 시드 (9개) — PK: code → ON DUPLICATE KEY UPDATE 안전
+-- topic 시드 (9개) — PK: code → ON CONFLICT DO UPDATE
 -- ---------------------------------------------------------------------------
 INSERT INTO topic (code, display_name, sort_order, is_active)
 VALUES
-    ('data_modeling',        '데이터 모델링의 이해',           1, 1),
-    ('sql_basic_select',     'SELECT 기본',                    2, 1),
-    ('sql_ddl_dml_tcl',      'DDL / DML / TCL',                3, 1),
-    ('sql_function',         'SQL 함수 (문자/숫자/날짜/NULL)',  4, 1),
-    ('sql_join',             '조인 (JOIN)',                     5, 1),
-    ('sql_subquery',         '서브쿼리',                        6, 1),
-    ('sql_group_aggregate',  '그룹함수 / 집계',                 7, 1),
-    ('sql_window',           '윈도우 함수',                     8, 1),
-    ('sql_hierarchy_pivot',  '계층 쿼리 / PIVOT',               9, 1)
-ON DUPLICATE KEY UPDATE
-    display_name = VALUES(display_name),
-    sort_order   = VALUES(sort_order),
-    is_active    = VALUES(is_active);
+    ('data_modeling',        '데이터 모델링의 이해',           1, TRUE),
+    ('sql_basic_select',     'SELECT 기본',                    2, TRUE),
+    ('sql_ddl_dml_tcl',      'DDL / DML / TCL',                3, TRUE),
+    ('sql_function',         'SQL 함수 (문자/숫자/날짜/NULL)',  4, TRUE),
+    ('sql_join',             '조인 (JOIN)',                     5, TRUE),
+    ('sql_subquery',         '서브쿼리',                        6, TRUE),
+    ('sql_group_aggregate',  '그룹함수 / 집계',                 7, TRUE),
+    ('sql_window',           '윈도우 함수',                     8, TRUE),
+    ('sql_hierarchy_pivot',  '계층 쿼리 / PIVOT',               9, TRUE)
+ON CONFLICT (code) DO UPDATE
+    SET display_name = EXCLUDED.display_name,
+        sort_order   = EXCLUDED.sort_order,
+        is_active    = EXCLUDED.is_active;

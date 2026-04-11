@@ -34,61 +34,79 @@ export const ChoiceCard = memo(function ChoiceCard({
   onExecute,
   onAskAi,
 }: ChoiceCardProps) {
-  const borderClass = isSelected ? "border-brand border-2" : "border-border";
-
   // RESULT_MATCH 선택지 판별: kind===TEXT + body가 JSON 배열
   const isResultMatch = choice.kind === "TEXT" && isJsonArray(choice.body);
   // CONCEPT_ONLY 텍스트 선택지: kind===TEXT + body가 JSON 배열 아님
   const isConceptText = choice.kind === "TEXT" && !isJsonArray(choice.body);
 
   return (
-    <div className={`card-base ${borderClass}`}>
-      <div className="flex items-start gap-3">
-        <button
-          type="button"
-          className={`radio-custom mt-0.5 shrink-0 ${isSelected ? "radio-custom--selected" : ""}`}
-          onClick={() => onSelect(choice.key, choice.body)}
-          aria-label={`선택지 ${choice.key}`}
-        />
-        <div className="flex-1 min-w-0">
-          <span className="text-body font-bold text-sm mb-2 block">{choice.key}</span>
-
-          {isResultMatch ? (
-            // RESULT_MATCH: JSON 배열 → 컴팩트 결과 테이블 렌더링, 실행 버튼 없음
-            <ResultMatchTable body={choice.body} />
-          ) : isConceptText ? (
-            // CONCEPT_ONLY: 일반 텍스트 렌더링
-            <p className="text-body text-sm">{choice.body}</p>
-          ) : (
-            // EXECUTABLE SQL: 코드 블록 + 실행 버튼
-            <>
-              <pre className="code-block text-sm"><code>{choice.body}</code></pre>
-              {isExecutable && (
-                <div className="flex justify-end mt-2">
-                  <button
-                    className="btn-compact"
-                    type="button"
-                    onClick={() => onExecute(choice.key, choice.body)}
-                    disabled={!!cached || isExecuting}
-                  >
-                    {isExecuting ? "실행 중..." : "실행"}
-                  </button>
-                </div>
-              )}
-              {cached && (
-                <ResultTable
-                  result={cached}
-                  onAskAi={
-                    cached.errorCode
-                      ? () => onAskAi?.(choice.key, cached.errorCode ?? "", cached.errorMessage ?? "")
-                      : undefined
-                  }
-                />
-              )}
-            </>
-          )}
+    // div[role=button]로 감싸야 내부 <button> (실행, AI에게 물어보기)이 중첩 버튼 위반 없이 동작한다
+    <div
+      role="button"
+      tabIndex={0}
+      aria-pressed={isSelected}
+      className="w-full text-left rounded-2xl p-4 transition-all duration-200 cursor-pointer"
+      style={{
+        backgroundColor: isSelected
+          ? "var(--color-brand-light)"
+          : "var(--color-surface-card)",
+        border: `1px solid ${isSelected ? "var(--color-brand)" : "var(--color-border)"}`,
+        borderLeft: `4px solid ${isSelected ? "var(--color-brand)" : "var(--color-border)"}`,
+      }}
+      onClick={() => onSelect(choice.key, choice.body)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          onSelect(choice.key, choice.body);
+        }
+      }}
+    >
+      {isResultMatch ? (
+        // RESULT_MATCH: JSON 결과 테이블 렌더링, 실행 버튼 없음
+        <div onClick={(e) => e.stopPropagation()}>
+          <ResultMatchTable body={choice.body} />
         </div>
-      </div>
+      ) : isConceptText ? (
+        // CONCEPT_ONLY: 일반 텍스트 렌더링
+        <p className="text-body text-sm">{choice.body}</p>
+      ) : (
+        // EXECUTABLE SQL: 모노 폰트 + 실행 버튼 (풀이 중 isExecutable=false로 숨김)
+        <>
+          <p
+            className="text-sm leading-relaxed whitespace-pre-wrap break-words"
+            style={{ fontFamily: "var(--font-mono)", color: "var(--color-text-primary)" }}
+          >
+            {choice.body}
+          </p>
+          {isExecutable && (
+            <div
+              className="flex justify-end mt-2"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                className="btn-compact"
+                type="button"
+                onClick={() => onExecute(choice.key, choice.body)}
+                disabled={!!cached || isExecuting}
+              >
+                {isExecuting ? "실행 중..." : "실행"}
+              </button>
+            </div>
+          )}
+          {cached && (
+            <div onClick={(e) => e.stopPropagation()}>
+              <ResultTable
+                result={cached}
+                onAskAi={
+                  cached.errorCode
+                    ? () => onAskAi?.(choice.key, cached.errorCode ?? "", cached.errorMessage ?? "")
+                    : undefined
+                }
+              />
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 });

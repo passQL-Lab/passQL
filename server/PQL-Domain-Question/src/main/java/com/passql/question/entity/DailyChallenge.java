@@ -26,12 +26,12 @@ public class DailyChallenge extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(columnDefinition = "CHAR(36)", updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false)
     private UUID dailyChallengeUuid;
 
     @Column(nullable = false)
     private LocalDate challengeDate;
 
-    @Column(columnDefinition = "CHAR(36)", nullable = false)
+    @Column(nullable = false)
     private UUID questionUuid;
 }

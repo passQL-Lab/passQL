@@ -6,6 +6,8 @@ import com.passql.question.constant.ChoiceSetPolicy;
 import com.passql.question.constant.ExecutionMode;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.util.UUID;
 
@@ -27,13 +29,13 @@ public class Question extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(columnDefinition = "CHAR(36)", updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false)
     private UUID questionUuid;
 
-    @Column(columnDefinition = "CHAR(36)", nullable = false)
+    @Column(nullable = false)
     private UUID topicUuid;
 
-    @Column(columnDefinition = "CHAR(36)")
+    
     private UUID subtopicUuid;
 
     @Column(nullable = false)
@@ -79,7 +81,8 @@ public class Question extends BaseEntity {
     @Builder.Default
     private ChoiceSetPolicy choiceSetPolicy = ChoiceSetPolicy.AI_ONLY;
 
-    @Column(columnDefinition = "JSON")
+    @JdbcTypeCode(SqlTypes.JSON)  // Hibernate 6 + PostgreSQL jsonb 컬럼 호환
+    @Column(columnDefinition = "JSONB")
     private String extraMetaJson;
 
     @Column(nullable = false)

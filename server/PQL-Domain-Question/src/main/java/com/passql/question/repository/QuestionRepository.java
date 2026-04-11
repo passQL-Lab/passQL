@@ -45,10 +45,12 @@ public interface QuestionRepository extends JpaRepository<Question, UUID> {
             Pageable pageable
     );
 
-    @Query(value = "SELECT * FROM question WHERE is_active = true ORDER BY RAND() LIMIT :size", nativeQuery = true)
+    // PostgreSQL: RAND() 대신 RANDOM() 사용
+    @Query(value = "SELECT * FROM question WHERE is_active = true ORDER BY RANDOM() LIMIT :size", nativeQuery = true)
     List<Question> findRandomActive(@Param("size") int size);
 
-    @Query(value = "SELECT * FROM question WHERE is_active = true AND question_uuid <> :excludeUuid ORDER BY RAND() LIMIT :size", nativeQuery = true)
+    // PostgreSQL: CAST(:param AS uuid) 사용 (::uuid는 Hibernate 파라미터 파싱 오류 유발)
+    @Query(value = "SELECT * FROM question WHERE is_active = true AND question_uuid <> CAST(:excludeUuid AS uuid) ORDER BY RANDOM() LIMIT :size", nativeQuery = true)
     List<Question> findRandomActiveExcluding(@Param("size") int size, @Param("excludeUuid") String excludeUuid);
 
     @Query("SELECT q.questionUuid FROM Question q WHERE q.isActive = true ORDER BY q.createdAt ASC")

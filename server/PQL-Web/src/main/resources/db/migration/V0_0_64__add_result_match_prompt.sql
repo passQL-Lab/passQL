@@ -1,9 +1,5 @@
 -- ===================================================================
 -- V0_0_64: RESULT_MATCH 선택지 정책 프롬프트 추가
---
--- 문제 유형: "다음 SQL의 실행 결과로 올바른 것은?"
--- 선택지 body: JSON 배열 형태의 결과 테이블
--- 검증: body JSON 파싱 후 answerSql 실행 결과와 비교 (Sandbox 재호출 없음)
 -- ===================================================================
 
 INSERT INTO prompt_template (
@@ -11,7 +7,7 @@ INSERT INTO prompt_template (
     system_prompt, user_template, temperature, max_tokens, note,
     created_at, updated_at
 )
-SELECT UUID(), 'generate_choice_set_result_match', 1, 1, 'gemini-2.5-flash-lite',
+SELECT gen_random_uuid(), 'generate_choice_set_result_match', 1, TRUE, 'gemini-2.5-flash-lite',
 '너는 SQL 문제의 4지선다 선택지를 생성하는 출제자야.
 
 이 문제 유형은 "다음 SQL의 실행 결과로 올바른 것은?" 유형이다.
@@ -32,7 +28,7 @@ SELECT UUID(), 'generate_choice_set_result_match', 1, 1, 'gemini-2.5-flash-lite'
 '[문제]\n{stem}\n\n[기준 SQL]\n{answer_sql}\n\n[기준 SQL 실행 결과]\n{answer_result}\n\n[DB 스키마]\n{schema_ddl}\n\n[샘플 데이터]\n{schema_sample_data}\n\n[난이도] {difficulty}/5\n\n위 기준 SQL의 실행 결과와 동일한 결과 JSON(정답 1개)과 다른 결과 JSON(오답 3개)로 4지선다를 생성해줘.\n각 선택지 body는 반드시 JSON 배열 형태여야 하며, SQL 쿼리를 body에 넣으면 안 된다.\n각 선택지에 rationale(왜 정답/오답인지 근거)을 포함해.',
 0.9, 1536,
 'v1: RESULT_MATCH 정책 전용 프롬프트. 선택지 body = JSON 배열 결과 테이블.',
-NOW(6), NOW(6)
+NOW(), NOW()
 WHERE NOT EXISTS (
     SELECT 1 FROM prompt_template
     WHERE key_name = 'generate_choice_set_result_match' AND version = 1

@@ -27,10 +27,10 @@ public class ConceptDoc extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(columnDefinition = "CHAR(36)", updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false)
     private UUID conceptDocUuid;
 
-    @Column(nullable = false, columnDefinition = "CHAR(36)")
+    @Column(nullable = false)
     private UUID conceptTagUuid;
 
     @Column(length = 255)

@@ -2,8 +2,8 @@
 -- execution_log
 -- -------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS execution_log (
-    id            BIGINT       NOT NULL AUTO_INCREMENT,
-    user_uuid     VARCHAR(36),
+    id            BIGINT       NOT NULL GENERATED ALWAYS AS IDENTITY,
+    user_uuid     UUID,
     question_id   BIGINT,
     choice_key    VARCHAR(100),
     sql_text      TEXT,
@@ -12,7 +12,7 @@ CREATE TABLE IF NOT EXISTS execution_log (
     error_message TEXT,
     row_count     INT,
     elapsed_ms    BIGINT,
-    executed_at   DATETIME,
+    executed_at   TIMESTAMP,
     PRIMARY KEY (id)
 );
 
@@ -20,11 +20,11 @@ CREATE TABLE IF NOT EXISTS execution_log (
 -- submission
 -- -------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS submission (
-    id           BIGINT      NOT NULL AUTO_INCREMENT,
-    user_uuid    VARCHAR(36),
+    id           BIGINT      NOT NULL GENERATED ALWAYS AS IDENTITY,
+    user_uuid    UUID,
     question_id  BIGINT,
     selected_key VARCHAR(100),
-    is_correct   TINYINT(1),
-    submitted_at DATETIME,
+    is_correct   BOOLEAN,
+    submitted_at TIMESTAMP,
     PRIMARY KEY (id)
 );

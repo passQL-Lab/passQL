@@ -161,10 +161,10 @@ public class QuestionImportExportService {
                 continue;
             }
 
-            // 1:1 치환 가능한 Oracle 문법을 MariaDB 호환으로 변환 후 저장 (validate 단계와 동일하게 적용)
-            String savedDdl       = translateOracleToMariaDb(item.schemaDdl());
-            String savedSample    = translateOracleToMariaDb(item.schemaSampleData());
-            String savedAnswerSql = translateOracleToMariaDb(item.answerSql());
+            // 1:1 치환 가능한 Oracle 문법을 PostgreSQL 호환으로 변환 후 저장 (validate 단계와 동일하게 적용)
+            String savedDdl       = translateOracleToPostgres(item.schemaDdl());
+            String savedSample    = translateOracleToPostgres(item.schemaSampleData());
+            String savedAnswerSql = translateOracleToPostgres(item.answerSql());
 
             // 치환 후에도 Oracle 전용 문법이 남아있으면 CONCEPT_ONLY로 자동 전환
             if (mode == ExecutionMode.EXECUTABLE
@@ -247,10 +247,10 @@ public class QuestionImportExportService {
                     item.executionMode(), "SKIP", null, null, null, importAction);
         }
 
-        // 1단계: 1:1 치환 가능한 Oracle 문법을 MariaDB 호환으로 변환 (NVL→IFNULL, SYSDATE→NOW())
-        String translatedDdl       = translateOracleToMariaDb(item.schemaDdl());
-        String translatedSample    = translateOracleToMariaDb(item.schemaSampleData());
-        String translatedAnswerSql = translateOracleToMariaDb(item.answerSql());
+        // 1단계: 1:1 치환 가능한 Oracle 문법을 PostgreSQL 호환으로 변환 (NVL→COALESCE, SYSDATE→NOW())
+        String translatedDdl       = translateOracleToPostgres(item.schemaDdl());
+        String translatedSample    = translateOracleToPostgres(item.schemaSampleData());
+        String translatedAnswerSql = translateOracleToPostgres(item.answerSql());
 
         // 2단계: 치환 후에도 남은 Oracle 전용 문법 감지 → CONCEPT_ONLY 자동 전환
         // (CONNECT BY, ROWNUM, NVL2, DECODE 등 단순 치환 불가 문법)
@@ -325,17 +325,18 @@ public class QuestionImportExportService {
     private static final Pattern PATTERN_SYSDATE = Pattern.compile("(?i)\\bSYSDATE\\b");
 
     /**
-     * 1:1 치환 가능한 Oracle 문법을 MariaDB 호환 문법으로 변환한다.
-     * - NVL(a, b)  → IFNULL(a, b)   (인자 순서·개수 동일, 안전)
-     * - SYSDATE    → NOW()           (동일 의미, 안전)
+     * 1:1 치환 가능한 Oracle 문법을 PostgreSQL 호환 문법으로 변환한다.
+     * - NVL(a, b)  → COALESCE(a, b)  (인자 순서·개수 동일, 안전)
+     * - SYSDATE    → NOW()            (동일 의미, 안전)
      * NVL2, DECODE, TO_DATE, TO_CHAR 등은 인자 구조가 달라 단순 치환 시 오작동 위험 → 미포함.
      *
      * @param sql 변환할 SQL 문자열 (null이면 null 그대로 반환)
      * @return 변환된 SQL 문자열
      */
-    public String translateOracleToMariaDb(String sql) {
+    public String translateOracleToPostgres(String sql) {
         if (sql == null) return null;
-        String result = PATTERN_NVL.matcher(sql).replaceAll("IFNULL(");
+        // PostgreSQL은 IFNULL 없음 → COALESCE 사용
+        String result = PATTERN_NVL.matcher(sql).replaceAll("COALESCE(");
         result = PATTERN_SYSDATE.matcher(result).replaceAll("NOW()");
         return result;
     }
@@ -349,7 +350,7 @@ public class QuestionImportExportService {
 
     /**
      * Oracle 전용 문법 키워드를 검사한다.
-     * MariaDB에서 실행 불가하거나 결과가 달라지는 Oracle 전용 문법이 포함된 경우 해당 키워드를 반환한다.
+     * PostgreSQL에서 실행 불가하거나 결과가 달라지는 Oracle 전용 문법이 포함된 경우 해당 키워드를 반환한다.
      * 검사 대상: answerSql, schemaDdl, schemaSampleData, stem (문제 본문에 SQL 예시가 포함되는 경우)
      * 단일 문제 직접 등록 및 벌크 임포트 양쪽에서 호출된다.
      *
@@ -367,45 +368,41 @@ public class QuestionImportExportService {
 
         // Oracle 전용 키워드 목록 (순서 중요: 더 긴 키워드를 먼저 검사)
         // 각 항목은 { 검사용 패턴, 사용자에게 보여줄 레이블 } 쌍
-        // NVL(→IFNULL, SYSDATE→NOW()는 translateOracleToMariaDb()에서 사전 치환되므로 여기서 감지 불필요.
+        // NVL(→COALESCE(, SYSDATE→NOW()는 translateOracleToPostgres()에서 사전 치환되므로 여기서 감지 불필요.
         // NVL2(는 3인자 구조가 달라 치환 불가 → 감지 대상 유지.
-        // REGEXP_REPLACE는 MariaDB 10.0.5+에서 지원 → 감지 목록 제외.
+        // FULL OUTER JOIN은 PostgreSQL 지원 → 감지 목록 제외.
+        // GROUPING SETS, REGEXP_SUBSTR 등은 PostgreSQL 지원 → 감지 목록 제외.
         String[][] oracleKeywords = {
-                // 계층적 쿼리 (CONNECT BY 절은 MariaDB 미지원)
+                // 계층적 쿼리 (CONNECT BY 절은 PostgreSQL 미지원 — 재귀 CTE로 대체)
                 {"CONNECT_BY_ROOT",         "CONNECT_BY_ROOT"},
                 {"SYS_CONNECT_BY_PATH",     "SYS_CONNECT_BY_PATH"},
                 {"CONNECT BY",              "CONNECT BY"},
                 {"START WITH",              "START WITH"},
-                // GROUPING SETS: MariaDB 10.2.2 이상에서 부분 지원하나 문법 차이 존재
-                {"GROUPING SETS",           "GROUPING SETS"},
-                // Oracle 전용 정규식 함수 (MariaDB 미지원)
+                // Oracle 전용 정규식 함수 (PostgreSQL 미지원)
                 {"REGEXP_COUNT(",           "REGEXP_COUNT"},
-                {"REGEXP_SUBSTR(",          "REGEXP_SUBSTR"},
                 {"REGEXP_INSTR(",           "REGEXP_INSTR"},
-                // DUAL 의사 테이블 (MariaDB는 FROM DUAL 없이도 동작하지만 일부 문법에서 차이)
+                // DUAL 의사 테이블 (PostgreSQL은 FROM DUAL 미지원 — FROM 절 생략 사용)
                 {"FROM DUAL",               "FROM DUAL"},
-                // FULL OUTER JOIN — MariaDB 미지원 (LEFT JOIN UNION RIGHT JOIN으로 우회 필요)
-                {"FULL OUTER JOIN",         "FULL OUTER JOIN"},
-                // Oracle OUTER JOIN 구문 (+) — MariaDB는 LEFT/RIGHT JOIN 사용
+                // Oracle OUTER JOIN 구문 (+) — PostgreSQL은 LEFT/RIGHT JOIN 사용
                 {"(+)",                     "(+)"},
-                // ROWNUM — MariaDB는 LIMIT/FETCH 사용
+                // ROWNUM — PostgreSQL은 ROW_NUMBER() 또는 LIMIT/OFFSET 사용
                 {"ROWNUM",                  "ROWNUM"},
-                // Oracle 전용 PIVOT/UNPIVOT
+                // Oracle 전용 PIVOT/UNPIVOT (PostgreSQL 미지원)
                 {"PIVOT",                   "PIVOT"},
                 {"UNPIVOT",                 "UNPIVOT"},
-                // Oracle 전용 MERGE INTO
+                // Oracle 전용 MERGE INTO (PostgreSQL은 INSERT ... ON CONFLICT 사용)
                 {"MERGE INTO",              "MERGE INTO"},
                 // Oracle SEQUENCE 객체
                 {".NEXTVAL",                ".NEXTVAL"},
                 {".CURRVAL",                ".CURRVAL"},
-                // DECODE — MariaDB 미지원 (CASE WHEN으로 대체 필요, 인자 가변이라 자동 치환 불가)
+                // DECODE — PostgreSQL 미지원 (CASE WHEN으로 대체 필요, 인자 가변이라 자동 치환 불가)
                 {"DECODE(",                 "DECODE"},
                 // NVL2 — NVL과 달리 3인자이며 논리가 반대라 자동 치환 불가
                 {"NVL2(",                   "NVL2"},
                 // 날짜 함수 — 포맷 코드 체계가 달라 자동 치환 불가
                 {"TO_DATE(",                "TO_DATE"},
                 {"TO_CHAR(",                "TO_CHAR"},
-                // ADD_MONTHS, MONTHS_BETWEEN — MariaDB 미지원
+                // ADD_MONTHS, MONTHS_BETWEEN — PostgreSQL 미지원
                 {"ADD_MONTHS(",             "ADD_MONTHS"},
                 {"MONTHS_BETWEEN(",         "MONTHS_BETWEEN"},
                 // Oracle 계층 쿼리의 LEVEL 의사 컬럼

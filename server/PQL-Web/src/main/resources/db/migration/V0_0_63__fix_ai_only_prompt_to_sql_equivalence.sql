@@ -1,32 +1,22 @@
 -- ===================================================================
 -- V0_0_63: AI_ONLY 선택지 정책 지문 패턴 및 프롬프트 수정
---
--- 문제: AI_ONLY + EXECUTABLE 문제의 지문이 "실행 결과로 올바른 것은?"인데
---       AI가 생성하는 선택지 body는 SQL 쿼리 형태 → 문제 유형과 불일치.
---       사용자가 실행 버튼으로 정답을 바로 확인할 수 있어 학습 효과 없음.
---
--- 해결: AI_ONLY 정책을 "주어진 SQL과 동일한 결과를 내는 SQL은?" 유형으로
---       재정의. 프롬프트 v2 → v3으로 업그레이드하여 이 방향을 명시.
---       기존 AI_ONLY EXECUTABLE 문제의 stem을 일괄 수정.
---       기존 선택지 세트는 삭제하여 재생성 유도.
 -- ===================================================================
 
 -- Phase 1: generate_choice_set v2 비활성화
 UPDATE prompt_template
-SET is_active = 0,
-    updated_at = NOW(6)
+SET is_active = FALSE,
+    updated_at = NOW()
 WHERE key_name = 'generate_choice_set'
   AND version = 2
-  AND is_active = 1;
+  AND is_active = TRUE;
 
 -- Phase 2: generate_choice_set v3 추가
--- AI_ONLY = "주어진 SQL과 동일한 결과를 내는 SQL을 고르는" 유형으로 명시
 INSERT INTO prompt_template (
     prompt_template_uuid, key_name, version, is_active, model,
     system_prompt, user_template, temperature, max_tokens, note,
     created_at, updated_at
 )
-SELECT UUID(), 'generate_choice_set', 3, 1, 'gemini-2.5-flash-lite',
+SELECT gen_random_uuid(), 'generate_choice_set', 3, TRUE, 'gemini-2.5-flash-lite',
 '너는 SQL 문제의 4지선다 선택지를 생성하는 출제자야.
 
 이 문제 유형은 "주어진 SQL과 동일한 실행 결과를 내는 SQL을 고르는" 유형이다.
@@ -36,7 +26,7 @@ SELECT UUID(), 'generate_choice_set', 3, 1, 'gemini-2.5-flash-lite',
 반드시 아래 규칙을 지킨다:
 1. 선택지는 정확히 4개(A, B, C, D)이어야 한다.
 2. 정답(is_correct=true)은 반드시 정확히 1개만이어야 한다.
-3. 각 선택지의 "body" 필드는 반드시 MariaDB에서 실행 가능한 SELECT SQL 쿼리여야 한다.
+3. 각 선택지의 "body" 필드는 반드시 PostgreSQL에서 실행 가능한 SELECT SQL 쿼리여야 한다.
    - 올바른 예: "SELECT A.NAME, B.DEPT_NAME FROM EMP A INNER JOIN DEPT B ON A.DEPT_ID = B.DEPT_ID WHERE B.DEPT_NAME = ''개발팀''"
    - 절대 금지: "NAME | DEPT_NAME\n홍길동 | 개발팀" (실행 결과 텍스트)
    - 절대 금지: "홍길동, 이철수" (단순 데이터 나열)
@@ -46,21 +36,16 @@ SELECT UUID(), 'generate_choice_set', 3, 1, 'gemini-2.5-flash-lite',
 '[문제]\n{stem}\n\n[기준 SQL]\n{answer_sql}\n\n[DB 스키마]\n{schema_ddl}\n\n[샘플 데이터]\n{schema_sample_data}\n\n[스키마 의도]\n{schema_intent}\n\n[난이도] {difficulty}/5\n\n위 기준 SQL과 동일한 실행 결과를 내는 SQL(정답 1개)과 다른 결과를 내는 SQL(오답 3개)로 4지선다를 생성해줘.\n각 선택지 body는 반드시 실행 가능한 SELECT SQL 쿼리여야 하며, 실행 결과 텍스트를 body에 넣으면 안 된다.\n각 선택지에 rationale(왜 정답/오답인지 근거)을 포함해.',
 0.9, 1536,
 'v3: AI_ONLY 정책을 "기준 SQL과 동일 결과를 내는 SQL 찾기" 유형으로 명시. 지문 패턴 변경에 맞춰 프롬프트 재작성.',
-NOW(6), NOW(6)
+NOW(), NOW()
 WHERE NOT EXISTS (
     SELECT 1 FROM prompt_template
     WHERE key_name = 'generate_choice_set' AND version = 3
 );
 
 -- Phase 3: AI_ONLY EXECUTABLE 문제 stem 일괄 수정
--- "다음 SQL의 실행 결과로 올바른 것은?" → "다음 SQL과 동일한 실행 결과를 내는 SQL은?"
--- "다음 SQL의 실행 결과 행 수로 올바른 것은?" → "다음 SQL과 동일한 실행 결과를 내는 SQL은?"
 UPDATE question
-SET stem = CONCAT(
-        '다음 SQL과 동일한 실행 결과를 내는 SQL은?',
-        SUBSTRING(stem, LOCATE(CHAR(10), stem))
-    ),
-    updated_at = NOW(6)
+SET stem = '다음 SQL과 동일한 실행 결과를 내는 SQL은?' || SUBSTRING(stem FROM POSITION(CHR(10) IN stem)),
+    updated_at = NOW()
 WHERE choice_set_policy = 'AI_ONLY'
   AND execution_mode = 'EXECUTABLE'
   AND (
@@ -69,27 +54,27 @@ WHERE choice_set_policy = 'AI_ONLY'
   );
 
 -- Phase 4: AI_ONLY EXECUTABLE 문제의 기존 선택지 세트 삭제 (재생성 유도)
--- 삭제 순서: submission FK 해제 → question_choice_set_item → question_choice_set
 
--- Step 1: submission이 참조하는 choice_set_uuid를 NULL로 해제 (FK 제약 회피)
+-- Step 1: submission이 참조하는 choice_set_uuid를 NULL로 해제
 UPDATE submission s
-INNER JOIN question_choice_set cs ON s.choice_set_uuid = cs.choice_set_uuid
-INNER JOIN question q ON cs.question_uuid = q.question_uuid
-SET s.choice_set_uuid = NULL
-WHERE q.choice_set_policy = 'AI_ONLY'
+SET choice_set_uuid = NULL
+FROM question_choice_set cs
+JOIN question q ON cs.question_uuid = q.question_uuid
+WHERE s.choice_set_uuid = cs.choice_set_uuid
+  AND q.choice_set_policy = 'AI_ONLY'
   AND q.execution_mode = 'EXECUTABLE';
 
 -- Step 2: 선택지 항목 삭제
-DELETE csi
-FROM question_choice_set_item csi
-INNER JOIN question_choice_set cs ON csi.choice_set_uuid = cs.choice_set_uuid
-INNER JOIN question q ON cs.question_uuid = q.question_uuid
-WHERE q.choice_set_policy = 'AI_ONLY'
+DELETE FROM question_choice_set_item csi
+USING question_choice_set cs
+JOIN question q ON cs.question_uuid = q.question_uuid
+WHERE csi.choice_set_uuid = cs.choice_set_uuid
+  AND q.choice_set_policy = 'AI_ONLY'
   AND q.execution_mode = 'EXECUTABLE';
 
 -- Step 3: 선택지 세트 삭제
-DELETE cs
-FROM question_choice_set cs
-INNER JOIN question q ON cs.question_uuid = q.question_uuid
-WHERE q.choice_set_policy = 'AI_ONLY'
+DELETE FROM question_choice_set cs
+USING question q
+WHERE cs.question_uuid = q.question_uuid
+  AND q.choice_set_policy = 'AI_ONLY'
   AND q.execution_mode = 'EXECUTABLE';

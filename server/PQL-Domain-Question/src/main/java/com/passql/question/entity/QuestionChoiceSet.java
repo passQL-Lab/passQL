@@ -5,6 +5,8 @@ import com.passql.question.constant.ChoiceSetSource;
 import com.passql.question.constant.ChoiceSetStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -36,10 +38,10 @@ public class QuestionChoiceSet extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(columnDefinition = "CHAR(36)", updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false)
     private UUID choiceSetUuid;
 
-    @Column(columnDefinition = "CHAR(36)", nullable = false)
+    @Column(nullable = false)
     private UUID questionUuid;
 
     @Enumerated(EnumType.STRING)
@@ -51,14 +53,14 @@ public class QuestionChoiceSet extends BaseEntity {
     @Builder.Default
     private ChoiceSetStatus status = ChoiceSetStatus.OK;
 
-    @Column(columnDefinition = "CHAR(36)")
+    
     private UUID generatedForMemberUuid;
 
     @Column(nullable = false)
     @Builder.Default
     private Boolean isReusable = false;
 
-    @Column(columnDefinition = "CHAR(36)")
+    
     private UUID promptTemplateUuid;
 
     @Column(length = 100)
@@ -76,12 +78,13 @@ public class QuestionChoiceSet extends BaseEntity {
     @Builder.Default
     private Boolean sandboxValidationPassed = false;
 
-    @Column(columnDefinition = "JSON")
+    @JdbcTypeCode(SqlTypes.JSON)  // Hibernate 6 + PostgreSQL jsonb 컬럼 호환
+    @Column(columnDefinition = "JSONB")
     private String rawResponseJson;
 
     private Integer totalElapsedMs;
 
-    @Column(columnDefinition = "CHAR(36)")
+    
     private UUID createdByMemberUuid;
 
     private LocalDateTime consumedAt;

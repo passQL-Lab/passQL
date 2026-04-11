@@ -1,12 +1,14 @@
 import { useState, useCallback, useEffect } from "react";
-import { useParams, useNavigate, Navigate } from "react-router-dom";
+import { useParams, useNavigate, Navigate, useBlocker } from "react-router-dom";
 import { Home } from "lucide-react";
 import { usePracticeStore } from "../stores/practiceStore";
 import { submitAnswer } from "../api/questions";
 import { getRandomMessage } from "../constants/microcopy";
 import QuestionDetail from "./QuestionDetail";
 import PracticeFeedbackBar from "../components/PracticeFeedbackBar";
-import type { SubmitResult } from "../types/api";
+import ConfirmModal from "../components/ConfirmModal";
+import ChoiceReview from "../components/ChoiceReview";
+import type { ChoiceItem, SubmitResult } from "../types/api";
 
 function WaitingForQuestion({ topicName }: { readonly topicName: string }) {
   return (
@@ -29,15 +31,30 @@ export default function PracticeSet() {
   const submitAndAdvance = usePracticeStore((s) => s.submitAndAdvance);
 
   const [feedback, setFeedback] = useState<SubmitResult | null>(null);
+  // EXECUTABLE 문제 오답노트용 상태
+  const [reviewChoices, setReviewChoices] = useState<readonly ChoiceItem[] | null>(null);
+  const [reviewSelectedKey, setReviewSelectedKey] = useState<string | null>(null);
 
   const totalQuestions = questions.length;
   const displayIndex = feedback ? currentIndex - 1 : currentIndex;
   const displayQuestion = questions[displayIndex];
   const isLast = displayIndex >= totalQuestions - 1;
 
+  // 마지막 문제 완료 여부 — 결과 페이지 이동 조건이자 이탈 차단 해제 기준
+  const shouldNavigateToResult = !feedback && currentIndex >= totalQuestions;
+
+  // 마지막 문제 완료 전까지 이탈 차단 — 중간 이탈 시 세션 기록 유실 방지
+  // useBlocker는 훅이므로 조건부 return 이전에 호출해야 함
+  const blocker = useBlocker(!shouldNavigateToResult);
+
   const handleSelect = useCallback(
-    async (selectedChoiceKey: string, choiceSetId: string) => {
+    async (selectedChoiceKey: string, choiceSetId: string, choices: readonly ChoiceItem[]) => {
       if (!displayQuestion) return;
+      // EXECUTABLE 문제면 오답노트 데이터 저장
+      if (choices[0]?.kind === "SQL") {
+        setReviewChoices(choices);
+        setReviewSelectedKey(selectedChoiceKey);
+      }
       try {
         const result = await submitAnswer(displayQuestion.questionUuid, choiceSetId, selectedChoiceKey);
         setFeedback(result);
@@ -61,18 +78,20 @@ export default function PracticeSet() {
 
   const handleNext = useCallback(() => {
     setFeedback(null);
+    setReviewChoices(null);
+    setReviewSelectedKey(null);
   }, []);
 
-  if (!storeSessionId || storeSessionId !== sessionId) {
-    return <Navigate to="/questions" replace />;
-  }
-
-  const shouldNavigateToResult = !feedback && currentIndex >= totalQuestions;
+  // useEffect는 훅 규칙상 조건부 return 이전에 위치해야 함
   useEffect(() => {
     if (shouldNavigateToResult) {
       navigate(`/practice/${sessionId}/result`, { replace: true });
     }
   }, [shouldNavigateToResult, navigate, sessionId]);
+
+  if (!storeSessionId || storeSessionId !== sessionId) {
+    return <Navigate to="/questions" replace />;
+  }
 
   if (shouldNavigateToResult) {
     return null;
@@ -107,14 +126,25 @@ export default function PracticeSet() {
       </div>
 
       {displayQuestion ? (
-        <div className={`flex-1 overflow-y-auto px-4 ${feedback ? "pointer-events-none opacity-60" : ""}`}>
-          <QuestionDetail
-            key={displayQuestion.questionUuid}
-            questionUuid={displayQuestion.questionUuid}
-            practiceMode
-            practiceSubmitLabel={isLast ? "결과 보기" : "다음 문제"}
-            onPracticeSubmit={handleSelect}
-          />
+        <div className="flex-1 overflow-y-auto px-4">
+          {/* 풀이 중: 선택 가능 / 피드백 후: 흐리게 비활성화 */}
+          <div className={feedback ? "pointer-events-none opacity-60" : ""}>
+            <QuestionDetail
+              key={displayQuestion.questionUuid}
+              questionUuid={displayQuestion.questionUuid}
+              practiceMode
+              practiceSubmitLabel={isLast ? "결과 보기" : "다음 문제"}
+              onPracticeSubmit={handleSelect}
+            />
+          </div>
+          {/* EXECUTABLE 문제: 피드백 후 오답노트 SQL 실행 비교 */}
+          {feedback && reviewChoices && (
+            <ChoiceReview
+              choices={reviewChoices}
+              questionUuid={displayQuestion.questionUuid}
+              selectedKey={reviewSelectedKey ?? undefined}
+            />
+          )}
         </div>
       ) : (
         <WaitingForQuestion topicName={topicName ?? ""} />
@@ -127,6 +157,17 @@ export default function PracticeSet() {
           nextLabel={currentIndex >= totalQuestions ? "결과 보기" : "다음 문제"}
         />
       )}
+
+      {/* 이탈 방지 확인 모달 */}
+      <ConfirmModal
+        isOpen={blocker.state === "blocked"}
+        title="풀이를 그만할까요?"
+        description="지금 나가면 현재 풀이 기록이 저장되지 않아요."
+        cancelLabel="계속 풀기"
+        confirmLabel="나가기"
+        onCancel={() => blocker.reset?.()}
+        onConfirm={() => blocker.proceed?.()}
+      />
     </div>
   );
 }

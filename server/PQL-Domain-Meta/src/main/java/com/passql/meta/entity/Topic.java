@@ -27,7 +27,7 @@ public class Topic extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(columnDefinition = "CHAR(36)", updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false)
     private UUID topicUuid;
 
     @Column(nullable = false, length = 100)

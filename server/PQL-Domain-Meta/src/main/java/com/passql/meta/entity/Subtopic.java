@@ -30,13 +30,13 @@ public class Subtopic extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(columnDefinition = "CHAR(36)", updatable = false, nullable = false)
+    @Column(updatable = false, nullable = false)
     private UUID subtopicUuid;
 
     @Column(nullable = false, length = 100)
     private String code;
 
-    @Column(nullable = false, columnDefinition = "CHAR(36)")
+    @Column(nullable = false)
     private UUID topicUuid;
 
     @Column(length = 255)
