@@ -12,6 +12,7 @@ import com.passql.question.repository.QuestionChoiceSetItemRepository;
 import com.passql.question.repository.QuestionChoiceSetRepository;
 import com.passql.question.repository.QuestionRepository;
 import com.passql.question.service.SandboxExecutor;
+import com.passql.question.service.SandboxPool;
 import com.passql.submission.dto.MonitorStats;
 import com.passql.submission.entity.ExecutionLog;
 import com.passql.submission.entity.Submission;
@@ -38,6 +39,7 @@ public class SubmissionService {
     private final QuestionRepository questionRepository;
     private final ExecutionLogRepository executionLogRepository;
     private final SandboxExecutor sandboxExecutor;
+    private final SandboxPool sandboxPool;
     // AI 코멘트 캐시 무효화용 (submit 완료 시 evict)
     private final RedisTemplate<String, Object> redisTemplate;
 
@@ -87,17 +89,38 @@ public class SubmissionService {
 
         Question question = questionRepository.findById(questionUuid).orElse(null);
         if (question != null && question.getExecutionMode() == ExecutionMode.EXECUTABLE) {
-            // sandboxDbName이 없는 레거시 문제는 questionUuid를 DB명으로 폴백 (executeChoice와 동일 정책)
             String dbName = question.getSandboxDbName();
-            if (dbName == null || dbName.isBlank()) {
-                dbName = question.getQuestionUuid().toString();
-            }
-            selectedSql = selected.getBody();
-            selectedResult = sandboxExecutor.execute(dbName, selectedSql);
 
+            selectedSql = selected.getBody();
             if (correct != null) {
                 correctSql = correct.getBody();
-                correctResult = sandboxExecutor.execute(dbName, correctSql);
+            }
+
+            if (dbName != null && !dbName.isBlank()) {
+                // 영구 sandbox DB — executeChoice()와 동일 경로
+                selectedResult = sandboxExecutor.execute(dbName, selectedSql);
+                if (correctSql != null) {
+                    correctResult = sandboxExecutor.execute(dbName, correctSql);
+                }
+            } else {
+                // sandboxDbName 미설정: SandboxPool에서 임시 DB를 빌려 DDL 적용 → 실행 → 반납
+                // executeChoice()와 동일한 경로 — questionUuid 폴백 DB는 존재하지 않으므로 사용 금지
+                String tempDb = sandboxPool.acquire();
+                try {
+                    String setupSql = question.getSchemaDdl() != null ? question.getSchemaDdl() : "";
+                    if (question.getSchemaSampleData() != null && !question.getSchemaSampleData().isBlank()) {
+                        setupSql = setupSql + ";\n" + question.getSchemaSampleData();
+                    }
+                    if (!setupSql.isBlank()) {
+                        sandboxExecutor.applyDdl(tempDb, setupSql);
+                    }
+                    selectedResult = sandboxExecutor.execute(tempDb, selectedSql);
+                    if (correctSql != null) {
+                        correctResult = sandboxExecutor.execute(tempDb, correctSql);
+                    }
+                } finally {
+                    sandboxPool.release(tempDb);
+                }
             }
         }
 
