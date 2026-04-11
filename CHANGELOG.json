@@ -1,11 +1,44 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-11T16:07:35Z",
-    "currentVersion": "0.0.70",
+    "lastUpdated": "2026-04-11T17:03:58Z",
+    "currentVersion": "0.0.72",
     "projectType": "basic",
-    "totalReleases": 25
+    "totalReleases": 26
   },
   "releases": [
+    {
+      "version": "0.0.72",
+      "project_type": "basic",
+      "date": "2026-04-11",
+      "pr_number": 124,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새로운 기능**\n  * 문제 풀이 중 화면 이동 시 확인 모달 추가\n  * SQL형 선택지의 실행 비교 기능 추가\n  * 선택지 카드 키보드 입력 지원 (Enter/Space)\n  * 로딩 화면 커스텀 메시지 지원\n\n* **버그 수정**\n  * 선택지 선택 시 자동 SQL 실행 제거\n  * 스키마 토글 UI 간소화\n  * 오답 피드백 표시 개선\n\n* **인프라 개선**\n  * PostgreSQL로 데이터베이스 마이그레이션",
+      "parsed_changes": {
+        "새로운_기능": {
+          "title": "새로운 기능",
+          "items": [
+            "문제 풀이 중 화면 이동 시 확인 모달 추가",
+            "SQL형 선택지의 실행 비교 기능 추가",
+            "선택지 카드 키보드 입력 지원 (Enter/Space)",
+            "로딩 화면 커스텀 메시지 지원"
+          ]
+        },
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "선택지 선택 시 자동 SQL 실행 제거",
+            "스키마 토글 UI 간소화",
+            "오답 피드백 표시 개선"
+          ]
+        },
+        "인프라_개선": {
+          "title": "인프라 개선",
+          "items": [
+            "PostgreSQL로 데이터베이스 마이그레이션"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.70",
       "project_type": "basic",
