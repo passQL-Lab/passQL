@@ -384,6 +384,8 @@ public class QuestionImportExportService {
                 {"REGEXP_INSTR(",           "REGEXP_INSTR"},
                 // DUAL 의사 테이블 (MariaDB는 FROM DUAL 없이도 동작하지만 일부 문법에서 차이)
                 {"FROM DUAL",               "FROM DUAL"},
+                // FULL OUTER JOIN — MariaDB 미지원 (LEFT JOIN UNION RIGHT JOIN으로 우회 필요)
+                {"FULL OUTER JOIN",         "FULL OUTER JOIN"},
                 // Oracle OUTER JOIN 구문 (+) — MariaDB는 LEFT/RIGHT JOIN 사용
                 {"(+)",                     "(+)"},
                 // ROWNUM — MariaDB는 LIMIT/FETCH 사용
