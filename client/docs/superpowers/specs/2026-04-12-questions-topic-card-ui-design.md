@@ -56,12 +56,32 @@ displayName  ← 제목만
 - 카드 내 `subtopics.length > 0` 조건부 캡션 제거
 - 카드 중앙 정렬 구조 유지 (아이콘 → 텍스트)
 
+### 3. 카드 그림자 & 호버 인터랙션
+
+> 디자인 시스템은 기본적으로 그림자 없음 정책이나, 사용자 요청에 따라 토픽 카드에 한해 적용.
+
+**기본 상태:**
+- `shadow-sm` — 카드에 미세한 입체감 부여 (`0 1px 3px rgba(0,0,0,0.08)`)
+- border: `1px solid #E5E7EB` 유지
+
+**호버 상태 (transition: all 200ms ease):**
+- `hover:shadow-md` — 그림자 확장으로 카드가 떠오르는 느낌
+- `hover:-translate-y-0.5` — 위로 2px 살짝 올라오는 리프트 효과
+- `hover:border-[#4F46E5]` — 보더 브랜드 인디고로 전환
+- 아이콘 색상: `group-hover` 시 `text-brand` 유지 (이미 인디고)
+
+**Tailwind 클래스 변경 (카드 버튼):**
+```
+기존: card-base flex flex-col ... hover:bg-surface transition-colors
+변경: card-base flex flex-col ... shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-[#4F46E5] transition-all duration-200
+```
+
 ---
 
 ## 변경하지 않는 것
 
 - `getTopicIcon()` 함수 시그니처 — 호출부(`Questions.tsx`) 변경 없음
-- 카드 레이아웃, 그리드, hover 스타일
+- 카드 그리드 레이아웃, 패딩, 정렬
 - `QuestionDetail.tsx` 미포함 (이번 스펙 범위 외)
 
 ---
@@ -71,4 +91,4 @@ displayName  ← 제목만
 | 파일 | 작업 |
 |------|------|
 | `src/constants/topicIcons.ts` | TOPIC_ICON_MAP 키 교정 + fallback 제거 |
-| `src/pages/Questions.tsx` | 카드 캡션(중복 displayName) 제거 |
+| `src/pages/Questions.tsx` | 카드 캡션 제거 + shadow/hover 인터랙션 추가 |
