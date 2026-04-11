@@ -1,11 +1,49 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-11T18:34:25Z",
-    "currentVersion": "0.0.78",
+    "lastUpdated": "2026-04-11T19:22:35Z",
+    "currentVersion": "0.0.81",
     "projectType": "basic",
-    "totalReleases": 29
+    "totalReleases": 30
   },
   "releases": [
+    {
+      "version": "0.0.81",
+      "project_type": "basic",
+      "date": "2026-04-11",
+      "pr_number": 137,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **New Features**\n  * SQL 코드 블록을 질문에서 파싱하여 표시하고 접을 수 있는 미리보기 모드 추가\n  * 답변 제출 후 추천 문제 목록 캐시 동기화 개선\n\n* **Bug Fixes**\n  * 파싱 실패 시 스트림 종료 오류 처리 수정\n  * 캐시 무효화 로직 개선\n\n* **Style**\n  * UI 컴포넌트 전반의 모서리 반경 스타일 업데이트\n  * 홈 페이지 구분선 제거로 레이아웃 간소화\n  * 스키마 뷰어 레이아웃 재설계\n\n* **Chores**\n  * 버전 v0.0.81로 업데이트",
+      "parsed_changes": {
+        "new_features": {
+          "title": "New Features",
+          "items": [
+            "SQL 코드 블록을 질문에서 파싱하여 표시하고 접을 수 있는 미리보기 모드 추가",
+            "답변 제출 후 추천 문제 목록 캐시 동기화 개선"
+          ]
+        },
+        "bug_fixes": {
+          "title": "Bug Fixes",
+          "items": [
+            "파싱 실패 시 스트림 종료 오류 처리 수정",
+            "캐시 무효화 로직 개선"
+          ]
+        },
+        "style": {
+          "title": "Style",
+          "items": [
+            "UI 컴포넌트 전반의 모서리 반경 스타일 업데이트",
+            "홈 페이지 구분선 제거로 레이아웃 간소화",
+            "스키마 뷰어 레이아웃 재설계"
+          ]
+        },
+        "chores": {
+          "title": "Chores",
+          "items": [
+            "버전 v0.0.81로 업데이트"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.78",
       "project_type": "basic",
