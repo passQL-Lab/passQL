@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 import '../models/member/member_register_response.dart';
 import '../models/member/member_me_response.dart';
+import '../models/member/nickname_regenerate_response.dart';
 
 part 'member_api.g.dart';
 
@@ -16,4 +17,10 @@ abstract class MemberApiClient {
   /// 닉네임 조회.
   @GET('/members/me')
   Future<MemberMeResponse> getMe(@Query('memberUuid') String memberUuid);
+
+  /// 닉네임 재생성.
+  @POST('/members/me/regenerate-nickname')
+  Future<NicknameRegenerateResponse> regenerateNickname(
+    @Query('memberUuid') String memberUuid,
+  );
 }
