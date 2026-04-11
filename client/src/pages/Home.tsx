@@ -70,6 +70,8 @@ export default function Home() {
         )}
       </section>
 
+      <hr className="border-t border-border my-6" />
+
       {/* 오늘의 문제 + 시험 일정 카드 섹션 */}
       <section className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
         {today?.question ? (
@@ -145,6 +147,8 @@ export default function Home() {
         )}
       </section>
 
+      <hr className="border-t border-border my-6" />
+
       {/* 학습 현황 섹션: heatmap 에러/로딩만 독립 처리 */}
       <section className="card-base shadow-sm mb-4">
         <div className="flex items-center justify-between mb-3">
@@ -186,6 +190,8 @@ export default function Home() {
           <div className="h-16 bg-border animate-pulse rounded" />
         )}
       </section>
+
+      <hr className="border-t border-border my-6" />
 
       {/* 합격 준비도 / 통계 섹션: progress 에러/로딩 독립 처리 */}
       {progressLoading ? (
@@ -256,6 +262,8 @@ export default function Home() {
           </div>
         </section>
       )}
+
+      <hr className="border-t border-border my-6" />
 
       {/* 추천 문제 섹션: 에러 또는 데이터 없으면 섹션 전체 숨김 */}
       {!recommendationsError && recommendations && recommendations.questions.length > 0 && (
