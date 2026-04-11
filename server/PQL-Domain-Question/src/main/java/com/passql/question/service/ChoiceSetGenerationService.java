@@ -186,8 +186,19 @@ public class ChoiceSetGenerationService {
             }
         }
 
-        // 3회 다 실패
+        // 3회 다 실패 — MULTIPLE_CORRECT이고 AI isCorrect=true가 정확히 1개면 AI 판단 신뢰 후 반환
         log.error("[choice-gen] 최대 재시도 초과: questionUuid={}, lastErrorCode={}", questionUuid, lastErrorCode);
+        if (lastErrorCode == ErrorCode.CHOICE_SET_VALIDATION_MULTIPLE_CORRECT && lastResult != null) {
+            long aiCorrectCount = lastResult.choices().stream()
+                    .filter(GeneratedChoiceDto::isCorrect)
+                    .count();
+            if (aiCorrectCount == 1) {
+                log.warn("[choice-gen] MULTIPLE_CORRECT fallback: AI isCorrect=1개 신뢰, sandboxValidationPassed=false 저장. questionUuid={}", questionUuid);
+                return choiceSetSaveService.saveWithAiCorrect(
+                        question, source, memberUuid, prompt, lastResult, MAX_ATTEMPTS);
+            }
+            log.error("[choice-gen] MULTIPLE_CORRECT fallback 불가: aiCorrectCount={}. questionUuid={}", aiCorrectCount, questionUuid);
+        }
         choiceSetSaveService.saveFailed(question, source, memberUuid, prompt, lastResult, MAX_ATTEMPTS, lastErrorCode);
         throw new CustomException(
                 lastErrorCode != null ? lastErrorCode : ErrorCode.CHOICE_SET_GENERATION_FAILED,
