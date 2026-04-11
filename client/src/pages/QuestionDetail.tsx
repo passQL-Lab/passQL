@@ -292,9 +292,10 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
 
   // standalone 모드: 전체화면 + max-w-120 집중 레이아웃 (DailyChallenge와 동일)
   // practiceMode: DailyChallenge가 외부 컨테이너(flex-1 overflow-y-auto px-4) 제공
+  // pb-24: fixed bottom 버튼 높이만큼 스크롤 영역 하단 여백 확보
   const containerClass = practiceMode
-    ? "flex flex-col px-1 pb-6"
-    : "flex flex-col min-h-screen bg-surface max-w-120 mx-auto w-full px-4 pb-6";
+    ? "flex flex-col px-1 pb-24"
+    : "flex flex-col min-h-screen bg-surface max-w-120 mx-auto w-full px-4 pb-24";
 
   return (
     <div className={containerClass}>
@@ -341,9 +342,11 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
         />
       )}
 
-      {/* 제출 버튼 */}
-      <div className="pt-4">
-        {submitButton}
+      {/* fixed bottom 제출 버튼 — PracticeFeedbackBar(z-30)가 제출 후 자연스럽게 덮음 */}
+      <div className="fixed bottom-0 inset-x-0 z-20 bg-surface-page border-t border-border">
+        <div className="mx-auto max-w-120 px-4 py-4">
+          {submitButton}
+        </div>
       </div>
 
       <AiExplanationSheet

@@ -153,7 +153,7 @@ export default function PracticeSet() {
               key={displayQuestion.questionUuid}
               questionUuid={displayQuestion.questionUuid}
               practiceMode
-              practiceSubmitLabel={isLast ? "결과 보기" : "다음 문제"}
+              practiceSubmitLabel={isLast ? "결과 보기" : "확인하기"}
               onPracticeSubmit={handleSelect}
             />
           </div>
