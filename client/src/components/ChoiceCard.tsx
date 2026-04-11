@@ -35,7 +35,6 @@ export const ChoiceCard = memo(function ChoiceCard({
           aria-label={`선택지 ${choice.key}`}
         />
         <div className="flex-1 min-w-0">
-          <span className="text-body font-bold text-sm mb-2 block">{choice.key}</span>
           <pre className="code-block text-sm"><code>{choice.body}</code></pre>
           {isExecutable && (
             <div className="flex justify-end mt-2">

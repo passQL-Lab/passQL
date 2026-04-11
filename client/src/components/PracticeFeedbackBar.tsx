@@ -51,11 +51,6 @@ export default function PracticeFeedbackBar({
             >
               {isCorrect ? "정답이에요!" : "오답이에요"}
             </p>
-            {!isCorrect && (
-              <p className="text-xs text-text-secondary mt-0.5">
-                정답: {result.correctKey}
-              </p>
-            )}
           </div>
         </div>
 
