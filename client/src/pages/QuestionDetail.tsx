@@ -277,10 +277,10 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
   );
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col px-1 pb-6">
       {/* 헤더: 일반 모드에서만 뒤로가기 + 메타 정보 */}
       {!practiceMode && (
-        <header className="flex items-center justify-between h-14 px-4">
+        <header className="flex items-center justify-between h-14 px-3">
           <button
             type="button"
             className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-border transition-colors"
@@ -295,36 +295,34 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
         </header>
       )}
 
-      {/* Sticky: 문제 지문 (토글) + 스키마 (토글) */}
-      <div className="sticky top-0 z-10 bg-surface px-1 pb-2">
-        <button
-          type="button"
-          className="card-base w-full text-left flex items-start gap-2 mt-2"
-          onClick={() => setStemOpen((prev) => !prev)}
-        >
-          <BookOpen size={16} className="text-brand mt-0.5 shrink-0" />
-          {stemOpen ? (
-            <p className="text-body text-sm">{question.stem}</p>
-          ) : (
-            <p className="text-body text-sm truncate">{question.stem}</p>
-          )}
-        </button>
-        {schemaSection}
-      </div>
-
-      {/* 스크롤: 선택지 + SQL 실행기 */}
-      <div className="flex-1 overflow-y-auto px-1">
-        {choicesSection}
-        {question.executionMode === "EXECUTABLE" && (
-          <SqlPlayground
-            questionUuid={questionUuid!}
-            onExecute={(sql) => executeChoice(questionUuid!, sql)}
-          />
+      {/* 문제 지문 (토글) */}
+      <button
+        type="button"
+        className="card-base w-full text-left flex items-start gap-2 mt-2"
+        onClick={() => setStemOpen((prev) => !prev)}
+      >
+        <BookOpen size={16} className="text-brand mt-0.5 shrink-0" />
+        {stemOpen ? (
+          <p className="text-body text-sm">{question.stem}</p>
+        ) : (
+          <p className="text-body text-sm truncate">{question.stem}</p>
         )}
-      </div>
+      </button>
 
-      {/* 하단: 버튼 */}
-      <div className="px-4 pb-4 pt-2">
+      {/* 스키마 */}
+      {schemaSection}
+
+      {/* 선택지 + SQL 실행기 */}
+      {choicesSection}
+      {question.executionMode === "EXECUTABLE" && (
+        <SqlPlayground
+          questionUuid={questionUuid!}
+          onExecute={(sql) => executeChoice(questionUuid!, sql)}
+        />
+      )}
+
+      {/* 제출 버튼 */}
+      <div className="px-3 pt-4">
         {submitButton}
       </div>
 
