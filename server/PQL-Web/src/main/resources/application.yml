@@ -22,9 +22,10 @@ suhapilog:
     base-url: "https://github.com/passQL-Lab/passQL/issues/"
 
 # SSE 스트림 엔드포인트는 ContentCachingResponseWrapper 버퍼링으로 스트림이 망가지므로 로깅 제외
+# suh-logger의 excludePatterns는 String.contains() 기반이므로 suffix 문자열만 지정
 suh-logger:
   exclude-patterns:
-    - "**/generate-choices"
+    - "generate-choices"
 
 springdoc:
   swagger-ui:
