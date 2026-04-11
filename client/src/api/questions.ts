@@ -1,4 +1,4 @@
-import { apiFetch } from "./client";
+import { apiFetch, BASE_URL } from "./client";
 import { getMemberUuid } from "../stores/memberStore";
 import type {
   Page,
@@ -75,7 +75,7 @@ export function generateChoices(
   (async () => {
     try {
       const response = await fetch(
-        `/api/questions/${questionUuid}/generate-choices`,
+        `${BASE_URL}/questions/${questionUuid}/generate-choices`,
         {
           method: "POST",
           headers: {

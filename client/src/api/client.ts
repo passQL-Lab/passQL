@@ -1,6 +1,6 @@
 import { getMockResponse } from "./mock-data";
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "/api";
+export const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "/api";
 const TIMEOUT_MS = 25_000;
 const IS_DEV = import.meta.env.DEV;
 const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true";
