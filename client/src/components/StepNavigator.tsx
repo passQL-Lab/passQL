@@ -40,7 +40,7 @@ export default function StepNavigator({ steps, lastButtonLabel = "다른 카테�
       <div className="flex items-center justify-between px-4 h-14">
         <button
           type="button"
-          className="w-10 h-10 flex items-center justify-center bg-surface-card border border-border rounded-lg"
+          className="w-10 h-10 flex items-center justify-center bg-surface-card border border-border rounded-xl"
           onClick={() => isFirst ? navigate("/") : goTo(current - 1)}
         >
           {isFirst ? <Home size={18} className="text-text-primary" /> : <ChevronLeft size={20} className="text-text-primary" />}
@@ -81,7 +81,7 @@ export default function StepNavigator({ steps, lastButtonLabel = "다른 카테�
       <div className="px-6 pb-6">
         <button
           type="button"
-          className="w-full h-12 bg-brand text-white font-bold rounded-lg flex items-center justify-center gap-1.5"
+          className="w-full h-12 bg-brand text-white font-bold rounded-xl flex items-center justify-center gap-1.5"
           onClick={handleNext}
         >
           {isLast ? lastButtonLabel : "다음"}

@@ -65,7 +65,7 @@ export default function CategoryCards() {
       )}
 
       {error && (
-        <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-lg mt-4">
+        <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl mt-4">
           <AlertCircle size={16} className="text-red-500 shrink-0" />
           <p className="text-sm text-red-700">{error}</p>
         </div>

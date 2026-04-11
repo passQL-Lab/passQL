@@ -104,7 +104,7 @@ export default function Questions() {
             {difficulty ? `난이도 ${difficulty}` : "난이도"} <ChevronDown size={14} className="text-text-caption inline" />
           </button>
           {diffOpen && (
-            <div className="absolute top-full mt-1 left-0 bg-surface-card border border-border rounded-lg z-10 py-1 min-w-30">
+            <div className="absolute top-full mt-1 left-0 bg-surface-card border border-border rounded-xl z-10 py-1 min-w-30">
               <button
                 type="button"
                 className="w-full text-left px-4 py-2 text-sm hover:bg-surface"

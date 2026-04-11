@@ -217,7 +217,6 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
         schemaDisplay={question.schemaDisplay}
         schemaDdl={question.schemaDdl}
         schemaSampleData={question.schemaSampleData}
-        schemaIntent={question.schemaIntent}
       />
     </section>
   ) : null;
@@ -307,7 +306,7 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
         <header className="flex items-center justify-between h-14 px-3">
           <button
             type="button"
-            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-border transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-border transition-colors"
             onClick={() => navigate(-1)}
           >
             <ArrowLeft size={18} className="text-text-secondary" />
@@ -346,7 +345,7 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
       )}
 
       {/* fixed bottom 제출 버튼 — PracticeFeedbackBar(z-30)가 제출 후 자연스럽게 덮음 */}
-      <div className="fixed bottom-0 inset-x-0 z-20 bg-surface-page border-t border-border">
+      <div className="fixed bottom-0 inset-x-0 z-20 bg-surface-page">
         <div className="mx-auto max-w-120 px-4 py-4">
           {submitButton}
         </div>

@@ -41,7 +41,7 @@ export const SqlPlayground = memo(function SqlPlayground({
       {isOpen && (
         <div className="mt-3">
           <textarea
-            className="w-full rounded-lg p-3 text-sm resize-none focus:outline-none focus:ring-1"
+            className="w-full rounded-xl p-3 text-sm resize-none focus:outline-none focus:ring-1"
             style={{
               fontFamily: "'JetBrains Mono', monospace",
               backgroundColor: "var(--color-code-bg)",

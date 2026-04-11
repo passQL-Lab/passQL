@@ -50,7 +50,7 @@ function SqlCompareBlock({
 
   return (
     <div
-      className="rounded-lg p-4 mb-4"
+      className="rounded-xl p-4 mb-4"
       style={{ backgroundColor: bgColor, borderLeft: `4px solid ${borderColor}` }}
     >
       <p className="text-sm font-semibold mb-2" style={{ color: labelColor }}>{label}</p>
@@ -85,7 +85,7 @@ function TextCompareBlock({
 
   return (
     <div
-      className="rounded-lg p-4 mb-4"
+      className="rounded-xl p-4 mb-4"
       style={{ backgroundColor: bgColor, borderLeft: `4px solid ${borderColor}` }}
     >
       <p className="text-sm font-semibold mb-2" style={{ color: labelColor }}>{label}</p>
@@ -260,11 +260,11 @@ export default function AnswerFeedback() {
       />
 
       {/* fixed bottom 액션 버튼 — QuestionDetail과 동일한 컨테이너 구조 */}
-      <div className="fixed bottom-0 inset-x-0 z-20 bg-surface-page border-t border-border">
+      <div className="fixed bottom-0 inset-x-0 z-20 bg-surface-page">
         <div className="mx-auto max-w-180 px-4 py-4">
           <button
             type="button"
-            className="w-full h-12 rounded-lg text-white font-bold text-base"
+            className="w-full h-12 rounded-xl text-white font-bold text-base"
             style={{
               backgroundColor: isCorrect
                 ? "var(--color-sem-success)"

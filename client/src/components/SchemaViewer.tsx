@@ -1,5 +1,4 @@
-import { useState, memo } from "react";
-import { Key, Link, ChevronDown, ChevronUp } from "lucide-react";
+import { memo } from "react";
 
 interface ParsedColumn {
   readonly name: string;
@@ -46,14 +45,12 @@ export function parseSchemaDisplay(schemaDisplay: string): ParsedTable[] {
  */
 export function parseSchemaDdl(schemaDdl: string): ParsedTable[] {
   const results: ParsedTable[] = [];
-  // CREATE TABLE 블록을 반복 추출
   const tableRegex = /CREATE\s+TABLE\s+(?:IF\s+NOT\s+EXISTS\s+)?(\w+)\s*\(([^;]+)\)/gi;
   let tableMatch: RegExpExecArray | null;
   while ((tableMatch = tableRegex.exec(schemaDdl)) !== null) {
     const tableName = tableMatch[1].toUpperCase();
     const body = tableMatch[2];
     const columns: ParsedColumn[] = [];
-    // 컬럼 정의 라인 파싱 (PRIMARY KEY, FOREIGN KEY, CONSTRAINT 라인 제외)
     for (const line of body.split(",")) {
       const trimmed = line.trim();
       if (!trimmed) continue;
@@ -63,7 +60,6 @@ export function parseSchemaDdl(schemaDdl: string): ParsedTable[] {
       const name = tokens[0] ?? "";
       const type = tokens[1] ?? "";
       if (!name || name.startsWith("--")) continue;
-      // PRIMARY KEY 인라인 표시 여부 확인
       const isPk = upper.includes("PRIMARY KEY");
       columns.push({ name: name.toUpperCase(), type: type.toUpperCase(), constraint: isPk ? "PK" : null });
     }
@@ -96,17 +92,14 @@ interface SchemaViewerProps {
   readonly schemaDisplay: string | null | undefined;
   readonly schemaDdl?: string | null;
   readonly schemaSampleData?: string;
-  readonly schemaIntent?: string;
+  // schemaIntent는 UI에 노출하지 않음 — DB 설계자용 메모
 }
 
 export const SchemaViewer = memo(function SchemaViewer({
   schemaDisplay,
   schemaDdl,
   schemaSampleData,
-  schemaIntent,
 }: SchemaViewerProps) {
-  const [ddlOpen, setDdlOpen] = useState(false);
-  // schemaDisplay 없으면 schemaDdl을 파싱해서 폴백 (레거시 데이터 대응)
   const tables =
     schemaDisplay && schemaDisplay.trim()
       ? parseSchemaDisplay(schemaDisplay)
@@ -117,142 +110,104 @@ export const SchemaViewer = memo(function SchemaViewer({
     ? parseSampleData(schemaSampleData)
     : new Map<string, string[][]>();
 
+  if (tables.length === 0) return null;
+
   return (
-    <div className="mt-1 space-y-2">
-      {schemaIntent && (
-        <p className="text-xs" style={{ color: "var(--color-text-caption)" }}>
-          {schemaIntent}
-        </p>
-      )}
+    <div className="mt-1 flex gap-2 overflow-x-auto pb-1" style={{ scrollSnapType: "x mandatory" }}>
+      {tables.map((table) => {
+        const rows = sampleRows.get(table.tableName.toUpperCase()) ?? [];
+        const hasSample = rows.length > 0;
 
-      {/* 테이블 구조 카드 — 가로 스와이프 */}
-      <div
-        className="flex gap-2 overflow-x-auto pb-1"
-        style={{ scrollSnapType: "x mandatory" }}
-      >
-        {tables.map((table) => (
-          <div
-            key={table.tableName}
-            className="card-base overflow-hidden shrink-0"
-            style={{ padding: 8, scrollSnapAlign: "start" }}
-          >
+        return (
+          <div key={table.tableName} className="w-full min-w-0 space-y-2" style={{ scrollSnapAlign: "start" }}>
+            {/* 스키마 구조 카드 */}
             <div
-              className="px-3 py-1 text-xs font-bold"
-              style={{
-                backgroundColor: "var(--color-accent-light)",
-                color: "var(--color-brand)",
-                borderBottom: "1px solid var(--color-border)",
-              }}
+              className="overflow-hidden rounded-xl border"
+              style={{ borderColor: "var(--color-border)" }}
             >
-              {table.tableName}
-            </div>
-            <table className="text-xs whitespace-nowrap">
-              <tbody>
-                {table.columns.map((col) => (
-                  <tr
-                    key={col.name}
-                    style={{ borderBottom: "1px solid var(--color-border)" }}
-                    className="last:border-0"
-                  >
-                    <td
-                      className="px-3 py-1 font-mono font-medium w-2/5"
-                      style={{ color: "var(--color-text-body)" }}
-                    >
-                      {col.constraint === "PK" && (
-                        <Key
-                          size={10}
-                          className="inline mr-1"
-                          style={{ color: "var(--color-brand)" }}
-                        />
-                      )}
-                      {col.constraint === "FK" && (
-                        <Link
-                          size={10}
-                          className="inline mr-1"
-                          style={{ color: "var(--color-text-body)" }}
-                        />
-                      )}
-                      {col.name}
-                    </td>
-                    <td
-                      className="px-3 py-1 w-2/5"
-                      style={{ color: "var(--color-text-caption)" }}
-                    >
-                      {col.type}
-                    </td>
-                    <td
-                      className="px-3 py-1 w-1/5"
-                      style={{ color: "var(--color-brand)", opacity: 0.7 }}
-                    >
-                      {col.constraint ?? ""}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        ))}
-      </div>
-
-      {/* 샘플 데이터 + DDL — 접기/펼치기로 숨김 */}
-      {(sampleRows.size > 0 || schemaDdl) && (
-        <div className="space-y-2">
-          {sampleRows.size > 0 &&
-            tables.map((table) => {
-              const rows = sampleRows.get(table.tableName.toUpperCase()) ?? [];
-              if (rows.length === 0) return null;
-              return (
-                <div key={`sample-${table.tableName}`}>
-                  <p
-                    className="text-xs mb-1"
-                    style={{ color: "var(--color-text-caption)" }}
-                  >
-                    {table.tableName} 샘플
-                  </p>
-                  <div className="overflow-x-auto">
-                    <table className="data-table w-full text-xs">
-                      <thead>
-                        <tr>
-                          {table.columns.map((col) => (
-                            <th key={col.name}>{col.name}</th>
-                          ))}
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {rows.map((row, i) => (
-                          <tr key={i}>
-                            {row.map((cell, j) => (
-                              <td key={j}>{cell}</td>
-                            ))}
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              );
-            })}
-
-          {schemaDdl && (
-            <div>
-              <button
-                type="button"
-                className="flex items-center gap-1 text-xs"
-                style={{ color: "var(--color-text-caption)" }}
-                onClick={() => setDdlOpen((prev) => !prev)}
+              <div
+                className="px-2 py-0.5 text-sm font-bold font-mono"
+                style={{
+                  backgroundColor: "var(--color-accent-light)",
+                  color: "var(--color-brand)",
+                  borderBottom: "1px solid var(--color-border)",
+                }}
               >
-                DDL{" "}
-                {ddlOpen ? <ChevronUp size={11} /> : <ChevronDown size={11} />}
-              </button>
-              {ddlOpen && (
-                <pre className="code-block mt-1 text-xs">
-                  <code>{schemaDdl}</code>
-                </pre>
-              )}
+                {table.tableName}
+              </div>
+              <table className="text-sm whitespace-nowrap w-full" style={{ borderCollapse: "collapse" }}>
+                <tbody>
+                  {table.columns.map((col, idx) => (
+                    <tr
+                      key={col.name}
+                      style={{
+                        borderBottom: "1px solid var(--color-border)",
+                        backgroundColor: idx % 2 === 1 ? "var(--color-surface-page)" : undefined,
+                      }}
+                      className="last:border-0"
+                    >
+                      {/* 컬럼명(제약조건) 형태로 표현 — ID(PK), DEPT_ID(FK) */}
+                      <td className="px-2 py-0.5 font-mono font-medium" style={{ color: "var(--color-text-body)" }}>
+                        {col.name}
+                        {col.constraint && (
+                          <span className="ml-0.5 text-xs" style={{ color: "var(--color-brand)", opacity: 0.8 }}>
+                            ({col.constraint})
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-2 py-0.5" style={{ color: "var(--color-text-caption)" }}>
+                        {col.type}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
-          )}
-        </div>
-      )}
+
+            {/* 샘플 데이터 카드 — 4px(space-y-1) 간격으로 분리 */}
+            {hasSample && (
+              <div
+                className="overflow-hidden rounded-xl border"
+                style={{ borderColor: "var(--color-border)" }}
+              >
+                <table className="text-sm whitespace-nowrap w-full" style={{ borderCollapse: "collapse" }}>
+                  <thead>
+                    <tr style={{ backgroundColor: "var(--color-surface-page)" }}>
+                      {table.columns.map((col) => (
+                        <th
+                          key={col.name}
+                          className="px-2 py-0.5 text-left font-medium font-mono"
+                          style={{ color: "var(--color-text-caption)", borderBottom: "1px solid var(--color-border)" }}
+                        >
+                          {col.name}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {rows.map((row, i) => (
+                      <tr
+                        key={i}
+                        className="last:border-0"
+                        style={{
+                          borderBottom: "1px solid var(--color-border)",
+                          backgroundColor: i % 2 === 1 ? "var(--color-surface-page)" : undefined,
+                        }}
+                      >
+                        {row.map((cell, j) => (
+                          <td key={j} className="px-2 py-0.5 font-mono tabular-nums" style={{ color: "var(--color-text-body)" }}>
+                            {cell}
+                          </td>
+                        ))}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 });

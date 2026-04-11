@@ -96,7 +96,7 @@ export default function DailyChallenge() {
           <div className="justify-self-start">
             <button
               type="button"
-              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-border transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-border transition-colors"
               onClick={() => navigate("/")}
             >
               <Home size={18} className="text-text-secondary" />

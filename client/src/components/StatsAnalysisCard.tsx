@@ -11,7 +11,7 @@ export default function StatsAnalysisCard({ comment, isLoading }: StatsAnalysisC
   if (isLoading) {
     return (
       <div className="card-base flex gap-3">
-        <div className="w-8 h-8 rounded-lg bg-border animate-pulse shrink-0" />
+        <div className="w-8 h-8 rounded-xl bg-border animate-pulse shrink-0" />
         <div className="flex-1 space-y-2 py-1">
           <div className="h-3 bg-border rounded animate-pulse w-1/4" />
           <div className="h-3 bg-border rounded animate-pulse w-full" />
@@ -26,7 +26,7 @@ export default function StatsAnalysisCard({ comment, isLoading }: StatsAnalysisC
 
   return (
     <div className="card-base flex gap-3">
-      <div className="w-8 h-8 rounded-lg bg-accent-light flex items-center justify-center shrink-0">
+      <div className="w-8 h-8 rounded-xl bg-accent-light flex items-center justify-center shrink-0">
         <Lightbulb size={16} className="text-brand" />
       </div>
       <div>
