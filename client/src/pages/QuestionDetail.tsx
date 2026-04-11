@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect, memo } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useParams, useNavigate, useBlocker } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, BookOpen, RefreshCw } from "lucide-react";
@@ -17,56 +17,6 @@ import {
 import { explainError } from "../api/ai";
 import ConfirmModal from "../components/ConfirmModal";
 import type { ChoiceItem, ExecuteResult, SubmitResult } from "../types/api";
-
-type StemSegment = { kind: "text"; content: string } | { kind: "sql"; content: string };
-
-/** ` ```sql ... ``` ` 블록을 텍스트와 SQL 세그먼트로 분리 */
-function parseStem(stem: string): StemSegment[] {
-  const segments: StemSegment[] = [];
-  // ```sql 또는 ``` 로 감싸진 블록 추출
-  const regex = /```(?:sql)?\n([\s\S]*?)```/g;
-  let lastIndex = 0;
-  let match: RegExpExecArray | null;
-
-  while ((match = regex.exec(stem)) !== null) {
-    // 코드 블록 앞 텍스트
-    if (match.index > lastIndex) {
-      const text = stem.slice(lastIndex, match.index).trim();
-      if (text) segments.push({ kind: "text", content: text });
-    }
-    segments.push({ kind: "sql", content: match[1].trim() });
-    lastIndex = match.index + match[0].length;
-  }
-  // 나머지 텍스트
-  const remaining = stem.slice(lastIndex).trim();
-  if (remaining) segments.push({ kind: "text", content: remaining });
-
-  // 백틱 블록이 없으면 전체를 텍스트로
-  return segments.length > 0 ? segments : [{ kind: "text", content: stem }];
-}
-
-/** stem을 텍스트/SQL 블록으로 나눠 렌더링 */
-const StemRenderer = memo(function StemRenderer({ stem, truncate }: { stem: string; truncate: boolean }) {
-  if (truncate) {
-    // 접힌 상태: 백틱 블록 제거 후 한 줄로 truncate
-    const preview = stem.replace(/```(?:sql)?\n[\s\S]*?```/g, "[SQL]").replace(/\n/g, " ");
-    return <p className="text-body text-sm truncate">{preview}</p>;
-  }
-  const segments = parseStem(stem);
-  return (
-    <div className="space-y-2 text-sm">
-      {segments.map((seg, i) =>
-        seg.kind === "sql" ? (
-          <pre key={i} className="code-block text-xs leading-relaxed whitespace-pre-wrap break-words">
-            <code>{seg.content}</code>
-          </pre>
-        ) : (
-          <p key={i} className="text-body leading-relaxed">{seg.content}</p>
-        )
-      )}
-    </div>
-  );
-});
 
 interface QuestionDetailProps {
   readonly practiceMode?: boolean;
@@ -104,6 +54,18 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
   // 재시도 트리거용 카운터
   const [sseRetryCount, setSseRetryCount] = useState(0);
 
+  // questionUuid가 바뀌면 SSE 상태 전체 초기화
+  // practiceMode에서 같은 컴포넌트 인스턴스로 문제가 교체될 때 이전 SSE 에러/결과가 남아
+  // needsSseGeneration의 !sseError 조건을 막아 새 SSE가 발화되지 않는 문제 방지
+  useEffect(() => {
+    setSseChoices(null);
+    setSseChoiceSetId(null);
+    setSseStatus(null);
+    setSseError(null);
+    setSseRetryCount(0);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [questionUuid]);
+
   // 단독 풀이 모드에서 제출 완료 전까지 이탈 차단 — practiceMode는 부모가 이미 차단하므로 제외
   // practiceMode !== true로 명시해 undefined(단독 모드 기본값)도 정확히 처리
   const blocker = useBlocker(practiceMode !== true && !submitted);
@@ -123,10 +85,9 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
     activeChoiceSet == null &&
     sseChoices == null &&
     !sseError;
+
   useEffect(() => {
-    // question 로드 완료 후 SSE 필요 여부를 effect 진입 시점에만 체크
-    // deps에 sseChoices/sseError를 넣으면 onComplete 후 리렌더 시 cleanup이 즉시 호출돼
-    // abort race condition이 발생하므로 진입 조건 체크만 하고 deps에서 제외
+    // question이 아직 로드되지 않았거나 SSE 불필요한 경우 스킵
     if (!needsSseGeneration || !questionUuid) return;
 
     setSseError(null);
@@ -164,11 +125,13 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
       clearTimeout(timeoutId);
       cleanup();
     };
-  // needsSseGeneration: question 로드·sseChoices·sseError 상태를 모두 반영한 파생값
-  // onComplete/onError 콜백이 상태를 바꿔도 cleanup이 abort를 호출하지 않도록
-  // deps에서 제외하고 effect 본문 첫 줄에서 직접 체크하는 방식 사용
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [questionUuid, sseRetryCount, question]);
+  // needsSseGeneration을 deps에 넣되, sseChoices/sseError의 변화는
+  // onComplete/onError 콜백 내부에서만 일어나므로 실질적으로 effect가 재실행되는 시점은:
+  //   1. question 첫 로드 완료 (null → 객체)
+  //   2. sseRetryCount 증가 (재시도 버튼)
+  //   3. questionUuid 변경 (다른 문제로 이동)
+  // background refetch는 staleTime: 60_000 설정으로 SSE 진행 중 발생하지 않음
+  }, [needsSseGeneration, questionUuid, sseRetryCount]);
 
   const explainMutation = useMutation({
     mutationFn: explainError,
@@ -380,7 +343,11 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
         onClick={() => setStemOpen((prev) => !prev)}
       >
         <BookOpen size={16} className="text-brand mt-0.5 shrink-0" />
-        <StemRenderer stem={question.stem} truncate={!stemOpen} />
+        {stemOpen ? (
+          <p className="text-body text-sm">{question.stem}</p>
+        ) : (
+          <p className="text-body text-sm truncate">{question.stem}</p>
+        )}
       </button>
 
       {/* 스키마 */}
