@@ -100,6 +100,9 @@ public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
         @Param("toDateExclusive") LocalDateTime toDateExclusive
     );
 
+    /** 특정 시간 이후 제출 건수 (대시보드 오늘 제출 집계용) */
+    long countBySubmittedAtAfter(LocalDateTime since);
+
     @Modifying
     @Transactional
     void deleteByQuestionUuid(UUID questionUuid);

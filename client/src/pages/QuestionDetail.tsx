@@ -196,10 +196,8 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
 
   const choicesSection = choices.length === 0 ? (
     <div className="mt-4 card-base text-center py-8 space-y-2">
-      {/* CONCEPT_ONLY 문제: 선택지가 아직 등록되지 않은 상태 */}
-      {question?.executionMode === "CONCEPT_ONLY" ? (
-        <p className="text-text-caption text-sm">선택지가 아직 준비되지 않았습니다</p>
-      ) : sseError ? (
+      {/* SSE 에러 → 재시도 UI (EXECUTABLE, CONCEPT_ONLY 공통) */}
+      {sseError ? (
         <>
           <p className="text-text-caption text-sm">선택지 생성에 실패했어요</p>
           {sseError.retryable && (

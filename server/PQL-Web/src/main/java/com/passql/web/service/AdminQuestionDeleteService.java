@@ -18,8 +18,10 @@ import com.passql.submission.repository.SubmissionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -85,4 +87,46 @@ public class AdminQuestionDeleteService {
 
         log.info("문제 삭제 완료: questionUuid={}", questionUuid);
     }
+
+    /**
+     * 선택된 UUID 목록을 순차적으로 cascade 삭제한다.
+     * 각 문제를 독립 트랜잭션으로 처리하여 일부 실패 시 나머지 삭제는 계속 진행한다.
+     *
+     * @return 삭제 결과 요약 (deleted: 성공, skipped: 건너뜀, errors: 실패 UUID 목록)
+     */
+    public BulkDeleteResult bulkDeleteQuestions(List<UUID> questionUuids) {
+        int deleted = 0;
+        int skipped = 0;
+        List<String> errors = new ArrayList<>();
+
+        for (UUID uuid : questionUuids) {
+            try {
+                // REQUIRES_NEW: 문제별 독립 트랜잭션 → 한 건 실패가 다른 건 롤백에 영향 안 줌
+                deleteSingleInNewTransaction(uuid);
+                deleted++;
+            } catch (Exception e) {
+                // CustomException(활성세션·미존재) 및 JPA 예외 등 모두 스킵 처리
+                skipped++;
+                errors.add(uuid + ": " + e.getMessage());
+                log.warn("일괄삭제 스킵: questionUuid={}, reason={}", uuid, e.getMessage());
+            }
+        }
+
+        log.info("일괄삭제 완료: total={}, deleted={}, skipped={}", questionUuids.size(), deleted, skipped);
+        return new BulkDeleteResult(deleted, skipped, errors);
+    }
+
+    /**
+     * 단일 문제를 새 트랜잭션으로 삭제한다.
+     * bulkDeleteQuestions에서 문제별 독립 커밋을 보장하기 위해 분리.
+     */
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void deleteSingleInNewTransaction(UUID questionUuid) {
+        deleteQuestionCascade(questionUuid);
+    }
+
+    /**
+     * 일괄삭제 결과 DTO.
+     */
+    public record BulkDeleteResult(int deleted, int skipped, List<String> errors) {}
 }

@@ -49,20 +49,27 @@ public class ChoiceSetGenerationService {
         Question question = questionService.getQuestionEntity(questionUuid);
         PromptTemplate prompt = promptService.getActivePrompt(CONCEPT_PROMPT_KEY);
         GenerateChoiceSetRequest req = buildConceptRequest(question, prompt);
+        log.debug("[choice-gen-concept] 요청 빌드 완료: questionUuid={}, promptKey={}", questionUuid, CONCEPT_PROMPT_KEY);
 
         GenerateChoiceSetResult lastResult = null;
         ErrorCode lastErrorCode = null;
 
         for (int attempts = 1; attempts <= MAX_ATTEMPTS; attempts++) {
             try {
+                log.debug("[choice-gen-concept] AI 호출 시작: attempt={}/{}, questionUuid={}", attempts, MAX_ATTEMPTS, questionUuid);
                 lastResult = aiGatewayClient.generateChoiceSet(req);
+                log.debug("[choice-gen-concept] AI 응답 수신: attempt={}, choiceCount={}, questionUuid={}",
+                        attempts, lastResult.choices().size(), questionUuid);
 
                 // AI가 내려준 is_correct 집계 — 1개여야 유효
                 long correctCount = lastResult.choices().stream()
                         .filter(c -> Boolean.TRUE.equals(c.isCorrect()))
                         .count();
+                log.debug("[choice-gen-concept] is_correct 집계: correctCount={}, attempt={}, questionUuid={}",
+                        correctCount, attempts, questionUuid);
 
                 if (correctCount == 1) {
+                    log.debug("[choice-gen-concept] 검증 통과, 저장 시작: attempt={}, questionUuid={}", attempts, questionUuid);
                     return choiceSetSaveService.saveConceptSuccess(
                             question, source, memberUuid, prompt, lastResult, attempts);
                 }
@@ -75,6 +82,7 @@ public class ChoiceSetGenerationService {
 
             } catch (CustomException e) {
                 if (e.getErrorCode() == ErrorCode.AI_FALLBACK_FAILED) {
+                    log.error("[choice-gen-concept] AI fallback 실패, 재시도 불가: attempt={}, questionUuid={}", attempts, questionUuid);
                     choiceSetSaveService.saveFailed(question, source, memberUuid, prompt, lastResult, attempts, e.getErrorCode());
                     throw e;
                 }
@@ -84,6 +92,7 @@ public class ChoiceSetGenerationService {
             }
         }
 
+        log.error("[choice-gen-concept] 최대 재시도 초과: questionUuid={}, lastErrorCode={}", questionUuid, lastErrorCode);
         choiceSetSaveService.saveFailed(question, source, memberUuid, prompt, lastResult, MAX_ATTEMPTS, lastErrorCode);
         throw new CustomException(
                 lastErrorCode != null ? lastErrorCode : ErrorCode.CHOICE_SET_GENERATION_FAILED,
@@ -98,6 +107,7 @@ public class ChoiceSetGenerationService {
         Question question = questionService.getQuestionEntity(questionUuid);
         PromptTemplate prompt = promptService.getActivePrompt(PROMPT_KEY);
         GenerateChoiceSetRequest req = buildRequest(question, prompt);
+        log.debug("[choice-gen] 요청 빌드 완료: questionUuid={}, promptKey={}", questionUuid, PROMPT_KEY);
 
         ValidationReport lastReport = null;
         GenerateChoiceSetResult lastResult = null;
@@ -105,7 +115,12 @@ public class ChoiceSetGenerationService {
 
         for (int attempts = 1; attempts <= MAX_ATTEMPTS; attempts++) {
             try {
+                log.debug("[choice-gen] AI 호출 시작: attempt={}/{}, questionUuid={}", attempts, MAX_ATTEMPTS, questionUuid);
                 lastResult = aiGatewayClient.generateChoiceSet(req);
+                log.debug("[choice-gen] AI 응답 수신: attempt={}, choiceCount={}, questionUuid={}",
+                        attempts, lastResult.choices().size(), questionUuid);
+
+                log.debug("[choice-gen] Sandbox 검증 시작: attempt={}, questionUuid={}", attempts, questionUuid);
                 // policy를 validator에 전달 — ODD_ONE_OUT 유형은 다른 검증 로직 적용
                 lastReport = sandboxValidator.validate(
                         lastResult.choices(),
@@ -113,8 +128,11 @@ public class ChoiceSetGenerationService {
                         question.getSchemaDdl(),
                         question.getSchemaSampleData(),
                         question.getChoiceSetPolicy());
+                log.debug("[choice-gen] Sandbox 검증 완료: attempt={}, correctCount={}, questionUuid={}",
+                        attempts, lastReport.correctCount(), questionUuid);
 
                 if (lastReport.correctCount() == 1) {
+                    log.debug("[choice-gen] 검증 통과, 저장 시작: attempt={}, questionUuid={}", attempts, questionUuid);
                     return choiceSetSaveService.saveSuccess(
                             question, source, memberUuid, prompt, lastResult, lastReport, attempts);
                 }
@@ -131,6 +149,7 @@ public class ChoiceSetGenerationService {
                 if (ec == ErrorCode.SANDBOX_SETUP_FAILED
                         || ec == ErrorCode.SANDBOX_ANSWER_SQL_FAILED
                         || ec == ErrorCode.AI_FALLBACK_FAILED) {
+                    log.error("[choice-gen] 재시도 불가 에러: code={}, attempt={}, questionUuid={}", ec, attempts, questionUuid);
                     choiceSetSaveService.saveFailed(question, source, memberUuid, prompt, lastResult, attempts, ec);
                     throw e;
                 }
@@ -142,6 +161,7 @@ public class ChoiceSetGenerationService {
         }
 
         // 3회 다 실패
+        log.error("[choice-gen] 최대 재시도 초과: questionUuid={}, lastErrorCode={}", questionUuid, lastErrorCode);
         choiceSetSaveService.saveFailed(question, source, memberUuid, prompt, lastResult, MAX_ATTEMPTS, lastErrorCode);
         throw new CustomException(
                 lastErrorCode != null ? lastErrorCode : ErrorCode.CHOICE_SET_GENERATION_FAILED,

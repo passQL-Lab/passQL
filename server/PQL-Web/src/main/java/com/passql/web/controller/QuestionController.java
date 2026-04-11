@@ -23,6 +23,7 @@ import com.passql.question.service.QuestionService;
 import com.passql.question.service.SandboxExecutor;
 import com.passql.submission.service.SubmissionService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
@@ -34,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+@Slf4j
 @RestController
 @RequestMapping("/api/questions")
 @RequiredArgsConstructor
@@ -101,6 +103,7 @@ public class QuestionController implements QuestionControllerDocs {
 
         Thread.startVirtualThread(() -> {
             try {
+                log.debug("[generate-choices] VirtualThread 진입: questionUuid={}, memberUuid={}", questionUuid, memberUuid);
                 // status: generating
                 emitter.send(SseEmitter.event()
                         .name("status")
@@ -109,6 +112,8 @@ public class QuestionController implements QuestionControllerDocs {
 
                 // ChoiceSetResolver: 프리페치 캐시 히트 → 없으면 실시간 AI 생성
                 QuestionChoiceSet choiceSet = choiceSetResolver.resolveForUser(questionUuid, memberUuid);
+                log.info("[generate-choices] resolveForUser 완료: questionUuid={}, choiceSetUuid={}",
+                        questionUuid, choiceSet.getChoiceSetUuid());
 
                 // status: validating
                 emitter.send(SseEmitter.event()
@@ -117,8 +122,10 @@ public class QuestionController implements QuestionControllerDocs {
                                 new SseStatusEvent("validating", "SQL 실행 검증 중..."))));
 
                 // Items 조회 → 응답 변환 (isCorrect, rationale 제외)
+                log.debug("[generate-choices] items 조회 시작: choiceSetUuid={}", choiceSet.getChoiceSetUuid());
                 List<QuestionChoiceSetItem> items = choiceSetItemRepository
                         .findByChoiceSetUuidOrderBySortOrderAsc(choiceSet.getChoiceSetUuid());
+                log.debug("[generate-choices] items 조회 완료: count={}", items.size());
 
                 List<ChoiceSetGenerateResponse.ChoiceItem> responseItems = items.stream()
                         .map(item -> new ChoiceSetGenerateResponse.ChoiceItem(
@@ -132,14 +139,20 @@ public class QuestionController implements QuestionControllerDocs {
                         choiceSet.getChoiceSetUuid(), responseItems);
 
                 // complete
+                log.info("[generate-choices] SSE complete 전송: questionUuid={}, choiceSetUuid={}, itemCount={}",
+                        questionUuid, choiceSet.getChoiceSetUuid(), items.size());
                 emitter.send(SseEmitter.event()
                         .name("complete")
                         .data(objectMapper.writeValueAsString(response)));
 
                 emitter.complete();
             } catch (CustomException e) {
+                log.error("[generate-choices] CustomException 발생: questionUuid={}, code={}, message={}",
+                        questionUuid, e.getErrorCode().name(), e.getMessage());
                 sendSseError(emitter, e.getErrorCode().name(), e.getMessage(), true);
             } catch (Exception e) {
+                // VirtualThread 내 예외는 기본적으로 로그가 없어 silent fail 발생 — 반드시 로깅
+                log.error("[generate-choices] 예상치 못한 예외 발생: questionUuid={}", questionUuid, e);
                 sendSseError(emitter, "GENERATION_FAILED", "선택지 생성에 실패했습니다", true);
             }
         });

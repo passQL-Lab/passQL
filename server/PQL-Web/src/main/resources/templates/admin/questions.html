@@ -50,23 +50,56 @@
                 </button>
                 <a th:href="@{/admin/questions}" class="btn btn-sm btn-ghost">초기화</a>
 
-                <div class="ml-auto flex gap-2">
-                    <button type="button" class="btn btn-sm btn-ghost" onclick="openBulkGuideModal()" title="대량 JSON 가이드">
-                        <i data-lucide="help-circle" class="size-4"></i>
-                        가이드
+                <div class="ml-auto flex gap-2 items-center">
+                    <!-- 선택 삭제 버튼: 체크박스 선택 시 활성화 -->
+                    <button type="button" id="deleteSelectedBtn" class="btn btn-sm btn-error btn-outline" onclick="deleteSelected()" disabled>
+                        <i data-lucide="trash-2" class="size-4"></i>
+                        <span id="deleteSelectedLabel">선택 삭제</span>
                     </button>
-                    <button type="button" class="btn btn-sm btn-outline" onclick="openImportFileDialog()">
-                        <i data-lucide="upload" class="size-4"></i>
-                        JSON 가져오기
-                    </button>
-                    <button type="button" class="btn btn-sm btn-outline" onclick="exportByFilter()">
-                        <i data-lucide="download" class="size-4"></i>
-                        필터 전체 내보내기
-                    </button>
-                    <button type="button" id="exportSelectedBtn" class="btn btn-sm btn-outline" onclick="exportSelected()" disabled>
-                        <i data-lucide="check-square" class="size-4"></i>
-                        <span id="exportSelectedLabel">선택 내보내기</span>
-                    </button>
+
+                    <!-- JSON 내보내기/가져오기 드롭다운 -->
+                    <div class="dropdown dropdown-end">
+                        <label tabindex="0" class="btn btn-sm btn-outline">
+                            <i data-lucide="database" class="size-4"></i>
+                            JSON
+                            <i data-lucide="chevron-down" class="size-3"></i>
+                        </label>
+                        <ul tabindex="0" class="dropdown-content menu menu-sm shadow bg-base-100 rounded-box w-52 z-50 mt-1">
+                            <li>
+                                <button type="button" onclick="openImportFileDialog()">
+                                    <i data-lucide="upload" class="size-4"></i>
+                                    JSON 파일 가져오기
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" onclick="openBulkPasteModal()">
+                                    <i data-lucide="clipboard-paste" class="size-4"></i>
+                                    JSON 붙여넣기
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" onclick="exportByFilter()">
+                                    <i data-lucide="download" class="size-4"></i>
+                                    필터 전체 내보내기
+                                </button>
+                            </li>
+                            <li>
+                                <button type="button" id="exportSelectedBtn" onclick="exportSelected()" disabled>
+                                    <i data-lucide="check-square" class="size-4"></i>
+                                    <span id="exportSelectedLabel">선택 내보내기</span>
+                                </button>
+                            </li>
+                            <li><hr class="border-base-300 my-1"/></li>
+                            <li>
+                                <button type="button" onclick="openBulkGuideModal()">
+                                    <i data-lucide="help-circle" class="size-4"></i>
+                                    대량 JSON 가이드
+                                </button>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- 주요 액션 버튼 -->
                     <a th:href="@{/admin/questions/register}" class="btn btn-sm btn-primary">
                         <i data-lucide="pencil" class="size-4"></i>
                         직접 등록
@@ -231,6 +264,27 @@
         <form method="dialog" class="modal-backdrop"><button>close</button></form>
     </dialog>
 
+    <!-- 선택 일괄삭제 확인 모달 -->
+    <dialog id="bulkDeleteModal" class="modal">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg text-error">선택한 문제를 삭제하시겠습니까?</h3>
+            <p class="py-4">
+                총 <span id="bulkDeleteCount" class="font-bold text-error">0</span>개의 문제를 삭제합니다.
+            </p>
+            <p class="text-sm text-base-content/60">
+                이 작업은 되돌릴 수 없으며, 각 문제의 제출 기록·실행 로그·선택지·태그·오늘의 문제 등록 이력이 모두 함께 삭제됩니다.
+                진행 중인 퀴즈 세션에서 사용 중인 문제는 삭제되지 않고 건너뜁니다.
+            </p>
+            <div class="modal-action">
+                <button class="btn" onclick="document.getElementById('bulkDeleteModal').close()">취소</button>
+                <button id="bulkDeleteConfirmBtn" type="button" class="btn btn-error" onclick="confirmBulkDelete()">
+                    삭제
+                </button>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop"><button>close</button></form>
+    </dialog>
+
     <!-- 대량 JSON 가이드 모달 -->
     <dialog id="bulkGuideModal" class="modal">
         <div class="modal-box w-11/12 max-w-3xl max-h-[80vh] overflow-y-auto">
@@ -242,9 +296,9 @@
                         <i data-lucide="download" class="size-4"></i>
                         MD 파일 다운로드
                     </a>
-                    <button type="button" class="btn btn-sm btn-ghost" onclick="copyBulkPrompt()">
-                        <i data-lucide="copy" class="size-4"></i>
-                        AI 프롬프트 복사
+                    <button type="button" id="copyBulkPromptBtn" class="btn btn-sm btn-ghost" onclick="copyBulkPrompt()">
+                        <i id="copyBulkPromptIcon" data-lucide="copy" class="size-4"></i>
+                        <span id="copyBulkPromptLabel">AI 프롬프트 복사</span>
                     </button>
                 </div>
             </div>
@@ -309,11 +363,37 @@
                     <textarea id="bulkGuidePromptText" rows="10" readonly
                               class="textarea textarea-bordered w-full font-mono text-xs bg-base-200"></textarea>
                 </div>
-                <p id="bulkCopySuccessMsg" class="text-success text-xs mt-1 hidden">복사됐습니다.</p>
             </div>
 
             <div class="modal-action">
                 <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('bulkGuideModal').close()">닫기</button>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop"><button>close</button></form>
+    </dialog>
+
+    <!-- JSON 붙여넣기 모달 (배열 텍스트 직접 입력) -->
+    <dialog id="bulkPasteModal" class="modal">
+        <div class="modal-box w-11/12 max-w-2xl">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-lg">JSON 붙여넣기</h3>
+                <button type="button" class="btn btn-sm btn-ghost" onclick="document.getElementById('bulkPasteModal').close()">
+                    <i data-lucide="x" class="size-4"></i>
+                </button>
+            </div>
+            <p class="text-sm text-base-content/60 mb-3">
+                대량 JSON 배열을 텍스트로 직접 붙여넣어 가져옵니다. <code>[{...}, {...}]</code> 형태의 배열이어야 합니다.
+            </p>
+            <textarea id="bulkPasteArea" rows="12"
+                      class="textarea textarea-bordered w-full font-mono text-xs"
+                      placeholder='[&#10;  {&#10;    "topicCode": "sql_join",&#10;    "difficulty": 3,&#10;    "executionMode": "EXECUTABLE",&#10;    ...&#10;  }&#10;]'></textarea>
+            <p id="bulkPasteError" class="text-error text-sm mt-2 hidden"></p>
+            <div class="modal-action">
+                <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('bulkPasteModal').close()">취소</button>
+                <button type="button" class="btn btn-primary btn-sm" onclick="applyBulkFromPaste()">
+                    <i data-lucide="check" class="size-4"></i>
+                    가져오기
+                </button>
             </div>
         </div>
         <form method="dialog" class="modal-backdrop"><button>close</button></form>
@@ -453,20 +533,38 @@ answerSql (EXECUTABLE 필수, CONCEPT_ONLY → null):
 
     function openBulkGuideModal() {
         document.getElementById('bulkGuidePromptText').value = BULK_AI_PROMPT;
-        document.getElementById('bulkCopySuccessMsg').classList.add('hidden');
         document.getElementById('bulkGuideModal').showModal();
         lucide.createIcons();
     }
 
     function copyBulkPrompt() {
-        navigator.clipboard.writeText(BULK_AI_PROMPT).then(() => {
-            const msg = document.getElementById('bulkCopySuccessMsg');
-            msg.classList.remove('hidden');
-            setTimeout(() => msg.classList.add('hidden'), 2000);
-        }).catch(() => {
+        const btn = document.getElementById('copyBulkPromptBtn');
+        const icon = document.getElementById('copyBulkPromptIcon');
+        const label = document.getElementById('copyBulkPromptLabel');
+
+        function onCopied() {
+            // 버튼을 초록색 체크 아이콘으로 전환
+            btn.classList.add('btn-success', 'text-success-content');
+            btn.classList.remove('btn-ghost');
+            icon.setAttribute('data-lucide', 'check');
+            label.textContent = '복사됨';
+            lucide.createIcons();
+
+            setTimeout(() => {
+                // 원래 상태로 복구
+                btn.classList.remove('btn-success', 'text-success-content');
+                btn.classList.add('btn-ghost');
+                icon.setAttribute('data-lucide', 'copy');
+                label.textContent = 'AI 프롬프트 복사';
+                lucide.createIcons();
+            }, 2000);
+        }
+
+        navigator.clipboard.writeText(BULK_AI_PROMPT).then(onCopied).catch(() => {
             const ta = document.getElementById('bulkGuidePromptText');
             ta.select();
             document.execCommand('copy');
+            onCopied();
         });
     }
 

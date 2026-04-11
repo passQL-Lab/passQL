@@ -26,4 +26,10 @@ public interface MemberRepository extends JpaRepository<Member, UUID>, JpaSpecif
     /** 스케줄러용: 제재 만료 회원 배치 조회 */
     List<Member> findAllByStatusAndSuspendUntilBeforeAndIsDeletedFalse(
         MemberStatus status, LocalDateTime now);
+
+    /** 대시보드 집계용 — 테스트 계정 제외 전체 회원 수 */
+    long countByIsTestAccountFalseAndIsDeletedFalse();
+
+    /** 대시보드 집계용 — 테스트 계정 제외 상태별 회원 수 */
+    long countByIsTestAccountFalseAndIsDeletedFalseAndStatus(MemberStatus status);
 }

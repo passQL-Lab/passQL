@@ -6,7 +6,9 @@
 
 <th:block layout:fragment="content">
 
-    <!-- Stats Cards -->
+    <!-- ==============================
+         1) 핵심 지표 카드 (Row 1)
+         ============================== -->
     <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
 
         <!-- 전체 문제 수 -->
@@ -15,7 +17,8 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-base-content/60">전체 문제 수</p>
-                        <p class="text-3xl font-bold text-primary mt-1" th:text="${stats?.totalQuestions ?: 0}">0</p>
+                        <p class="text-3xl font-bold text-primary mt-1"
+                           th:text="${stats?.totalQuestions ?: 0}">0</p>
                     </div>
                     <div class="p-3 bg-primary/10 rounded-full">
                         <i data-lucide="book-open" class="size-6 text-primary"></i>
@@ -31,7 +34,8 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-base-content/60">오늘 제출 수</p>
-                        <p class="text-3xl font-bold text-success mt-1" th:text="${stats?.todaySubmissions ?: 0}">0</p>
+                        <p class="text-3xl font-bold text-success mt-1"
+                           th:text="${stats?.todaySubmissions ?: 0}">0</p>
                     </div>
                     <div class="p-3 bg-success/10 rounded-full">
                         <i data-lucide="send" class="size-6 text-success"></i>
@@ -47,13 +51,14 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-sm text-base-content/60">AI 호출 수</p>
-                        <p class="text-3xl font-bold text-warning mt-1" th:text="${stats?.aiCallCount ?: 0}">0</p>
+                        <p class="text-3xl font-bold text-warning mt-1"
+                           th:text="${stats?.aiCallCount ?: 0}">0</p>
                     </div>
                     <div class="p-3 bg-warning/10 rounded-full">
                         <i data-lucide="bot" class="size-6 text-warning"></i>
                     </div>
                 </div>
-                <p class="text-xs text-base-content/50 mt-2">오늘 Ollama 호출</p>
+                <p class="text-xs text-base-content/50 mt-2">오늘 AI 선택지 생성</p>
             </div>
         </div>
 
@@ -64,19 +69,161 @@
                     <div>
                         <p class="text-sm text-base-content/60">에러율</p>
                         <p class="text-3xl font-bold text-error mt-1">
-                            <span th:text="${stats?.errorRate != null ? #numbers.formatDecimal(stats.errorRate, 1, 1) : '0.0'}">0.0</span>%
+                            <span th:text="${stats?.errorRate != null
+                                ? #numbers.formatDecimal(stats.errorRate, 1, 1)
+                                : '0.0'}">0.0</span>%
                         </p>
                     </div>
                     <div class="p-3 bg-error/10 rounded-full">
                         <i data-lucide="alert-triangle" class="size-6 text-error"></i>
                     </div>
                 </div>
-                <p class="text-xs text-base-content/50 mt-2">오늘 SQL 실행 실패율</p>
+                <p class="text-xs text-base-content/50 mt-2">최근 24h SQL 실행 실패율</p>
             </div>
         </div>
     </div>
 
-    <!-- 최근 실행 로그 -->
+    <!-- ==============================
+         2) 회원 통계 카드 (Row 2)
+         ============================== -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+
+        <!-- 전체 회원 -->
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-base-content/60">전체 회원</p>
+                        <p class="text-3xl font-bold mt-1"
+                           th:text="${stats?.totalMembers ?: 0}">0</p>
+                    </div>
+                    <div class="p-3 bg-base-200 rounded-full">
+                        <i data-lucide="users" class="size-6 text-base-content/60"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-base-content/50 mt-2">테스트 계정 제외</p>
+            </div>
+        </div>
+
+        <!-- 활성 회원 -->
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-base-content/60">활성 회원</p>
+                        <p class="text-3xl font-bold text-info mt-1"
+                           th:text="${stats?.activeMembers ?: 0}">0</p>
+                    </div>
+                    <div class="p-3 bg-info/10 rounded-full">
+                        <i data-lucide="user-check" class="size-6 text-info"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-base-content/50 mt-2">ACTIVE 상태</p>
+            </div>
+        </div>
+
+        <!-- 정지 회원 -->
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-base-content/60">정지 회원</p>
+                        <p class="text-3xl font-bold text-error mt-1"
+                           th:text="${stats?.suspendedMembers ?: 0}">0</p>
+                    </div>
+                    <div class="p-3 bg-error/10 rounded-full">
+                        <i data-lucide="user-x" class="size-6 text-error"></i>
+                    </div>
+                </div>
+                <p class="text-xs text-base-content/50 mt-2">SUSPENDED 상태</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==============================
+         3) 토픽별 문제 분포 + 최근 실행 로그
+         ============================== -->
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-4 mb-6">
+
+        <!-- 토픽별 문제 수 -->
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <h2 class="card-title text-base mb-4">
+                    <i data-lucide="bar-chart-2" class="size-5"></i>
+                    토픽별 문제 수
+                </h2>
+
+                <div th:if="${stats?.questionsByTopic != null and not #lists.isEmpty(stats.questionsByTopic)}">
+                    <div th:each="item : ${stats.questionsByTopic}" class="mb-3">
+                        <div class="flex justify-between text-sm mb-1">
+                            <span class="font-medium" th:text="${item.topicName}">토픽명</span>
+                            <span class="text-base-content/60"
+                                  th:text="${item.count} + '문제'">0문제</span>
+                        </div>
+                        <!-- 전체 문제 수 대비 비율 막대 -->
+                        <div class="w-full bg-base-200 rounded-full h-2">
+                            <div class="bg-primary h-2 rounded-full transition-all"
+                                 th:style="${'width: ' + (stats.totalQuestions > 0 ? #numbers.formatDecimal(item.count * 100.0 / stats.totalQuestions, 1, 0) : 0) + '%'}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:if="${stats?.questionsByTopic == null or #lists.isEmpty(stats.questionsByTopic)}"
+                     class="text-center text-base-content/50 py-8">
+                    <i data-lucide="inbox" class="size-8 mx-auto mb-2"></i>
+                    <p>데이터가 없습니다.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 빠른 링크 / 운영 현황 요약 -->
+        <div class="card bg-base-100 shadow">
+            <div class="card-body">
+                <h2 class="card-title text-base mb-4">
+                    <i data-lucide="zap" class="size-5"></i>
+                    빠른 링크
+                </h2>
+                <div class="grid grid-cols-2 gap-3">
+                    <a th:href="@{/admin/questions}" class="btn btn-outline btn-sm justify-start gap-2">
+                        <i data-lucide="book-open" class="size-4"></i>
+                        문제 관리
+                    </a>
+                    <a th:href="@{/admin/members}" class="btn btn-outline btn-sm justify-start gap-2">
+                        <i data-lucide="users" class="size-4"></i>
+                        회원 관리
+                    </a>
+                    <a th:href="@{/admin/daily-challenges}" class="btn btn-outline btn-sm justify-start gap-2">
+                        <i data-lucide="calendar-check" class="size-4"></i>
+                        일일 챌린지
+                    </a>
+                    <a th:href="@{/admin/exam-schedules}" class="btn btn-outline btn-sm justify-start gap-2">
+                        <i data-lucide="calendar-days" class="size-4"></i>
+                        시험 일정
+                    </a>
+                    <a th:href="@{/admin/monitor}" class="btn btn-outline btn-sm justify-start gap-2">
+                        <i data-lucide="activity" class="size-4"></i>
+                        모니터링
+                    </a>
+                    <a th:href="@{/admin/settings}" class="btn btn-outline btn-sm justify-start gap-2">
+                        <i data-lucide="settings" class="size-4"></i>
+                        앱 설정
+                    </a>
+                    <!-- Swagger 문서 바로가기 -->
+                    <a href="/docs/swagger" target="_blank"
+                       class="btn btn-outline btn-sm justify-start gap-2 col-span-2 border-primary/30 text-primary hover:bg-primary hover:text-primary-content">
+                        <i data-lucide="file-code-2" class="size-4"></i>
+                        Swagger API 문서
+                        <i data-lucide="external-link" class="size-3 ml-auto"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==============================
+         4) 최근 실행 로그
+         ============================== -->
     <div class="card bg-base-100 shadow">
         <div class="card-body">
             <div class="flex items-center justify-between mb-4">
@@ -103,15 +250,20 @@
                     </thead>
                     <tbody>
                     <tr th:each="log : ${recentLogs}">
-                        <td class="font-mono text-xs" th:text="${log.memberUuid != null ? #strings.substring(log.memberUuid.toString(), 0, 8) + '...' : '-'}">uuid1234...</td>
-                        <td class="font-mono text-xs" th:text="${#strings.substring(log.questionUuid.toString(), 0, 8) + '...'}">q1234...</td>
+                        <td class="font-mono text-xs"
+                            th:text="${log.memberUuid != null
+                                ? #strings.substring(log.memberUuid.toString(), 0, 8) + '...'
+                                : '-'}">uuid1234...</td>
+                        <td class="font-mono text-xs"
+                            th:text="${#strings.substring(log.questionUuid.toString(), 0, 8) + '...'}">q1234...</td>
                         <td>
                             <span th:classappend="${log.status == 'OK'} ? 'badge-success' : 'badge-error'"
                                   class="badge badge-sm"
                                   th:text="${log.status}">OK</span>
                         </td>
                         <td th:text="${log.elapsedMs}">123</td>
-                        <td class="text-xs" th:text="${#temporals.format(log.executedAt, 'MM-dd HH:mm:ss')}">04-06 12:00:00</td>
+                        <td class="text-xs"
+                            th:text="${#temporals.format(log.executedAt, 'MM-dd HH:mm:ss')}">04-06 12:00:00</td>
                     </tr>
                     <tr th:if="${recentLogs == null or #lists.isEmpty(recentLogs)}">
                         <td colspan="5" class="text-center text-base-content/50 py-8">

@@ -1,11 +1,45 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-11T02:38:25Z",
-    "currentVersion": "0.0.56",
+    "lastUpdated": "2026-04-11T08:38:49Z",
+    "currentVersion": "0.0.58",
     "projectType": "basic",
-    "totalReleases": 20
+    "totalReleases": 21
   },
   "releases": [
+    {
+      "version": "0.0.58",
+      "project_type": "basic",
+      "date": "2026-04-11",
+      "pr_number": 99,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새로운 기능**\n  * 관리자 대시보드 추가: 질문 통계, 회원 통계, 오늘 제출 현황, AI 선택지 생성 호출 수, 24시간 에러율 표시\n  * 질문 대량 삭제 기능\n  * JSON 붙여넣기를 통한 질문 대량 가져오기\n  * 루트 URL을 관리자 대시보드로 자동 리다이렉트\n\n* **UI/UX 개선**\n  * 관리자 사이드바 네비게이션 업데이트 및 Swagger API 문서 링크 추가\n  * 관리자 질문 페이지 작업 버튼 통합 (JSON 드롭다운 추가)\n  * 대시보드 레이아웃 개선: 토픽별 문제 통계, 빠른 링크 추가\n  * 에러율 표시 기간을 24시간으로 명확화\n\n* **버그 수정**\n  * 질문 상세 페이지의 빈 상태 처리 단순화",
+      "parsed_changes": {
+        "새로운_기능": {
+          "title": "새로운 기능",
+          "items": [
+            "관리자 대시보드 추가: 질문 통계, 회원 통계, 오늘 제출 현황, AI 선택지 생성 호출 수, 24시간 에러율 표시",
+            "질문 대량 삭제 기능",
+            "JSON 붙여넣기를 통한 질문 대량 가져오기",
+            "루트 URL을 관리자 대시보드로 자동 리다이렉트"
+          ]
+        },
+        "ui_ux_개선": {
+          "title": "UI/UX 개선",
+          "items": [
+            "관리자 사이드바 네비게이션 업데이트 및 Swagger API 문서 링크 추가",
+            "관리자 질문 페이지 작업 버튼 통합 (JSON 드롭다운 추가)",
+            "대시보드 레이아웃 개선: 토픽별 문제 통계, 빠른 링크 추가",
+            "에러율 표시 기간을 24시간으로 명확화"
+          ]
+        },
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "질문 상세 페이지의 빈 상태 처리 단순화"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.56",
       "project_type": "basic",

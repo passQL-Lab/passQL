@@ -15,6 +15,9 @@ public interface QuestionRepository extends JpaRepository<Question, UUID> {
 
     List<Question> findByIsActiveTrue();
 
+    /** 대시보드 집계용 — 전체 활성 문제 수 count 쿼리 */
+    long countByIsActiveTrue();
+
     List<Question> findByTopicUuid(UUID topicUuid);
 
     Page<Question> findByIsActiveTrue(Pageable pageable);
