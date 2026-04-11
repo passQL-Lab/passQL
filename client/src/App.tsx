@@ -18,12 +18,15 @@ const router = createBrowserRouter([
     children: [
       { index: true, element: <Home /> },
       { path: "questions", element: <CategoryCards /> },
-      { path: "questions/:questionUuid", element: <QuestionDetail /> },
       { path: "stats", element: <Stats /> },
       { path: "settings", element: <Settings /> },
     ],
   },
-  // AppLayout 밖: 전체화면 몰입형 화면
+  // AppLayout 밖: 전체화면 몰입형 화면 (문제 풀이는 집중 모드)
+  {
+    path: "questions/:questionUuid",
+    element: <QuestionDetail />,
+  },
   {
     path: "daily-challenge",
     element: <DailyChallenge />,

@@ -32,8 +32,12 @@ export default function PracticeSet() {
 
   const [feedback, setFeedback] = useState<SubmitResult | null>(null);
   // EXECUTABLE 문제 오답노트용 상태
-  const [reviewChoices, setReviewChoices] = useState<readonly ChoiceItem[] | null>(null);
-  const [reviewSelectedKey, setReviewSelectedKey] = useState<string | null>(null);
+  const [reviewChoices, setReviewChoices] = useState<
+    readonly ChoiceItem[] | null
+  >(null);
+  const [reviewSelectedKey, setReviewSelectedKey] = useState<string | null>(
+    null,
+  );
 
   const totalQuestions = questions.length;
   const displayIndex = feedback ? currentIndex - 1 : currentIndex;
@@ -48,7 +52,11 @@ export default function PracticeSet() {
   const blocker = useBlocker(!shouldNavigateToResult);
 
   const handleSelect = useCallback(
-    async (selectedChoiceKey: string, choiceSetId: string, choices: readonly ChoiceItem[]) => {
+    async (
+      selectedChoiceKey: string,
+      choiceSetId: string,
+      choices: readonly ChoiceItem[],
+    ) => {
       if (!displayQuestion) return;
       // EXECUTABLE 문제면 오답노트 데이터 저장
       if (choices[0]?.kind === "SQL") {
@@ -56,9 +64,17 @@ export default function PracticeSet() {
         setReviewSelectedKey(selectedChoiceKey);
       }
       try {
-        const result = await submitAnswer(displayQuestion.questionUuid, choiceSetId, selectedChoiceKey);
+        const result = await submitAnswer(
+          displayQuestion.questionUuid,
+          choiceSetId,
+          selectedChoiceKey,
+        );
         setFeedback(result);
-        submitAndAdvance(displayQuestion.questionUuid, result.isCorrect, selectedChoiceKey);
+        submitAndAdvance(
+          displayQuestion.questionUuid,
+          result.isCorrect,
+          selectedChoiceKey,
+        );
       } catch {
         const fallback: SubmitResult = {
           isCorrect: false,
@@ -70,7 +86,11 @@ export default function PracticeSet() {
           correctSql: null,
         };
         setFeedback(fallback);
-        submitAndAdvance(displayQuestion.questionUuid, false, selectedChoiceKey);
+        submitAndAdvance(
+          displayQuestion.questionUuid,
+          false,
+          selectedChoiceKey,
+        );
       }
     },
     [displayQuestion, submitAndAdvance],
