@@ -1,4 +1,4 @@
-import { Flame, ChevronRight, CheckCircle } from "lucide-react";
+import { Flame, ChevronRight } from "lucide-react";
 import { getReadinessCopy } from "../constants/readinessCopy";
 import { Link } from "react-router-dom";
 import { useProgress } from "../hooks/useProgress";
@@ -65,13 +65,10 @@ export default function Home() {
       <section className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
         {today?.question ? (
           today.alreadySolvedToday ? (
-            // 완료 상태: 클릭 불가, 완료 UI
-            <div className="card-base h-full flex flex-col gap-2 bg-code cursor-default">
-              <div className="flex items-center justify-between">
-                <p className="text-secondary text-sm">오늘의 문제</p>
-                <CheckCircle size={16} className="text-green-500 shrink-0" />
-              </div>
-              <p className="text-body text-sm truncate text-text-caption">{today.question.stemPreview}</p>
+            // 완료 상태: 클릭 불가, 불투명 처리
+            <div className="card-base h-full flex flex-col gap-2 opacity-50 cursor-default">
+              <p className="text-secondary text-sm">오늘의 문제</p>
+              <p className="text-body text-sm truncate">{today.question.stemPreview}</p>
               <div className="flex items-center gap-2 mt-auto">
                 <span className="badge-topic">{today.question.topicName}</span>
                 <StarRating level={today.question.difficulty} />
