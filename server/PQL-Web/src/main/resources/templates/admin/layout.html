@@ -76,7 +76,7 @@
             </div>
 
             <!-- Menu -->
-            <ul class="menu p-4 gap-1" id="sidebarMenu">
+            <ul class="menu p-4 gap-1 [&_.active]:bg-base-300 [&_.active]:text-base-content [&_.active]:font-semibold" id="sidebarMenu">
                 <li>
                     <a th:href="@{/admin}" th:classappend="${currentMenu == 'dashboard'} ? 'active'">
                         <i data-lucide="layout-dashboard" class="size-5"></i>
@@ -135,6 +135,14 @@
                     <a th:href="@{/admin/monitor}" th:classappend="${currentMenu == 'monitor'} ? 'active'">
                         <i data-lucide="activity" class="size-5"></i>
                         모니터링
+                    </a>
+                </li>
+                <div class="divider my-1"></div>
+                <li>
+                    <a href="/docs/swagger" target="_blank">
+                        <i data-lucide="file-code-2" class="size-5"></i>
+                        Swagger API 문서
+                        <i data-lucide="external-link" class="size-3 ml-auto opacity-40"></i>
                     </a>
                 </li>
             </ul>
