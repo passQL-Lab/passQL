@@ -1,11 +1,41 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-11T18:07:35Z",
-    "currentVersion": "0.0.77",
+    "lastUpdated": "2026-04-11T18:34:25Z",
+    "currentVersion": "0.0.78",
     "projectType": "basic",
-    "totalReleases": 28
+    "totalReleases": 29
   },
   "releases": [
+    {
+      "version": "0.0.78",
+      "project_type": "basic",
+      "date": "2026-04-11",
+      "pr_number": 133,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **UI 개선**\n  * 문제 풀이 페이지의 하단 액션 버튼을 고정 위치로 변경하여 스크롤 중에도 항상 접근 가능하게 개선\n  * 답변 피드백 페이지의 하단 액션 버튼 스타일 일관성 개선\n  * 연습 모드의 제출 버튼 라벨 업데이트\n\n* **성능 개선**\n  * 선택지 생성 시 스트리밍 데이터 처리 최적화\n\n* **문서**\n  * 고정 하단 액션 버튼 구현 계획 및 디자인 스펙 추가",
+      "parsed_changes": {
+        "ui_개선": {
+          "title": "UI 개선",
+          "items": [
+            "문제 풀이 페이지의 하단 액션 버튼을 고정 위치로 변경하여 스크롤 중에도 항상 접근 가능하게 개선",
+            "답변 피드백 페이지의 하단 액션 버튼 스타일 일관성 개선",
+            "연습 모드의 제출 버튼 라벨 업데이트"
+          ]
+        },
+        "성능_개선": {
+          "title": "성능 개선",
+          "items": [
+            "선택지 생성 시 스트리밍 데이터 처리 최적화"
+          ]
+        },
+        "문서": {
+          "title": "문서",
+          "items": [
+            "고정 하단 액션 버튼 구현 계획 및 디자인 스펙 추가"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.77",
       "project_type": "basic",
