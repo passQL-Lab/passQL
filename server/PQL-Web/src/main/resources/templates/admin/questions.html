@@ -430,106 +430,59 @@
 반드시 JSON 배열: [{...}, {...}, ...]
 questionUuid는 포함하지 않음 (신규 등록용)
 
-=== 필드 규칙 ===
+=== stem 작성 핵심 규칙 ===
+stem에는 질문 문장만 작성한다. 선택지(①②③④, 1. 2. 3. 4., A B C D)는 절대 포함하지 않는다.
+AI가 stem을 읽고 선택지를 동적으로 생성하므로, 선택지가 stem에 있으면 중복 문제가 발생한다.
 
-topicCode (필수):
-  data_modeling | sql_basic_select | sql_ddl_dml_tcl | sql_function |
-  sql_join | sql_subquery | sql_group_aggregate | sql_window | sql_hierarchy_pivot
+나쁜 예: "다음 설명 중 맞는 것은?\\n1. 테이블은 하나만 존재한다.\\n2. 데이터는 파일에 저장된다."
+좋은 예 (CONCEPT_ONLY): "엔터티(Entity)의 특성에 대한 설명 중 옳지 않은 것은?"
+좋은 예 (EXECUTABLE AI_ONLY): "다음 SQL의 실행 결과로 올바른 것은?\\n\\nSELECT * FROM TAB WHERE COL IS NULL;"
+좋은 예 (EXECUTABLE ODD_ONE_OUT): "다음 중 SQL 실행 결과가 나머지와 다른 것은?\\n\\n테이블: PLAYER (TEAM VARCHAR, WEIGHT INT)"
 
-difficulty (필수): 1~5 정수
-  1 = 개념 암기 (정의, 용어)
-  2 = 단순 SQL 읽기 (기본 SELECT, 간단한 WHERE)
-  3 = SQL 실행 추적 (JOIN 1개, GROUP BY, NULL 처리)
-  4 = 복합 조건 (다중 JOIN, 서브쿼리, HAVING)
-  5 = 윈도우 함수·계층 쿼리·PIVOT
+=== EXECUTABLE 필드 규칙 ===
 
-executionMode (필수):
-  "EXECUTABLE"   → 선택지가 SQL이거나, SQL 실행 결과(테이블/값)를 묻는 문제
-  "CONCEPT_ONLY" → 개념·이론·용어 문제. SQL 실행 없이 텍스트 선택지
+choiceSetPolicy 선택:
+  "AI_ONLY"     → "다음 SQL의 실행 결과로 올바른 것은?" 유형
+                   stem에 SQL 포함 / answerSql = stem의 SQL과 동일한 쿼리 (한 줄)
+  "ODD_ONE_OUT" → "다음 중 SQL 실행 결과가 다른 것은?" 유형
+                   stem에 SQL 미포함, 테이블·조건만 설명
+                   answerSql = 나머지 3개와 다른 결과를 내는 SQL (소수 쪽)
 
-choiceSetPolicy:
-  "AI_ONLY"      → 일반 EXECUTABLE 문제 (기본값, 생략 가능)
-  "ODD_ONE_OUT"  → "다음 중 SQL 실행 결과가 다른 것은?" 유형일 때만 사용
-  "CURATED_ONLY" → 선택지를 직접 작성하는 경우
-  CONCEPT_ONLY 문제 → null
+schemaDdl 작성:
+  - MariaDB 호환 필수: ROWNUM→LIMIT, VARCHAR2→VARCHAR, NUMBER→INT, DUAL 사용 금지
+  - 부모 테이블 먼저 생성 (FK 순서)
+  - 문제에서 쓰는 컬럼만 포함
+  - 줄바꿈은 \\n
 
-stem (필수):
-  문제 지문 전체 텍스트. 보기(①②③④ 또는 A/B/C/D) 절대 포함 금지.
-  지문 내 SQL 코드는 \\n으로 줄바꿈하여 그대로 포함.
+schemaSampleData 작성:
+  - answerSql 실행 시 의미 있는 결과가 나오는 최소 INSERT 문
+  - NULL 포함 문제 → NULL 행 필수
+  - OUTER JOIN 문제 → 매칭 안 되는 행 필수
+  - ODD_ONE_OUT → 조건 분기가 명확히 나뉘는 데이터
 
-schemaDisplay (선택):
-  화면 표시용 스키마 요약. 예: "EMP (emp_id, name, dept_id)\\nDEPT (dept_id, dept_name)"
-  CONCEPT_ONLY면 null.
+answerSql 작성:
+  - SELECT 문만, 한 줄로 작성
+  - AI_ONLY: stem의 SQL 그대로 복사
+  - ODD_ONE_OUT: 나머지와 다른 결과를 내는 SQL
 
-hint (선택):
-  정답 근거 핵심 개념 또는 함정 포인트를 한 문장으로. 없으면 null.
+=== 공통 필드 규칙 ===
 
-schemaDdl (EXECUTABLE 필수, CONCEPT_ONLY → null):
-  문제에 등장하는 테이블의 CREATE TABLE 문.
-  - MariaDB 호환 SQL (ROWNUM 금지, LIMIT 사용)
-  - FK 참조 대상 테이블을 먼저 생성
-  - 문제에서 사용하는 컬럼만 포함
-  - 문자열 내 줄바꿈은 \\n
+topicCode: data_modeling | sql_basic_select | sql_ddl_dml_tcl | sql_function |
+           sql_join | sql_subquery | sql_group_aggregate | sql_window | sql_hierarchy_pivot
 
-schemaSampleData (선택, CONCEPT_ONLY → null):
-  SELECT 실행 결과를 재현할 수 있는 최소한의 INSERT 문.
-  문제에 데이터가 없으면 결과를 추론하여 유추 생성.
-  문자열 내 줄바꿈은 \\n.
+difficulty: 1=개념 암기, 2=단순 SQL, 3=실행 추적, 4=복합 JOIN/서브쿼리, 5=윈도우/계층/PIVOT
 
-schemaIntent (선택, CONCEPT_ONLY → null):
-  이 스키마가 테스트하는 SQL 개념을 한 줄로 설명.
+executionMode:
+  "EXECUTABLE"   → SQL 실행 결과를 묻는 문제
+  "CONCEPT_ONLY" → 개념·이론·용어 문제. 모든 스키마 필드 null.
 
-answerSql (EXECUTABLE 필수, CONCEPT_ONLY → null):
-  문제 정답 번호에 해당하는 SELECT 쿼리를 그대로 복사.
-  ODD_ONE_OUT 유형이면: 나머지 3개와 다른 실행 결과를 내는 선택지의 SQL.
-
-=== 출력 예시 ===
-
-[
-  {
-    "topicCode": "sql_join",
-    "difficulty": 3,
-    "executionMode": "EXECUTABLE",
-    "choiceSetPolicy": "AI_ONLY",
-    "stem": "다음 SQL의 실행 결과로 올바른 것은?\\n\\nSELECT e.name, d.dept_name\\nFROM emp e\\nINNER JOIN dept d ON e.dept_id = d.dept_id\\nWHERE d.location = 'SEOUL';",
-    "schemaDisplay": "EMP (emp_id, name, dept_id, salary)\\nDEPT (dept_id, dept_name, location)",
-    "hint": "INNER JOIN은 양쪽 테이블에 모두 일치하는 행만 반환한다.",
-    "schemaDdl": "CREATE TABLE dept (\\n  dept_id INT PRIMARY KEY,\\n  dept_name VARCHAR(50),\\n  location VARCHAR(50)\\n);\\nCREATE TABLE emp (\\n  emp_id INT PRIMARY KEY,\\n  name VARCHAR(50),\\n  dept_id INT,\\n  salary INT\\n);",
-    "schemaSampleData": "INSERT INTO dept VALUES (1, '개발팀', 'SEOUL'), (2, '영업팀', 'BUSAN');\\nINSERT INTO emp VALUES (1, '홍길동', 1, 5000), (2, '김영희', 2, 4000), (3, '이철수', 1, 6000);",
-    "schemaIntent": "INNER JOIN 조건 필터링 및 위치 기반 부서 조회",
-    "answerSql": "SELECT e.name, d.dept_name FROM emp e INNER JOIN dept d ON e.dept_id = d.dept_id WHERE d.location = 'SEOUL'"
-  },
-  {
-    "topicCode": "sql_basic_select",
-    "difficulty": 3,
-    "executionMode": "EXECUTABLE",
-    "choiceSetPolicy": "ODD_ONE_OUT",
-    "stem": "다음 보기에서 SQL 실행 결과가 다른 것은?\\n\\n테이블: SCORE (student_id, subject, score)",
-    "schemaDisplay": "SCORE (student_id, subject, score)",
-    "hint": "GROUP BY 없이 집계함수를 사용하면 전체 집계, GROUP BY를 사용하면 그룹별 집계가 된다.",
-    "schemaDdl": "CREATE TABLE score (\\n  student_id INT,\\n  subject VARCHAR(20),\\n  score INT\\n);",
-    "schemaSampleData": "INSERT INTO score VALUES (1, 'MATH', 90), (1, 'ENG', 80), (2, 'MATH', 70), (2, 'ENG', 85);",
-    "schemaIntent": "GROUP BY 유무에 따른 집계 결과 차이 이해",
-    "answerSql": "SELECT subject, AVG(score) FROM score"
-  },
-  {
-    "topicCode": "data_modeling",
-    "difficulty": 1,
-    "executionMode": "CONCEPT_ONLY",
-    "choiceSetPolicy": null,
-    "stem": "다음 중 관계형 데이터베이스에서 기본키(Primary Key)의 특성으로 옳지 않은 것은?",
-    "schemaDisplay": null,
-    "hint": "기본키는 NULL을 허용하지 않으며 테이블 내에서 유일해야 한다.",
-    "schemaDdl": null,
-    "schemaSampleData": null,
-    "schemaIntent": null,
-    "answerSql": null
-  }
-]
+hint: 핵심 개념 또는 함정 포인트 한 줄. 없으면 null.
+schemaDisplay: "테이블명 (컬럼명, ...)" 형태. CONCEPT_ONLY면 null.
+schemaIntent: 스키마가 테스트하는 개념 한 줄. CONCEPT_ONLY면 null.
 
 === 변환할 문제들 ===
 
-[여기에 SQLD 문제들을 붙여넣기]`;
+[여기에 SQLD 문제들 붙여넣기]`;
 
     function openBulkGuideModal() {
         document.getElementById('bulkGuidePromptText').value = BULK_AI_PROMPT;

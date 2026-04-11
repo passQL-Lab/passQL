@@ -109,14 +109,16 @@ public class SandboxPool {
 
     /**
      * 특정 샌드박스 DB에 대한 DataSource 생성.
+     * <p>
+     * urlTemplate에 "serverTimezone=Asia/Seoul" 같은 파라미터가 포함된 경우
+     * lastIndexOf("/")를 urlTemplate 전체에 사용하면 파라미터 안의 "/"를 잘못 가리킨다.
+     * 따라서 "?" 앞의 경로 부분에서만 lastIndexOf("/")를 호출해 DB명을 교체한다.
      */
     public DataSource createDataSource(String dbName) {
-        String baseUrl = urlTemplate.substring(0, urlTemplate.lastIndexOf("/") + 1);
-        String params = "";
         int qIdx = urlTemplate.indexOf("?");
-        if (qIdx >= 0) {
-            params = urlTemplate.substring(qIdx);
-        }
+        String urlWithoutParams = qIdx >= 0 ? urlTemplate.substring(0, qIdx) : urlTemplate;
+        String params = qIdx >= 0 ? urlTemplate.substring(qIdx) : "";
+        String baseUrl = urlWithoutParams.substring(0, urlWithoutParams.lastIndexOf("/") + 1);
         String url = baseUrl + dbName + params;
         return DataSourceBuilder.create()
                 .url(url)
@@ -127,11 +129,12 @@ public class SandboxPool {
     }
 
     private DataSource buildAdminDataSource() {
-        String url = urlTemplate.substring(0, urlTemplate.lastIndexOf("/") + 1) + "mysql";
+        // createDataSource와 동일한 이유로 "?" 앞의 경로 부분에서만 DB명을 교체한다.
         int qIdx = urlTemplate.indexOf("?");
-        if (qIdx >= 0) {
-            url = urlTemplate.substring(0, urlTemplate.lastIndexOf("/") + 1) + "mysql" + urlTemplate.substring(qIdx);
-        }
+        String urlWithoutParams = qIdx >= 0 ? urlTemplate.substring(0, qIdx) : urlTemplate;
+        String params = qIdx >= 0 ? urlTemplate.substring(qIdx) : "";
+        String baseUrl = urlWithoutParams.substring(0, urlWithoutParams.lastIndexOf("/") + 1);
+        String url = baseUrl + "mysql" + params;
         return DataSourceBuilder.create()
                 .url(url)
                 .username(username)

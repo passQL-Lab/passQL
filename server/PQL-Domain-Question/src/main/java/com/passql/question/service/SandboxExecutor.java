@@ -31,9 +31,15 @@ public class SandboxExecutor {
         try {
             try (Connection conn = ds.getConnection();
                  Statement stmt = conn.createStatement()) {
-                for (String sql : splitStatements(ddl)) {
+                String[] tokens = splitStatements(ddl);
+                log.debug("[applyDdl] DB={} 총 {}개 토큰", dbName, tokens.length);
+                for (int i = 0; i < tokens.length; i++) {
+                    String sql = tokens[i];
                     if (!sql.isBlank()) {
-                        stmt.execute(normalizeDdl(sql.trim()));
+                        String normalized = normalizeDdl(sql.trim());
+                        log.debug("[applyDdl] [{}/{}] 실행: {}", i + 1, tokens.length,
+                                normalized.length() > 120 ? normalized.substring(0, 120) + "..." : normalized);
+                        stmt.execute(normalized);
                     }
                 }
             }
