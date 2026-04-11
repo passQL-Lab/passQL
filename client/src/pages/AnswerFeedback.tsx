@@ -5,8 +5,9 @@ import { useMutation } from "@tanstack/react-query";
 import { diffExplain } from "../api/ai";
 import AiExplanationSheet from "../components/AiExplanationSheet";
 import { ResultTable } from "../components/ResultTable";
+import ChoiceReview from "../components/ChoiceReview";
 import { useSimilarQuestions } from "../hooks/useSimilarQuestions";
-import type { ExecuteResult, ExecutionMode } from "../types/api";
+import type { ChoiceItem, ExecuteResult, ExecutionMode } from "../types/api";
 
 interface FeedbackState {
   readonly isCorrect: boolean;
@@ -22,6 +23,8 @@ interface FeedbackState {
   readonly correctResult: ExecuteResult | null;
   // 데일리 챌린지 모드: 버튼 동작 분기용
   readonly isDailyChallenge?: boolean;
+  // EXECUTABLE 문제: 제출 후 오답노트에서 SQL 비교 실행용
+  readonly choices?: readonly ChoiceItem[];
 }
 
 function SqlCompareBlock({
@@ -128,6 +131,8 @@ export default function AnswerFeedback() {
     selectedResult,
     correctResult,
     isDailyChallenge,
+    choices,
+    selectedKey,
   } = state;
 
   const isExecutable = executionMode === "EXECUTABLE";
@@ -218,6 +223,15 @@ export default function AnswerFeedback() {
       <div className="flex-1 mx-auto max-w-180 w-full px-4 pb-24">
         {headerSection}
         {comparisonSection}
+        {/* EXECUTABLE 문제: 오답노트 SQL 실행 비교 */}
+        {choices && choices.length > 0 && (
+          <ChoiceReview
+            choices={choices}
+            questionUuid={state.questionUuid}
+            selectedKey={selectedKey}
+          />
+        )}
+
         {similarQuery.data && similarQuery.data.length > 0 && (
           <section className="mt-6">
             <h2 className="text-secondary text-sm mb-3">유사 문제</h2>

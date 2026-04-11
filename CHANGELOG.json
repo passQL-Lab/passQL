@@ -1,11 +1,39 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-11T15:52:31Z",
-    "currentVersion": "0.0.69",
+    "lastUpdated": "2026-04-11T16:07:35Z",
+    "currentVersion": "0.0.70",
     "projectType": "basic",
-    "totalReleases": 24
+    "totalReleases": 25
   },
   "releases": [
+    {
+      "version": "0.0.70",
+      "project_type": "basic",
+      "date": "2026-04-11",
+      "pr_number": 118,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **New Features**\n  * SQL 실행 시 임시 데이터베이스 풀 지원 추가\n\n* **Bug Fixes**\n  * 데이터베이스 이름 누락 시 SQL 실행 처리 개선\n\n* **Documentation**\n  * 버전 정보 업데이트 (v0.0.70)",
+      "parsed_changes": {
+        "new_features": {
+          "title": "New Features",
+          "items": [
+            "SQL 실행 시 임시 데이터베이스 풀 지원 추가"
+          ]
+        },
+        "bug_fixes": {
+          "title": "Bug Fixes",
+          "items": [
+            "데이터베이스 이름 누락 시 SQL 실행 처리 개선"
+          ]
+        },
+        "documentation": {
+          "title": "Documentation",
+          "items": [
+            "버전 정보 업데이트 (v0.0.70)"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.69",
       "project_type": "basic",
