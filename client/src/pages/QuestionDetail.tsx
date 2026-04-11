@@ -104,6 +104,18 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
   // 재시도 트리거용 카운터
   const [sseRetryCount, setSseRetryCount] = useState(0);
 
+  // questionUuid가 바뀌면 SSE 상태 전체 초기화
+  // practiceMode에서 같은 컴포넌트 인스턴스로 문제가 교체될 때 이전 SSE 에러/결과가 남아
+  // needsSseGeneration의 !sseError 조건을 막아 새 SSE가 발화되지 않는 문제 방지
+  useEffect(() => {
+    setSseChoices(null);
+    setSseChoiceSetId(null);
+    setSseStatus(null);
+    setSseError(null);
+    setSseRetryCount(0);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [questionUuid]);
+
   // 단독 풀이 모드에서 제출 완료 전까지 이탈 차단 — practiceMode는 부모가 이미 차단하므로 제외
   // practiceMode !== true로 명시해 undefined(단독 모드 기본값)도 정확히 처리
   const blocker = useBlocker(practiceMode !== true && !submitted);
@@ -112,9 +124,6 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
   // SSE로 받은 선택지가 있으면 우선 사용, 없으면 GET 응답의 choiceSets 사용
   const choices = sseChoices ?? activeChoiceSet?.items ?? [];
   const choiceSetId = sseChoiceSetId ?? activeChoiceSet?.choiceSetUuid ?? "";
-
-  // SSE 생성 실행 여부 추적 — question 로드 후 1회만 실행, background refetch로 재실행 방지
-  const sseTriggeredRef = useRef(false);
 
   // 선택지가 없고 에러도 없을 때 SSE 선택지 생성 호출
   // EXECUTABLE: 샌드박스 검증을 포함한 SQL 선택지 생성
@@ -127,22 +136,9 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
     sseChoices == null &&
     !sseError;
 
-  // questionUuid 또는 sseRetryCount가 바뀌면 트리거 플래그 리셋
-  const prevTriggerKeyRef = useRef<string>("");
-  const triggerKey = `${questionUuid ?? ""}:${sseRetryCount}`;
-  if (prevTriggerKeyRef.current !== triggerKey) {
-    prevTriggerKeyRef.current = triggerKey;
-    sseTriggeredRef.current = false;
-  }
-
   useEffect(() => {
-    // question 로드 완료 여부와 SSE 필요 여부를 effect 진입 시점에만 체크
-    // deps에 question/sseChoices/sseError를 넣으면:
-    //   - question: React Query background refetch 시 객체 참조가 바뀌어 effect 재실행 → 진행 중인 스트림 abort
-    //   - sseChoices/sseError: onComplete 후 리렌더 시 cleanup이 즉시 호출되어 abort race condition 발생
-    // sseTriggeredRef로 최초 1회 실행을 보장하고 deps에서 모두 제외
-    if (!needsSseGeneration || !questionUuid || sseTriggeredRef.current) return;
-    sseTriggeredRef.current = true;
+    // question이 아직 로드되지 않았거나 SSE 불필요한 경우 스킵
+    if (!needsSseGeneration || !questionUuid) return;
 
     setSseError(null);
     setSseStatus("선택지 생성 중...");
@@ -179,12 +175,13 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
       clearTimeout(timeoutId);
       cleanup();
     };
-  // questionUuid/sseRetryCount만 deps로 유지:
-  //   - questionUuid: 다른 문제로 이동 시 새 SSE 실행 필요
-  //   - sseRetryCount: 재시도 버튼 클릭 시 재실행 필요
-  // question은 deps에서 제외 — background refetch 시 effect 재실행으로 진행 중인 스트림이 abort됨
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [questionUuid, sseRetryCount]);
+  // needsSseGeneration을 deps에 넣되, sseChoices/sseError의 변화는
+  // onComplete/onError 콜백 내부에서만 일어나므로 실질적으로 effect가 재실행되는 시점은:
+  //   1. question 첫 로드 완료 (null → 객체)
+  //   2. sseRetryCount 증가 (재시도 버튼)
+  //   3. questionUuid 변경 (다른 문제로 이동)
+  // background refetch는 staleTime: 60_000 설정으로 SSE 진행 중 발생하지 않음
+  }, [needsSseGeneration, questionUuid, sseRetryCount]);
 
   const explainMutation = useMutation({
     mutationFn: explainError,
