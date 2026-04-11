@@ -224,7 +224,7 @@ export default function Home() {
       {recommendations && recommendations.questions.length > 0 && (
         <section className="mt-6">
           <h2 className="text-secondary text-sm mb-3">추천 문제</h2>
-          <div className="space-y-2">
+          <div className="space-y-3">
             {recommendations.questions.map((q) => (
               <Link key={q.questionUuid} to={`/questions/${q.questionUuid}`}>
                 <div className="card-base shadow-sm flex items-center gap-3 cursor-pointer hover:bg-surface transition-colors">
