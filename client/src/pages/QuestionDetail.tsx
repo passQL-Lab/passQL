@@ -299,7 +299,7 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
       {/* 문제 지문 (토글) */}
       <button
         type="button"
-        className="card-base w-full text-left flex items-start gap-2 mt-2"
+        className="card-base shadow-sm w-full text-left flex items-start gap-2 mt-2"
         onClick={() => setStemOpen((prev) => !prev)}
       >
         <BookOpen size={16} className="text-brand mt-0.5 shrink-0" />
