@@ -53,11 +53,13 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
   const choices = sseChoices ?? activeChoiceSet?.items ?? [];
   const choiceSetId = sseChoiceSetId ?? activeChoiceSet?.choiceSetUuid ?? "";
 
-  // EXECUTABLE 문제이고, choiceSets[]가 비어있고, 에러도 없을 때만 SSE 선택지 생성 호출
-  // CONCEPT_ONLY 문제는 서버에 answerSql/schemaDdl이 없으므로 AI 선택지 생성 불가
+  // 선택지가 없고 에러도 없을 때 SSE 선택지 생성 호출
+  // EXECUTABLE: 샌드박스 검증을 포함한 SQL 선택지 생성
+  // CONCEPT_ONLY: 샌드박스 없이 AI가 텍스트 선택지를 직접 생성 (서버의 generateConcept 호출)
   const needsSseGeneration =
     question != null &&
-    question.executionMode === "EXECUTABLE" &&
+    (question.executionMode === "EXECUTABLE" ||
+      question.executionMode === "CONCEPT_ONLY") &&
     activeChoiceSet == null &&
     sseChoices == null &&
     !sseError;

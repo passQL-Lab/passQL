@@ -1,11 +1,35 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-11T01:27:26Z",
-    "currentVersion": "0.0.53",
+    "lastUpdated": "2026-04-11T02:27:35Z",
+    "currentVersion": "0.0.54",
     "projectType": "basic",
-    "totalReleases": 18
+    "totalReleases": 19
   },
   "releases": [
+    {
+      "version": "0.0.54",
+      "project_type": "basic",
+      "date": "2026-04-11",
+      "pr_number": 92,
+      "raw_summary": "## Summary by CodeRabbit\n\n# v0.0.54 릴리스 노트\n\n* **New Features**\n  * CONCEPT_ONLY 실행 모드 추가: SQL 없이 개념 이론만 학습하는 문제 유형 지원\n  * 개념 기반 선택지 생성 기능 구현: AI를 통한 자동 선택지 생성\n\n* **Chores**\n  * 프로젝트 버전 업데이트 (v0.0.54)\n  * 데이터베이스 마이그레이션 추가",
+      "parsed_changes": {
+        "new_features": {
+          "title": "New Features",
+          "items": [
+            "CONCEPT_ONLY 실행 모드 추가: SQL 없이 개념 이론만 학습하는 문제 유형 지원",
+            "개념 기반 선택지 생성 기능 구현: AI를 통한 자동 선택지 생성"
+          ]
+        },
+        "chores": {
+          "title": "Chores",
+          "items": [
+            "프로젝트 버전 업데이트 (v0.0.54)",
+            "데이터베이스 마이그레이션 추가"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.53",
       "project_type": "basic",
