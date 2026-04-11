@@ -113,6 +113,9 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
   const choices = sseChoices ?? activeChoiceSet?.items ?? [];
   const choiceSetId = sseChoiceSetId ?? activeChoiceSet?.choiceSetUuid ?? "";
 
+  // SSE 생성 실행 여부 추적 — question 로드 후 1회만 실행, background refetch로 재실행 방지
+  const sseTriggeredRef = useRef(false);
+
   // 선택지가 없고 에러도 없을 때 SSE 선택지 생성 호출
   // EXECUTABLE: 샌드박스 검증을 포함한 SQL 선택지 생성
   // CONCEPT_ONLY: 샌드박스 없이 AI가 텍스트 선택지를 직접 생성 (서버의 generateConcept 호출)
@@ -123,11 +126,23 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
     activeChoiceSet == null &&
     sseChoices == null &&
     !sseError;
+
+  // questionUuid 또는 sseRetryCount가 바뀌면 트리거 플래그 리셋
+  const prevTriggerKeyRef = useRef<string>("");
+  const triggerKey = `${questionUuid ?? ""}:${sseRetryCount}`;
+  if (prevTriggerKeyRef.current !== triggerKey) {
+    prevTriggerKeyRef.current = triggerKey;
+    sseTriggeredRef.current = false;
+  }
+
   useEffect(() => {
-    // question 로드 완료 후 SSE 필요 여부를 effect 진입 시점에만 체크
-    // deps에 sseChoices/sseError를 넣으면 onComplete 후 리렌더 시 cleanup이 즉시 호출돼
-    // abort race condition이 발생하므로 진입 조건 체크만 하고 deps에서 제외
-    if (!needsSseGeneration || !questionUuid) return;
+    // question 로드 완료 여부와 SSE 필요 여부를 effect 진입 시점에만 체크
+    // deps에 question/sseChoices/sseError를 넣으면:
+    //   - question: React Query background refetch 시 객체 참조가 바뀌어 effect 재실행 → 진행 중인 스트림 abort
+    //   - sseChoices/sseError: onComplete 후 리렌더 시 cleanup이 즉시 호출되어 abort race condition 발생
+    // sseTriggeredRef로 최초 1회 실행을 보장하고 deps에서 모두 제외
+    if (!needsSseGeneration || !questionUuid || sseTriggeredRef.current) return;
+    sseTriggeredRef.current = true;
 
     setSseError(null);
     setSseStatus("선택지 생성 중...");
@@ -164,11 +179,12 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
       clearTimeout(timeoutId);
       cleanup();
     };
-  // needsSseGeneration: question 로드·sseChoices·sseError 상태를 모두 반영한 파생값
-  // onComplete/onError 콜백이 상태를 바꿔도 cleanup이 abort를 호출하지 않도록
-  // deps에서 제외하고 effect 본문 첫 줄에서 직접 체크하는 방식 사용
+  // questionUuid/sseRetryCount만 deps로 유지:
+  //   - questionUuid: 다른 문제로 이동 시 새 SSE 실행 필요
+  //   - sseRetryCount: 재시도 버튼 클릭 시 재실행 필요
+  // question은 deps에서 제외 — background refetch 시 effect 재실행으로 진행 중인 스트림이 abort됨
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [questionUuid, sseRetryCount, question]);
+  }, [questionUuid, sseRetryCount]);
 
   const explainMutation = useMutation({
     mutationFn: explainError,
