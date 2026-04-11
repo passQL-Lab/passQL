@@ -64,18 +64,29 @@ export default function Home() {
 
       <section className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
         {today?.question ? (
-          <Link to={`/questions/${today.question.questionUuid}`} className="block">
-            <div className="card-base h-full flex flex-col gap-2 cursor-pointer hover:bg-surface transition-colors">
-              <p className="text-secondary text-sm">
-                {today.alreadySolvedToday ? "오늘의 문제 (완료)" : "오늘의 문제"}
-              </p>
+          today.alreadySolvedToday ? (
+            // 완료 상태: 클릭 불가, 불투명 처리
+            <div className="card-base h-full flex flex-col gap-2 opacity-50 cursor-default">
+              <p className="text-secondary text-sm">오늘의 문제</p>
               <p className="text-body text-sm truncate">{today.question.stemPreview}</p>
               <div className="flex items-center gap-2 mt-auto">
                 <span className="badge-topic">{today.question.topicName}</span>
                 <StarRating level={today.question.difficulty} />
               </div>
             </div>
-          </Link>
+          ) : (
+            // 미완료 상태: 데일리 챌린지 페이지로 이동
+            <Link to="/daily-challenge" className="block">
+              <div className="card-base h-full flex flex-col gap-2 cursor-pointer hover:bg-surface transition-colors">
+                <p className="text-secondary text-sm">오늘의 문제</p>
+                <p className="text-body text-sm truncate">{today.question.stemPreview}</p>
+                <div className="flex items-center gap-2 mt-auto">
+                  <span className="badge-topic">{today.question.topicName}</span>
+                  <StarRating level={today.question.difficulty} />
+                </div>
+              </div>
+            </Link>
+          )
         ) : (
           <Link to="/questions" className="block">
             <div className="card-base h-full flex flex-col justify-center cursor-pointer hover:bg-surface transition-colors">

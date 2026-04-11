@@ -14,16 +14,18 @@ import {
   useSubmitAnswer,
 } from "../hooks/useQuestionDetail";
 import { explainError } from "../api/ai";
-import type { ChoiceItem, ExecuteResult } from "../types/api";
+import type { ChoiceItem, ExecuteResult, SubmitResult } from "../types/api";
 
 interface QuestionDetailProps {
   readonly practiceMode?: boolean;
   readonly practiceSubmitLabel?: string;
   readonly questionUuid?: string;
   readonly onPracticeSubmit?: (selectedChoiceKey: string, choiceSetId: string) => void;
+  // 데일리 챌린지 모드: 제출 성공 시 호출자가 직접 네비게이션 제어
+  readonly onSubmitSuccess?: (result: SubmitResult, questionUuid: string) => void;
 }
 
-export default function QuestionDetail({ practiceMode, practiceSubmitLabel, questionUuid: propUuid, onPracticeSubmit }: QuestionDetailProps = {}) {
+export default function QuestionDetail({ practiceMode, practiceSubmitLabel, questionUuid: propUuid, onPracticeSubmit, onSubmitSuccess }: QuestionDetailProps = {}) {
   const { questionUuid: paramUuid } = useParams<{ questionUuid: string }>();
   const questionUuid = propUuid ?? paramUuid;
   const navigate = useNavigate();
@@ -122,18 +124,22 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
     }
     submitMutation.mutate({ choiceSetId, selectedChoiceKey: selectedKey }, {
       onSuccess: (result) => {
-        navigate(`/questions/${questionUuid}/result`, {
-          state: {
-            ...result,
-            selectedKey,
-            questionUuid,
-            // executionMode는 QuestionDetail에서 전달 (SubmitResult에서 제거됨)
-            executionMode: question.executionMode,
-          },
-        });
+        const fullResult = {
+          ...result,
+          selectedKey,
+          questionUuid,
+          // executionMode는 QuestionDetail에서 전달 (SubmitResult에서 제거됨)
+          executionMode: question.executionMode,
+        };
+        if (onSubmitSuccess) {
+          // 데일리 챌린지 등 호출자가 네비게이션 제어
+          onSubmitSuccess(fullResult as SubmitResult, questionUuid!);
+        } else {
+          navigate(`/questions/${questionUuid}/result`, { state: fullResult });
+        }
       },
     });
-  }, [selectedKey, choiceSetId, submitMutation, question, questionUuid, navigate, practiceMode, onPracticeSubmit]);
+  }, [selectedKey, choiceSetId, submitMutation, question, questionUuid, navigate, practiceMode, onPracticeSubmit, onSubmitSuccess]);
 
   const handleAskAi = useCallback(
     (choiceKey: string, _errorCode: string, errorMessage: string) => {

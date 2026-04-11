@@ -50,7 +50,7 @@
       "post": {
         "tags": ["Question"],
         "summary": "문제 제출",
-        "description": "선택지 제출 후 정답 여부 반환. 헤더 X-Member-UUID(UUID) 필수. Body: { \"selectedChoiceKey\": \"A\" }\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.07\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/1\" target=\"_blank\"\u003E#1\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EAI 서버 및 Spring 서버 초기 프로젝트 구성\u003C/td\u003E\u003Ctd\u003E문제 제출 API 추가\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.08\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/22\" target=\"_blank\"\u003E#22\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EEntity 스키마 보강 submission 테이블 및 question.is_active 컬럼 추가\u003C/td\u003E\u003Ctd\u003EPathVariable: Long id → UUID questionUuid. Header: X-User-UUID(String) → X-Member-UUID(UUID). Body: selectedKey → selectedChoiceKey (구 selectedKey 한시적 fallback 지원)\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.10\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/57\" target=\"_blank\"\u003E#57\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003Esubmit 엔드포인트 404 반환 및 executionMode null 이슈\u003C/td\u003E\u003Ctd\u003ERequest Body를 Map → SubmitRequest DTO로 변경하여 Swagger 스키마 정확도 개선\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
+        "description": "선택지 제출 후 정답 여부 + SQL 실행 결과 비교 반환. 헤더 X-Member-UUID(UUID) 필수. Body: { \"choiceSetId\": \"uuid\", \"selectedChoiceKey\": \"A\" }. EXECUTABLE 문제: selectedResult/correctResult에 양쪽 SQL 실행 결과 포함. CONCEPT_ONLY: null.\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.07\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/1\" target=\"_blank\"\u003E#1\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EAI 서버 및 Spring 서버 초기 프로젝트 구성\u003C/td\u003E\u003Ctd\u003E문제 제출 API 추가\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.08\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/22\" target=\"_blank\"\u003E#22\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EEntity 스키마 보강 submission 테이블 및 question.is_active 컬럼 추가\u003C/td\u003E\u003Ctd\u003EPathVariable: Long id → UUID questionUuid. Header: X-User-UUID(String) → X-Member-UUID(UUID). Body: selectedKey → selectedChoiceKey (구 selectedKey 한시적 fallback 지원)\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.10\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/57\" target=\"_blank\"\u003E#57\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003Esubmit 엔드포인트 404 반환 및 executionMode null 이슈\u003C/td\u003E\u003Ctd\u003ERequest Body를 Map → SubmitRequest DTO로 변경하여 Swagger 스키마 정확도 개선\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.10\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/69\" target=\"_blank\"\u003E#69\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003E사용자 문제 풀기 선택지 생성(SSE) 및 제출 플로우 완성\u003C/td\u003E\u003Ctd\u003ESubmitRequest에 choiceSetId 추가, SubmitResult에 ExecuteResult 비교 필드(selectedResult/correctResult/correctSql/selectedSql) 추가\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
         "operationId": "submit",
         "parameters": [
           {
@@ -96,11 +96,51 @@
         }
       }
     },
+    "/api/questions/{questionUuid}/generate-choices": {
+      "post": {
+        "tags": ["Question"],
+        "summary": "AI 선택지 세트 생성 (SSE)",
+        "description": "AI가 4지선다 선택지를 실시간 생성. SSE 이벤트: status(generating/validating), complete(choiceSetId+choices), error. 생성된 세트는 DB에 저장되어 관리자 화면에서 조회 가능. 헤더 X-Member-UUID(UUID) 필수.\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.10\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/69\" target=\"_blank\"\u003E#69\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003E사용자 문제 풀기 선택지 생성(SSE) 및 제출 플로우 완성\u003C/td\u003E\u003Ctd\u003ESSE 선택지 생성 엔드포인트 추가\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
+        "operationId": "generateChoices",
+        "parameters": [
+          {
+            "name": "questionUuid",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "X-Member-UUID",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "$ref": "#/components/schemas/SseEmitter"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/questions/{questionUuid}/execute": {
       "post": {
         "tags": ["Question"],
-        "summary": "SQL 실행 (테스트)",
-        "description": "\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.07\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/1\" target=\"_blank\"\u003E#1\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EAI 서버 및 Spring 서버 초기 프로젝트 구성\u003C/td\u003E\u003Ctd\u003ESQL 실행(테스트) API 추가\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.08\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/22\" target=\"_blank\"\u003E#22\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EEntity 스키마 보강 submission 테이블 및 question.is_active 컬럼 추가\u003C/td\u003E\u003Ctd\u003EPathVariable: Long id → UUID questionUuid\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
+        "summary": "SQL 실행",
+        "description": "EXECUTABLE 문제만 허용. body: { \"sql\": \"SELECT ...\" }. CONCEPT_ONLY 문제에 호출 시 400 INVALID_EXECUTION_MODE 반환.\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.07\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/1\" target=\"_blank\"\u003E#1\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EAI 서버 및 Spring 서버 초기 프로젝트 구성\u003C/td\u003E\u003Ctd\u003ESQL 실행(테스트) API 추가\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.08\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/22\" target=\"_blank\"\u003E#22\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003EEntity 스키마 보강 submission 테이블 및 question.is_active 컬럼 추가\u003C/td\u003E\u003Ctd\u003EPathVariable: Long id → UUID questionUuid\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.10\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/70\" target=\"_blank\"\u003E#70\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003E문제 풀기 화면 스키마 시각화, 실행 결과 비교, 자유 SQL 실행 등 재설계 필요\u003C/td\u003E\u003Ctd\u003EQuestionExecutionService 경유로 전환: sandboxDbName 기반 실행, CONCEPT_ONLY 에러 처리 추가\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
         "operationId": "executeChoice",
         "parameters": [
           {
@@ -476,6 +516,37 @@
         }
       }
     },
+    "/api/progress/topic-analysis": {
+      "get": {
+        "tags": ["Progress"],
+        "summary": "토픽별 분석 조회",
+        "description": "## 인증(JWT): **불필요** (추후 헤더 전환 예정)\n\n## 요청 파라미터\n- memberUuid (UUID, required): 회원 식별자\n\n## 반환값 (TopicAnalysisResponse)\n- topicStats: 토픽별 집계 목록\n  - topicUuid: 토픽 식별자\n  - displayName: 토픽 표시명\n  - totalQuestionCount: 해당 토픽 전체 활성 문제 수 (막대그래프용)\n  - correctRate: 최근 7일 정답률 (0.0~1.0, 문제별 최근 시도 기준, 레이더차트용)\n  - solvedCount: 최근 7일 내 푼 문제 수\n- Submission 없는 토픽도 correctRate=0.0, solvedCount=0으로 포함\n\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.10\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/71\" target=\"_blank\"\u003E#71\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003E토픽별 분석 및 AI 코멘트 API 구현 필요\u003C/td\u003E\u003Ctd\u003E토픽별 정답률/문제수 분석 API 추가\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
+        "operationId": "getTopicAnalysis",
+        "parameters": [
+          {
+            "name": "memberUuid",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/TopicAnalysisResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/progress/heatmap": {
       "get": {
         "tags": ["Progress"],
@@ -518,6 +589,37 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/HeatmapResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/progress/ai-comment": {
+      "get": {
+        "tags": ["Progress"],
+        "summary": "AI 영역 분석 코멘트 조회",
+        "description": "## 인증(JWT): **불필요** (추후 헤더 전환 예정)\n\n## 요청 파라미터\n- memberUuid (UUID, required): 회원 식별자\n\n## 반환값 (AiCommentResponse)\n- comment: AI 생성 한국어 코멘트 (2~3문장, 약점 영역 파악 + 집중 학습 추천)\n- generatedAt: 코멘트 생성(캐시 저장) 시각\n\n## 캐싱\n- Redis key: ai-comment:{memberUuid}, TTL 24시간\n- 새 Submission 저장 시 즉시 캐시 무효화 → 다음 호출 시 재생성\n- AI 호출 latency를 고려해 프론트엔드에서 비동기 로딩 권장\n\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.10\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/71\" target=\"_blank\"\u003E#71\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003E토픽별 분석 및 AI 코멘트 API 구현 필요\u003C/td\u003E\u003Ctd\u003EAI 영역 분석 코멘트 API 추가 (Redis 캐시 24h TTL, Submission 저장 시 evict)\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
+        "operationId": "getAiComment",
+        "parameters": [
+          {
+            "name": "memberUuid",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/AiCommentResponse"
                 }
               }
             }
@@ -736,26 +838,17 @@
       "SubmitRequest": {
         "type": "object",
         "description": "문제 제출 요청",
-        "required": ["selectedChoiceKey"],
         "properties": {
+          "choiceSetId": {
+            "type": "string",
+            "format": "uuid",
+            "description": "선택지 세트 UUID",
+            "example": "550e8400-e29b-41d4-a716-446655440000"
+          },
           "selectedChoiceKey": {
             "type": "string",
             "description": "선택한 선택지 키",
             "example": "A"
-          }
-        }
-      },
-      "SubmitResult": {
-        "type": "object",
-        "properties": {
-          "isCorrect": {
-            "type": "boolean"
-          },
-          "correctKey": {
-            "type": "string"
-          },
-          "rationale": {
-            "type": "string"
           }
         }
       },
@@ -793,6 +886,41 @@
           },
           "errorMessage": {
             "type": "string"
+          }
+        }
+      },
+      "SubmitResult": {
+        "type": "object",
+        "properties": {
+          "isCorrect": {
+            "type": "boolean"
+          },
+          "correctKey": {
+            "type": "string"
+          },
+          "rationale": {
+            "type": "string"
+          },
+          "selectedResult": {
+            "$ref": "#/components/schemas/ExecuteResult"
+          },
+          "correctResult": {
+            "$ref": "#/components/schemas/ExecuteResult"
+          },
+          "correctSql": {
+            "type": "string"
+          },
+          "selectedSql": {
+            "type": "string"
+          }
+        }
+      },
+      "SseEmitter": {
+        "type": "object",
+        "properties": {
+          "timeout": {
+            "type": "integer",
+            "format": "int64"
           }
         }
       },
@@ -860,9 +988,6 @@
             "type": "integer",
             "format": "int64"
           },
-          "pageable": {
-            "$ref": "#/components/schemas/PageableObject"
-          },
           "numberOfElements": {
             "type": "integer",
             "format": "int32"
@@ -884,6 +1009,9 @@
           "sort": {
             "$ref": "#/components/schemas/SortObject"
           },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
           "first": {
             "type": "boolean"
           },
@@ -901,13 +1029,6 @@
           "unpaged": {
             "type": "boolean"
           },
-          "paged": {
-            "type": "boolean"
-          },
-          "pageSize": {
-            "type": "integer",
-            "format": "int32"
-          },
           "pageNumber": {
             "type": "integer",
             "format": "int32"
@@ -918,6 +1039,13 @@
           },
           "sort": {
             "$ref": "#/components/schemas/SortObject"
+          },
+          "paged": {
+            "type": "boolean"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -957,10 +1085,10 @@
           "unsorted": {
             "type": "boolean"
           },
-          "sorted": {
+          "empty": {
             "type": "boolean"
           },
-          "empty": {
+          "sorted": {
             "type": "boolean"
           }
         }
@@ -1046,6 +1174,10 @@
           "executionMode": {
             "type": "string",
             "enum": ["EXECUTABLE", "CONCEPT_ONLY"]
+          },
+          "choiceSetPolicy": {
+            "type": "string",
+            "enum": ["AI_ONLY", "CURATED_ONLY", "HYBRID", "ODD_ONE_OUT"]
           },
           "stem": {
             "type": "string"
@@ -1172,6 +1304,41 @@
           }
         }
       },
+      "TopicAnalysisResponse": {
+        "type": "object",
+        "properties": {
+          "topicStats": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TopicStat"
+            }
+          }
+        }
+      },
+      "TopicStat": {
+        "type": "object",
+        "properties": {
+          "topicUuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "totalQuestionCount": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "correctRate": {
+            "type": "number",
+            "format": "double"
+          },
+          "solvedCount": {
+            "type": "integer",
+            "format": "int32"
+          }
+        }
+      },
       "HeatmapEntry": {
         "type": "object",
         "properties": {
@@ -1197,6 +1364,18 @@
             "items": {
               "$ref": "#/components/schemas/HeatmapEntry"
             }
+          }
+        }
+      },
+      "AiCommentResponse": {
+        "type": "object",
+        "properties": {
+          "comment": {
+            "type": "string"
+          },
+          "generatedAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },

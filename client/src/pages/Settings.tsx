@@ -70,7 +70,7 @@ export default function Settings() {
 
         <div className="px-5 py-4">
           <p className="text-secondary text-sm">버전</p>
-          <p className="text-caption text-sm mt-1">1.0.0-MVP</p>
+          <p className="text-caption text-sm mt-1">{__APP_VERSION__}</p>
         </div>
       </div>
 
