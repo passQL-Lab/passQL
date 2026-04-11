@@ -27,7 +27,33 @@ class SettingsPage extends ConsumerWidget {
               // 정보 카드
               settingsAsync.when(
                 loading: () => const _InfoCardSkeleton(),
-                error: (e, _) => const SizedBox.shrink(),
+                error: (e, _) => Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    color: AppColors.cardBg,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.borderDefault),
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '정보를 불러오지 못했습니다.',
+                        style: AppTextStyles.paragraph_14
+                            .copyWith(color: AppColors.textSecondary),
+                      ),
+                      const SizedBox(height: 12),
+                      GestureDetector(
+                        onTap: () => ref.refresh(settingsDataProvider),
+                        child: Text(
+                          '다시 시도',
+                          style: AppTextStyles.paragraph_14
+                              .copyWith(color: AppColors.brandIndigo),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
                 data: (data) {
                   // 닉네임은 nicknameNotifier 상태 우선 (재생성 반영)
                   final nickname = nicknameAsync.valueOrNull ?? data.nickname;
@@ -38,8 +64,11 @@ class SettingsPage extends ConsumerWidget {
                     nickname: nickname,
                     version: data.version,
                     isRegenerating: isRegenerating,
-                    onCopyUuid: () {
-                      Clipboard.setData(ClipboardData(text: data.memberUuid));
+                    onCopyUuid: () async {
+                      await Clipboard.setData(
+                          ClipboardData(text: data.memberUuid));
+                      // async gap 이후 위젯이 unmount됐을 수 있으므로 체크
+                      if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
@@ -84,7 +113,8 @@ class _InfoCard extends StatelessWidget {
   final String nickname;
   final String version;
   final bool isRegenerating;
-  final VoidCallback onCopyUuid;
+  // async 콜백 — Clipboard.setData 이후 context.mounted 체크를 위해 Future<void> 사용
+  final Future<void> Function() onCopyUuid;
   final VoidCallback onRegenerateNickname;
 
   @override
