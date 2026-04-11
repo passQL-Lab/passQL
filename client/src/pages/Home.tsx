@@ -226,7 +226,7 @@ export default function Home() {
           <h2 className="text-secondary text-sm mb-3">추천 문제</h2>
           <div className="space-y-3">
             {recommendations.questions.map((q) => (
-              <Link key={q.questionUuid} to={`/questions/${q.questionUuid}`}>
+              <Link key={q.questionUuid} to={`/questions/${q.questionUuid}`} className="block">
                 <div className="card-base shadow-sm flex items-center gap-3 cursor-pointer hover:bg-surface transition-colors">
                   <div className="flex-1 min-w-0">
                     <p className="text-body truncate">{q.stemPreview}</p>
