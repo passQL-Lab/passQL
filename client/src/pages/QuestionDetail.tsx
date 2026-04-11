@@ -183,8 +183,12 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
   );
 
   if (isLoading || !question) {
+    // standalone 모드: 전체화면 컨테이너, practiceMode: 부모(DailyChallenge)가 컨테이너 제공
+    const loadingClass = practiceMode
+      ? "py-6 space-y-4"
+      : "min-h-screen bg-surface py-6 space-y-4 max-w-120 mx-auto w-full px-4";
     return (
-      <div className="py-6 space-y-4">
+      <div className={loadingClass}>
         <div className="h-14 bg-border animate-pulse rounded" />
         <div className="h-24 bg-border animate-pulse rounded-xl" />
         <div className="space-y-3">
@@ -286,8 +290,14 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
     </button>
   );
 
+  // standalone 모드: 전체화면 + max-w-120 집중 레이아웃 (DailyChallenge와 동일)
+  // practiceMode: DailyChallenge가 외부 컨테이너(flex-1 overflow-y-auto px-4) 제공
+  const containerClass = practiceMode
+    ? "flex flex-col px-1 pb-6"
+    : "flex flex-col min-h-screen bg-surface max-w-120 mx-auto w-full px-4 pb-6";
+
   return (
-    <div className="flex flex-col px-1 pb-6">
+    <div className={containerClass}>
       {/* 헤더: 일반 모드에서만 뒤로가기 + 메타 정보 */}
       {!practiceMode && (
         <header className="flex items-center justify-between h-14 px-3">
@@ -308,7 +318,7 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
       {/* 문제 지문 (토글) */}
       <button
         type="button"
-        className="card-base w-full text-left flex items-start gap-2 mt-2"
+        className="card-base shadow-sm w-full text-left flex items-start gap-2 mt-2"
         onClick={() => setStemOpen((prev) => !prev)}
       >
         <BookOpen size={16} className="text-brand mt-0.5 shrink-0" />
@@ -332,7 +342,7 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
       )}
 
       {/* 제출 버튼 */}
-      <div className="px-3 pt-4">
+      <div className="pt-4">
         {submitButton}
       </div>
 
