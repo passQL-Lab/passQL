@@ -74,7 +74,7 @@ export default function Home() {
         )}
       </section>
 
-      <hr className="border-t border-border my-6" />
+      <hr className="border-t border-border my-8" />
 
       <section className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
         {today?.question ? (
@@ -150,7 +150,7 @@ export default function Home() {
         )}
       </section>
 
-      <hr className="border-t border-border my-6" />
+      <hr className="border-t border-border my-8" />
 
       <section className="card-base shadow-sm mb-4">
         <div className="flex items-center justify-between mb-3">
@@ -176,7 +176,7 @@ export default function Home() {
         )}
       </section>
 
-      <hr className="border-t border-border my-6" />
+      <hr className="border-t border-border my-8" />
 
       {progress?.readiness ? (
         <section className="card-base shadow-sm mb-4">
@@ -227,7 +227,7 @@ export default function Home() {
         </section>
       )}
 
-      <hr className="border-t border-border my-6" />
+      <hr className="border-t border-border my-8" />
 
       {recommendations && recommendations.questions.length > 0 && (
         <section className="mt-6">
