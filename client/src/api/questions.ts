@@ -157,9 +157,10 @@ export function generateChoices(
             buffer += "\n\n"; // 청크 구분자 강제 추가
             processBuffer();
           }
+          // processBuffer에서 PARSE_ERROR가 발생한 경우 abortProcessing=true이므로 STREAM_CLOSED 중복 방지
           // complete/error 이벤트 없이 스트림이 닫힌 경우 — 서버 측 조용한 종료
           // AbortError로 cleanup한 경우가 아닐 때만 에러 처리
-          if (!receivedTerminalEvent && !abortController.signal.aborted) {
+          if (!receivedTerminalEvent && !abortProcessing && !abortController.signal.aborted) {
             callbacks.onError({ code: "STREAM_CLOSED", message: "선택지 생성이 중단되었습니다", retryable: true });
           }
           break;

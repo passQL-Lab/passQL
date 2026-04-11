@@ -53,7 +53,7 @@ export default function ChoiceReview({ choices, questionUuid, selectedKey }: Cho
           return (
             <div
               key={choice.key}
-              className="rounded-2xl p-4 transition-colors"
+              className="rounded-xl p-4 transition-colors"
               style={{
                 backgroundColor: "var(--color-surface-card)",
                 border: `1px solid ${isSelected ? "var(--color-brand)" : "var(--color-border)"}`,

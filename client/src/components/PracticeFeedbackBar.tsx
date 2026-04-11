@@ -62,7 +62,7 @@ export default function PracticeFeedbackBar({
 
         <button
           type="button"
-          className="w-full h-12 rounded-lg text-white font-bold text-base"
+          className="w-full h-12 rounded-xl text-white font-bold text-base"
           style={{
             backgroundColor: isCorrect
               ? "var(--color-sem-success)"

@@ -43,8 +43,9 @@ export default function DailyChallenge() {
         // 정답: 백엔드에 제출 → 완료 처리 (alreadySolvedToday=true)
         try {
           const result = await submitAnswer(today.question.questionUuid, choiceSetId, selectedChoiceKey);
-          // 백그라운드에서 캐시 무효화 — 홈 복귀 시 완료 상태 반영 (await 금지: 즉시 리다이렉트 방지)
+          // 백그라운드에서 캐시 무효화 — 홈 복귀 시 완료 상태·추천 문제 목록 즉시 반영
           queryClient.invalidateQueries({ queryKey: ["todayQuestion", uuid] });
+          queryClient.invalidateQueries({ queryKey: ["recommendations"] });
           setFeedback(result);
         } catch {
           navigate("/", { replace: true });
@@ -63,7 +64,7 @@ export default function DailyChallenge() {
         setFeedback(localResult);
       }
     },
-    [today?.question, navigate],
+    [today?.question, navigate, queryClient, uuid],
   );
 
   // 이미 오늘 풀었으면 홈으로 리다이렉트 — 피드백바 표시 중엔 건너뜀
@@ -95,7 +96,7 @@ export default function DailyChallenge() {
           <div className="justify-self-start">
             <button
               type="button"
-              className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-border transition-colors"
+              className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-border transition-colors"
               onClick={() => navigate("/")}
             >
               <Home size={18} className="text-text-secondary" />

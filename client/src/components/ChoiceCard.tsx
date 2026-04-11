@@ -45,7 +45,7 @@ export const ChoiceCard = memo(function ChoiceCard({
       role="button"
       tabIndex={0}
       aria-pressed={isSelected}
-      className="w-full text-left rounded-2xl p-4 shadow-sm transition-all duration-200 cursor-pointer"
+      className="w-full text-left rounded-xl p-4 shadow-sm transition-all duration-200 cursor-pointer"
       style={{
         backgroundColor: isSelected
           ? "var(--color-brand-light)"

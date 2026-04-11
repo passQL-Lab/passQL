@@ -1,6 +1,6 @@
-import { useState, useCallback, useRef, useEffect } from "react";
+import { useState, useCallback, useRef, useEffect, memo } from "react";
 import { useParams, useNavigate, useBlocker } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, BookOpen, RefreshCw } from "lucide-react";
 import { StarRating } from "../components/StarRating";
 import { ChoiceCard } from "../components/ChoiceCard";
@@ -18,6 +18,56 @@ import { explainError } from "../api/ai";
 import ConfirmModal from "../components/ConfirmModal";
 import type { ChoiceItem, ExecuteResult, SubmitResult } from "../types/api";
 
+type StemSegment = { kind: "text"; content: string } | { kind: "sql"; content: string };
+
+/** ` ```sql ... ``` ` 블록을 텍스트와 SQL 세그먼트로 분리 */
+function parseStem(stem: string): StemSegment[] {
+  const segments: StemSegment[] = [];
+  // ```sql 또는 ``` 로 감싸진 블록 추출
+  const regex = /```(?:sql)?\n([\s\S]*?)```/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+
+  while ((match = regex.exec(stem)) !== null) {
+    // 코드 블록 앞 텍스트
+    if (match.index > lastIndex) {
+      const text = stem.slice(lastIndex, match.index).trim();
+      if (text) segments.push({ kind: "text", content: text });
+    }
+    segments.push({ kind: "sql", content: match[1].trim() });
+    lastIndex = match.index + match[0].length;
+  }
+  // 나머지 텍스트
+  const remaining = stem.slice(lastIndex).trim();
+  if (remaining) segments.push({ kind: "text", content: remaining });
+
+  // 백틱 블록이 없으면 전체를 텍스트로
+  return segments.length > 0 ? segments : [{ kind: "text", content: stem }];
+}
+
+/** stem을 텍스트/SQL 블록으로 나눠 렌더링 */
+const StemRenderer = memo(function StemRenderer({ stem, truncate }: { stem: string; truncate: boolean }) {
+  if (truncate) {
+    // 접힌 상태: 백틱 블록 제거 후 한 줄로 truncate
+    const preview = stem.replace(/```(?:sql)?\n[\s\S]*?```/g, "[SQL]").replace(/\n/g, " ");
+    return <p className="text-body text-sm truncate">{preview}</p>;
+  }
+  const segments = parseStem(stem);
+  return (
+    <div className="space-y-2 text-sm">
+      {segments.map((seg, i) =>
+        seg.kind === "sql" ? (
+          <pre key={i} className="code-block text-xs leading-relaxed whitespace-pre-wrap break-words">
+            <code>{seg.content}</code>
+          </pre>
+        ) : (
+          <p key={i} className="text-body leading-relaxed">{seg.content}</p>
+        )
+      )}
+    </div>
+  );
+});
+
 interface QuestionDetailProps {
   readonly practiceMode?: boolean;
   readonly practiceSubmitLabel?: string;
@@ -31,6 +81,7 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
   const { questionUuid: paramUuid } = useParams<{ questionUuid: string }>();
   const questionUuid = propUuid ?? paramUuid;
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { data: question, isLoading } = useQuestionDetail(questionUuid!);
   const executeMutation = useExecuteChoice(questionUuid!);
   const submitMutation = useSubmitAnswer(questionUuid!);
@@ -158,6 +209,8 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
           // EXECUTABLE 문제: 제출 후 오답노트에서 선택지 SQL 실행 비교용
           choices: question.executionMode === "EXECUTABLE" ? choices : undefined,
         };
+        // 제출 완료 시 추천 문제 캐시 무효화 — 홈 복귀 시 목록 즉시 갱신
+        queryClient.invalidateQueries({ queryKey: ["recommendations"] });
         if (onSubmitSuccess) {
           // 데일리 챌린지 등 호출자가 네비게이션 제어
           onSubmitSuccess(fullResult as SubmitResult, questionUuid!);
@@ -166,7 +219,7 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
         }
       },
     });
-  }, [selectedKey, choiceSetId, choices, submitMutation, question, questionUuid, navigate, practiceMode, onPracticeSubmit, onSubmitSuccess]);
+  }, [selectedKey, choiceSetId, choices, submitMutation, question, questionUuid, navigate, practiceMode, onPracticeSubmit, onSubmitSuccess, queryClient]);
 
   const handleAskAi = useCallback(
     (choiceKey: string, _errorCode: string, errorMessage: string) => {
@@ -214,7 +267,6 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
         schemaDisplay={question.schemaDisplay}
         schemaDdl={question.schemaDdl}
         schemaSampleData={question.schemaSampleData}
-        schemaIntent={question.schemaIntent}
       />
     </section>
   ) : null;
@@ -304,7 +356,7 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
         <header className="flex items-center justify-between h-14 px-3">
           <button
             type="button"
-            className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-border transition-colors"
+            className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-border transition-colors"
             onClick={() => navigate(-1)}
           >
             <ArrowLeft size={18} className="text-text-secondary" />
@@ -323,11 +375,7 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
         onClick={() => setStemOpen((prev) => !prev)}
       >
         <BookOpen size={16} className="text-brand mt-0.5 shrink-0" />
-        {stemOpen ? (
-          <p className="text-body text-sm">{question.stem}</p>
-        ) : (
-          <p className="text-body text-sm truncate">{question.stem}</p>
-        )}
+        <StemRenderer stem={question.stem} truncate={!stemOpen} />
       </button>
 
       {/* 스키마 */}
@@ -343,7 +391,7 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
       )}
 
       {/* fixed bottom 제출 버튼 — PracticeFeedbackBar(z-30)가 제출 후 자연스럽게 덮음 */}
-      <div className="fixed bottom-0 inset-x-0 z-20 bg-surface-page border-t border-border">
+      <div className="fixed bottom-0 inset-x-0 z-20 bg-surface-page">
         <div className="mx-auto max-w-120 px-4 py-4">
           {submitButton}
         </div>

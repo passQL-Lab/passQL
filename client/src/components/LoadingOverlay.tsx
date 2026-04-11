@@ -22,7 +22,7 @@ export default function LoadingOverlay({ topicName, staticMessage, subMessage }:
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-      <div className="bg-surface-card rounded-2xl p-10 text-center max-w-[360px] w-[90%]">
+      <div className="bg-surface-card rounded-xl p-10 text-center max-w-[360px] w-[90%]">
         <div className="w-12 h-12 border-3 border-accent-light border-t-brand rounded-full animate-spin mx-auto mb-5" />
         {!staticMessage && (
           <span className="inline-block bg-accent-light text-brand text-sm font-medium px-3.5 py-1 rounded-full mb-4">
