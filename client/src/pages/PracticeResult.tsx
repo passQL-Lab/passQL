@@ -1,5 +1,6 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useParams, useNavigate, Navigate, Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { Check, RotateCcw } from "lucide-react";
 import { usePracticeStore } from "../stores/practiceStore";
 import { fetchAiComment } from "../api/progress";
@@ -20,18 +21,15 @@ export default function PracticeResult() {
   const navigate = useNavigate();
   const store = usePracticeStore();
   const [statsVisible, setStatsVisible] = useState(false);
-  // AI 코멘트: null=로딩 중, ""=에러/데이터 없음
-  const [aiComment, setAiComment] = useState<string | null>(null);
 
-  // 세션 종료 후 AI 분석 코멘트 비동기 로딩
-  // cancelled 플래그: StrictMode 이중 실행 및 언마운트 후 stale 업데이트 방지
-  useEffect(() => {
-    let cancelled = false;
-    fetchAiComment()
-      .then((res) => { if (!cancelled) setAiComment(res.comment); })
-      .catch(() => { if (!cancelled) setAiComment(""); });
-    return () => { cancelled = true; };
-  }, []);
+  // AI 코멘트: useQuery로 캐싱 및 StrictMode 이중 호출 방지
+  const { data: aiCommentData, isLoading: aiCommentLoading } = useQuery({
+    queryKey: ["aiComment"],
+    queryFn: fetchAiComment,
+    staleTime: 1000 * 60 * 24, // 24분 — Redis 캐시(24h)와 맞춤
+  });
+  // null=로딩 중, ""=에러/데이터 없음, string=내용
+  const aiComment = aiCommentLoading ? null : (aiCommentData?.comment ?? "");
 
   const analysis = useMemo(() => {
     const results = store.results;

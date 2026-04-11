@@ -702,10 +702,10 @@ export function getMockResponse(
         rationale:
           "CUSTOMER와 ORDERS를 customer_id로 JOIN한 후 c.name으로 GROUP BY하면 고객별 주문 수를 정확히 구할 수 있습니다.",
         selectedSql: isCorrect
-          ? "SELECT c.name, COUNT(*) AS cnt FROM CUSTOMER c JOIN ORDERS o ON c.customer_id = o.customer_id GROUP BY c.name"
-          : "SELECT c.name, COUNT(*) AS cnt FROM CUSTOMER c JOIN ORDERS o ON c.cust_id = o.cust_id GROUP BY c.name",
+          ? "SELECT c.name, COUNT(*) AS cnt FROM CUSTOMER c JOIN ORDERS o ON c.id = o.customer_id GROUP BY c.name"
+          : "SELECT c.name, COUNT(*) AS cnt FROM CUSTOMER c JOIN ORDERS o ON c.id = o.cust_id GROUP BY c.name",
         correctSql:
-          "SELECT c.name, COUNT(*) AS cnt FROM CUSTOMER c JOIN ORDERS o ON c.customer_id = o.customer_id GROUP BY c.name",
+          "SELECT c.name, COUNT(*) AS cnt FROM CUSTOMER c JOIN ORDERS o ON c.id = o.customer_id GROUP BY c.name",
         selectedResult: isCorrect
           ? MOCK_CORRECT_EXECUTE_RESULT
           : MOCK_WRONG_EXECUTE_RESULT,

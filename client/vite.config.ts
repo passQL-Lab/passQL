@@ -3,8 +3,10 @@ import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react-swc";
 import tailwindcss from "@tailwindcss/vite";
 import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 
-const pkg = JSON.parse(readFileSync("./package.json", "utf-8")) as { version: string };
+// import.meta.url 기반 절대 경로 — CWD에 무관하게 항상 이 파일 기준으로 package.json 탐색
+const pkg = JSON.parse(readFileSync(fileURLToPath(new URL("./package.json", import.meta.url)), "utf-8")) as { version: string };
 
 export default defineConfig({
   // package.json의 version을 빌드 시 전역 상수로 주입

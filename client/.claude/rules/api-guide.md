@@ -83,7 +83,7 @@ Frontend ──(/api)──> Backend(Spring) ──(x-api-key)──> AI Server(
 | `fetchProgress(memberUuid)`                   | GET    | `/progress?memberUuid`                 | O (query param) | `ProgressResponse`       |  O   |
 | `fetchTopicAnalysis(memberUuid)`              | GET    | `/progress/topic-analysis?memberUuid`  | O (query param) | `TopicAnalysisResponse`  |  O   |
 | `fetchHeatmap(memberUuid, from?, to?)`        | GET    | `/progress/heatmap?memberUuid&from&to` | O (query param) | `HeatmapResponse`        |  O   |
-| `fetchAiComment(memberUuid)`                  | GET    | `/progress/ai-comment?memberUuid`      | O (query param) | `AiCommentResponse`      |  O   |
+| `fetchAiComment()`                            | GET    | `/progress/ai-comment?memberUuid`      | O (query param) | `AiCommentResponse`      |  O   |
 
 - `fetchProgress`: 응답 필드 `solvedCount`(int64, distinct questionUuid 기준), `correctRate`(double, 0.0~1.0 둘째자리 반올림, 마지막 시도 기준), `streakDays`(int32, 하루 그레이스 -- 오늘 미제출이어도 어제까지 연속이면 유지). 제출 이력 0건이면 `{ 0, 0.0, 0 }`. `readiness` 블록: `ReadinessResponse { score, accuracy, coverage, recency, lastStudiedAt, recentAttemptCount, coveredTopicCount, activeTopicCount, daysUntilExam, toneKey }`. score = Accuracy x Coverage x Recency (0.0~1.0). toneKey: NO_EXAM/ONBOARDING/POST_EXAM/TODAY/SPRINT/PUSH/STEADY/EARLY.
 - `fetchTopicAnalysis`: 토픽별 학습 분석. `TopicAnalysisResponse { topicStats: TopicStat[] }`. `TopicStat { topicUuid, displayName, totalQuestionCount, correctRate, solvedCount }`.
@@ -211,7 +211,7 @@ AI 요청 body 필드 누락/타입 오류 시 백엔드가 422를 프록시할 
 
 ```typescript
 try {
-  const result = await submitAnswer(id, key);
+  const result = await submitAnswer(id, choiceSetId, key);
 } catch (err) {
   if (err instanceof ApiError) {
     // status별 분기: 400 입력오류, 401 인증실패, 404 리소스없음, 422 유효성오류, 500 서버오류

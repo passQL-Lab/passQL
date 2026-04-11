@@ -838,6 +838,7 @@
       "SubmitRequest": {
         "type": "object",
         "description": "문제 제출 요청",
+        "required": ["choiceSetId", "selectedChoiceKey"],
         "properties": {
           "choiceSetId": {
             "type": "string",
