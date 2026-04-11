@@ -5,7 +5,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 
 // 9개 토픽 코드 완전 명시 — fallback 랜덤 로직 제거
-const TOPIC_ICON_MAP: Record<string, LucideIcon> = {
+const TOPIC_ICON_MAP: Readonly<Record<string, LucideIcon>> = {
   data_modeling: Database,
   sql_basic_select: Table,
   sql_ddl_dml_tcl: PencilLine,
