@@ -838,7 +838,6 @@
       "SubmitRequest": {
         "type": "object",
         "description": "문제 제출 요청",
-        "required": ["choiceSetId", "selectedChoiceKey"],
         "properties": {
           "choiceSetId": {
             "type": "string",
@@ -989,9 +988,6 @@
             "type": "integer",
             "format": "int64"
           },
-          "pageable": {
-            "$ref": "#/components/schemas/PageableObject"
-          },
           "numberOfElements": {
             "type": "integer",
             "format": "int32"
@@ -1013,6 +1009,9 @@
           "sort": {
             "$ref": "#/components/schemas/SortObject"
           },
+          "pageable": {
+            "$ref": "#/components/schemas/PageableObject"
+          },
           "first": {
             "type": "boolean"
           },
@@ -1030,13 +1029,6 @@
           "unpaged": {
             "type": "boolean"
           },
-          "paged": {
-            "type": "boolean"
-          },
-          "pageSize": {
-            "type": "integer",
-            "format": "int32"
-          },
           "pageNumber": {
             "type": "integer",
             "format": "int32"
@@ -1047,6 +1039,13 @@
           },
           "sort": {
             "$ref": "#/components/schemas/SortObject"
+          },
+          "paged": {
+            "type": "boolean"
+          },
+          "pageSize": {
+            "type": "integer",
+            "format": "int32"
           }
         }
       },
@@ -1086,10 +1085,10 @@
           "unsorted": {
             "type": "boolean"
           },
-          "sorted": {
+          "empty": {
             "type": "boolean"
           },
-          "empty": {
+          "sorted": {
             "type": "boolean"
           }
         }
