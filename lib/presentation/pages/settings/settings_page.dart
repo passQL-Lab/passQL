@@ -39,16 +39,18 @@ class SettingsPage extends ConsumerWidget {
                     children: [
                       Text(
                         '정보를 불러오지 못했습니다.',
-                        style: AppTextStyles.paragraph_14
-                            .copyWith(color: AppColors.textSecondary),
+                        style: AppTextStyles.paragraph_14.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
                       ),
                       const SizedBox(height: 12),
                       GestureDetector(
                         onTap: () => ref.refresh(settingsDataProvider),
                         child: Text(
                           '다시 시도',
-                          style: AppTextStyles.paragraph_14
-                              .copyWith(color: AppColors.brandIndigo),
+                          style: AppTextStyles.paragraph_14.copyWith(
+                            color: AppColors.brandIndigo,
+                          ),
                         ),
                       ),
                     ],
@@ -66,15 +68,17 @@ class SettingsPage extends ConsumerWidget {
                     isRegenerating: isRegenerating,
                     onCopyUuid: () async {
                       await Clipboard.setData(
-                          ClipboardData(text: data.memberUuid));
+                        ClipboardData(text: data.memberUuid),
+                      );
                       // async gap 이후 위젯이 unmount됐을 수 있으므로 체크
                       if (!context.mounted) return;
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text(
                             '디바이스 ID가 복사되었습니다.',
-                            style: AppTextStyles.paragraph_14
-                                .copyWith(color: Colors.white),
+                            style: AppTextStyles.paragraph_14.copyWith(
+                              color: Colors.white,
+                            ),
                           ),
                           backgroundColor: AppColors.toastBg,
                           behavior: SnackBarBehavior.floating,
@@ -82,8 +86,9 @@ class SettingsPage extends ConsumerWidget {
                         ),
                       );
                     },
-                    onRegenerateNickname: () =>
-                        ref.read(nicknameNotifierProvider.notifier).regenerate(),
+                    onRegenerateNickname: () => ref
+                        .read(nicknameNotifierProvider.notifier)
+                        .regenerate(),
                   );
                 },
               ),
@@ -135,8 +140,9 @@ class _InfoCard extends StatelessWidget {
           _InfoRow(
             label: '디바이스 ID',
             value: truncatedUuid,
-            valueStyle: AppTextStyles.paragraph_14
-                .copyWith(color: AppColors.textPrimary),
+            valueStyle: AppTextStyles.paragraph_14.copyWith(
+              color: AppColors.textPrimary,
+            ),
             action: IconButton(
               icon: const FaIcon(FontAwesomeIcons.copy, size: 16),
               color: AppColors.textCaption,
@@ -147,8 +153,9 @@ class _InfoCard extends StatelessWidget {
           _InfoRow(
             label: '닉네임',
             value: nickname,
-            valueStyle: AppTextStyles.label_16
-                .copyWith(color: AppColors.textPrimary),
+            valueStyle: AppTextStyles.label_16.copyWith(
+              color: AppColors.textPrimary,
+            ),
             action: isRegenerating
                 ? const SizedBox(
                     width: 40,
@@ -174,8 +181,9 @@ class _InfoCard extends StatelessWidget {
           _InfoRow(
             label: '버전',
             value: version,
-            valueStyle: AppTextStyles.paragraph_14
-                .copyWith(color: AppColors.textCaption),
+            valueStyle: AppTextStyles.paragraph_14.copyWith(
+              color: AppColors.textCaption,
+            ),
             action: null,
           ),
         ],
@@ -211,8 +219,9 @@ class _InfoRow extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: AppTextStyles.tag_12
-                      .copyWith(color: AppColors.textCaption),
+                  style: AppTextStyles.tag_12.copyWith(
+                    color: AppColors.textCaption,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(value, style: valueStyle),
@@ -251,18 +260,12 @@ class _Footer extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Center(
-          child: Image.asset(
-            'assets/logo.png',
-            height: 28,
-          ),
-        ),
-        const SizedBox(height: 6),
+        Center(child: Image.asset('assets/logo.png', height: 24)),
+        const SizedBox(height: 8),
         Center(
           child: Text(
             '© 2026 passQL. All rights reserved.',
-            style: AppTextStyles.tag_12
-                .copyWith(color: AppColors.textCaption),
+            style: AppTextStyles.tag_12.copyWith(color: AppColors.textCaption),
           ),
         ),
       ],
