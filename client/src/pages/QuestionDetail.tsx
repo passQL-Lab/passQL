@@ -124,6 +124,9 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
     sseChoices == null &&
     !sseError;
   useEffect(() => {
+    // question 로드 완료 후 SSE 필요 여부를 effect 진입 시점에만 체크
+    // deps에 sseChoices/sseError를 넣으면 onComplete 후 리렌더 시 cleanup이 즉시 호출돼
+    // abort race condition이 발생하므로 진입 조건 체크만 하고 deps에서 제외
     if (!needsSseGeneration || !questionUuid) return;
 
     setSseError(null);
@@ -161,9 +164,11 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
       clearTimeout(timeoutId);
       cleanup();
     };
-  // sseRetryCount를 의존성에 포함해 재시도 시 재실행
+  // needsSseGeneration: question 로드·sseChoices·sseError 상태를 모두 반영한 파생값
+  // onComplete/onError 콜백이 상태를 바꿔도 cleanup이 abort를 호출하지 않도록
+  // deps에서 제외하고 effect 본문 첫 줄에서 직접 체크하는 방식 사용
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [needsSseGeneration, questionUuid, sseRetryCount]);
+  }, [questionUuid, sseRetryCount, question]);
 
   const explainMutation = useMutation({
     mutationFn: explainError,
