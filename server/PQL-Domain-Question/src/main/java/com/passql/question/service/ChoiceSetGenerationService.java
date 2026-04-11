@@ -6,19 +6,13 @@ import com.passql.common.exception.CustomException;
 import com.passql.common.exception.constant.ErrorCode;
 import com.passql.meta.entity.PromptTemplate;
 import com.passql.meta.service.PromptService;
-import com.passql.question.constant.ChoiceKind;
 import com.passql.question.constant.ChoiceSetSource;
-import com.passql.question.constant.ChoiceSetStatus;
 import com.passql.question.dto.ValidationReport;
 import com.passql.question.entity.Question;
 import com.passql.question.entity.QuestionChoiceSet;
-import com.passql.question.entity.QuestionChoiceSetItem;
-import com.passql.question.repository.QuestionChoiceSetItemRepository;
-import com.passql.question.repository.QuestionChoiceSetRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -28,7 +22,7 @@ import java.util.UUID;
  * AI 선택지 세트 생성 + 샌드박스 검증 재시도 루프.
  * <p>
  * 비트랜잭션 — AI·샌드박스 호출이 수 초 걸리므로 긴 트랜잭션 금지.
- * save만 짧은 트랜잭션(@Transactional).
+ * save는 ChoiceSetSaveService(별도 빈)에 위임하여 self-invocation 문제 방지.
  */
 @Slf4j
 @Service
@@ -44,8 +38,7 @@ public class ChoiceSetGenerationService {
     private final PromptService promptService;
     private final AiGatewayClient aiGatewayClient;
     private final SandboxValidator sandboxValidator;
-    private final QuestionChoiceSetRepository choiceSetRepository;
-    private final QuestionChoiceSetItemRepository choiceSetItemRepository;
+    private final ChoiceSetSaveService choiceSetSaveService;
 
     /**
      * CONCEPT_ONLY 전용: Sandbox 없이 AI가 텍스트 선택지를 생성한다.
@@ -70,7 +63,8 @@ public class ChoiceSetGenerationService {
                         .count();
 
                 if (correctCount == 1) {
-                    return saveConceptSuccess(question, source, memberUuid, prompt, lastResult, attempts);
+                    return choiceSetSaveService.saveConceptSuccess(
+                            question, source, memberUuid, prompt, lastResult, attempts);
                 }
 
                 lastErrorCode = (correctCount == 0)
@@ -81,7 +75,7 @@ public class ChoiceSetGenerationService {
 
             } catch (CustomException e) {
                 if (e.getErrorCode() == ErrorCode.AI_FALLBACK_FAILED) {
-                    saveFailed(question, source, memberUuid, prompt, lastResult, attempts, e.getErrorCode());
+                    choiceSetSaveService.saveFailed(question, source, memberUuid, prompt, lastResult, attempts, e.getErrorCode());
                     throw e;
                 }
                 lastErrorCode = e.getErrorCode();
@@ -90,7 +84,7 @@ public class ChoiceSetGenerationService {
             }
         }
 
-        saveFailed(question, source, memberUuid, prompt, lastResult, MAX_ATTEMPTS, lastErrorCode);
+        choiceSetSaveService.saveFailed(question, source, memberUuid, prompt, lastResult, MAX_ATTEMPTS, lastErrorCode);
         throw new CustomException(
                 lastErrorCode != null ? lastErrorCode : ErrorCode.CHOICE_SET_GENERATION_FAILED,
                 "concept questionUuid=" + questionUuid);
@@ -121,8 +115,8 @@ public class ChoiceSetGenerationService {
                         question.getChoiceSetPolicy());
 
                 if (lastReport.correctCount() == 1) {
-                    return saveSuccess(question, source, memberUuid, prompt,
-                            lastResult, lastReport, attempts);
+                    return choiceSetSaveService.saveSuccess(
+                            question, source, memberUuid, prompt, lastResult, lastReport, attempts);
                 }
 
                 lastErrorCode = (lastReport.correctCount() == 0)
@@ -137,7 +131,7 @@ public class ChoiceSetGenerationService {
                 if (ec == ErrorCode.SANDBOX_SETUP_FAILED
                         || ec == ErrorCode.SANDBOX_ANSWER_SQL_FAILED
                         || ec == ErrorCode.AI_FALLBACK_FAILED) {
-                    saveFailed(question, source, memberUuid, prompt, lastResult, attempts, ec);
+                    choiceSetSaveService.saveFailed(question, source, memberUuid, prompt, lastResult, attempts, ec);
                     throw e;
                 }
                 // 재시도 가능 에러 (파싱 실패, 스키마 위반 등)
@@ -148,124 +142,10 @@ public class ChoiceSetGenerationService {
         }
 
         // 3회 다 실패
-        saveFailed(question, source, memberUuid, prompt, lastResult, MAX_ATTEMPTS, lastErrorCode);
+        choiceSetSaveService.saveFailed(question, source, memberUuid, prompt, lastResult, MAX_ATTEMPTS, lastErrorCode);
         throw new CustomException(
                 lastErrorCode != null ? lastErrorCode : ErrorCode.CHOICE_SET_GENERATION_FAILED,
                 "questionUuid=" + questionUuid + ", source=" + source);
-    }
-
-    @Transactional
-    protected QuestionChoiceSet saveSuccess(
-            Question question, ChoiceSetSource source, UUID memberUuid,
-            PromptTemplate prompt, GenerateChoiceSetResult result,
-            ValidationReport report, int attempts) {
-
-        QuestionChoiceSet set = QuestionChoiceSet.builder()
-                .questionUuid(question.getQuestionUuid())
-                .source(source)
-                .status(ChoiceSetStatus.OK)
-                .generatedForMemberUuid(memberUuid)
-                .promptTemplateUuid(prompt.getPromptTemplateUuid())
-                .modelName(prompt.getModel())
-                .temperature(prompt.getTemperature())
-                .maxTokens(prompt.getMaxTokens())
-                .generationAttempts(attempts)
-                .sandboxValidationPassed(true)
-                .isReusable(false)
-                .totalElapsedMs(result.metadata() != null ? result.metadata().elapsedMs() : 0)
-                .build();
-        set = choiceSetRepository.saveAndFlush(set);
-
-        List<GeneratedChoiceDto> choices = result.choices();
-        for (int i = 0; i < choices.size(); i++) {
-            GeneratedChoiceDto c = choices.get(i);
-            // 샌드박스 결과 기반 is_correct 덮어쓰기
-            boolean correct = report.items().get(i).matchesExpected();
-            QuestionChoiceSetItem item = QuestionChoiceSetItem.builder()
-                    .choiceSetUuid(set.getChoiceSetUuid())
-                    .choiceKey(c.key())
-                    .sortOrder(i)
-                    .kind(ChoiceKind.SQL)
-                    .body(c.body())
-                    .isCorrect(correct)
-                    .rationale(c.rationale())
-                    .build();
-            choiceSetItemRepository.save(item);
-        }
-
-        log.info("[choice-gen] success: questionUuid={}, attempts={}, setUuid={}",
-                question.getQuestionUuid(), attempts, set.getChoiceSetUuid());
-        return set;
-    }
-
-    @Transactional
-    protected void saveFailed(
-            Question question, ChoiceSetSource source, UUID memberUuid,
-            PromptTemplate prompt, GenerateChoiceSetResult result,
-            int attempts, ErrorCode errorCode) {
-
-        QuestionChoiceSet set = QuestionChoiceSet.builder()
-                .questionUuid(question.getQuestionUuid())
-                .source(source)
-                .status(ChoiceSetStatus.FAILED)
-                .generatedForMemberUuid(memberUuid)
-                .promptTemplateUuid(prompt.getPromptTemplateUuid())
-                .modelName(prompt.getModel())
-                .temperature(prompt.getTemperature())
-                .maxTokens(prompt.getMaxTokens())
-                .generationAttempts(attempts)
-                .sandboxValidationPassed(false)
-                .isReusable(false)
-                .build();
-        choiceSetRepository.save(set);
-
-        log.warn("[choice-gen] failed: questionUuid={}, attempts={}, errorCode={}",
-                question.getQuestionUuid(), attempts, errorCode);
-    }
-
-    /**
-     * CONCEPT_ONLY 성공 저장 — ChoiceKind.TEXT + AI의 is_correct 그대로 사용 (샌드박스 없음).
-     */
-    @Transactional
-    protected QuestionChoiceSet saveConceptSuccess(
-            Question question, ChoiceSetSource source, UUID memberUuid,
-            PromptTemplate prompt, GenerateChoiceSetResult result, int attempts) {
-
-        QuestionChoiceSet set = QuestionChoiceSet.builder()
-                .questionUuid(question.getQuestionUuid())
-                .source(source)
-                .status(ChoiceSetStatus.OK)
-                .generatedForMemberUuid(memberUuid)
-                .promptTemplateUuid(prompt.getPromptTemplateUuid())
-                .modelName(prompt.getModel())
-                .temperature(prompt.getTemperature())
-                .maxTokens(prompt.getMaxTokens())
-                .generationAttempts(attempts)
-                .sandboxValidationPassed(false) // 개념 문제는 샌드박스 미사용
-                .isReusable(false)
-                .totalElapsedMs(result.metadata() != null ? result.metadata().elapsedMs() : 0)
-                .build();
-        set = choiceSetRepository.saveAndFlush(set);
-
-        List<GeneratedChoiceDto> choices = result.choices();
-        for (int i = 0; i < choices.size(); i++) {
-            GeneratedChoiceDto c = choices.get(i);
-            // AI가 직접 is_correct를 판별 — 샌드박스 검증 없음
-            QuestionChoiceSetItem item = QuestionChoiceSetItem.builder()
-                    .choiceSetUuid(set.getChoiceSetUuid())
-                    .choiceKey(c.key())
-                    .sortOrder(i)
-                    .kind(ChoiceKind.TEXT)
-                    .body(c.body())
-                    .isCorrect(c.isCorrect())
-                    .rationale(c.rationale())
-                    .build();
-            choiceSetItemRepository.save(item);
-        }
-
-        log.info("[choice-gen-concept] success: questionUuid={}, attempts={}, setUuid={}",
-                question.getQuestionUuid(), attempts, set.getChoiceSetUuid());
-        return set;
     }
 
     /**

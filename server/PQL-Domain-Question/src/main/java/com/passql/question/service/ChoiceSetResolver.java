@@ -31,10 +31,12 @@ public class ChoiceSetResolver {
 
     /**
      * questionUuid + memberUuid 로 사용자에게 제공할 선택지 세트를 결정한다.
+     * <p>
+     * 비트랜잭션 — AI·샌드박스 호출이 수 초 걸리므로 긴 트랜잭션 금지.
+     * consumed_at 마킹은 markConsumed()에서 짧은 트랜잭션으로 처리.
      *
      * @return 사용 가능한 QuestionChoiceSet
      */
-    @Transactional
     public QuestionChoiceSet resolveForUser(UUID questionUuid, UUID memberUuid) {
         Question question = questionService.getQuestionEntity(questionUuid);
 
@@ -72,8 +74,7 @@ public class ChoiceSetResolver {
 
         if (prefetched.isPresent()) {
             QuestionChoiceSet set = prefetched.get();
-            set.setConsumedAt(LocalDateTime.now());
-            choiceSetRepository.save(set);
+            markConsumed(set);
             log.info("[resolver] concept prefetch HIT: questionUuid={}, setUuid={}",
                     questionUuid, set.getChoiceSetUuid());
             return set;
@@ -93,8 +94,7 @@ public class ChoiceSetResolver {
         if (prefetched.isPresent()) {
             // 2. HIT: consumed_at 마킹 후 반환
             QuestionChoiceSet set = prefetched.get();
-            set.setConsumedAt(LocalDateTime.now());
-            choiceSetRepository.save(set);
+            markConsumed(set);
             log.info("[resolver] prefetch HIT: questionUuid={}, setUuid={}",
                     questionUuid, set.getChoiceSetUuid());
             return set;
@@ -104,5 +104,14 @@ public class ChoiceSetResolver {
         log.info("[resolver] prefetch MISS, runtime generation: questionUuid={}, memberUuid={}",
                 questionUuid, memberUuid);
         return choiceSetGenerationService.generate(questionUuid, memberUuid, ChoiceSetSource.AI_RUNTIME);
+    }
+
+    /**
+     * 프리페치 캐시 소비 마킹 — 짧은 트랜잭션으로 처리.
+     */
+    @Transactional
+    protected void markConsumed(QuestionChoiceSet set) {
+        set.setConsumedAt(LocalDateTime.now());
+        choiceSetRepository.save(set);
     }
 }
