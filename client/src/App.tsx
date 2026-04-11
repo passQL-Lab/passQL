@@ -3,6 +3,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import AppLayout from "./components/AppLayout";
 import Home from "./pages/Home";
 import CategoryCards from "./pages/CategoryCards";
+import DailyChallenge from "./pages/DailyChallenge";
 import PracticeSet from "./pages/PracticeSet";
 import PracticeResult from "./pages/PracticeResult";
 import QuestionDetail from "./pages/QuestionDetail";
@@ -18,6 +19,7 @@ const router = createBrowserRouter([
       { index: true, element: <Home /> },
       { path: "questions", element: <CategoryCards /> },
       { path: "questions/:questionUuid", element: <QuestionDetail /> },
+      { path: "daily-challenge", element: <DailyChallenge /> },
       { path: "stats", element: <Stats /> },
       { path: "settings", element: <Settings /> },
     ],

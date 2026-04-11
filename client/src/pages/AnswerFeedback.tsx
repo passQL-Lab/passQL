@@ -20,6 +20,8 @@ interface FeedbackState {
   readonly executionMode?: ExecutionMode;
   readonly selectedResult: ExecuteResult | null;
   readonly correctResult: ExecuteResult | null;
+  // 데일리 챌린지 모드: 버튼 동작 분기용
+  readonly isDailyChallenge?: boolean;
 }
 
 function SqlCompareBlock({
@@ -149,6 +151,7 @@ export default function AnswerFeedback() {
     executionMode,
     selectedResult,
     correctResult,
+    isDailyChallenge,
   } = state;
 
   const isExecutable = executionMode === "EXECUTABLE";
@@ -287,9 +290,18 @@ export default function AnswerFeedback() {
                 ? "var(--color-sem-success)"
                 : "var(--color-sem-error)",
             }}
-            onClick={() => navigate("/questions")}
+            onClick={() => {
+              if (isDailyChallenge) {
+                // 데일리 챌린지: 정답이면 홈, 오답이면 다시 풀기
+                navigate(isCorrect ? "/" : "/daily-challenge", { replace: true });
+              } else {
+                navigate("/questions");
+              }
+            }}
           >
-            다음 문제
+            {isDailyChallenge
+              ? isCorrect ? "홈으로 가기" : "다시 풀기"
+              : "다음 문제"}
           </button>
         </div>
       </div>
