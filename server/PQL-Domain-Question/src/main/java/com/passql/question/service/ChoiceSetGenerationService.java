@@ -192,12 +192,13 @@ public class ChoiceSetGenerationService {
             long aiCorrectCount = lastResult.choices().stream()
                     .filter(GeneratedChoiceDto::isCorrect)
                     .count();
-            if (aiCorrectCount == 1) {
-                log.warn("[choice-gen] MULTIPLE_CORRECT fallback: AI isCorrect=1개 신뢰, sandboxValidationPassed=false 저장. questionUuid={}", questionUuid);
+            if (aiCorrectCount >= 1) {
+                // 정답이 2개 이상이어도 OK — "맞는 것은?" 유형에서 정답 중 하나를 고르면 정답 처리되므로 문제없음
+                log.warn("[choice-gen] MULTIPLE_CORRECT fallback: AI isCorrect={}개 신뢰, sandboxValidationPassed=false 저장. questionUuid={}", aiCorrectCount, questionUuid);
                 return choiceSetSaveService.saveWithAiCorrect(
                         question, source, memberUuid, prompt, lastResult, MAX_ATTEMPTS);
             }
-            log.error("[choice-gen] MULTIPLE_CORRECT fallback 불가: aiCorrectCount={}. questionUuid={}", aiCorrectCount, questionUuid);
+            log.error("[choice-gen] MULTIPLE_CORRECT fallback 불가: aiCorrectCount=0. questionUuid={}", questionUuid);
         }
         choiceSetSaveService.saveFailed(question, source, memberUuid, prompt, lastResult, MAX_ATTEMPTS, lastErrorCode);
         throw new CustomException(
