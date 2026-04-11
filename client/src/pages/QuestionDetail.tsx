@@ -175,7 +175,9 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
     choiceSetId !== "" &&
     !submitMutation.isPending;
 
-  const schemaSection = question.schemaDisplay ? (
+  // schemaDisplay가 없어도 schemaDdl이 있으면 SchemaViewer가 폴백으로 파싱해서 표시
+  const hasSchema = question.schemaDisplay || question.schemaDdl;
+  const schemaSection = hasSchema ? (
     <section className="mt-3">
       <button
         type="button"
