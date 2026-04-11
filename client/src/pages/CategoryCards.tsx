@@ -51,16 +51,13 @@ export default function CategoryCards() {
               <button
                 key={t.code}
                 type="button"
-                className="card-base flex flex-col items-center text-center cursor-pointer hover:border-brand transition-colors"
+                className="card-base flex flex-col items-center text-center cursor-pointer shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-[#4F46E5] transition-all duration-200"
                 onClick={() => handleSelect(t.code, t.displayName)}
               >
                 <div className="w-11 h-11 bg-accent-light rounded-[10px] flex items-center justify-center mb-3">
                   <Icon size={22} className="text-brand" />
                 </div>
                 <span className="text-body font-bold">{t.displayName}</span>
-                <span className="text-xs text-text-caption mt-1">
-                  {t.subtopics.length > 0 ? t.subtopics.map((s) => s.displayName).join(", ") : t.displayName}
-                </span>
               </button>
             );
           })}
