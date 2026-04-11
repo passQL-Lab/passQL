@@ -109,7 +109,7 @@ export default function Home() {
           ) : (
             // 미완료 상태: 데일리 챌린지 페이지로 이동
             <Link to="/daily-challenge" className="block">
-              <div className="card-base shadow-sm h-full flex flex-col gap-2 cursor-pointer hover:bg-surface transition-colors">
+              <div className="card-base shadow-sm h-full flex flex-col gap-2 cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:border-brand transition-all duration-200">
                 <p className="text-secondary text-sm">오늘의 문제</p>
                 <p className="text-body text-sm truncate">
                   {today.question.stemPreview}
@@ -125,7 +125,7 @@ export default function Home() {
           )
         ) : (
           <Link to="/questions" className="block">
-            <div className="card-base shadow-sm h-full flex flex-col justify-center cursor-pointer hover:bg-surface transition-colors">
+            <div className="card-base shadow-sm h-full flex flex-col justify-center cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:border-brand transition-all duration-200">
               <p className="text-secondary text-sm">문제 풀기</p>
               <p className="text-body text-sm">SQL 문제를 풀어보세요</p>
             </div>
@@ -272,7 +272,7 @@ export default function Home() {
           <div className="space-y-3">
             {recommendations.questions.map((q) => (
               <Link key={q.questionUuid} to={`/questions/${q.questionUuid}`} className="block">
-                <div className="card-base shadow-sm flex items-center gap-3 cursor-pointer hover:bg-surface transition-colors">
+                <div className="card-base shadow-sm flex items-center gap-3 cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:border-brand transition-all duration-200">
                   <div className="flex-1 min-w-0">
                     <p className="text-body truncate">{q.stemPreview}</p>
                     <div className="flex items-center gap-2 mt-1">

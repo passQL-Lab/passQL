@@ -57,7 +57,7 @@ export default function Questions() {
                 <button
                   key={t.code}
                   type="button"
-                  className="card-base flex flex-col gap-2 cursor-pointer hover:bg-surface transition-colors text-left"
+                  className="card-base shadow-sm flex flex-col gap-2 cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:border-brand transition-all duration-200 text-left"
                   onClick={() => selectTopic(t.code)}
                 >
                   <span className="text-body font-medium text-text-primary">{t.displayName}</span>
@@ -147,7 +147,7 @@ export default function Questions() {
         <section className="space-y-3">
           {data?.content.map((q) => (
             <Link key={q.questionUuid} to={`/questions/${q.questionUuid}`} className="block">
-              <div className="card-base flex flex-col gap-3 cursor-pointer hover:bg-surface transition-colors">
+              <div className="card-base shadow-sm flex flex-col gap-3 cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:border-brand transition-all duration-200">
                 <div className="flex items-center justify-between">
                   <span className="font-mono text-xs text-text-caption">{q.questionUuid.slice(0, 8)}</span>
                   <span className="badge-topic">{q.topicName}</span>
