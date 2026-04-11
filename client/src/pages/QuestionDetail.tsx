@@ -323,7 +323,7 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
       )}
 
       {/* 제출 버튼 */}
-      <div className="px-3 pt-4">
+      <div className="pt-4">
         {submitButton}
       </div>
 
