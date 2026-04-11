@@ -51,7 +51,7 @@ export default function CategoryCards() {
               <button
                 key={t.code}
                 type="button"
-                className="card-base flex flex-col items-center text-center cursor-pointer shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-[#4F46E5] transition-all duration-200"
+                className="card-base flex flex-col items-center text-center cursor-pointer shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-brand"
                 onClick={() => handleSelect(t.code, t.displayName)}
               >
                 <div className="w-11 h-11 bg-accent-light rounded-[10px] flex items-center justify-center mb-3">
