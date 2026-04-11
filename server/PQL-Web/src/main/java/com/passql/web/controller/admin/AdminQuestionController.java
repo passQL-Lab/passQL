@@ -153,6 +153,18 @@ public class AdminQuestionController {
         return "redirect:/admin/questions";
     }
 
+    /**
+     * 선택된 UUID 목록 일괄삭제 (JSON body: { "questionUuids": [...] }).
+     */
+    @DeleteMapping("/bulk")
+    @ResponseBody
+    public ResponseEntity<AdminQuestionDeleteService.BulkDeleteResult> bulkDelete(
+            @RequestBody ExportRequest request) {
+        AdminQuestionDeleteService.BulkDeleteResult result =
+                adminQuestionDeleteService.bulkDeleteQuestions(request.questionUuids());
+        return ResponseEntity.ok(result);
+    }
+
     // ── Import / Export ──────────────────────────────────────────
 
     /**

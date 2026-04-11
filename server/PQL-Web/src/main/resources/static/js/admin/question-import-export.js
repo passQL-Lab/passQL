@@ -29,12 +29,84 @@ function getSelectedUuids() {
 }
 
 function updateExportButtonState() {
-    const btn = document.getElementById('exportSelectedBtn');
-    const label = document.getElementById('exportSelectedLabel');
-    if (btn && label) {
-        const count = getSelectedUuids().length;
-        btn.disabled = count === 0;
-        label.textContent = count > 0 ? `선택 내보내기 (${count})` : '선택 내보내기';
+    const count = getSelectedUuids().length;
+
+    // 선택 내보내기 버튼 상태
+    const exportBtn = document.getElementById('exportSelectedBtn');
+    const exportLabel = document.getElementById('exportSelectedLabel');
+    if (exportBtn && exportLabel) {
+        exportBtn.disabled = count === 0;
+        exportLabel.textContent = count > 0 ? `선택 내보내기 (${count})` : '선택 내보내기';
+    }
+
+    // 선택 삭제 버튼 상태
+    const deleteBtn = document.getElementById('deleteSelectedBtn');
+    const deleteLabel = document.getElementById('deleteSelectedLabel');
+    if (deleteBtn && deleteLabel) {
+        deleteBtn.disabled = count === 0;
+        deleteLabel.textContent = count > 0 ? `선택 삭제 (${count})` : '선택 삭제';
+    }
+}
+
+// ── 선택 일괄삭제 ─────────────────────────────────────────────
+
+/**
+ * 선택된 문제들을 일괄삭제한다.
+ * 확인 모달을 먼저 열고, 사용자가 확정하면 API 호출 후 페이지를 새로고침한다.
+ */
+function deleteSelected() {
+    const uuids = getSelectedUuids();
+    if (uuids.length === 0) {
+        alert('삭제할 문제를 선택해주세요.');
+        return;
+    }
+    // 확인 모달에 선택 개수를 표시하고 열기
+    const countEl = document.getElementById('bulkDeleteCount');
+    if (countEl) countEl.textContent = uuids.length;
+    document.getElementById('bulkDeleteModal').showModal();
+}
+
+/**
+ * 일괄삭제 확인 후 실제 API를 호출한다.
+ */
+async function confirmBulkDelete() {
+    const uuids = getSelectedUuids();
+    if (uuids.length === 0) return;
+
+    // 모달 버튼 로딩 상태
+    const confirmBtn = document.getElementById('bulkDeleteConfirmBtn');
+    if (confirmBtn) {
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<span class="loading loading-spinner loading-xs"></span> 삭제 중...';
+    }
+
+    try {
+        const resp = await fetch('/admin/questions/bulk', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ questionUuids: uuids })
+        });
+
+        // ok 체크를 json 파싱 전에 수행 — 에러 응답이 HTML일 때 파싱 오류 방지
+        if (!resp.ok) {
+            const err = await resp.json().catch(() => ({}));
+            alert(err.message || '일괄삭제 실패');
+            if (confirmBtn) { confirmBtn.disabled = false; confirmBtn.textContent = '삭제'; }
+            return;
+        }
+
+        const result = await resp.json();
+        document.getElementById('bulkDeleteModal').close();
+
+        // 결과 알림 후 새로고침
+        const msg = `삭제 완료: ${result.deleted}건 삭제, ${result.skipped}건 스킵`;
+        alert(msg);
+        location.reload();
+    } catch (e) {
+        alert('삭제 오류: ' + e.message);
+        document.getElementById('bulkDeleteModal').close();
+        // 네트워크 오류 등 예외 시 버튼 상태 복구
+        if (confirmBtn) { confirmBtn.disabled = false; confirmBtn.textContent = '삭제'; }
     }
 }
 
