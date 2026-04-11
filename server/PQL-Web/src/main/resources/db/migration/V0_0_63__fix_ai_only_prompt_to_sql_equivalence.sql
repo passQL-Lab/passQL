@@ -69,7 +69,17 @@ WHERE choice_set_policy = 'AI_ONLY'
   );
 
 -- Phase 4: AI_ONLY EXECUTABLE 문제의 기존 선택지 세트 삭제 (재생성 유도)
--- question_choice_set_item → question_choice_set 순서로 삭제 (FK 제약)
+-- 삭제 순서: submission FK 해제 → question_choice_set_item → question_choice_set
+
+-- Step 1: submission이 참조하는 choice_set_uuid를 NULL로 해제 (FK 제약 회피)
+UPDATE submission s
+INNER JOIN question_choice_set cs ON s.choice_set_uuid = cs.choice_set_uuid
+INNER JOIN question q ON cs.question_uuid = q.question_uuid
+SET s.choice_set_uuid = NULL
+WHERE q.choice_set_policy = 'AI_ONLY'
+  AND q.execution_mode = 'EXECUTABLE';
+
+-- Step 2: 선택지 항목 삭제
 DELETE csi
 FROM question_choice_set_item csi
 INNER JOIN question_choice_set cs ON csi.choice_set_uuid = cs.choice_set_uuid
@@ -77,6 +87,7 @@ INNER JOIN question q ON cs.question_uuid = q.question_uuid
 WHERE q.choice_set_policy = 'AI_ONLY'
   AND q.execution_mode = 'EXECUTABLE';
 
+-- Step 3: 선택지 세트 삭제
 DELETE cs
 FROM question_choice_set cs
 INNER JOIN question q ON cs.question_uuid = q.question_uuid

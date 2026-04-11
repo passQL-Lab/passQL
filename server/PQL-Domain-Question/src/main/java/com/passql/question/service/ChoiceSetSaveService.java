@@ -19,7 +19,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 /**
  * 선택지 세트·아이템 저장 전용 서비스.
@@ -123,6 +125,61 @@ public class ChoiceSetSaveService {
         }
 
         log.info("[choice-gen-concept] success: questionUuid={}, attempts={}, setUuid={}",
+                question.getQuestionUuid(), attempts, set.getChoiceSetUuid());
+        return set;
+    }
+
+    /**
+     * RESULT_MATCH 선택지 세트 성공 저장.
+     * kind=TEXT, is_correct=샌드박스 검증 결과 기반(ValidationReport).
+     * answerSql Sandbox 실행 + JSON 비교 검증을 통과한 세트.
+     */
+    @Transactional
+    public QuestionChoiceSet saveResultMatch(
+            Question question, ChoiceSetSource source, UUID memberUuid,
+            PromptTemplate prompt, GenerateChoiceSetResult result,
+            ValidationReport report, int attempts) {
+
+        QuestionChoiceSet set = QuestionChoiceSet.builder()
+                .questionUuid(question.getQuestionUuid())
+                .source(source)
+                .status(ChoiceSetStatus.OK)
+                .generatedForMemberUuid(memberUuid)
+                .promptTemplateUuid(prompt.getPromptTemplateUuid())
+                .modelName(prompt.getModel())
+                .temperature(prompt.getTemperature())
+                .maxTokens(prompt.getMaxTokens())
+                .generationAttempts(attempts)
+                .sandboxValidationPassed(true) // answerSql 실행 + JSON 비교 검증 통과
+                .isReusable(false)
+                .totalElapsedMs(result.metadata() != null ? result.metadata().elapsedMs() : 0)
+                .build();
+        set = choiceSetRepository.saveAndFlush(set);
+
+        // key 기반 매핑 — 인덱스 순서 의존 제거
+        Map<String, Boolean> correctMap = report.items().stream()
+                .collect(Collectors.toMap(
+                        ValidationReport.ChoiceValidation::key,
+                        ValidationReport.ChoiceValidation::matchesExpected));
+
+        List<GeneratedChoiceDto> choices = result.choices();
+        for (int i = 0; i < choices.size(); i++) {
+            GeneratedChoiceDto c = choices.get(i);
+            // is_correct는 AI 판단이 아닌 JSON 비교 검증 결과로 덮어쓰기
+            boolean correct = correctMap.getOrDefault(c.key(), false);
+            QuestionChoiceSetItem item = QuestionChoiceSetItem.builder()
+                    .choiceSetUuid(set.getChoiceSetUuid())
+                    .choiceKey(c.key())
+                    .sortOrder(i)
+                    .kind(ChoiceKind.TEXT)   // RESULT_MATCH는 항상 TEXT
+                    .body(c.body())          // JSON 배열 문자열
+                    .isCorrect(correct)
+                    .rationale(c.rationale())
+                    .build();
+            choiceSetItemRepository.save(item);
+        }
+
+        log.info("[choice-gen-result-match] success: questionUuid={}, attempts={}, setUuid={}",
                 question.getQuestionUuid(), attempts, set.getChoiceSetUuid());
         return set;
     }
