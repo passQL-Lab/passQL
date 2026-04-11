@@ -23,43 +23,57 @@ export const ChoiceCard = memo(function ChoiceCard({
   onExecute,
   onAskAi,
 }: ChoiceCardProps) {
-  const borderClass = isSelected ? "border-brand border-2" : "border-border";
-
   return (
-    <div className={`card-base ${borderClass}`}>
-      <div className="flex items-start gap-3">
-        <button
-          type="button"
-          className={`radio-custom mt-0.5 shrink-0 ${isSelected ? "radio-custom--selected" : ""}`}
-          onClick={() => onSelect(choice.key, choice.body)}
-          aria-label={`선택지 ${choice.key}`}
-        />
-        <div className="flex-1 min-w-0">
-          <pre className="code-block text-sm"><code>{choice.body}</code></pre>
-          {isExecutable && (
-            <div className="flex justify-end mt-2">
-              <button
-                className="btn-compact"
-                type="button"
-                onClick={() => onExecute(choice.key, choice.body)}
-                disabled={!!cached || isExecuting}
-              >
-                {isExecuting ? "실행 중..." : "실행"}
-              </button>
-            </div>
-          )}
-          {cached && (
-            <ResultTable
-              result={cached}
-              onAskAi={
-                cached.errorCode
-                  ? () => onAskAi?.(choice.key, cached.errorCode ?? "", cached.errorMessage ?? "")
-                  : undefined
-              }
-            />
-          )}
+    <button
+      type="button"
+      className="w-full text-left rounded-2xl p-4 transition-all duration-200"
+      style={{
+        backgroundColor: isSelected
+          ? "var(--color-brand-light)"
+          : "var(--color-surface-card)",
+        border: `1px solid ${isSelected ? "var(--color-brand)" : "var(--color-border)"}`,
+        borderLeft: `4px solid ${isSelected ? "var(--color-brand)" : "transparent"}`,
+      }}
+      onClick={() => onSelect(choice.key, choice.body)}
+    >
+      {/* 선택지 본문 — 줄바꿈 허용, 모노 폰트 */}
+      <p
+        className="text-sm leading-relaxed whitespace-pre-wrap break-words"
+        style={{ fontFamily: "var(--font-mono)", color: "var(--color-text-primary)" }}
+      >
+        {choice.body}
+      </p>
+
+      {/* EXECUTABLE: 실행 버튼 (클릭 버블링 차단) */}
+      {isExecutable && (
+        <div
+          className="flex justify-end mt-2"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <button
+            className="btn-compact"
+            type="button"
+            onClick={() => onExecute(choice.key, choice.body)}
+            disabled={!!cached || isExecuting}
+          >
+            {isExecuting ? "실행 중..." : "실행"}
+          </button>
         </div>
-      </div>
-    </div>
+      )}
+
+      {/* 실행 결과 테이블 (클릭 버블링 차단) */}
+      {cached && (
+        <div onClick={(e) => e.stopPropagation()}>
+          <ResultTable
+            result={cached}
+            onAskAi={
+              cached.errorCode
+                ? () => onAskAi?.(choice.key, cached.errorCode ?? "", cached.errorMessage ?? "")
+                : undefined
+            }
+          />
+        </div>
+      )}
+    </button>
   );
 });
