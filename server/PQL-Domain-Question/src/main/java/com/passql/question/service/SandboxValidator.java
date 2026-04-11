@@ -95,6 +95,21 @@ public class SandboxValidator {
         int correctCount = 0;
 
         for (GeneratedChoiceDto choice : choices) {
+            // AI가 SQL 쿼리 대신 실행 결과 텍스트를 body에 넣는 경우 방어:
+            // SELECT/WITH로 시작하지 않으면 DB 커넥션 소비 없이 즉시 ERROR 처리
+            String bodyTrimmed = choice.body() != null ? choice.body().trim().toUpperCase() : "";
+            if (!bodyTrimmed.startsWith("SELECT") && !bodyTrimmed.startsWith("WITH")) {
+                log.warn("[validateStandard] body가 SQL 쿼리가 아님 (스킵): key={}, bodyPreview={}",
+                        choice.key(),
+                        choice.body() != null && choice.body().length() > 50
+                                ? choice.body().substring(0, 50) + "..."
+                                : choice.body());
+                validations.add(new ChoiceValidation(
+                        choice.key(), "ERROR", List.of(), 0, false,
+                        "body가 SQL 쿼리가 아닙니다: " + bodyTrimmed.substring(0, Math.min(30, bodyTrimmed.length()))));
+                continue;
+            }
+
             ExecuteResult actual = sandboxExecutor.execute(dbName, choice.body());
             boolean matches = false;
             if ("OK".equals(actual.status())) {

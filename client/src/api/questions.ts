@@ -98,13 +98,10 @@ export function generateChoices(
       const decoder = new TextDecoder();
       let buffer = "";
 
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        // SSE는 빈 줄(\n\n)로 이벤트를 구분
+      // SSE 청크 파싱 헬퍼 — buffer를 \n\n으로 분리해 이벤트를 순차 처리
+      const processBuffer = () => {
         const chunks = buffer.split("\n\n");
+        // 마지막 항목은 아직 완성되지 않은 청크일 수 있으므로 다시 버퍼에 보관
         buffer = chunks.pop() ?? "";
 
         for (const chunk of chunks) {
@@ -126,6 +123,23 @@ export function generateChoices(
           else if (eventName === "complete") callbacks.onComplete(data as ChoiceSetGenerateResponse);
           else if (eventName === "error") callbacks.onError(data as SseErrorEvent);
         }
+      };
+
+      while (true) {
+        const { done, value } = await reader.read();
+
+        if (done) {
+          // 스트림 종료 시 버퍼에 남은 마지막 청크도 처리
+          // (서버가 emitter.complete()를 호출하면 error 이벤트가 마지막 청크로 남을 수 있음)
+          if (buffer.trim()) {
+            buffer += "\n\n"; // 청크 구분자 강제 추가
+            processBuffer();
+          }
+          break;
+        }
+
+        buffer += decoder.decode(value, { stream: true });
+        processBuffer();
       }
     } catch (err) {
       // AbortError는 정상 cleanup이므로 무시
