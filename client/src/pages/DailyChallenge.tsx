@@ -1,7 +1,9 @@
 import { useState, useCallback } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { Home } from "lucide-react";
 import { useTodayQuestion } from "../hooks/useHome";
+import { useMemberStore } from "../stores/memberStore";
 import { submitAnswer } from "../api/questions";
 import QuestionDetail from "./QuestionDetail";
 import PracticeFeedbackBar from "../components/PracticeFeedbackBar";
@@ -9,6 +11,8 @@ import type { ChoiceItem, SubmitResult } from "../types/api";
 
 export default function DailyChallenge() {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const uuid = useMemberStore((s) => s.uuid);
   const { data: today, isLoading } = useTodayQuestion();
   const [feedback, setFeedback] = useState<SubmitResult | null>(null);
 
@@ -24,6 +28,8 @@ export default function DailyChallenge() {
         // 정답: 백엔드에 제출 → 완료 처리 (alreadySolvedToday=true)
         try {
           const result = await submitAnswer(today.question.questionUuid, choiceSetId, selectedChoiceKey);
+          // 홈으로 돌아갈 때 완료 표시가 즉시 반영되도록 캐시 무효화
+          await queryClient.invalidateQueries({ queryKey: ["todayQuestion", uuid] });
           setFeedback(result);
         } catch {
           navigate("/", { replace: true });
