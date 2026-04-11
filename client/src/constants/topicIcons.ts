@@ -1,33 +1,22 @@
 import {
-  Combine, BarChart3, Layers, Table, ShieldCheck,
-  Database, Filter, GitBranch, Box, Braces,
-  FileCode, Columns3, ArrowUpDown, Search, Network,
+  Database, Table, PencilLine, Sigma, Combine,
+  Layers, BarChart3, AppWindow, Network, HelpCircle,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
-const TOPIC_ICON_MAP: Record<string, LucideIcon> = {
-  JOIN: Combine,
-  GROUP_BY: BarChart3,
-  SUBQUERY: Layers,
-  DDL: Table,
-  CONSTRAINT: ShieldCheck,
+// 9개 토픽 코드 완전 명시 — fallback 랜덤 로직 제거
+const TOPIC_ICON_MAP: Readonly<Record<string, LucideIcon>> = {
+  data_modeling: Database,
+  sql_basic_select: Table,
+  sql_ddl_dml_tcl: PencilLine,
+  sql_function: Sigma,
+  sql_join: Combine,
+  sql_subquery: Layers,
+  sql_group_aggregate: BarChart3,
+  sql_window: AppWindow,
+  sql_hierarchy_pivot: Network,
 };
 
-const FALLBACK_ICONS: readonly LucideIcon[] = [
-  Database, Filter, GitBranch, Box, Braces,
-  FileCode, Columns3, ArrowUpDown, Search, Network,
-];
-
-const dynamicCache = new Map<string, LucideIcon>();
-
 export function getTopicIcon(code: string): LucideIcon {
-  const mapped = TOPIC_ICON_MAP[code];
-  if (mapped) return mapped;
-
-  const cached = dynamicCache.get(code);
-  if (cached) return cached;
-
-  const icon = FALLBACK_ICONS[dynamicCache.size % FALLBACK_ICONS.length];
-  dynamicCache.set(code, icon);
-  return icon;
+  return TOPIC_ICON_MAP[code] ?? HelpCircle;
 }
