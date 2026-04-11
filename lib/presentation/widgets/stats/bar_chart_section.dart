@@ -3,14 +3,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/app_colors.dart';
 import '../../../core/text_styles.dart';
-import '../../../data/models/progress/category_stats.dart';
+import '../../../data/models/progress/topic_stat.dart';
 
 /// 카테고리별 문제 수 가로 막대 차트 섹션.
 /// totalQuestionCount 기준으로 막대 길이 비율 결정.
 class BarChartSection extends StatelessWidget {
-  final List<CategoryStats>? categoryStats;
+  final List<TopicStat>? topicStats;
 
-  const BarChartSection({super.key, required this.categoryStats});
+  const BarChartSection({super.key, required this.topicStats});
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +38,7 @@ class BarChartSection extends StatelessWidget {
   }
 
   Widget _buildBars() {
-    final stats = categoryStats;
+    final stats = topicStats;
 
     if (stats == null || stats.isEmpty) {
       return Padding(
@@ -72,7 +72,7 @@ class BarChartSection extends StatelessWidget {
               SizedBox(
                 width: 100.w,
                 child: Text(
-                  stat.topicName,
+                  stat.displayName,
                   style: AppTextStyles.tag_10.copyWith(
                     color: AppColors.textSecondary,
                   ),

@@ -12,7 +12,7 @@ import '../../widgets/stats/radar_chart_section.dart';
 import '../../widgets/stats/summary_stats_section.dart';
 
 /// 통계 화면 — "내 실력, 한눈에"
-/// statsDataProvider에서 progress + categoryStats를 받아 렌더링.
+/// statsDataProvider에서 progress + topicAnalysis + aiComment를 받아 렌더링.
 /// 로딩: shimmer 스켈레톤 / 에러: 재시도 버튼 / 성공: pull-to-refresh 지원.
 class StatsPage extends ConsumerWidget {
   const StatsPage({super.key});
@@ -74,19 +74,16 @@ class _StatsScrollView extends StatelessWidget {
         SummaryStatsSection(progress: data.progress),
         SizedBox(height: 16.h),
 
-        // AI 영역 분석 카드 (로컬 로직)
-        AiAnalysisCard(
-          progress: data.progress,
-          categoryStats: data.categoryStats,
-        ),
+        // AI 영역 분석 카드 (/progress/ai-comment 응답)
+        AiAnalysisCard(aiComment: data.aiComment),
         SizedBox(height: 16.h),
 
         // 레이더 차트
-        RadarChartSection(categoryStats: data.categoryStats),
+        RadarChartSection(topicStats: data.topicAnalysis?.topicStats),
         SizedBox(height: 16.h),
 
         // 카테고리별 가로 막대
-        BarChartSection(categoryStats: data.categoryStats),
+        BarChartSection(topicStats: data.topicAnalysis?.topicStats),
       ],
     );
   }

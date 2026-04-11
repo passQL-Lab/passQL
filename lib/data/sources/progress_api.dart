@@ -2,7 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 import '../models/progress/progress_response.dart';
 import '../models/progress/heatmap_response.dart';
-import '../models/progress/category_stats.dart';
+import '../models/progress/topic_analysis_response.dart';
+import '../models/progress/ai_comment_response.dart';
 
 part 'progress_api.g.dart';
 
@@ -22,9 +23,15 @@ abstract class ProgressApiClient {
     @Query('to') String? to,
   );
 
-  /// 카테고리별 학습 통계. (미문서화 — 에러 시 null 처리)
-  @GET('/progress/categories')
-  Future<List<CategoryStats>> getCategoryStats(
+  /// 토픽별 정답률/문제수 분석 (레이더 차트 + 막대 차트용).
+  @GET('/progress/topic-analysis')
+  Future<TopicAnalysisResponse> getTopicAnalysis(
+    @Query('memberUuid') String memberUuid,
+  );
+
+  /// AI 영역 분석 코멘트 (Redis 24h 캐시, AI 호출 latency 있음).
+  @GET('/progress/ai-comment')
+  Future<AiCommentResponse> getAiComment(
     @Query('memberUuid') String memberUuid,
   );
 }

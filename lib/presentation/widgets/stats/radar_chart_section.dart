@@ -4,14 +4,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../../../core/app_colors.dart';
 import '../../../core/text_styles.dart';
-import '../../../data/models/progress/category_stats.dart';
+import '../../../data/models/progress/topic_stat.dart';
 
 /// 영역별 분석 레이더(스파이더) 차트 섹션.
-/// categoryStats가 없으면 빈 상태 메시지 표시.
+/// topicStats가 없으면 빈 상태 메시지 표시.
 class RadarChartSection extends StatelessWidget {
-  final List<CategoryStats>? categoryStats;
+  final List<TopicStat>? topicStats;
 
-  const RadarChartSection({super.key, required this.categoryStats});
+  const RadarChartSection({super.key, required this.topicStats});
 
   @override
   Widget build(BuildContext context) {
@@ -39,7 +39,7 @@ class RadarChartSection extends StatelessWidget {
   }
 
   Widget _buildChart() {
-    final stats = categoryStats;
+    final stats = topicStats;
 
     if (stats == null || stats.isEmpty) {
       return SizedBox(
@@ -57,7 +57,7 @@ class RadarChartSection extends StatelessWidget {
 
     // correctRate 0.0~1.0 → 0~5 스케일 변환 (RadarChart 최대값 기준)
     final values = stats.map((s) => s.correctRate * 5).toList();
-    final labels = stats.map((s) => s.topicName).toList();
+    final labels = stats.map((s) => s.displayName).toList();
 
     return SizedBox(
       height: 260.h,
