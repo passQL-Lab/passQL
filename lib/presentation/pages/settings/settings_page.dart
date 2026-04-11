@@ -252,18 +252,9 @@ class _Footer extends StatelessWidget {
     return Column(
       children: [
         Center(
-          child: RichText(
-            text: TextSpan(
-              style: AppTextStyles.label_16
-                  .copyWith(color: AppColors.textPrimary),
-              children: const [
-                TextSpan(text: 'pass'),
-                TextSpan(
-                  text: 'QL',
-                  style: TextStyle(color: AppColors.brandIndigo),
-                ),
-              ],
-            ),
+          child: Image.asset(
+            'assets/logo.png',
+            height: 28,
           ),
         ),
         const SizedBox(height: 6),

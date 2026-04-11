@@ -78,6 +78,7 @@ flutter:
 
   assets:
     - .env
+    - assets/logo.png
 
   fonts:
     - family: Pretendard-Thin
