@@ -5,6 +5,9 @@ import '../../core/network/dio_client.dart';
 import '../../data/sources/member_api.dart';
 import 'member_store.dart';
 
+/// MemberStore와 공유하는 닉네임 캐시 키 — 변경 시 member_store.dart와 동기화 필요
+const _kNickname = 'member_nickname';
+
 /// 설정 화면 데이터 집계 모델
 class SettingsData {
   final String memberUuid;
@@ -23,22 +26,18 @@ class SettingsData {
 /// UUID는 MemberStore에서, 닉네임은 GET /members/me, 버전은 PackageInfo에서 조회.
 final settingsDataProvider = FutureProvider<SettingsData>((ref) async {
   final memberUuid =
-      await ref.watch(memberStoreProvider.notifier).getOrRegister();
+      await ref.read(memberStoreProvider.notifier).getOrRegister();
 
   final dio = ref.read(dioProvider);
   final client = MemberApiClient(dio);
 
-  final results = await Future.wait([
-    client.getMe(memberUuid),
-    PackageInfo.fromPlatform(),
-  ]);
-
-  final me = results[0] as dynamic;
-  final info = results[1] as PackageInfo;
+  // 타입 안전한 개별 await — Future.wait + dynamic 캐스트 패턴 제거
+  final me = await client.getMe(memberUuid);
+  final info = await PackageInfo.fromPlatform();
 
   return SettingsData(
     memberUuid: memberUuid,
-    nickname: me.nickname as String,
+    nickname: me.nickname,
     version: '${info.version}-MVP',
   );
 });
@@ -51,7 +50,7 @@ class NicknameNotifier extends AsyncNotifier<String?> {
   Future<String?> build() async {
     // 초기값은 캐시에서 로드
     final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('member_nickname');
+    return prefs.getString(_kNickname);
   }
 
   Future<void> regenerate() async {
@@ -65,7 +64,7 @@ class NicknameNotifier extends AsyncNotifier<String?> {
       final response = await client.regenerateNickname(memberUuid);
       // 로컬 캐시 업데이트
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('member_nickname', response.nickname);
+      await prefs.setString(_kNickname, response.nickname);
       return response.nickname;
     });
   }
