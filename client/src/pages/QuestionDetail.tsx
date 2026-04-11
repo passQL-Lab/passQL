@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect, memo } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useParams, useNavigate, useBlocker } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, BookOpen, RefreshCw } from "lucide-react";
@@ -17,56 +17,6 @@ import {
 import { explainError } from "../api/ai";
 import ConfirmModal from "../components/ConfirmModal";
 import type { ChoiceItem, ExecuteResult, SubmitResult } from "../types/api";
-
-type StemSegment = { kind: "text"; content: string } | { kind: "sql"; content: string };
-
-/** ` ```sql ... ``` ` 블록을 텍스트와 SQL 세그먼트로 분리 */
-function parseStem(stem: string): StemSegment[] {
-  const segments: StemSegment[] = [];
-  // ```sql 또는 ``` 로 감싸진 블록 추출
-  const regex = /```(?:sql)?\n([\s\S]*?)```/g;
-  let lastIndex = 0;
-  let match: RegExpExecArray | null;
-
-  while ((match = regex.exec(stem)) !== null) {
-    // 코드 블록 앞 텍스트
-    if (match.index > lastIndex) {
-      const text = stem.slice(lastIndex, match.index).trim();
-      if (text) segments.push({ kind: "text", content: text });
-    }
-    segments.push({ kind: "sql", content: match[1].trim() });
-    lastIndex = match.index + match[0].length;
-  }
-  // 나머지 텍스트
-  const remaining = stem.slice(lastIndex).trim();
-  if (remaining) segments.push({ kind: "text", content: remaining });
-
-  // 백틱 블록이 없으면 전체를 텍스트로
-  return segments.length > 0 ? segments : [{ kind: "text", content: stem }];
-}
-
-/** stem을 텍스트/SQL 블록으로 나눠 렌더링 */
-const StemRenderer = memo(function StemRenderer({ stem, truncate }: { stem: string; truncate: boolean }) {
-  if (truncate) {
-    // 접힌 상태: 백틱 블록 제거 후 한 줄로 truncate
-    const preview = stem.replace(/```(?:sql)?\n[\s\S]*?```/g, "[SQL]").replace(/\n/g, " ");
-    return <p className="text-body text-sm truncate">{preview}</p>;
-  }
-  const segments = parseStem(stem);
-  return (
-    <div className="space-y-2 text-sm">
-      {segments.map((seg, i) =>
-        seg.kind === "sql" ? (
-          <pre key={i} className="code-block text-xs leading-relaxed whitespace-pre-wrap break-words">
-            <code>{seg.content}</code>
-          </pre>
-        ) : (
-          <p key={i} className="text-body leading-relaxed">{seg.content}</p>
-        )
-      )}
-    </div>
-  );
-});
 
 interface QuestionDetailProps {
   readonly practiceMode?: boolean;
@@ -393,7 +343,11 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
         onClick={() => setStemOpen((prev) => !prev)}
       >
         <BookOpen size={16} className="text-brand mt-0.5 shrink-0" />
-        <StemRenderer stem={question.stem} truncate={!stemOpen} />
+        {stemOpen ? (
+          <p className="text-body text-sm">{question.stem}</p>
+        ) : (
+          <p className="text-body text-sm truncate">{question.stem}</p>
+        )}
       </button>
 
       {/* 스키마 */}
