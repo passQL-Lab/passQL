@@ -290,9 +290,9 @@
                         <i data-lucide="download" class="size-4"></i>
                         MD 파일 다운로드
                     </a>
-                    <button type="button" class="btn btn-sm btn-ghost" onclick="copyBulkPrompt()">
-                        <i data-lucide="copy" class="size-4"></i>
-                        AI 프롬프트 복사
+                    <button type="button" id="copyBulkPromptBtn" class="btn btn-sm btn-ghost" onclick="copyBulkPrompt()">
+                        <i id="copyBulkPromptIcon" data-lucide="copy" class="size-4"></i>
+                        <span id="copyBulkPromptLabel">AI 프롬프트 복사</span>
                     </button>
                 </div>
             </div>
@@ -357,7 +357,6 @@
                     <textarea id="bulkGuidePromptText" rows="10" readonly
                               class="textarea textarea-bordered w-full font-mono text-xs bg-base-200"></textarea>
                 </div>
-                <p id="bulkCopySuccessMsg" class="text-success text-xs mt-1 hidden">복사됐습니다.</p>
             </div>
 
             <div class="modal-action">
@@ -501,20 +500,38 @@ answerSql (EXECUTABLE 필수, CONCEPT_ONLY → null):
 
     function openBulkGuideModal() {
         document.getElementById('bulkGuidePromptText').value = BULK_AI_PROMPT;
-        document.getElementById('bulkCopySuccessMsg').classList.add('hidden');
         document.getElementById('bulkGuideModal').showModal();
         lucide.createIcons();
     }
 
     function copyBulkPrompt() {
-        navigator.clipboard.writeText(BULK_AI_PROMPT).then(() => {
-            const msg = document.getElementById('bulkCopySuccessMsg');
-            msg.classList.remove('hidden');
-            setTimeout(() => msg.classList.add('hidden'), 2000);
-        }).catch(() => {
+        const btn = document.getElementById('copyBulkPromptBtn');
+        const icon = document.getElementById('copyBulkPromptIcon');
+        const label = document.getElementById('copyBulkPromptLabel');
+
+        function onCopied() {
+            // 버튼을 초록색 체크 아이콘으로 전환
+            btn.classList.add('btn-success', 'text-success-content');
+            btn.classList.remove('btn-ghost');
+            icon.setAttribute('data-lucide', 'check');
+            label.textContent = '복사됨';
+            lucide.createIcons();
+
+            setTimeout(() => {
+                // 원래 상태로 복구
+                btn.classList.remove('btn-success', 'text-success-content');
+                btn.classList.add('btn-ghost');
+                icon.setAttribute('data-lucide', 'copy');
+                label.textContent = 'AI 프롬프트 복사';
+                lucide.createIcons();
+            }, 2000);
+        }
+
+        navigator.clipboard.writeText(BULK_AI_PROMPT).then(onCopied).catch(() => {
             const ta = document.getElementById('bulkGuidePromptText');
             ta.select();
             document.execCommand('copy');
+            onCopied();
         });
     }
 
