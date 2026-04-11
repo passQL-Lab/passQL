@@ -32,7 +32,7 @@ export const ChoiceCard = memo(function ChoiceCard({
           ? "var(--color-brand-light)"
           : "var(--color-surface-card)",
         border: `1px solid ${isSelected ? "var(--color-brand)" : "var(--color-border)"}`,
-        borderLeft: `4px solid ${isSelected ? "var(--color-brand)" : "transparent"}`,
+        borderLeft: `4px solid ${isSelected ? "var(--color-brand)" : "var(--color-border)"}`,
       }}
       onClick={() => onSelect(choice.key, choice.body)}
     >
