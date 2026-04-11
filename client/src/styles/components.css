@@ -4,7 +4,7 @@
   border: 1px solid var(--color-border);
   border-radius: 16px;
   padding: 16px;
-  transition: transform 250ms var(--ease-smooth), background-color 250ms var(--ease-smooth);
+  transition: transform 250ms var(--ease-smooth), background-color 250ms var(--ease-smooth), border-color 250ms var(--ease-smooth), box-shadow 250ms var(--ease-smooth);
 }
 
 @media (min-width: 640px) {
