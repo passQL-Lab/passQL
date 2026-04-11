@@ -80,8 +80,8 @@ Frontend ──(/api)──> Backend(Spring) ──(x-api-key)──> AI Server(
 
 | 함수                                          | 메서드 | 경로                                   |      인증       | 응답 타입                | 상태 |
 | --------------------------------------------- | ------ | -------------------------------------- | :-------------: | ------------------------ | :--: |
-| `fetchProgress(memberUuid)`                   | GET    | `/progress?memberUuid`                 | O (query param) | `ProgressResponse`       |  O   |
-| `fetchTopicAnalysis(memberUuid)`              | GET    | `/progress/topic-analysis?memberUuid`  | O (query param) | `TopicAnalysisResponse`  |  O   |
+| `fetchProgress()`                             | GET    | `/progress?memberUuid`                 | O (query param) | `ProgressResponse`       |  O   |
+| `fetchTopicAnalysis()`                        | GET    | `/progress/topic-analysis?memberUuid`  | O (query param) | `TopicAnalysisResponse`  |  O   |
 | `fetchHeatmap(memberUuid, from?, to?)`        | GET    | `/progress/heatmap?memberUuid&from&to` | O (query param) | `HeatmapResponse`        |  O   |
 | `fetchAiComment()`                            | GET    | `/progress/ai-comment?memberUuid`      | O (query param) | `AiCommentResponse`      |  O   |
 

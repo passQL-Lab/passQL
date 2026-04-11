@@ -26,7 +26,7 @@ export default function PracticeResult() {
   const { data: aiCommentData, isLoading: aiCommentLoading } = useQuery({
     queryKey: ["aiComment"],
     queryFn: fetchAiComment,
-    staleTime: 1000 * 60 * 24, // 24분 — Redis 캐시(24h)와 맞춤
+    staleTime: 1000 * 60 * 60 * 24, // 24시간 — Redis 캐시(24h)와 맞춤
   });
   // null=로딩 중, ""=에러/데이터 없음, string=내용
   const aiComment = aiCommentLoading ? null : (aiCommentData?.comment ?? "");
