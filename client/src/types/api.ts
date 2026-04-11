@@ -2,7 +2,8 @@
 export type ExecutionMode = "EXECUTABLE" | "CONCEPT_ONLY";
 export type ChoiceKind = "SQL" | "TEXT";
 // AI_ONLY: 일반 AI 생성 / ODD_ONE_OUT: "결과가 다른 것은?" 유형 / CURATED_ONLY/HYBRID: 미구현
-export type ChoiceSetPolicy = "AI_ONLY" | "ODD_ONE_OUT" | "CURATED_ONLY" | "HYBRID";
+// RESULT_MATCH: "다음 SQL의 실행 결과로 올바른 것은?" 유형 — 선택지 body가 JSON 배열 결과 테이블
+export type ChoiceSetPolicy = "AI_ONLY" | "ODD_ONE_OUT" | "CURATED_ONLY" | "HYBRID" | "RESULT_MATCH";
 
 export interface QuestionSummary {
   readonly questionUuid: string;
