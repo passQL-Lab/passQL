@@ -1,9 +1,12 @@
 import { getMockResponse } from "./mock-data";
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "/api";
+// DEV 환경에서는 Vite 프록시(/api)를 사용하고, prod 환경에서는 실제 API 서버를 기본값으로 사용
+export const BASE_URL = import.meta.env.VITE_API_BASE_URL
+  ?? (import.meta.env.DEV ? "/api" : "https://api.passql.suhsaechan.kr/api");
 const TIMEOUT_MS = 25_000;
 const IS_DEV = import.meta.env.DEV;
-const USE_MOCK = import.meta.env.VITE_USE_MOCK === "true";
+// env 미설정 시 prod 기본값은 false
+const USE_MOCK = (import.meta.env.VITE_USE_MOCK ?? "false") === "true";
 
 function log(label: string, method: string, path: string, data?: unknown) {
   if (!IS_DEV) return;
