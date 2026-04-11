@@ -154,6 +154,9 @@ class HeatmapWidget extends StatelessWidget {
                     final entry = entryMap[key];
                     final count = entry?.solvedCount ?? 0;
 
+                    // 진한 배경(heatmap3/4)일 때 흰 글씨, 나머지는 caption 색
+                    final isDeep = count > 3;
+
                     return Expanded(
                       child: AspectRatio(
                         aspectRatio: 1,
@@ -162,6 +165,17 @@ class HeatmapWidget extends StatelessWidget {
                           decoration: BoxDecoration(
                             color: _colorForCount(count),
                             borderRadius: BorderRadius.circular(3.r),
+                          ),
+                          child: Center(
+                            child: Text(
+                              '${date.day}',
+                              style: AppTextStyles.tag_10.copyWith(
+                                fontSize: 8.sp,
+                                color: isDeep
+                                    ? Colors.white
+                                    : AppColors.textCaption,
+                              ),
+                            ),
                           ),
                         ),
                       ),
