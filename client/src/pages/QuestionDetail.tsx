@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
-import { ArrowLeft, ChevronUp, ChevronDown, BookOpen, RefreshCw } from "lucide-react";
+import { ArrowLeft, BookOpen, RefreshCw } from "lucide-react";
 import { StarRating } from "../components/StarRating";
 import { ChoiceCard } from "../components/ChoiceCard";
 import AiExplanationSheet from "../components/AiExplanationSheet";
@@ -34,7 +34,6 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
   const submitMutation = useSubmitAnswer(questionUuid!);
 
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
-  const [schemaOpen, setSchemaOpen] = useState(false);
   const [stemOpen, setStemOpen] = useState(true);
   const [executeCache, setExecuteCache] = useState<Record<string, ExecuteResult>>({});
   const executeCacheRef = useRef(executeCache);
@@ -197,26 +196,12 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
   const hasSchema = question.schemaDisplay || question.schemaDdl;
   const schemaSection = hasSchema ? (
     <section className="mt-3">
-      <button
-        type="button"
-        className="flex items-center gap-2 text-secondary text-sm w-full"
-        onClick={() => setSchemaOpen((prev) => !prev)}
-      >
-        <span>스키마 보기</span>
-        {schemaOpen ? (
-          <ChevronUp size={16} className="text-text-caption" />
-        ) : (
-          <ChevronDown size={16} className="text-text-caption" />
-        )}
-      </button>
-      {schemaOpen && (
-        <SchemaViewer
-          schemaDisplay={question.schemaDisplay}
-          schemaDdl={question.schemaDdl}
-          schemaSampleData={question.schemaSampleData}
-          schemaIntent={question.schemaIntent}
-        />
-      )}
+      <SchemaViewer
+        schemaDisplay={question.schemaDisplay}
+        schemaDdl={question.schemaDdl}
+        schemaSampleData={question.schemaSampleData}
+        schemaIntent={question.schemaIntent}
+      />
     </section>
   ) : null;
 
