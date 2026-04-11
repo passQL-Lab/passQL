@@ -71,15 +71,16 @@ export default function PracticeSet() {
     setFeedback(null);
   }, []);
 
-  if (!storeSessionId || storeSessionId !== sessionId) {
-    return <Navigate to="/questions" replace />;
-  }
-
+  // useEffect는 훅 규칙상 조건부 return 이전에 위치해야 함
   useEffect(() => {
     if (shouldNavigateToResult) {
       navigate(`/practice/${sessionId}/result`, { replace: true });
     }
   }, [shouldNavigateToResult, navigate, sessionId]);
+
+  if (!storeSessionId || storeSessionId !== sessionId) {
+    return <Navigate to="/questions" replace />;
+  }
 
   if (shouldNavigateToResult) {
     return null;

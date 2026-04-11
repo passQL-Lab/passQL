@@ -17,9 +17,9 @@ export default function DailyChallenge() {
   const { data: today, isLoading } = useTodayQuestion();
   const [feedback, setFeedback] = useState<SubmitResult | null>(null);
 
-  // 제출 완료 전까지 이탈 차단 — 정답 제출 전 이탈 시 오늘 기록 미저장
+  // 제출 완료 전까지 이탈 차단 — 로딩 중이나 제출 완료 후에는 차단 해제
   // useBlocker는 훅이므로 조건부 return 이전에 호출해야 함
-  const blocker = useBlocker(feedback === null);
+  const blocker = useBlocker(!isLoading && feedback === null);
 
   // 정답 시에만 submitAnswer 호출 — 오답은 로컬 피드백만 표시해 alreadySolvedToday 유지
   const handlePracticeSubmit = useCallback(

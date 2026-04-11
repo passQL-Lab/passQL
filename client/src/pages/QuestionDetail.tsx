@@ -54,7 +54,8 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
   const [sseRetryCount, setSseRetryCount] = useState(0);
 
   // 단독 풀이 모드에서 제출 완료 전까지 이탈 차단 — practiceMode는 부모가 이미 차단하므로 제외
-  const blocker = useBlocker(!practiceMode && !submitted);
+  // practiceMode !== true로 명시해 undefined(단독 모드 기본값)도 정확히 처리
+  const blocker = useBlocker(practiceMode !== true && !submitted);
 
   const activeChoiceSet = question?.choiceSets?.find((cs) => cs.status === "OK");
   // SSE로 받은 선택지가 있으면 우선 사용, 없으면 GET 응답의 choiceSets 사용
