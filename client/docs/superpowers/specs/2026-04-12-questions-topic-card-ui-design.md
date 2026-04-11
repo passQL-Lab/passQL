@@ -2,7 +2,7 @@
 
 **날짜:** 2026-04-12
 **이슈:** #120
-**대상 파일:** `src/constants/topicIcons.ts`, `src/pages/Questions.tsx`
+**대상 파일:** `src/constants/topicIcons.ts`, `src/pages/CategoryCards.tsx`
 
 ---
 
@@ -38,23 +38,23 @@
 | `sql_window` | 윈도우 함수 | `AppWindow` |
 | `sql_hierarchy_pivot` | 계층 쿼리 / PIVOT | `Network` |
 
-### 2. `src/pages/Questions.tsx`
+### 2. `src/pages/CategoryCards.tsx`
 
-**현재 카드 구조:**
+**현재 카드 구조 (line 61-63):**
+```tsx
+<span className="text-body font-bold">{t.displayName}</span>
+<span className="text-xs text-text-caption mt-1">
+  {t.subtopics.length > 0 ? t.subtopics.map((s) => s.displayName).join(", ") : t.displayName}
+</span>
 ```
-아이콘
-displayName  ← 제목
-displayName  ← 캡션 (중복)
-```
+→ subtopics가 없을 때 `t.displayName`을 캡션으로 재출력 (중복)
 
 **변경 후 카드 구조:**
+```tsx
+<span className="text-body font-bold">{t.displayName}</span>
 ```
-아이콘
-displayName  ← 제목만
-```
-
-- 카드 내 `subtopics.length > 0` 조건부 캡션 제거
-- 카드 중앙 정렬 구조 유지 (아이콘 → 텍스트)
+- 캡션 `<span>` 전체 제거 (아이콘 → 제목만)
+- 카드 중앙 정렬 구조 유지
 
 ### 3. 카드 그림자 & 호버 인터랙션
 
@@ -91,4 +91,4 @@ displayName  ← 제목만
 | 파일 | 작업 |
 |------|------|
 | `src/constants/topicIcons.ts` | TOPIC_ICON_MAP 키 교정 + fallback 제거 |
-| `src/pages/Questions.tsx` | 카드 캡션 제거 + shadow/hover 인터랙션 추가 |
+| `src/pages/CategoryCards.tsx` | 카드 캡션 제거 + shadow/hover 인터랙션 추가 |
