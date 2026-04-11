@@ -103,6 +103,7 @@ public class QuestionController implements QuestionControllerDocs {
 
         Thread.startVirtualThread(() -> {
             try {
+                log.debug("[generate-choices] VirtualThread 진입: questionUuid={}, memberUuid={}", questionUuid, memberUuid);
                 // status: generating
                 emitter.send(SseEmitter.event()
                         .name("status")
