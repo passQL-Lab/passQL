@@ -74,6 +74,8 @@ export default function Home() {
         )}
       </section>
 
+      <hr className="border-t border-border my-6" />
+
       <section className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
         {today?.question ? (
           today.alreadySolvedToday ? (
@@ -148,6 +150,8 @@ export default function Home() {
         )}
       </section>
 
+      <hr className="border-t border-border my-6" />
+
       <section className="card-base shadow-sm mb-4">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-secondary text-sm">학습 현황</h2>
@@ -171,6 +175,8 @@ export default function Home() {
           <div className="h-16 bg-border animate-pulse rounded" />
         )}
       </section>
+
+      <hr className="border-t border-border my-6" />
 
       {progress?.readiness ? (
         <section className="card-base shadow-sm mb-4">
@@ -220,6 +226,8 @@ export default function Home() {
           </div>
         </section>
       )}
+
+      <hr className="border-t border-border my-6" />
 
       {recommendations && recommendations.questions.length > 0 && (
         <section className="mt-6">
