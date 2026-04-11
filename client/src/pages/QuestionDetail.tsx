@@ -36,8 +36,6 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
 
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [stemOpen, setStemOpen] = useState(true);
-  // 제출 중 오버레이: 300ms 딜레이 후 표시 (빠른 응답 시 깜빡임 방지)
-  const [showSubmitOverlay, setShowSubmitOverlay] = useState(false);
   const [executeCache, setExecuteCache] = useState<Record<string, ExecuteResult>>({});
   const executeCacheRef = useRef(executeCache);
   executeCacheRef.current = executeCache;
@@ -108,16 +106,6 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
   // sseRetryCount를 의존성에 포함해 재시도 시 재실행
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [needsSseGeneration, questionUuid, sseRetryCount]);
-
-  // 제출 중 오버레이: isPending 300ms 이상 지속 시 표시
-  useEffect(() => {
-    if (!submitMutation.isPending) {
-      setShowSubmitOverlay(false);
-      return;
-    }
-    const timer = setTimeout(() => setShowSubmitOverlay(true), 300);
-    return () => clearTimeout(timer);
-  }, [submitMutation.isPending]);
 
   const explainMutation = useMutation({
     mutationFn: explainError,
@@ -346,8 +334,8 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
         onClose={() => setAiSheetOpen(false)}
       />
 
-      {/* 채점 중 오버레이 — 300ms 이상 지연 시 표시 */}
-      {showSubmitOverlay && (
+      {/* 채점 중 오버레이 — API 호출 기간 동안 표시 */}
+      {submitMutation.isPending && (
         <LoadingOverlay
           topicName={question.topicName}
           staticMessage="채점 중..."
