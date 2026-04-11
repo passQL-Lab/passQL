@@ -262,6 +262,7 @@ const MOCK_QUESTION_DETAIL: QuestionDetail = {
   subtopicName: "INNER JOIN",
   difficulty: 2,
   executionMode: "CONCEPT_ONLY",
+  choiceSetPolicy: "AI_ONLY",
   stem: "다음 SQL 중 고객별 주문 수를 올바르게 구하는 것은?",
   schemaDisplay: "CUSTOMER (id INT PK, name VARCHAR, email VARCHAR)\nORDERS (id INT PK, customer_id INT FK, amount INT, order_date DATE)",
   schemaDdl: "CREATE TABLE CUSTOMER (id INT PRIMARY KEY, name VARCHAR(50), email VARCHAR(100));\nCREATE TABLE ORDERS (id INT PRIMARY KEY, customer_id INT REFERENCES CUSTOMER(id), amount INT, order_date DATE);",

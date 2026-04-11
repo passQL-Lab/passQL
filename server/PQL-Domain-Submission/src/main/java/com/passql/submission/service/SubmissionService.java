@@ -87,7 +87,11 @@ public class SubmissionService {
 
         Question question = questionRepository.findById(questionUuid).orElse(null);
         if (question != null && question.getExecutionMode() == ExecutionMode.EXECUTABLE) {
-            String dbName = question.getQuestionUuid().toString();
+            // sandboxDbName이 없는 레거시 문제는 questionUuid를 DB명으로 폴백 (executeChoice와 동일 정책)
+            String dbName = question.getSandboxDbName();
+            if (dbName == null || dbName.isBlank()) {
+                dbName = question.getQuestionUuid().toString();
+            }
             selectedSql = selected.getBody();
             selectedResult = sandboxExecutor.execute(dbName, selectedSql);
 

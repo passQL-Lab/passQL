@@ -214,6 +214,7 @@ describe("타입 계약 (컴파일 타임 검증 보조)", () => {
       subtopicName: "INNER",
       difficulty: 2,
       executionMode: "EXECUTABLE",
+      choiceSetPolicy: "AI_ONLY",
       stem: "test",
       schemaDisplay: "test",
       schemaDdl: "",

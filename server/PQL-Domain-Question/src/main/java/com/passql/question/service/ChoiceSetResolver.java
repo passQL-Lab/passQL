@@ -4,6 +4,7 @@ import com.passql.common.exception.CustomException;
 import com.passql.common.exception.constant.ErrorCode;
 import com.passql.question.constant.ChoiceSetSource;
 import com.passql.question.constant.ChoiceSetStatus;
+import com.passql.question.constant.ExecutionMode;
 import com.passql.question.entity.Question;
 import com.passql.question.entity.QuestionChoiceSet;
 import com.passql.question.repository.QuestionChoiceSetRepository;
@@ -36,6 +37,12 @@ public class ChoiceSetResolver {
     @Transactional
     public QuestionChoiceSet resolveForUser(UUID questionUuid, UUID memberUuid) {
         Question question = questionService.getQuestionEntity(questionUuid);
+
+        // CONCEPT_ONLY 문제는 SQL 실행이 없으므로 AI 선택지 생성 불가
+        if (question.getExecutionMode() == ExecutionMode.CONCEPT_ONLY) {
+            throw new CustomException(ErrorCode.INVALID_EXECUTION_MODE,
+                    "CONCEPT_ONLY 문제는 선택지 생성을 지원하지 않습니다.");
+        }
 
         switch (question.getChoiceSetPolicy()) {
             case AI_ONLY:

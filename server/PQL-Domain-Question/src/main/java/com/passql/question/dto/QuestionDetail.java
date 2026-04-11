@@ -1,6 +1,7 @@
 package com.passql.question.dto;
 
 import com.passql.question.constant.ChoiceKind;
+import com.passql.question.constant.ChoiceSetPolicy;
 import com.passql.question.constant.ChoiceSetSource;
 import com.passql.question.constant.ChoiceSetStatus;
 import com.passql.question.constant.ExecutionMode;
@@ -15,6 +16,7 @@ public record QuestionDetail(
     String subtopicName,
     Integer difficulty,
     ExecutionMode executionMode,
+    ChoiceSetPolicy choiceSetPolicy,
     String stem,
     String schemaDisplay,
     String schemaDdl,
