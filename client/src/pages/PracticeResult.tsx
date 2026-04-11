@@ -24,10 +24,13 @@ export default function PracticeResult() {
   const [aiComment, setAiComment] = useState<string | null>(null);
 
   // 세션 종료 후 AI 분석 코멘트 비동기 로딩
+  // cancelled 플래그: StrictMode 이중 실행 및 언마운트 후 stale 업데이트 방지
   useEffect(() => {
+    let cancelled = false;
     fetchAiComment()
-      .then((res) => setAiComment(res.comment))
-      .catch(() => setAiComment(""));
+      .then((res) => { if (!cancelled) setAiComment(res.comment); })
+      .catch(() => { if (!cancelled) setAiComment(""); });
+    return () => { cancelled = true; };
   }, []);
 
   const analysis = useMemo(() => {
