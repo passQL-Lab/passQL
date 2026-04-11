@@ -48,6 +48,9 @@ class HeatmapWidget extends StatelessWidget {
     final days = _buildDays();
     const weekLabels = ['일', '월', '화', '수', '목', '금', '토'];
 
+    // 월 레이블 열 너비
+    const double monthLabelWidth = 28;
+
     return Container(
       padding: EdgeInsets.all(20.r),
       decoration: BoxDecoration(
@@ -97,45 +100,74 @@ class HeatmapWidget extends StatelessWidget {
             ],
           ),
           SizedBox(height: 12.h),
+
+          // 요일 헤더 — 월 레이블 너비만큼 왼쪽 여백
           Row(
-            children: weekLabels.map((label) {
-              return Expanded(
-                child: Center(
-                  child: Text(
-                    label,
-                    style: AppTextStyles.tag_10.copyWith(
-                      color: AppColors.textCaption,
+            children: [
+              SizedBox(width: monthLabelWidth.w),
+              ...weekLabels.map((label) {
+                return Expanded(
+                  child: Center(
+                    child: Text(
+                      label,
+                      style: AppTextStyles.tag_10.copyWith(
+                        color: AppColors.textCaption,
+                      ),
                     ),
                   ),
-                ),
-              );
-            }).toList(),
+                );
+              }),
+            ],
           ),
           SizedBox(height: 4.h),
+
+          // 5주 그리드 — 각 행 왼쪽에 월 레이블
           ...List.generate(5, (week) {
+            final firstDay = days[week * 7];
+            final prevFirstDay = week > 0 ? days[(week - 1) * 7] : null;
+
+            // 첫 주이거나 월이 바뀌는 주에 월 레이블 표시
+            final showMonth =
+                week == 0 || prevFirstDay?.month != firstDay.month;
+            final monthLabel = showMonth ? '${firstDay.month}월' : '';
+
             return Padding(
               padding: EdgeInsets.only(bottom: 4.h),
               child: Row(
-                children: List.generate(7, (dayOfWeek) {
-                  final idx = week * 7 + dayOfWeek;
-                  final date = days[idx];
-                  final key = _toDateKey(date);
-                  final entry = entryMap[key];
-                  final count = entry?.solvedCount ?? 0;
-
-                  return Expanded(
-                    child: AspectRatio(
-                      aspectRatio: 1,
-                      child: Container(
-                        margin: EdgeInsets.all(2.r),
-                        decoration: BoxDecoration(
-                          color: _colorForCount(count),
-                          borderRadius: BorderRadius.circular(3.r),
-                        ),
+                children: [
+                  // 월 레이블
+                  SizedBox(
+                    width: monthLabelWidth.w,
+                    child: Text(
+                      monthLabel,
+                      style: AppTextStyles.tag_10.copyWith(
+                        color: AppColors.textCaption,
                       ),
                     ),
-                  );
-                }),
+                  ),
+
+                  // 7개 날짜 셀
+                  ...List.generate(7, (dayOfWeek) {
+                    final idx = week * 7 + dayOfWeek;
+                    final date = days[idx];
+                    final key = _toDateKey(date);
+                    final entry = entryMap[key];
+                    final count = entry?.solvedCount ?? 0;
+
+                    return Expanded(
+                      child: AspectRatio(
+                        aspectRatio: 1,
+                        child: Container(
+                          margin: EdgeInsets.all(2.r),
+                          decoration: BoxDecoration(
+                            color: _colorForCount(count),
+                            borderRadius: BorderRadius.circular(3.r),
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                ],
               ),
             );
           }),
