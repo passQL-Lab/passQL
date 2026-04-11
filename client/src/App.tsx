@@ -3,6 +3,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import AppLayout from "./components/AppLayout";
 import Home from "./pages/Home";
 import CategoryCards from "./pages/CategoryCards";
+import DailyChallenge from "./pages/DailyChallenge";
 import PracticeSet from "./pages/PracticeSet";
 import PracticeResult from "./pages/PracticeResult";
 import QuestionDetail from "./pages/QuestionDetail";
@@ -21,6 +22,11 @@ const router = createBrowserRouter([
       { path: "stats", element: <Stats /> },
       { path: "settings", element: <Settings /> },
     ],
+  },
+  // AppLayout 밖: 전체화면 몰입형 화면
+  {
+    path: "daily-challenge",
+    element: <DailyChallenge />,
   },
   {
     path: "questions/:questionUuid/result",

@@ -14,16 +14,18 @@ import {
   useSubmitAnswer,
 } from "../hooks/useQuestionDetail";
 import { explainError } from "../api/ai";
-import type { ChoiceItem, ExecuteResult } from "../types/api";
+import type { ChoiceItem, ExecuteResult, SubmitResult } from "../types/api";
 
 interface QuestionDetailProps {
   readonly practiceMode?: boolean;
   readonly practiceSubmitLabel?: string;
   readonly questionUuid?: string;
-  readonly onPracticeSubmit?: (selectedChoiceKey: string, choiceSetId: string) => void;
+  readonly onPracticeSubmit?: (selectedChoiceKey: string, choiceSetId: string, choices: readonly ChoiceItem[]) => void;
+  // 데일리 챌린지 모드: 제출 성공 시 호출자가 직접 네비게이션 제어
+  readonly onSubmitSuccess?: (result: SubmitResult, questionUuid: string) => void;
 }
 
-export default function QuestionDetail({ practiceMode, practiceSubmitLabel, questionUuid: propUuid, onPracticeSubmit }: QuestionDetailProps = {}) {
+export default function QuestionDetail({ practiceMode, practiceSubmitLabel, questionUuid: propUuid, onPracticeSubmit, onSubmitSuccess }: QuestionDetailProps = {}) {
   const { questionUuid: paramUuid } = useParams<{ questionUuid: string }>();
   const questionUuid = propUuid ?? paramUuid;
   const navigate = useNavigate();
@@ -69,20 +71,38 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
     setSseError(null);
     setSseStatus("선택지 생성 중...");
 
+    // 60초 내에 complete/error가 오지 않으면 클라이언트 타임아웃으로 에러 전환
+    // AI 호출 + 샌드박스 3회 재시도 합산 예상 시간 기준
+    const SSE_TIMEOUT_MS = 60_000;
+    let streamCleanup: (() => void) | null = null;
+    const timeoutId = setTimeout(() => {
+      // 타임아웃 시 스트림도 abort — 이후 onComplete/onError 콜백 차단
+      streamCleanup?.();
+      setSseError({ code: "TIMEOUT", retryable: true });
+      setSseStatus(null);
+    }, SSE_TIMEOUT_MS);
+
     const cleanup = generateChoices(questionUuid, {
       onStatus: (event) => setSseStatus(event.message),
       onComplete: (response) => {
+        clearTimeout(timeoutId);
         setSseChoices(response.choices);
         setSseChoiceSetId(response.choiceSetId);
         setSseStatus(null);
       },
       onError: (event) => {
+        clearTimeout(timeoutId);
         setSseError({ code: event.code, retryable: event.retryable });
         setSseStatus(null);
       },
     });
+    // 타임아웃 콜백에서 abort할 수 있도록 참조 저장
+    streamCleanup = cleanup;
 
-    return cleanup;
+    return () => {
+      clearTimeout(timeoutId);
+      cleanup();
+    };
   // sseRetryCount를 의존성에 포함해 재시도 시 재실행
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [needsSseGeneration, questionUuid, sseRetryCount]);
@@ -107,7 +127,12 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
   const handleSelect = useCallback(
     (choiceKey: string, sql: string) => {
       setSelectedKey(choiceKey);
-      if (question?.executionMode === "EXECUTABLE" && !executeCacheRef.current[choiceKey]) {
+      // RESULT_MATCH는 body가 SQL이 아니므로 자동 실행 건너뜀
+      if (
+        question?.executionMode === "EXECUTABLE" &&
+        question?.choiceSetPolicy !== "RESULT_MATCH" &&
+        !executeCacheRef.current[choiceKey]
+      ) {
         handleExecute(choiceKey, sql);
       }
     },
@@ -117,23 +142,27 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
   const handleSubmit = useCallback(() => {
     if (!selectedKey || !question || !choiceSetId) return;
     if (practiceMode && onPracticeSubmit) {
-      onPracticeSubmit(selectedKey, choiceSetId);
+      onPracticeSubmit(selectedKey, choiceSetId, choices);
       return;
     }
     submitMutation.mutate({ choiceSetId, selectedChoiceKey: selectedKey }, {
       onSuccess: (result) => {
-        navigate(`/questions/${questionUuid}/result`, {
-          state: {
-            ...result,
-            selectedKey,
-            questionUuid,
-            // executionMode는 QuestionDetail에서 전달 (SubmitResult에서 제거됨)
-            executionMode: question.executionMode,
-          },
-        });
+        const fullResult = {
+          ...result,
+          selectedKey,
+          questionUuid,
+          // executionMode는 QuestionDetail에서 전달 (SubmitResult에서 제거됨)
+          executionMode: question.executionMode,
+        };
+        if (onSubmitSuccess) {
+          // 데일리 챌린지 등 호출자가 네비게이션 제어
+          onSubmitSuccess(fullResult as SubmitResult, questionUuid!);
+        } else {
+          navigate(`/questions/${questionUuid}/result`, { state: fullResult });
+        }
       },
     });
-  }, [selectedKey, choiceSetId, submitMutation, question, questionUuid, navigate, practiceMode, onPracticeSubmit]);
+  }, [selectedKey, choiceSetId, submitMutation, question, questionUuid, navigate, practiceMode, onPracticeSubmit, onSubmitSuccess]);
 
   const handleAskAi = useCallback(
     (choiceKey: string, _errorCode: string, errorMessage: string) => {
@@ -169,7 +198,9 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
     choiceSetId !== "" &&
     !submitMutation.isPending;
 
-  const schemaSection = question.schemaDisplay ? (
+  // schemaDisplay가 없어도 schemaDdl이 있으면 SchemaViewer가 폴백으로 파싱해서 표시
+  const hasSchema = question.schemaDisplay || question.schemaDdl;
+  const schemaSection = hasSchema ? (
     <section className="mt-3">
       <button
         type="button"
@@ -194,12 +225,21 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
     </section>
   ) : null;
 
+  // 에러 코드별 사용자 메시지 — 기술적 코드 대신 이해하기 쉬운 문구 표시
+  const sseErrorMessage = sseError
+    ? sseError.code === "TIMEOUT"
+      ? "선택지 생성 시간이 초과되었어요"
+      : sseError.code === "STREAM_CLOSED"
+        ? "서버 연결이 예기치 않게 끊겼어요"
+        : "선택지 생성에 실패했어요"
+    : null;
+
   const choicesSection = choices.length === 0 ? (
     <div className="mt-4 card-base text-center py-8 space-y-2">
       {/* SSE 에러 → 재시도 UI (EXECUTABLE, CONCEPT_ONLY 공통) */}
       {sseError ? (
         <>
-          <p className="text-text-caption text-sm">선택지 생성에 실패했어요</p>
+          <p className="text-text-caption text-sm">{sseErrorMessage}</p>
           {sseError.retryable && (
             <button
               type="button"
@@ -231,7 +271,11 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
           choice={choice}
           isSelected={selectedKey === choice.key}
           cached={executeCache[choice.key]}
-          isExecutable={question.executionMode === "EXECUTABLE"}
+          // RESULT_MATCH 선택지는 JSON 배열 body이므로 SQL 실행 불필요 — 실행 버튼 숨김
+          isExecutable={
+            question.executionMode === "EXECUTABLE" &&
+            question.choiceSetPolicy !== "RESULT_MATCH"
+          }
           isExecuting={
             executeMutation.isPending &&
             executeMutation.variables === choice.body
@@ -247,11 +291,7 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
   const submitButton = (
     <button
       type="button"
-      className={`w-full h-12 rounded-lg text-base font-bold ${
-        isSubmitReady
-          ? "bg-brand text-white"
-          : "bg-border text-text-caption cursor-not-allowed"
-      }`}
+      className={`w-full btn-primary ${!isSubmitReady ? "opacity-40 cursor-not-allowed" : ""}`}
       disabled={!isSubmitReady}
       onClick={handleSubmit}
     >

@@ -1,7 +1,9 @@
 import { useState, useMemo } from "react";
 import { useParams, useNavigate, Navigate, Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { Check, RotateCcw } from "lucide-react";
 import { usePracticeStore } from "../stores/practiceStore";
+import { fetchAiComment } from "../api/progress";
 import ScoreCountUp from "../components/ScoreCountUp";
 import StepNavigator from "../components/StepNavigator";
 
@@ -20,6 +22,15 @@ export default function PracticeResult() {
   const store = usePracticeStore();
   const [statsVisible, setStatsVisible] = useState(false);
 
+  // AI 코멘트: useQuery로 캐싱 및 StrictMode 이중 호출 방지
+  const { data: aiCommentData, isLoading: aiCommentLoading } = useQuery({
+    queryKey: ["aiComment"],
+    queryFn: fetchAiComment,
+    staleTime: 1000 * 60 * 60 * 24, // 24시간 — Redis 캐시(24h)와 맞춤
+  });
+  // null=로딩 중, ""=에러/데이터 없음, string=내용
+  const aiComment = aiCommentLoading ? null : (aiCommentData?.comment ?? "");
+
   const analysis = useMemo(() => {
     const results = store.results;
     const correctCount = results.filter((r) => r.isCorrect).length;
@@ -31,8 +42,6 @@ export default function PracticeResult() {
       totalCount,
       totalDurationMs,
       greeting: correctCount >= 9 ? "완벽해요!" : correctCount >= 7 ? "꽤 잘했어요!" : correctCount >= 5 ? "괜찮아요!" : "다시 도전해봐요!",
-      analysis: "INNER JOIN과 테이블 별칭은 이미 익숙하게 쓰고 있어요. 다중 테이블 JOIN 순서도 효율적이에요. 다만 OUTER JOIN에서 NULL 처리가 아직 어색한 것 같아요. LEFT JOIN 결과에서 매칭 안 되는 행을 WHERE로 필터링할 때 실수가 반복됐어요.",
-      tip: "LEFT JOIN + WHERE col IS NULL 패턴을 연습해보세요.",
     };
   }, [store.results]);
 
@@ -84,14 +93,16 @@ export default function PracticeResult() {
   const step2 = (
     <div className="text-left w-full max-w-90 px-2 sm:px-0">
       <p className="text-2xl font-bold text-center mb-5">{analysis.greeting}</p>
-      {analysis.analysis && (
-        <p className="text-body leading-relaxed">{analysis.analysis}</p>
-      )}
-      {analysis.tip && (
-        <div className="mt-5 p-3.5 bg-code rounded-lg text-sm text-text-secondary leading-relaxed">
-          <strong className="text-text-primary">Tip</strong> — {analysis.tip}
+      {/* AI 코멘트: null=로딩, ""=에러, 문자열=내용 */}
+      {aiComment === null ? (
+        <div className="space-y-2 animate-pulse">
+          <div className="h-4 bg-border rounded w-full" />
+          <div className="h-4 bg-border rounded w-5/6" />
+          <div className="h-4 bg-border rounded w-4/6" />
         </div>
-      )}
+      ) : aiComment ? (
+        <p className="text-body leading-relaxed">{aiComment}</p>
+      ) : null}
     </div>
   );
 

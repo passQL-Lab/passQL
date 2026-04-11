@@ -73,6 +73,9 @@ export function generateChoices(
   const abortController = new AbortController();
 
   (async () => {
+    // complete/error 이벤트를 정상 수신했는지 추적 — 스트림 종료 후 판단에 사용
+    let receivedTerminalEvent = false;
+
     try {
       const response = await fetch(
         `${BASE_URL}/questions/${questionUuid}/generate-choices`,
@@ -92,11 +95,16 @@ export function generateChoices(
         return;
       }
 
-      if (!response.body) return;
+      if (!response.body) {
+        callbacks.onError({ code: "NO_BODY", message: "응답 본문이 없습니다", retryable: true });
+        return;
+      }
 
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
+      // PARSE_ERROR 발생 시 외부 while 루프까지 종료하기 위한 플래그
+      let abortProcessing = false;
 
       // SSE 청크 파싱 헬퍼 — buffer를 \n\n으로 분리해 이벤트를 순차 처리
       const processBuffer = () => {
@@ -110,23 +118,32 @@ export function generateChoices(
           if (!eventMatch || !dataMatch) continue;
 
           const eventName = eventMatch[1];
-          // 잘못된 JSON을 받으면 스트림 전체가 중단되지 않도록 방어
+          // 잘못된 JSON을 받으면 루프 전체를 중단하고 에러로 전환
           let data: unknown;
           try {
             data = JSON.parse(dataMatch[1]);
           } catch {
+            receivedTerminalEvent = true;
+            abortProcessing = true; // while 루프도 종료
             callbacks.onError({ code: "PARSE_ERROR", message: "잘못된 응답 형식", retryable: false });
             return;
           }
 
-          if (eventName === "status") callbacks.onStatus(data as SseStatusEvent);
-          else if (eventName === "complete") callbacks.onComplete(data as ChoiceSetGenerateResponse);
-          else if (eventName === "error") callbacks.onError(data as SseErrorEvent);
+          if (eventName === "status") {
+            callbacks.onStatus(data as SseStatusEvent);
+          } else if (eventName === "complete") {
+            receivedTerminalEvent = true;
+            callbacks.onComplete(data as ChoiceSetGenerateResponse);
+          } else if (eventName === "error") {
+            receivedTerminalEvent = true;
+            callbacks.onError(data as SseErrorEvent);
+          }
         }
       };
 
       while (true) {
         const { done, value } = await reader.read();
+        if (abortProcessing) break;
 
         if (done) {
           // 스트림 종료 시 버퍼에 남은 마지막 청크도 처리
@@ -134,6 +151,11 @@ export function generateChoices(
           if (buffer.trim()) {
             buffer += "\n\n"; // 청크 구분자 강제 추가
             processBuffer();
+          }
+          // complete/error 이벤트 없이 스트림이 닫힌 경우 — 서버 측 조용한 종료
+          // AbortError로 cleanup한 경우가 아닐 때만 에러 처리
+          if (!receivedTerminalEvent && !abortController.signal.aborted) {
+            callbacks.onError({ code: "STREAM_CLOSED", message: "선택지 생성이 중단되었습니다", retryable: true });
           }
           break;
         }

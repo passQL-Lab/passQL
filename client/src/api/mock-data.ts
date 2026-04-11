@@ -37,9 +37,24 @@ const MOCK_TOPICS: readonly TopicTree[] = [
     sortOrder: 2,
     isActive: true,
     subtopics: [
-      { code: "select_basic", displayName: "SELECT 문 구조", sortOrder: 1, isActive: true },
-      { code: "where_clause", displayName: "WHERE 절", sortOrder: 2, isActive: true },
-      { code: "order_by", displayName: "ORDER BY", sortOrder: 3, isActive: true },
+      {
+        code: "select_basic",
+        displayName: "SELECT 문 구조",
+        sortOrder: 1,
+        isActive: true,
+      },
+      {
+        code: "where_clause",
+        displayName: "WHERE 절",
+        sortOrder: 2,
+        isActive: true,
+      },
+      {
+        code: "order_by",
+        displayName: "ORDER BY",
+        sortOrder: 3,
+        isActive: true,
+      },
     ],
   },
   {
@@ -49,10 +64,30 @@ const MOCK_TOPICS: readonly TopicTree[] = [
     sortOrder: 3,
     isActive: true,
     subtopics: [
-      { code: "ddl", displayName: "DDL (CREATE/ALTER/DROP)", sortOrder: 1, isActive: true },
-      { code: "dml", displayName: "DML (INSERT/UPDATE/DELETE)", sortOrder: 2, isActive: true },
-      { code: "tcl", displayName: "TCL (COMMIT/ROLLBACK)", sortOrder: 3, isActive: true },
-      { code: "constraint", displayName: "제약조건", sortOrder: 4, isActive: true },
+      {
+        code: "ddl",
+        displayName: "DDL (CREATE/ALTER/DROP)",
+        sortOrder: 1,
+        isActive: true,
+      },
+      {
+        code: "dml",
+        displayName: "DML (INSERT/UPDATE/DELETE)",
+        sortOrder: 2,
+        isActive: true,
+      },
+      {
+        code: "tcl",
+        displayName: "TCL (COMMIT/ROLLBACK)",
+        sortOrder: 3,
+        isActive: true,
+      },
+      {
+        code: "constraint",
+        displayName: "제약조건",
+        sortOrder: 4,
+        isActive: true,
+      },
     ],
   },
   {
@@ -62,10 +97,30 @@ const MOCK_TOPICS: readonly TopicTree[] = [
     sortOrder: 4,
     isActive: true,
     subtopics: [
-      { code: "string_func", displayName: "문자 함수", sortOrder: 1, isActive: true },
-      { code: "numeric_func", displayName: "숫자 함수", sortOrder: 2, isActive: true },
-      { code: "date_func", displayName: "날짜 함수", sortOrder: 3, isActive: true },
-      { code: "null_func", displayName: "NULL 관련 함수", sortOrder: 4, isActive: true },
+      {
+        code: "string_func",
+        displayName: "문자 함수",
+        sortOrder: 1,
+        isActive: true,
+      },
+      {
+        code: "numeric_func",
+        displayName: "숫자 함수",
+        sortOrder: 2,
+        isActive: true,
+      },
+      {
+        code: "date_func",
+        displayName: "날짜 함수",
+        sortOrder: 3,
+        isActive: true,
+      },
+      {
+        code: "null_func",
+        displayName: "NULL 관련 함수",
+        sortOrder: 4,
+        isActive: true,
+      },
     ],
   },
   {
@@ -75,10 +130,30 @@ const MOCK_TOPICS: readonly TopicTree[] = [
     sortOrder: 5,
     isActive: true,
     subtopics: [
-      { code: "inner_join", displayName: "INNER JOIN", sortOrder: 1, isActive: true },
-      { code: "outer_join", displayName: "OUTER JOIN", sortOrder: 2, isActive: true },
-      { code: "self_join", displayName: "SELF JOIN", sortOrder: 3, isActive: true },
-      { code: "cross_join", displayName: "CROSS JOIN", sortOrder: 4, isActive: true },
+      {
+        code: "inner_join",
+        displayName: "INNER JOIN",
+        sortOrder: 1,
+        isActive: true,
+      },
+      {
+        code: "outer_join",
+        displayName: "OUTER JOIN",
+        sortOrder: 2,
+        isActive: true,
+      },
+      {
+        code: "self_join",
+        displayName: "SELF JOIN",
+        sortOrder: 3,
+        isActive: true,
+      },
+      {
+        code: "cross_join",
+        displayName: "CROSS JOIN",
+        sortOrder: 4,
+        isActive: true,
+      },
     ],
   },
   {
@@ -88,9 +163,24 @@ const MOCK_TOPICS: readonly TopicTree[] = [
     sortOrder: 6,
     isActive: true,
     subtopics: [
-      { code: "scalar_subquery", displayName: "스칼라 서브쿼리", sortOrder: 1, isActive: true },
-      { code: "inline_view", displayName: "인라인 뷰", sortOrder: 2, isActive: true },
-      { code: "correlated_subquery", displayName: "상관 서브쿼리", sortOrder: 3, isActive: true },
+      {
+        code: "scalar_subquery",
+        displayName: "스칼라 서브쿼리",
+        sortOrder: 1,
+        isActive: true,
+      },
+      {
+        code: "inline_view",
+        displayName: "인라인 뷰",
+        sortOrder: 2,
+        isActive: true,
+      },
+      {
+        code: "correlated_subquery",
+        displayName: "상관 서브쿼리",
+        sortOrder: 3,
+        isActive: true,
+      },
     ],
   },
   {
@@ -100,9 +190,19 @@ const MOCK_TOPICS: readonly TopicTree[] = [
     sortOrder: 7,
     isActive: true,
     subtopics: [
-      { code: "group_by", displayName: "GROUP BY", sortOrder: 1, isActive: true },
+      {
+        code: "group_by",
+        displayName: "GROUP BY",
+        sortOrder: 1,
+        isActive: true,
+      },
       { code: "having", displayName: "HAVING", sortOrder: 2, isActive: true },
-      { code: "aggregate_func", displayName: "집계 함수", sortOrder: 3, isActive: true },
+      {
+        code: "aggregate_func",
+        displayName: "집계 함수",
+        sortOrder: 3,
+        isActive: true,
+      },
     ],
   },
   {
@@ -112,8 +212,18 @@ const MOCK_TOPICS: readonly TopicTree[] = [
     sortOrder: 8,
     isActive: true,
     subtopics: [
-      { code: "rank_func", displayName: "순위 함수 (RANK/ROW_NUMBER)", sortOrder: 1, isActive: true },
-      { code: "window_aggregate", displayName: "윈도우 집계", sortOrder: 2, isActive: true },
+      {
+        code: "rank_func",
+        displayName: "순위 함수 (RANK/ROW_NUMBER)",
+        sortOrder: 1,
+        isActive: true,
+      },
+      {
+        code: "window_aggregate",
+        displayName: "윈도우 집계",
+        sortOrder: 2,
+        isActive: true,
+      },
     ],
   },
   {
@@ -123,8 +233,18 @@ const MOCK_TOPICS: readonly TopicTree[] = [
     sortOrder: 9,
     isActive: true,
     subtopics: [
-      { code: "connect_by", displayName: "계층 쿼리 (CONNECT BY)", sortOrder: 1, isActive: true },
-      { code: "pivot", displayName: "PIVOT / UNPIVOT", sortOrder: 2, isActive: true },
+      {
+        code: "connect_by",
+        displayName: "계층 쿼리 (CONNECT BY)",
+        sortOrder: 1,
+        isActive: true,
+      },
+      {
+        code: "pivot",
+        displayName: "PIVOT / UNPIVOT",
+        sortOrder: 2,
+        isActive: true,
+      },
     ],
   },
 ];
@@ -133,7 +253,11 @@ const MOCK_TOPICS: readonly TopicTree[] = [
 const MOCK_CORRECT_EXECUTE_RESULT: ExecuteResult = {
   status: "SUCCESS",
   columns: ["name", "cnt"],
-  rows: [["홍길동", 2], ["김영희", 3], ["이철수", 1]],
+  rows: [
+    ["홍길동", 2],
+    ["김영희", 3],
+    ["이철수", 1],
+  ],
   rowCount: 3,
   elapsedMs: 28,
   errorCode: null,
@@ -144,7 +268,10 @@ const MOCK_CORRECT_EXECUTE_RESULT: ExecuteResult = {
 const MOCK_WRONG_EXECUTE_RESULT: ExecuteResult = {
   status: "SUCCESS",
   columns: ["name", "cnt"],
-  rows: [["홍길동", 5], ["김영희", 1]],
+  rows: [
+    ["홍길동", 5],
+    ["김영희", 1],
+  ],
   rowCount: 2,
   elapsedMs: 31,
   errorCode: null,
@@ -152,10 +279,39 @@ const MOCK_WRONG_EXECUTE_RESULT: ExecuteResult = {
 };
 
 const MOCK_CHOICES: readonly ChoiceItem[] = [
-  { key: "A", kind: "SQL", body: "SELECT c.name, COUNT(*) AS cnt\nFROM CUSTOMER c\nJOIN ORDERS o ON c.id = o.customer_id\nGROUP BY c.name", isCorrect: true, rationale: "CUSTOMER와 ORDERS를 customer_id로 JOIN한 후 c.name으로 GROUP BY하면 고객별 주문 수를 정확히 구할 수 있습니다.", sortOrder: 1 },
-  { key: "B", kind: "SQL", body: "SELECT c.name, COUNT(*) AS cnt\nFROM CUSTOMER c\nJOIN ORDERS o ON c.id = o.cust_id\nGROUP BY c.name", isCorrect: false, rationale: "cust_id는 존재하지 않는 컬럼입니다.", sortOrder: 2 },
-  { key: "C", kind: "SQL", body: "SELECT name, COUNT(*) AS cnt\nFROM CUSTOMER c\nJOIN ORDERS o ON c.id = o.customer_id\nGROUP BY name", isCorrect: false, rationale: "GROUP BY name은 모호한 참조입니다.", sortOrder: 3 },
-  { key: "D", kind: "SQL", body: "SELECT c.name, SUM(o.amount) AS total\nFROM CUSTOMER c\nJOIN ORDERS o ON c.id = o.customer_id\nGROUP BY c.name", isCorrect: false, rationale: "SUM(amount)은 주문 수가 아닌 금액 합계입니다.", sortOrder: 4 },
+  {
+    key: "A",
+    kind: "SQL",
+    body: "SELECT c.name, COUNT(*) AS cnt\nFROM CUSTOMER c\nJOIN ORDERS o ON c.id = o.customer_id\nGROUP BY c.name",
+    isCorrect: true,
+    rationale:
+      "CUSTOMER와 ORDERS를 customer_id로 JOIN한 후 c.name으로 GROUP BY하면 고객별 주문 수를 정확히 구할 수 있습니다.",
+    sortOrder: 1,
+  },
+  {
+    key: "B",
+    kind: "SQL",
+    body: "SELECT c.name, COUNT(*) AS cnt\nFROM CUSTOMER c\nJOIN ORDERS o ON c.id = o.cust_id\nGROUP BY c.name",
+    isCorrect: false,
+    rationale: "cust_id는 존재하지 않는 컬럼입니다.",
+    sortOrder: 2,
+  },
+  {
+    key: "C",
+    kind: "SQL",
+    body: "SELECT name, COUNT(*) AS cnt\nFROM CUSTOMER c\nJOIN ORDERS o ON c.id = o.customer_id\nGROUP BY name",
+    isCorrect: false,
+    rationale: "GROUP BY name은 모호한 참조입니다.",
+    sortOrder: 3,
+  },
+  {
+    key: "D",
+    kind: "SQL",
+    body: "SELECT c.name, SUM(o.amount) AS total\nFROM CUSTOMER c\nJOIN ORDERS o ON c.id = o.customer_id\nGROUP BY c.name",
+    isCorrect: false,
+    rationale: "SUM(amount)은 주문 수가 아닌 금액 합계입니다.",
+    sortOrder: 4,
+  },
 ];
 
 const MOCK_QUESTIONS: readonly QuestionSummary[] = [
@@ -194,7 +350,8 @@ const MOCK_QUESTIONS: readonly QuestionSummary[] = [
     topicName: "서브쿼리",
     difficulty: 2,
     executionMode: "CONCEPT_ONLY",
-    stemPreview: "상관 서브쿼리와 비상관 서브쿼리의 차이를 올바르게 설명한 것은?",
+    stemPreview:
+      "상관 서브쿼리와 비상관 서브쿼리의 차이를 올바르게 설명한 것은?",
     createdAt: "2026-04-07T12:00:00",
   },
   // sql_group_aggregate (2)
@@ -264,28 +421,70 @@ const MOCK_QUESTION_DETAIL: QuestionDetail = {
   executionMode: "CONCEPT_ONLY",
   choiceSetPolicy: "AI_ONLY",
   stem: "다음 SQL 중 고객별 주문 수를 올바르게 구하는 것은?",
-  schemaDisplay: "CUSTOMER (id INT PK, name VARCHAR, email VARCHAR)\nORDERS (id INT PK, customer_id INT FK, amount INT, order_date DATE)",
-  schemaDdl: "CREATE TABLE CUSTOMER (id INT PRIMARY KEY, name VARCHAR(50), email VARCHAR(100));\nCREATE TABLE ORDERS (id INT PRIMARY KEY, customer_id INT REFERENCES CUSTOMER(id), amount INT, order_date DATE);",
-  schemaSampleData: "CUSTOMER: (1, '홍길동', 'hong@test.com'), (2, '김영희', 'kim@test.com')\nORDERS: (1, 1, 50000, '2026-01-01'), (2, 1, 30000, '2026-01-15'), (3, 2, 70000, '2026-02-01')",
+  schemaDisplay:
+    "CUSTOMER (id INT PK, name VARCHAR, email VARCHAR)\nORDERS (id INT PK, customer_id INT FK, amount INT, order_date DATE)",
+  schemaDdl:
+    "CREATE TABLE CUSTOMER (id INT PRIMARY KEY, name VARCHAR(50), email VARCHAR(100));\nCREATE TABLE ORDERS (id INT PRIMARY KEY, customer_id INT REFERENCES CUSTOMER(id), amount INT, order_date DATE);",
+  schemaSampleData:
+    "CUSTOMER: (1, '홍길동', 'hong@test.com'), (2, '김영희', 'kim@test.com')\nORDERS: (1, 1, 50000, '2026-01-01'), (2, 1, 30000, '2026-01-15'), (3, 2, 70000, '2026-02-01')",
   schemaIntent: "고객과 주문 테이블을 조인하여 고객별 주문 수를 집계",
-  answerSql: "SELECT c.name, COUNT(*) AS cnt FROM CUSTOMER c JOIN ORDERS o ON c.id = o.customer_id GROUP BY c.name",
+  answerSql:
+    "SELECT c.name, COUNT(*) AS cnt FROM CUSTOMER c JOIN ORDERS o ON c.id = o.customer_id GROUP BY c.name",
   hint: "JOIN 조건에서 올바른 외래키 컬럼명을 확인하세요.",
-  choiceSets: [{
-    choiceSetUuid: "cs-uuid-0001",
-    source: "ADMIN_SEED",
-    status: "OK",
-    sandboxValidationPassed: true,
-    createdAt: "2026-04-07T12:00:00",
-    items: MOCK_CHOICES,
-  }],
+  choiceSets: [
+    {
+      choiceSetUuid: "cs-uuid-0001",
+      source: "ADMIN_SEED",
+      status: "OK",
+      sandboxValidationPassed: true,
+      createdAt: "2026-04-07T12:00:00",
+      items: MOCK_CHOICES,
+    },
+  ],
 };
 
 // MOCK_PROGRESS는 MOCK_CATEGORY_STATS 이후에 정의됨 (solvedCount 합산 일치)
 
 const MOCK_TAGS: readonly ConceptTag[] = [
-  { conceptTagUuid: "ct-uuid-001", tagKey: "join", labelKo: "JOIN", category: "SQL", description: "테이블 결합", isActive: true, sortOrder: 1, createdAt: "2026-04-07T12:00:00", updatedAt: "2026-04-07T12:00:00", createdBy: "admin", updatedBy: "admin" },
-  { conceptTagUuid: "ct-uuid-002", tagKey: "group_by", labelKo: "GROUP BY", category: "SQL", description: "그룹 집계", isActive: true, sortOrder: 2, createdAt: "2026-04-07T12:00:00", updatedAt: "2026-04-07T12:00:00", createdBy: "admin", updatedBy: "admin" },
-  { conceptTagUuid: "ct-uuid-003", tagKey: "aggregate", labelKo: "집계함수", category: "SQL", description: "COUNT, SUM 등", isActive: true, sortOrder: 3, createdAt: "2026-04-07T12:00:00", updatedAt: "2026-04-07T12:00:00", createdBy: "admin", updatedBy: "admin" },
+  {
+    conceptTagUuid: "ct-uuid-001",
+    tagKey: "join",
+    labelKo: "JOIN",
+    category: "SQL",
+    description: "테이블 결합",
+    isActive: true,
+    sortOrder: 1,
+    createdAt: "2026-04-07T12:00:00",
+    updatedAt: "2026-04-07T12:00:00",
+    createdBy: "admin",
+    updatedBy: "admin",
+  },
+  {
+    conceptTagUuid: "ct-uuid-002",
+    tagKey: "group_by",
+    labelKo: "GROUP BY",
+    category: "SQL",
+    description: "그룹 집계",
+    isActive: true,
+    sortOrder: 2,
+    createdAt: "2026-04-07T12:00:00",
+    updatedAt: "2026-04-07T12:00:00",
+    createdBy: "admin",
+    updatedBy: "admin",
+  },
+  {
+    conceptTagUuid: "ct-uuid-003",
+    tagKey: "aggregate",
+    labelKo: "집계함수",
+    category: "SQL",
+    description: "COUNT, SUM 등",
+    isActive: true,
+    sortOrder: 3,
+    createdAt: "2026-04-07T12:00:00",
+    updatedAt: "2026-04-07T12:00:00",
+    createdBy: "admin",
+    updatedBy: "admin",
+  },
 ];
 
 const MOCK_TODAY: TodayQuestionResponse = {
@@ -304,20 +503,40 @@ const MOCK_GREETING: GreetingResponse = {
 };
 
 const MOCK_EXAM_SCHEDULES: readonly ExamScheduleResponse[] = [
-  { examScheduleUuid: "es-uuid-0001", certType: "SQLD", round: 1, examDate: "2026-05-10", isSelected: true },
-  { examScheduleUuid: "es-uuid-0002", certType: "SQLD", round: 2, examDate: "2026-09-13", isSelected: false },
-  { examScheduleUuid: "es-uuid-0003", certType: "SQLP", round: 1, examDate: "2026-06-21", isSelected: false },
+  {
+    examScheduleUuid: "es-uuid-0001",
+    certType: "SQLD",
+    round: 1,
+    examDate: "2026-05-10",
+    isSelected: true,
+  },
+  {
+    examScheduleUuid: "es-uuid-0002",
+    certType: "SQLD",
+    round: 2,
+    examDate: "2026-09-13",
+    isSelected: false,
+  },
+  {
+    examScheduleUuid: "es-uuid-0003",
+    certType: "SQLP",
+    round: 1,
+    examDate: "2026-06-21",
+    isSelected: false,
+  },
 ];
 
 // MOCK_TOPICS에서 자동 생성 — 카테고리 수 일관성 유지
-const MOCK_RATE_POOL = [0.82, 0.68, 0.41, 0.90, 0.55, 0.75, 0.33, 0.60, 0.20];
+const MOCK_RATE_POOL = [0.82, 0.68, 0.41, 0.9, 0.55, 0.75, 0.33, 0.6, 0.2];
 const MOCK_SOLVED_POOL = [45, 32, 18, 28, 22, 38, 12, 15, 5];
-const MOCK_CATEGORY_STATS: readonly CategoryStats[] = MOCK_TOPICS.map((t, i) => ({
-  code: t.code,
-  displayName: t.displayName,
-  correctRate: MOCK_RATE_POOL[i % MOCK_RATE_POOL.length],
-  solvedCount: MOCK_SOLVED_POOL[i % MOCK_SOLVED_POOL.length],
-}));
+const MOCK_CATEGORY_STATS: readonly CategoryStats[] = MOCK_TOPICS.map(
+  (t, i) => ({
+    code: t.code,
+    displayName: t.displayName,
+    correctRate: MOCK_RATE_POOL[i % MOCK_RATE_POOL.length],
+    solvedCount: MOCK_SOLVED_POOL[i % MOCK_SOLVED_POOL.length],
+  }),
+);
 
 const MOCK_PROGRESS: ProgressResponse = {
   solvedCount: MOCK_CATEGORY_STATS.reduce((sum, c) => sum + c.solvedCount, 0),
@@ -338,7 +557,10 @@ const MOCK_PROGRESS: ProgressResponse = {
 };
 
 function buildMockHeatmap(): HeatmapResponse {
-  const pattern = [3, 0, 5, 2, 1, 0, 4, 6, 0, 1, 2, 3, 0, 0, 5, 1, 2, 0, 3, 4, 0, 1, 0, 6, 2, 3, 1, 0, 4, 2];
+  const pattern = [
+    3, 0, 5, 2, 1, 0, 4, 6, 0, 1, 2, 3, 0, 0, 5, 1, 2, 0, 3, 4, 0, 1, 0, 6, 2,
+    3, 1, 0, 4, 2,
+  ];
   const entries = [];
   const today = new Date();
   for (let i = 29; i >= 0; i--) {
@@ -348,14 +570,22 @@ function buildMockHeatmap(): HeatmapResponse {
     const solved = pattern[29 - i];
     if (solved > 0) {
       const correct = Math.min(solved, Math.max(0, solved - 1));
-      entries.push({ date: dateStr, solvedCount: solved, correctCount: correct });
+      entries.push({
+        date: dateStr,
+        solvedCount: solved,
+        correctCount: correct,
+      });
     }
   }
   return { entries };
 }
 
 /** path + method → mock response 매핑 */
-export function getMockResponse(path: string, method: string, body?: string): unknown {
+export function getMockResponse(
+  path: string,
+  method: string,
+  body?: string,
+): unknown {
   // GET /questions/today  (specific before generic /questions/:uuid)
   if (method === "GET" && path.startsWith("/questions/today")) {
     return MOCK_TODAY satisfies TodayQuestionResponse;
@@ -367,12 +597,18 @@ export function getMockResponse(path: string, method: string, body?: string): un
   }
 
   // GET /questions?...  (list — no second path segment)
-  if (method === "GET" && path.startsWith("/questions") && !path.includes("/questions/")) {
+  if (
+    method === "GET" &&
+    path.startsWith("/questions") &&
+    !path.includes("/questions/")
+  ) {
     const url = new URLSearchParams(path.split("?")[1] ?? "");
     const page = Number(url.get("page") ?? 0);
     const size = Number(url.get("size") ?? 10);
     const topic = url.get("topic");
-    const filtered = topic ? MOCK_QUESTIONS.filter((q) => q.topicCode === topic) : MOCK_QUESTIONS;
+    const filtered = topic
+      ? MOCK_QUESTIONS.filter((q) => q.topicCode === topic)
+      : MOCK_QUESTIONS;
     const start = page * size;
     const content = filtered.slice(start, start + size);
     return {
@@ -389,30 +625,60 @@ export function getMockResponse(path: string, method: string, body?: string): un
 
   // GET /questions/:uuid  (detail)
   if (method === "GET" && /^\/questions\/[^/?]+$/.test(path)) {
-    return { ...MOCK_QUESTION_DETAIL, questionUuid: path.split("/")[2] } satisfies QuestionDetail;
+    return {
+      ...MOCK_QUESTION_DETAIL,
+      questionUuid: path.split("/")[2],
+    } satisfies QuestionDetail;
   }
 
   // POST /questions/:uuid/execute
   if (method === "POST" && path.includes("/execute")) {
-    const sql = body ? JSON.parse(body).sql as string : "";
+    const sql = body ? (JSON.parse(body).sql as string) : "";
     const hasError = sql.includes("cust_id");
     if (hasError) {
-      return { status: "ERROR", columns: [], rows: [], rowCount: 0, elapsedMs: 0, errorCode: "SQL_SYNTAX", errorMessage: "Unknown column 'o.cust_id' in 'on clause'" } satisfies ExecuteResult;
+      return {
+        status: "ERROR",
+        columns: [],
+        rows: [],
+        rowCount: 0,
+        elapsedMs: 0,
+        errorCode: "SQL_SYNTAX",
+        errorMessage: "Unknown column 'o.cust_id' in 'on clause'",
+      } satisfies ExecuteResult;
     }
     return {
-      status: "SUCCESS", columns: ["name", "cnt"], rows: [["홍길동", 2], ["김영희", 3], ["이철수", 1]], rowCount: 3, elapsedMs: 34, errorCode: null, errorMessage: null,
+      status: "SUCCESS",
+      columns: ["name", "cnt"],
+      rows: [
+        ["홍길동", 2],
+        ["김영희", 3],
+        ["이철수", 1],
+      ],
+      rowCount: 3,
+      elapsedMs: 34,
+      errorCode: null,
+      errorMessage: null,
     } satisfies ExecuteResult;
   }
 
   // POST /questions/:uuid/generate-choices
   if (method === "POST" && path.includes("/generate-choices")) {
     const questionUuid = path.split("/")[2];
-    const matchedQuestion = MOCK_QUESTIONS.find((q) => q.questionUuid === questionUuid);
+    const matchedQuestion = MOCK_QUESTIONS.find(
+      (q) => q.questionUuid === questionUuid,
+    );
     const detail = { ...MOCK_QUESTION_DETAIL, questionUuid };
     const items = detail.choiceSets[0]?.items ?? [];
     return {
-      choiceSetId: matchedQuestion ? `mock-cs-${questionUuid}` : "mock-cs-default",
-      choices: items.map(({ key, kind, body, sortOrder }) => ({ key, kind, body, sortOrder })),
+      choiceSetId: matchedQuestion
+        ? `mock-cs-${questionUuid}`
+        : "mock-cs-default",
+      choices: items.map(({ key, kind, body, sortOrder }) => ({
+        key,
+        kind,
+        body,
+        sortOrder,
+      })),
     };
   }
 
@@ -424,19 +690,25 @@ export function getMockResponse(path: string, method: string, body?: string): un
     const questionUuid = path.split("/")[2];
 
     // UUID로 MOCK_QUESTIONS에서 executionMode 조회 (없으면 CONCEPT_ONLY 폴백)
-    const matchedQuestion = MOCK_QUESTIONS.find((q) => q.questionUuid === questionUuid);
+    const matchedQuestion = MOCK_QUESTIONS.find(
+      (q) => q.questionUuid === questionUuid,
+    );
     const executionMode = matchedQuestion?.executionMode ?? "CONCEPT_ONLY";
 
     if (executionMode === "EXECUTABLE") {
       return {
         isCorrect,
         correctKey: "A",
-        rationale: "CUSTOMER와 ORDERS를 customer_id로 JOIN한 후 c.name으로 GROUP BY하면 고객별 주문 수를 정확히 구할 수 있습니다.",
+        rationale:
+          "CUSTOMER와 ORDERS를 customer_id로 JOIN한 후 c.name으로 GROUP BY하면 고객별 주문 수를 정확히 구할 수 있습니다.",
         selectedSql: isCorrect
-          ? "SELECT c.name, COUNT(*) AS cnt FROM CUSTOMER c JOIN ORDERS o ON c.customer_id = o.customer_id GROUP BY c.name"
-          : "SELECT c.name, COUNT(*) AS cnt FROM CUSTOMER c JOIN ORDERS o ON c.cust_id = o.cust_id GROUP BY c.name",
-        correctSql: "SELECT c.name, COUNT(*) AS cnt FROM CUSTOMER c JOIN ORDERS o ON c.customer_id = o.customer_id GROUP BY c.name",
-        selectedResult: isCorrect ? MOCK_CORRECT_EXECUTE_RESULT : MOCK_WRONG_EXECUTE_RESULT,
+          ? "SELECT c.name, COUNT(*) AS cnt FROM CUSTOMER c JOIN ORDERS o ON c.id = o.customer_id GROUP BY c.name"
+          : "SELECT c.name, COUNT(*) AS cnt FROM CUSTOMER c JOIN ORDERS o ON c.id = o.cust_id GROUP BY c.name",
+        correctSql:
+          "SELECT c.name, COUNT(*) AS cnt FROM CUSTOMER c JOIN ORDERS o ON c.id = o.customer_id GROUP BY c.name",
+        selectedResult: isCorrect
+          ? MOCK_CORRECT_EXECUTE_RESULT
+          : MOCK_WRONG_EXECUTE_RESULT,
         correctResult: MOCK_CORRECT_EXECUTE_RESULT,
       } satisfies SubmitResult;
     }
@@ -445,7 +717,8 @@ export function getMockResponse(path: string, method: string, body?: string): un
     return {
       isCorrect,
       correctKey: "A",
-      rationale: "CUSTOMER와 ORDERS를 customer_id로 JOIN한 후 c.name으로 GROUP BY하면 고객별 주문 수를 정확히 구할 수 있습니다.",
+      rationale:
+        "CUSTOMER와 ORDERS를 customer_id로 JOIN한 후 c.name으로 GROUP BY하면 고객별 주문 수를 정확히 구할 수 있습니다.",
       selectedResult: null,
       correctResult: null,
       selectedSql: null,
@@ -464,7 +737,10 @@ export function getMockResponse(path: string, method: string, body?: string): un
   }
 
   // GET /progress?memberUuid=...
-  if (method === "GET" && (path === "/progress" || path.startsWith("/progress?"))) {
+  if (
+    method === "GET" &&
+    (path === "/progress" || path.startsWith("/progress?"))
+  ) {
     return MOCK_PROGRESS satisfies ProgressResponse;
   }
 
@@ -495,12 +771,23 @@ export function getMockResponse(path: string, method: string, body?: string): un
 
   // POST /members/register
   if (method === "POST" && path === "/members/register") {
-    return { memberUuid: "mock-uuid-1234-5678-abcd", nickname: "용감한 판다" } satisfies MemberRegisterResponse;
+    return {
+      memberUuid: "mock-uuid-1234-5678-abcd",
+      nickname: "용감한 판다",
+    } satisfies MemberRegisterResponse;
   }
 
   // GET /members/me
   if (method === "GET" && path.startsWith("/members/me")) {
-    return { memberUuid: "mock-uuid-1234-5678-abcd", nickname: "용감한 판다", role: "USER", status: "ACTIVE", isTestAccount: false, createdAt: "2026-04-07T12:00:00", lastSeenAt: "2026-04-08T01:00:00" } satisfies MemberMeResponse;
+    return {
+      memberUuid: "mock-uuid-1234-5678-abcd",
+      nickname: "용감한 판다",
+      role: "USER",
+      status: "ACTIVE",
+      isTestAccount: false,
+      createdAt: "2026-04-07T12:00:00",
+      lastSeenAt: "2026-04-08T01:00:00",
+    } satisfies MemberMeResponse;
   }
 
   // POST /members/me/regenerate-nickname
@@ -510,19 +797,35 @@ export function getMockResponse(path: string, method: string, body?: string): un
 
   // POST /ai/explain-error
   if (method === "POST" && path === "/ai/explain-error") {
-    return { text: "선택한 SQL에서 `o.cust_id`는 존재하지 않는 컬럼입니다.\n\n**올바른 참조:**\n`o.customer_id`를 사용해야 ORDERS 테이블의 외래키를 정확히 참조할 수 있습니다.\n\n```sql\nJOIN ORDERS o ON c.id = o.customer_id\n```", promptVersion: 1 } satisfies AiResult;
+    return {
+      text: "선택한 SQL에서 `o.cust_id`는 존재하지 않는 컬럼입니다.\n\n**올바른 참조:**\n`o.customer_id`를 사용해야 ORDERS 테이블의 외래키를 정확히 참조할 수 있습니다.\n\n```sql\nJOIN ORDERS o ON c.id = o.customer_id\n```",
+      promptVersion: 1,
+    } satisfies AiResult;
   }
 
   // POST /ai/diff-explain
   if (method === "POST" && path === "/ai/diff-explain") {
-    return { text: "선택지 C가 오답인 이유를 분석해 보겠습니다.\n\n**문제점: GROUP BY 절의 컬럼 참조 오류**\n\n`GROUP BY name`은 표준 SQL에서 모호한 참조입니다. 여러 테이블을 조인할 때는 반드시 테이블 별칭을 명시해야 합니다.\n\n```sql\n-- 올바른 SQL\nGROUP BY c.name\n```", promptVersion: 1 } satisfies AiResult;
+    return {
+      text: "선택지 C가 오답인 이유를 분석해 보겠습니다.\n\n**문제점: GROUP BY 절의 컬럼 참조 오류**\n\n`GROUP BY name`은 표준 SQL에서 모호한 참조입니다. 여러 테이블을 조인할 때는 반드시 테이블 별칭을 명시해야 합니다.\n\n```sql\n-- 올바른 SQL\nGROUP BY c.name\n```",
+      promptVersion: 1,
+    } satisfies AiResult;
   }
 
   // GET /ai/similar/:uuid
   if (method === "GET" && path.includes("/ai/similar/")) {
     return [
-      { questionUuid: "q-uuid-0006", stem: "LEFT JOIN과 INNER JOIN의 결과 차이는?", topicName: "조인 (JOIN)", score: 0.92 },
-      { questionUuid: "q-uuid-0007", stem: "GROUP BY와 HAVING의 실행 순서는?", topicName: "그룹함수 / 집계", score: 0.85 },
+      {
+        questionUuid: "q-uuid-0006",
+        stem: "LEFT JOIN과 INNER JOIN의 결과 차이는?",
+        topicName: "조인 (JOIN)",
+        score: 0.92,
+      },
+      {
+        questionUuid: "q-uuid-0007",
+        stem: "GROUP BY와 HAVING의 실행 순서는?",
+        topicName: "그룹함수 / 집계",
+        score: 0.85,
+      },
     ] satisfies SimilarQuestion[];
   }
 

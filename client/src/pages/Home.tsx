@@ -1,4 +1,4 @@
-import { Flame, ChevronRight } from "lucide-react";
+import { Flame, ChevronRight, Check } from "lucide-react";
 import { getReadinessCopy } from "../constants/readinessCopy";
 import { Link } from "react-router-dom";
 import { useProgress } from "../hooks/useProgress";
@@ -64,18 +64,40 @@ export default function Home() {
 
       <section className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
         {today?.question ? (
-          <Link to={`/questions/${today.question.questionUuid}`} className="block">
-            <div className="card-base h-full flex flex-col gap-2 cursor-pointer hover:bg-surface transition-colors">
-              <p className="text-secondary text-sm">
-                {today.alreadySolvedToday ? "오늘의 문제 (완료)" : "오늘의 문제"}
-              </p>
+          today.alreadySolvedToday ? (
+            // 완료 상태: 성공 카드 스타일 (초록 left border + 배경)
+            <div
+              className="h-full flex flex-col gap-2 rounded-xl p-5 cursor-default"
+              style={{ backgroundColor: "var(--color-sem-success-light)", borderLeft: "4px solid var(--color-sem-success)" }}
+            >
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-medium" style={{ color: "var(--color-sem-success-text)" }}>오늘의 문제</p>
+                <div
+                  className="w-6 h-6 rounded-full flex items-center justify-center"
+                  style={{ backgroundColor: "var(--color-sem-success)" }}
+                >
+                  <Check size={14} className="text-white" />
+                </div>
+              </div>
               <p className="text-body text-sm truncate">{today.question.stemPreview}</p>
               <div className="flex items-center gap-2 mt-auto">
                 <span className="badge-topic">{today.question.topicName}</span>
                 <StarRating level={today.question.difficulty} />
               </div>
             </div>
-          </Link>
+          ) : (
+            // 미완료 상태: 데일리 챌린지 페이지로 이동
+            <Link to="/daily-challenge" className="block">
+              <div className="card-base h-full flex flex-col gap-2 cursor-pointer hover:bg-surface transition-colors">
+                <p className="text-secondary text-sm">오늘의 문제</p>
+                <p className="text-body text-sm truncate">{today.question.stemPreview}</p>
+                <div className="flex items-center gap-2 mt-auto">
+                  <span className="badge-topic">{today.question.topicName}</span>
+                  <StarRating level={today.question.difficulty} />
+                </div>
+              </div>
+            </Link>
+          )
         ) : (
           <Link to="/questions" className="block">
             <div className="card-base h-full flex flex-col justify-center cursor-pointer hover:bg-surface transition-colors">
@@ -109,7 +131,8 @@ export default function Home() {
                 color: "var(--color-sem-warning-text)",
               }}
             >
-              <Flame size={14} className="inline mr-1" />
+              {/* fill 속성으로 불꽃 아이콘을 꽉 채운 스타일로 표시 */}
+              <Flame size={14} className="inline mr-1" fill="currentColor" />
               연속 {streak}일
             </span>
           )}

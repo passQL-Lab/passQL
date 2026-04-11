@@ -20,17 +20,17 @@ interface FeedbackState {
   readonly executionMode?: ExecutionMode;
   readonly selectedResult: ExecuteResult | null;
   readonly correctResult: ExecuteResult | null;
+  // 데일리 챌린지 모드: 버튼 동작 분기용
+  readonly isDailyChallenge?: boolean;
 }
 
 function SqlCompareBlock({
   label,
-  choiceKey,
   sql,
   result,
   isCorrect,
 }: {
   label: string;
-  choiceKey: string;
   sql?: string;
   result?: ExecuteResult;
   isCorrect: boolean;
@@ -41,8 +41,7 @@ function SqlCompareBlock({
   const bgColor = isCorrect
     ? "var(--color-sem-success-light)"
     : "var(--color-sem-error-light)";
-  const badgeBg = isCorrect ? "#DCFCE7" : "#FEE2E2";
-  const badgeColor = isCorrect
+  const labelColor = isCorrect
     ? "var(--color-sem-success-text)"
     : "var(--color-sem-error-text)";
 
@@ -51,15 +50,7 @@ function SqlCompareBlock({
       className="rounded-lg p-4 mb-4"
       style={{ backgroundColor: bgColor, borderLeft: `4px solid ${borderColor}` }}
     >
-      <div className="flex items-center gap-2 mb-2">
-        <span className="text-sm font-medium text-text-secondary">{label}</span>
-        <span
-          className="inline-flex items-center rounded-full px-3 py-0.5 text-sm font-bold"
-          style={{ backgroundColor: badgeBg, color: badgeColor }}
-        >
-          {choiceKey}
-        </span>
-      </div>
+      <p className="text-sm font-semibold mb-2" style={{ color: labelColor }}>{label}</p>
       {sql && (
         <pre className="text-sm font-mono leading-relaxed">
           <code>{sql}</code>
@@ -72,12 +63,10 @@ function SqlCompareBlock({
 
 function TextCompareBlock({
   label,
-  choiceKey,
   body,
   isCorrect,
 }: {
   label: string;
-  choiceKey: string;
   body?: string;
   isCorrect: boolean;
 }) {
@@ -87,8 +76,7 @@ function TextCompareBlock({
   const bgColor = isCorrect
     ? "var(--color-sem-success-light)"
     : "var(--color-sem-error-light)";
-  const badgeBg = isCorrect ? "#DCFCE7" : "#FEE2E2";
-  const badgeColor = isCorrect
+  const labelColor = isCorrect
     ? "var(--color-sem-success-text)"
     : "var(--color-sem-error-text)";
 
@@ -97,15 +85,7 @@ function TextCompareBlock({
       className="rounded-lg p-4 mb-4"
       style={{ backgroundColor: bgColor, borderLeft: `4px solid ${borderColor}` }}
     >
-      <div className="flex items-center gap-2 mb-2">
-        <span className="text-sm font-medium text-text-secondary">{label}</span>
-        <span
-          className="inline-flex items-center rounded-full px-3 py-0.5 text-sm font-bold"
-          style={{ backgroundColor: badgeBg, color: badgeColor }}
-        >
-          {choiceKey}
-        </span>
-      </div>
+      <p className="text-sm font-semibold mb-2" style={{ color: labelColor }}>{label}</p>
       {body && <p className="text-body text-sm">{body}</p>}
     </div>
   );
@@ -141,14 +121,13 @@ export default function AnswerFeedback() {
 
   const {
     isCorrect,
-    correctKey,
     rationale,
-    selectedKey,
     selectedSql,
     correctSql,
     executionMode,
     selectedResult,
     correctResult,
+    isDailyChallenge,
   } = state;
 
   const isExecutable = executionMode === "EXECUTABLE";
@@ -178,7 +157,7 @@ export default function AnswerFeedback() {
       <p className="text-secondary mt-2">
         {isCorrect
           ? "정확히 맞혔어요! 다음 문제도 도전해보세요"
-          : `정답은 ${correctKey}예요. 해설을 확인해보세요`}
+          : "오답이에요. 해설을 확인해보세요"}
       </p>
     </div>
   );
@@ -188,7 +167,6 @@ export default function AnswerFeedback() {
       {!isCorrect && (
         <SqlCompareBlock
           label="내가 선택한 SQL"
-          choiceKey={selectedKey}
           sql={selectedSql ?? undefined}
           result={selectedResult ?? undefined}
           isCorrect={false}
@@ -196,7 +174,6 @@ export default function AnswerFeedback() {
       )}
       <SqlCompareBlock
         label="정답 SQL"
-        choiceKey={correctKey}
         sql={correctSql ?? undefined}
         result={correctResult ?? undefined}
         isCorrect={true}
@@ -218,14 +195,12 @@ export default function AnswerFeedback() {
       {!isCorrect && (
         <TextCompareBlock
           label="내가 선택한 답"
-          choiceKey={selectedKey}
           body={selectedSql ?? undefined}
           isCorrect={false}
         />
       )}
       <TextCompareBlock
         label="정답"
-        choiceKey={correctKey}
         body={correctSql ?? undefined}
         isCorrect={true}
       />
@@ -287,9 +262,18 @@ export default function AnswerFeedback() {
                 ? "var(--color-sem-success)"
                 : "var(--color-sem-error)",
             }}
-            onClick={() => navigate("/questions")}
+            onClick={() => {
+              if (isDailyChallenge) {
+                // 데일리 챌린지: 정답이면 홈, 오답이면 다시 풀기
+                navigate(isCorrect ? "/" : "/daily-challenge", { replace: true });
+              } else {
+                navigate("/questions");
+              }
+            }}
           >
-            다음 문제
+            {isDailyChallenge
+              ? isCorrect ? "홈으로 가기" : "다시 풀기"
+              : "문제 목록으로"}
           </button>
         </div>
       </div>
