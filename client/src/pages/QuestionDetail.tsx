@@ -20,7 +20,7 @@ interface QuestionDetailProps {
   readonly practiceMode?: boolean;
   readonly practiceSubmitLabel?: string;
   readonly questionUuid?: string;
-  readonly onPracticeSubmit?: (selectedChoiceKey: string, choiceSetId: string) => void;
+  readonly onPracticeSubmit?: (selectedChoiceKey: string, choiceSetId: string, choices: readonly ChoiceItem[]) => void;
   // 데일리 챌린지 모드: 제출 성공 시 호출자가 직접 네비게이션 제어
   readonly onSubmitSuccess?: (result: SubmitResult, questionUuid: string) => void;
 }
@@ -119,7 +119,7 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
   const handleSubmit = useCallback(() => {
     if (!selectedKey || !question || !choiceSetId) return;
     if (practiceMode && onPracticeSubmit) {
-      onPracticeSubmit(selectedKey, choiceSetId);
+      onPracticeSubmit(selectedKey, choiceSetId, choices);
       return;
     }
     submitMutation.mutate({ choiceSetId, selectedChoiceKey: selectedKey }, {
@@ -255,11 +255,7 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
   const submitButton = (
     <button
       type="button"
-      className={`w-full h-12 rounded-lg text-base font-bold ${
-        isSubmitReady
-          ? "bg-brand text-white"
-          : "bg-border text-text-caption cursor-not-allowed"
-      }`}
+      className={`w-full btn-primary ${!isSubmitReady ? "opacity-40 cursor-not-allowed" : ""}`}
       disabled={!isSubmitReady}
       onClick={handleSubmit}
     >
