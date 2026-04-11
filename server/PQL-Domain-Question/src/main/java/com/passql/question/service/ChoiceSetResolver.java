@@ -50,6 +50,8 @@ public class ChoiceSetResolver {
                 return resolveAiOnly(questionUuid, memberUuid);
             case ODD_ONE_OUT:
                 return resolveAiOnly(questionUuid, memberUuid);
+            case RESULT_MATCH:
+                return resolveResultMatch(questionUuid, memberUuid);
             case CURATED_ONLY:
                 throw new CustomException(ErrorCode.CHOICE_SET_POLICY_NOT_IMPLEMENTED,
                         "CURATED_ONLY 정책은 아직 지원되지 않습니다.");
@@ -104,6 +106,28 @@ public class ChoiceSetResolver {
         log.info("[resolver] prefetch MISS, runtime generation: questionUuid={}, memberUuid={}",
                 questionUuid, memberUuid);
         return choiceSetGenerationService.generate(questionUuid, memberUuid, ChoiceSetSource.AI_RUNTIME);
+    }
+
+    /**
+     * RESULT_MATCH 문제: 프리페치 캐시 조회 후 없으면 실시간 생성.
+     * AI가 answerSql 실행 결과를 기반으로 JSON 배열 선택지를 생성한다.
+     */
+    private QuestionChoiceSet resolveResultMatch(UUID questionUuid, UUID memberUuid) {
+        Optional<QuestionChoiceSet> prefetched = choiceSetRepository
+                .findFirstByQuestionUuidAndGeneratedForMemberUuidAndSourceAndStatusAndConsumedAtIsNullOrderByCreatedAtDesc(
+                        questionUuid, memberUuid,
+                        ChoiceSetSource.AI_PREFETCH, ChoiceSetStatus.OK);
+
+        if (prefetched.isPresent()) {
+            QuestionChoiceSet set = prefetched.get();
+            markConsumed(set);
+            log.info("[resolver] result-match prefetch HIT: questionUuid={}, setUuid={}",
+                    questionUuid, set.getChoiceSetUuid());
+            return set;
+        }
+
+        log.info("[resolver] result-match MISS, runtime generation: questionUuid={}", questionUuid);
+        return choiceSetGenerationService.generateResultMatch(questionUuid, memberUuid, ChoiceSetSource.AI_RUNTIME);
     }
 
     /**

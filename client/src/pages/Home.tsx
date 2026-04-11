@@ -131,7 +131,8 @@ export default function Home() {
                 color: "var(--color-sem-warning-text)",
               }}
             >
-              <Flame size={14} className="inline mr-1" />
+              {/* fill 속성으로 불꽃 아이콘을 꽉 채운 스타일로 표시 */}
+              <Flame size={14} className="inline mr-1" fill="currentColor" />
               연속 {streak}일
             </span>
           )}

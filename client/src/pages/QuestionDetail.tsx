@@ -71,20 +71,38 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
     setSseError(null);
     setSseStatus("선택지 생성 중...");
 
+    // 60초 내에 complete/error가 오지 않으면 클라이언트 타임아웃으로 에러 전환
+    // AI 호출 + 샌드박스 3회 재시도 합산 예상 시간 기준
+    const SSE_TIMEOUT_MS = 60_000;
+    let streamCleanup: (() => void) | null = null;
+    const timeoutId = setTimeout(() => {
+      // 타임아웃 시 스트림도 abort — 이후 onComplete/onError 콜백 차단
+      streamCleanup?.();
+      setSseError({ code: "TIMEOUT", retryable: true });
+      setSseStatus(null);
+    }, SSE_TIMEOUT_MS);
+
     const cleanup = generateChoices(questionUuid, {
       onStatus: (event) => setSseStatus(event.message),
       onComplete: (response) => {
+        clearTimeout(timeoutId);
         setSseChoices(response.choices);
         setSseChoiceSetId(response.choiceSetId);
         setSseStatus(null);
       },
       onError: (event) => {
+        clearTimeout(timeoutId);
         setSseError({ code: event.code, retryable: event.retryable });
         setSseStatus(null);
       },
     });
+    // 타임아웃 콜백에서 abort할 수 있도록 참조 저장
+    streamCleanup = cleanup;
 
-    return cleanup;
+    return () => {
+      clearTimeout(timeoutId);
+      cleanup();
+    };
   // sseRetryCount를 의존성에 포함해 재시도 시 재실행
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [needsSseGeneration, questionUuid, sseRetryCount]);
@@ -108,6 +126,7 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
 
   const handleSelect = useCallback(
     (choiceKey: string, _sql: string) => {
+      // 풀이 중 SQL 자동 실행 없음 — 제출 후 ChoiceReview에서 직접 실행
       setSelectedKey(choiceKey);
     },
     [],
@@ -201,12 +220,21 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
     </section>
   ) : null;
 
+  // 에러 코드별 사용자 메시지 — 기술적 코드 대신 이해하기 쉬운 문구 표시
+  const sseErrorMessage = sseError
+    ? sseError.code === "TIMEOUT"
+      ? "선택지 생성 시간이 초과되었어요"
+      : sseError.code === "STREAM_CLOSED"
+        ? "서버 연결이 예기치 않게 끊겼어요"
+        : "선택지 생성에 실패했어요"
+    : null;
+
   const choicesSection = choices.length === 0 ? (
     <div className="mt-4 card-base text-center py-8 space-y-2">
       {/* SSE 에러 → 재시도 UI (EXECUTABLE, CONCEPT_ONLY 공통) */}
       {sseError ? (
         <>
-          <p className="text-text-caption text-sm">선택지 생성에 실패했어요</p>
+          <p className="text-text-caption text-sm">{sseErrorMessage}</p>
           {sseError.retryable && (
             <button
               type="button"
@@ -238,6 +266,7 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
           choice={choice}
           isSelected={selectedKey === choice.key}
           cached={executeCache[choice.key]}
+          // 풀이 중 실행 버튼 숨김 — 제출 후 ChoiceReview에서 SQL 실행 비교
           isExecutable={false}
           isExecuting={
             executeMutation.isPending &&

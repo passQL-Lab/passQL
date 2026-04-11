@@ -1,6 +1,7 @@
 import { memo } from "react";
 import type { ChoiceItem, ExecuteResult } from "../types/api";
 import { ResultTable } from "./ResultTable";
+import { ResultMatchTable } from "./ResultMatchTable";
 
 interface ChoiceCardProps {
   readonly choice: ChoiceItem;
@@ -13,6 +14,16 @@ interface ChoiceCardProps {
   readonly onAskAi?: (choiceKey: string, errorCode: string, errorMessage: string) => void;
 }
 
+/** body가 JSON 배열인지 판별 — RESULT_MATCH 선택지 감지용 */
+function isJsonArray(str: string): boolean {
+  try {
+    const parsed = JSON.parse(str);
+    return Array.isArray(parsed);
+  } catch {
+    return false;
+  }
+}
+
 export const ChoiceCard = memo(function ChoiceCard({
   choice,
   isSelected,
@@ -23,6 +34,11 @@ export const ChoiceCard = memo(function ChoiceCard({
   onExecute,
   onAskAi,
 }: ChoiceCardProps) {
+  // RESULT_MATCH 선택지 판별: kind===TEXT + body가 JSON 배열
+  const isResultMatch = choice.kind === "TEXT" && isJsonArray(choice.body);
+  // CONCEPT_ONLY 텍스트 선택지: kind===TEXT + body가 JSON 배열 아님
+  const isConceptText = choice.kind === "TEXT" && !isJsonArray(choice.body);
+
   return (
     <button
       type="button"
@@ -36,43 +52,51 @@ export const ChoiceCard = memo(function ChoiceCard({
       }}
       onClick={() => onSelect(choice.key, choice.body)}
     >
-      {/* 선택지 본문 — 줄바꿈 허용, 모노 폰트 */}
-      <p
-        className="text-sm leading-relaxed whitespace-pre-wrap break-words"
-        style={{ fontFamily: "var(--font-mono)", color: "var(--color-text-primary)" }}
-      >
-        {choice.body}
-      </p>
-
-      {/* EXECUTABLE: 실행 버튼 (클릭 버블링 차단) */}
-      {isExecutable && (
-        <div
-          className="flex justify-end mt-2"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <button
-            className="btn-compact"
-            type="button"
-            onClick={() => onExecute(choice.key, choice.body)}
-            disabled={!!cached || isExecuting}
-          >
-            {isExecuting ? "실행 중..." : "실행"}
-          </button>
-        </div>
-      )}
-
-      {/* 실행 결과 테이블 (클릭 버블링 차단) */}
-      {cached && (
+      {isResultMatch ? (
+        // RESULT_MATCH: JSON 결과 테이블 렌더링, 실행 버튼 없음
         <div onClick={(e) => e.stopPropagation()}>
-          <ResultTable
-            result={cached}
-            onAskAi={
-              cached.errorCode
-                ? () => onAskAi?.(choice.key, cached.errorCode ?? "", cached.errorMessage ?? "")
-                : undefined
-            }
-          />
+          <ResultMatchTable body={choice.body} />
         </div>
+      ) : isConceptText ? (
+        // CONCEPT_ONLY: 일반 텍스트 렌더링
+        <p className="text-body text-sm">{choice.body}</p>
+      ) : (
+        // EXECUTABLE SQL: 모노 폰트 + 실행 버튼 (풀이 중 isExecutable=false로 숨김)
+        <>
+          <p
+            className="text-sm leading-relaxed whitespace-pre-wrap break-words"
+            style={{ fontFamily: "var(--font-mono)", color: "var(--color-text-primary)" }}
+          >
+            {choice.body}
+          </p>
+          {isExecutable && (
+            <div
+              className="flex justify-end mt-2"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                className="btn-compact"
+                type="button"
+                onClick={() => onExecute(choice.key, choice.body)}
+                disabled={!!cached || isExecuting}
+              >
+                {isExecuting ? "실행 중..." : "실행"}
+              </button>
+            </div>
+          )}
+          {cached && (
+            <div onClick={(e) => e.stopPropagation()}>
+              <ResultTable
+                result={cached}
+                onAskAi={
+                  cached.errorCode
+                    ? () => onAskAi?.(choice.key, cached.errorCode ?? "", cached.errorMessage ?? "")
+                    : undefined
+                }
+              />
+            </div>
+          )}
+        </>
       )}
     </button>
   );
