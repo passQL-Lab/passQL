@@ -40,6 +40,8 @@ class TodayQuestionCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
+        width: double.infinity,
+        height: double.infinity,
         padding: EdgeInsets.all(16.r),
         decoration: BoxDecoration(
           color: AppColors.cardBg,

@@ -30,9 +30,8 @@ class HomePage extends ConsumerWidget {
       body: SafeArea(
         child: homeAsync.when(
           loading: () => const _HomeSkeletonLoader(),
-          error: (error, _) => _HomeErrorView(
-            onRetry: () => ref.invalidate(homeDataProvider),
-          ),
+          error: (error, _) =>
+              _HomeErrorView(onRetry: () => ref.invalidate(homeDataProvider)),
           data: (data) => RefreshIndicator(
             color: AppColors.brandIndigo,
             onRefresh: () async {
@@ -68,24 +67,24 @@ class _HomeScrollView extends StatelessWidget {
         // 2열 카드 그리드: 오늘의 문제 + 시험 일정
         Padding(
           padding: EdgeInsets.only(bottom: 16.h),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: IntrinsicHeight(
+            child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Expanded(
                 child: TodayQuestionCard(
                   todayQuestion: data.todayQuestion,
                   onTap: data.todayQuestion?.question != null
                       ? () => context.push(
-                            '/questions/${data.todayQuestion!.question!.questionUuid}',
-                          )
+                          '/questions/${data.todayQuestion!.question!.questionUuid}',
+                        )
                       : () => context.go('/questions'),
                 ),
               ),
               SizedBox(width: 12.w),
-              Expanded(
-                child: ExamScheduleCard(schedule: data.examSchedule),
-              ),
+              Expanded(child: ExamScheduleCard(schedule: data.examSchedule)),
             ],
+          ),
           ),
         ),
 
@@ -225,9 +224,7 @@ class _HomeErrorView extends StatelessWidget {
               ),
               child: Text(
                 '다시 시도',
-                style: AppTextStyles.label_16.copyWith(
-                  color: AppColors.cardBg,
-                ),
+                style: AppTextStyles.label_16.copyWith(color: AppColors.cardBg),
               ),
             ),
           ),
