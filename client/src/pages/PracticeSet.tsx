@@ -1,11 +1,12 @@
 import { useState, useCallback, useEffect } from "react";
-import { useParams, useNavigate, Navigate } from "react-router-dom";
+import { useParams, useNavigate, Navigate, useBlocker } from "react-router-dom";
 import { Home } from "lucide-react";
 import { usePracticeStore } from "../stores/practiceStore";
 import { submitAnswer } from "../api/questions";
 import { getRandomMessage } from "../constants/microcopy";
 import QuestionDetail from "./QuestionDetail";
 import PracticeFeedbackBar from "../components/PracticeFeedbackBar";
+import ConfirmModal from "../components/ConfirmModal";
 import type { SubmitResult } from "../types/api";
 
 function WaitingForQuestion({ topicName }: { readonly topicName: string }) {
@@ -34,6 +35,13 @@ export default function PracticeSet() {
   const displayIndex = feedback ? currentIndex - 1 : currentIndex;
   const displayQuestion = questions[displayIndex];
   const isLast = displayIndex >= totalQuestions - 1;
+
+  // 마지막 문제 완료 여부 — 결과 페이지 이동 조건이자 이탈 차단 해제 기준
+  const shouldNavigateToResult = !feedback && currentIndex >= totalQuestions;
+
+  // 마지막 문제 완료 전까지 이탈 차단 — 중간 이탈 시 세션 기록 유실 방지
+  // useBlocker는 훅이므로 조건부 return 이전에 호출해야 함
+  const blocker = useBlocker(!shouldNavigateToResult);
 
   const handleSelect = useCallback(
     async (selectedChoiceKey: string, choiceSetId: string) => {
@@ -67,7 +75,6 @@ export default function PracticeSet() {
     return <Navigate to="/questions" replace />;
   }
 
-  const shouldNavigateToResult = !feedback && currentIndex >= totalQuestions;
   useEffect(() => {
     if (shouldNavigateToResult) {
       navigate(`/practice/${sessionId}/result`, { replace: true });
@@ -127,6 +134,17 @@ export default function PracticeSet() {
           nextLabel={currentIndex >= totalQuestions ? "결과 보기" : "다음 문제"}
         />
       )}
+
+      {/* 이탈 방지 확인 모달 */}
+      <ConfirmModal
+        isOpen={blocker.state === "blocked"}
+        title="풀이를 그만할까요?"
+        description="지금 나가면 현재 풀이 기록이 저장되지 않아요."
+        cancelLabel="계속 풀기"
+        confirmLabel="나가기"
+        onCancel={() => blocker.reset?.()}
+        onConfirm={() => blocker.proceed?.()}
+      />
     </div>
   );
 }

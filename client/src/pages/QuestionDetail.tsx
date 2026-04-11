@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef, useEffect } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useBlocker } from "react-router-dom";
 import { useMutation } from "@tanstack/react-query";
 import { ArrowLeft, ChevronUp, ChevronDown, BookOpen, RefreshCw } from "lucide-react";
 import { StarRating } from "../components/StarRating";
@@ -14,6 +14,7 @@ import {
   useSubmitAnswer,
 } from "../hooks/useQuestionDetail";
 import { explainError } from "../api/ai";
+import ConfirmModal from "../components/ConfirmModal";
 import type { ChoiceItem, ExecuteResult, SubmitResult } from "../types/api";
 
 interface QuestionDetailProps {
@@ -34,6 +35,8 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
   const submitMutation = useSubmitAnswer(questionUuid!);
 
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  // 제출 완료 여부 — true가 되면 이탈 차단 해제
+  const [submitted, setSubmitted] = useState(false);
   const [schemaOpen, setSchemaOpen] = useState(false);
   const [stemOpen, setStemOpen] = useState(true);
   const [executeCache, setExecuteCache] = useState<Record<string, ExecuteResult>>({});
@@ -49,6 +52,9 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
   const [sseError, setSseError] = useState<{ code: string; retryable: boolean } | null>(null);
   // 재시도 트리거용 카운터
   const [sseRetryCount, setSseRetryCount] = useState(0);
+
+  // 단독 풀이 모드에서 제출 완료 전까지 이탈 차단 — practiceMode는 부모가 이미 차단하므로 제외
+  const blocker = useBlocker(!practiceMode && !submitted);
 
   const activeChoiceSet = question?.choiceSets?.find((cs) => cs.status === "OK");
   // SSE로 받은 선택지가 있으면 우선 사용, 없으면 GET 응답의 choiceSets 사용
@@ -147,6 +153,8 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
     }
     submitMutation.mutate({ choiceSetId, selectedChoiceKey: selectedKey }, {
       onSuccess: (result) => {
+        // 제출 완료 — 이탈 차단 해제 후 네비게이션
+        setSubmitted(true);
         const fullResult = {
           ...result,
           selectedKey,
@@ -357,6 +365,19 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
         text={aiText}
         onClose={() => setAiSheetOpen(false)}
       />
+
+      {/* 단독 풀이 모드에서만 이탈 방지 모달 표시 */}
+      {!practiceMode && (
+        <ConfirmModal
+          isOpen={blocker.state === "blocked"}
+          title="풀이를 그만할까요?"
+          description="지금 나가면 현재 풀이 기록이 저장되지 않아요."
+          cancelLabel="계속 풀기"
+          confirmLabel="나가기"
+          onCancel={() => blocker.reset?.()}
+          onConfirm={() => blocker.proceed?.()}
+        />
+      )}
     </div>
   );
 }
