@@ -1,6 +1,6 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useParams, useNavigate, useBlocker } from "react-router-dom";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, BookOpen, RefreshCw } from "lucide-react";
 import { StarRating } from "../components/StarRating";
 import { ChoiceCard } from "../components/ChoiceCard";
@@ -31,6 +31,7 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
   const { questionUuid: paramUuid } = useParams<{ questionUuid: string }>();
   const questionUuid = propUuid ?? paramUuid;
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { data: question, isLoading } = useQuestionDetail(questionUuid!);
   const executeMutation = useExecuteChoice(questionUuid!);
   const submitMutation = useSubmitAnswer(questionUuid!);
@@ -158,6 +159,8 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
           // EXECUTABLE 문제: 제출 후 오답노트에서 선택지 SQL 실행 비교용
           choices: question.executionMode === "EXECUTABLE" ? choices : undefined,
         };
+        // 제출 완료 시 추천 문제 캐시 무효화 — 홈 복귀 시 목록 즉시 갱신
+        queryClient.invalidateQueries({ queryKey: ["recommendations"] });
         if (onSubmitSuccess) {
           // 데일리 챌린지 등 호출자가 네비게이션 제어
           onSubmitSuccess(fullResult as SubmitResult, questionUuid!);
