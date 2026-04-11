@@ -38,14 +38,15 @@ public class ChoiceSetResolver {
     public QuestionChoiceSet resolveForUser(UUID questionUuid, UUID memberUuid) {
         Question question = questionService.getQuestionEntity(questionUuid);
 
-        // CONCEPT_ONLY 문제는 SQL 실행이 없으므로 AI 선택지 생성 불가
+        // CONCEPT_ONLY 문제는 Sandbox 없이 텍스트 선택지를 AI로 생성
         if (question.getExecutionMode() == ExecutionMode.CONCEPT_ONLY) {
-            throw new CustomException(ErrorCode.INVALID_EXECUTION_MODE,
-                    "CONCEPT_ONLY 문제는 선택지 생성을 지원하지 않습니다.");
+            return resolveConcept(questionUuid, memberUuid);
         }
 
         switch (question.getChoiceSetPolicy()) {
             case AI_ONLY:
+                return resolveAiOnly(questionUuid, memberUuid);
+            case ODD_ONE_OUT:
                 return resolveAiOnly(questionUuid, memberUuid);
             case CURATED_ONLY:
                 throw new CustomException(ErrorCode.CHOICE_SET_POLICY_NOT_IMPLEMENTED,
@@ -57,6 +58,29 @@ public class ChoiceSetResolver {
                 throw new CustomException(ErrorCode.CHOICE_SET_POLICY_NOT_IMPLEMENTED,
                         "알 수 없는 정책: " + question.getChoiceSetPolicy());
         }
+    }
+
+    /**
+     * CONCEPT_ONLY 문제: 프리페치 캐시 조회 후 없으면 텍스트 선택지 실시간 생성.
+     * Sandbox 검증 없이 AI가 직접 정답/오답을 판별한다.
+     */
+    private QuestionChoiceSet resolveConcept(UUID questionUuid, UUID memberUuid) {
+        Optional<QuestionChoiceSet> prefetched = choiceSetRepository
+                .findFirstByQuestionUuidAndGeneratedForMemberUuidAndSourceAndStatusAndConsumedAtIsNullOrderByCreatedAtDesc(
+                        questionUuid, memberUuid,
+                        ChoiceSetSource.AI_PREFETCH, ChoiceSetStatus.OK);
+
+        if (prefetched.isPresent()) {
+            QuestionChoiceSet set = prefetched.get();
+            set.setConsumedAt(LocalDateTime.now());
+            choiceSetRepository.save(set);
+            log.info("[resolver] concept prefetch HIT: questionUuid={}, setUuid={}",
+                    questionUuid, set.getChoiceSetUuid());
+            return set;
+        }
+
+        log.info("[resolver] concept MISS, runtime generation: questionUuid={}", questionUuid);
+        return choiceSetGenerationService.generateConcept(questionUuid, memberUuid, ChoiceSetSource.AI_RUNTIME);
     }
 
     private QuestionChoiceSet resolveAiOnly(UUID questionUuid, UUID memberUuid) {
