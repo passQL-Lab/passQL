@@ -22,6 +22,8 @@ export default function PracticeResult() {
   const store = usePracticeStore();
   // 각 통계 항목의 등장 여부를 인덱스별로 관리 (0: 정답률, 1: 총시간, 2: 문제당 평균)
   const [visibleStats, setVisibleStats] = useState<boolean[]>([false, false, false]);
+  // 펼쳐진 문제 카드 인덱스 (null = 모두 닫힘)
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   // 순차 등장 타이머 ID 보관 — 언마운트 시 클린업
   const timerIdsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
@@ -150,30 +152,52 @@ export default function PracticeResult() {
       <div className="flex flex-col gap-2">
         {store.results.map((r, i) => {
           const q = store.questions[i];
+          const isOpen = openIndex === i;
           return (
             <div
               key={r.questionUuid}
-              className={`flex items-center gap-3 p-3 bg-surface-card border rounded-[10px] ${
+              className={`bg-surface-card border rounded-[10px] overflow-hidden ${
                 r.isCorrect ? "border-border" : "border-red-300"
               }`}
             >
-              <span className={`text-sm font-bold w-5 text-center ${r.isCorrect ? "text-green-600" : "text-red-600"}`}>
-                {i + 1}
-              </span>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm truncate">{q?.stemPreview}</p>
-                <p className="text-xs text-text-caption mt-0.5">{formatDuration(r.durationMs)}</p>
+              {/* 카드 헤더 — 클릭 시 아코디언 토글 */}
+              <button
+                type="button"
+                className="w-full flex items-center gap-3 p-3 text-left"
+                onClick={() => setOpenIndex(isOpen ? null : i)}
+              >
+                <span className={`text-sm font-bold w-5 text-center shrink-0 ${r.isCorrect ? "text-green-600" : "text-red-600"}`}>
+                  {i + 1}
+                </span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm truncate">{q?.stemPreview}</p>
+                  <p className="text-xs text-text-caption mt-0.5">{formatDuration(r.durationMs)}</p>
+                </div>
+                {r.isCorrect && <Check size={16} className="text-green-500 shrink-0" />}
+              </button>
+
+              {/* 아코디언 본문 — grid-rows 전환으로 300ms ease-out 높이 애니메이션 */}
+              <div className={`grid transition-all duration-300 ease-out ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
+                <div className="overflow-hidden">
+                  <div className="px-3 pb-3 pt-1 border-t border-border">
+                    {/* 문제 전체 지문 */}
+                    <p className="text-sm text-text-secondary leading-relaxed mb-2">{q?.stemPreview}</p>
+                    {/* 선택한 답 및 정답 여부 */}
+                    <p className={`text-xs font-medium ${r.isCorrect ? "text-green-600" : "text-red-500"}`}>
+                      선택: {r.selectedChoiceKey} — {r.isCorrect ? "정답" : "오답"}
+                    </p>
+                    {/* 오답일 때만 다시 풀기 버튼 */}
+                    {!r.isCorrect && (
+                      <Link
+                        to={`/questions/${r.questionUuid}`}
+                        className="inline-flex items-center gap-1 text-xs font-medium text-brand bg-accent-light rounded-md px-2.5 py-1.5 mt-2"
+                      >
+                        <RotateCcw size={13} /> 다시 풀기
+                      </Link>
+                    )}
+                  </div>
+                </div>
               </div>
-              {r.isCorrect ? (
-                <Check size={16} className="text-green-500 shrink-0" />
-              ) : (
-                <Link
-                  to={`/questions/${r.questionUuid}`}
-                  className="flex items-center gap-1 text-xs font-medium text-brand bg-accent-light rounded-md px-2.5 py-1.5"
-                >
-                  <RotateCcw size={13} /> 다시
-                </Link>
-              )}
             </div>
           );
         })}
