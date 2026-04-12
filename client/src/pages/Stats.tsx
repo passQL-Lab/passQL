@@ -163,7 +163,7 @@ export default function Stats() {
       </section>
 
       {/* ② 상단 요약 카드 */}
-      <section className={`card-base !p-0 ${s1.className}`}>
+      <section className={`bg-surface-card border border-border rounded-2xl p-0 ${s1.className}`}>
         <div className="flex divide-x divide-border">
 
           {/* 푼 문제 */}
@@ -240,7 +240,7 @@ export default function Stats() {
           </section>
         </>
       ) : (
-        <section className={`card-base text-center py-12 ${s2.className}`}>
+        <section className={`bg-surface-card border border-border rounded-2xl text-center py-12 ${s2.className}`}>
           <p className="text-text-caption">아직 풀이 기록이 없어요</p>
           <p className="text-xs text-text-caption mt-1">
             문제를 풀면 여기에 실력이 나타나요

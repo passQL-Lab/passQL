@@ -471,7 +471,7 @@ export default function AnswerFeedback() {
             <div className="space-y-2">
               {similarQuery.data.map((q) => (
                 <Link key={q.questionUuid} to={`/questions/${q.questionUuid}`}>
-                  <div className="card-base flex items-center gap-3 cursor-pointer hover:bg-surface transition-colors">
+                  <div className="bg-surface-card border border-border rounded-2xl p-4 sm:p-6 flex items-center gap-3 cursor-pointer hover:bg-surface transition-colors">
                     <div className="flex-1 min-w-0">
                       <p className="text-body truncate">{q.stem}</p>
                       <span className="badge-topic">{q.topicName}</span>

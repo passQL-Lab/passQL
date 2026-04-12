@@ -347,7 +347,7 @@ export default function Home() {
                 to={`/questions/${q.questionUuid}`}
                 className="block animate-card-in"
               >
-                <div className="card-base shadow-sm flex items-center gap-3 cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:border-brand transition-all duration-200">
+                <div className="bg-surface-card border border-border rounded-2xl p-4 sm:p-6 shadow-sm flex items-center gap-3 cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:border-brand transition-all duration-200">
                   <div className="flex-1 min-w-0">
                     <p className="text-body truncate">{q.stemPreview}</p>
                     <div className="flex items-center gap-2 mt-1">
