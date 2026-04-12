@@ -8,6 +8,7 @@ import { submitAnswer } from "../api/questions";
 import QuestionDetail from "./QuestionDetail";
 import PracticeFeedbackBar from "../components/PracticeFeedbackBar";
 import ConfirmModal from "../components/ConfirmModal";
+import LoadingOverlay from "../components/LoadingOverlay";
 import type { ChoiceItem, SubmitResult } from "../types/api";
 
 export default function DailyChallenge() {
@@ -16,6 +17,8 @@ export default function DailyChallenge() {
   const uuid = useMemberStore((s) => s.uuid);
   const { data: today, isLoading } = useTodayQuestion();
   const [feedback, setFeedback] = useState<SubmitResult | null>(null);
+  // 답안 제출 API 호출 중 화면 조작 차단
+  const [submitting, setSubmitting] = useState(false);
 
   // 제출 완료 전까지 이탈 차단 — 로딩 중이나 제출 완료 후에는 차단 해제
   // useBlocker는 훅이므로 조건부 return 이전에 호출해야 함
@@ -29,6 +32,7 @@ export default function DailyChallenge() {
       const selectedChoice = choices.find((c) => c.key === selectedChoiceKey);
       const correctChoice = choices.find((c) => c.isCorrect);
 
+      setSubmitting(true);
       if (selectedChoice?.isCorrect) {
         // 정답: 백엔드에 제출 → 완료 처리 (alreadySolvedToday=true)
         try {
@@ -39,6 +43,8 @@ export default function DailyChallenge() {
           setFeedback(result);
         } catch {
           navigate("/", { replace: true });
+        } finally {
+          setSubmitting(false);
         }
       } else {
         // 오답: submitAnswer 호출 안 함 → 미완료 상태 유지 → 다시 풀기 가능
@@ -52,6 +58,7 @@ export default function DailyChallenge() {
           correctSql: null,
         };
         setFeedback(localResult);
+        setSubmitting(false);
       }
     },
     [today?.question, navigate, queryClient, uuid],
@@ -128,6 +135,15 @@ export default function DailyChallenge() {
               ? () => navigate("/", { replace: true })
               : () => setFeedback(null)
           }
+        />
+      )}
+
+      {/* 채점 중 오버레이 — 제출 API 응답 전 화면 조작 차단 */}
+      {submitting && (
+        <LoadingOverlay
+          topicName="오늘의 문제"
+          staticMessage="채점 중이에요"
+          subMessage="잠시만 기다려주세요"
         />
       )}
 

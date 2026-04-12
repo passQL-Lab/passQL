@@ -16,10 +16,7 @@ export default function PracticeFeedbackBar({
 
   return (
     <>
-      {/* 딤 오버레이 — 해설 패널에 시선 집중 */}
-      <div className="fixed inset-0 z-20" style={{ backgroundColor: "rgba(17, 24, 39, 0.25)" }} />
-
-      {/* 해설 패널 — 하단에서 슬라이드업 */}
+      {/* 해설 패널 — 하단에서 슬라이드업 (오버레이 없음: EXECUTABLE 모드에서 위 실행 버튼 접근 가능) */}
       <div
         className="fixed bottom-0 inset-x-0 z-30 animate-slide-up rounded-t-2xl"
         style={{

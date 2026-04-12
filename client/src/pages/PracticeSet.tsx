@@ -7,6 +7,7 @@ import { getRandomMessage } from "../constants/microcopy";
 import QuestionDetail from "./QuestionDetail";
 import PracticeFeedbackBar from "../components/PracticeFeedbackBar";
 import ConfirmModal from "../components/ConfirmModal";
+import LoadingOverlay from "../components/LoadingOverlay";
 import type { ChoiceItem, SubmitResult } from "../types/api";
 
 function WaitingForQuestion({ topicName }: { readonly topicName: string }) {
@@ -30,6 +31,8 @@ export default function PracticeSet() {
   const submitAndAdvance = usePracticeStore((s) => s.submitAndAdvance);
 
   const [feedback, setFeedback] = useState<SubmitResult | null>(null);
+  // 답안 제출 API 호출 중 화면 조작 차단
+  const [submitting, setSubmitting] = useState(false);
   // Home 버튼 클릭 시 이탈 확인 모달 — blocker와 독립적으로 제어
   const [exitModalOpen, setExitModalOpen] = useState(false);
   // exitConfirmed=true 시 blocker를 우회하여 홈으로 이동 — 이중 확인 방지
@@ -54,6 +57,8 @@ export default function PracticeSet() {
       _choices: readonly ChoiceItem[],
     ) => {
       if (!displayQuestion) return;
+      // 제출 중 중복 호출 및 화면 조작 방지
+      setSubmitting(true);
       try {
         const result = await submitAnswer(
           displayQuestion.questionUuid,
@@ -82,6 +87,8 @@ export default function PracticeSet() {
           false,
           selectedChoiceKey,
         );
+      } finally {
+        setSubmitting(false);
       }
     },
     [displayQuestion, submitAndAdvance],
@@ -163,6 +170,15 @@ export default function PracticeSet() {
           result={feedback}
           onNext={handleNext}
           nextLabel={feedback?.isCorrect ? "계속하기" : "확인"}
+        />
+      )}
+
+      {/* 채점 중 오버레이 — 제출 API 응답 전 화면 조작 차단 */}
+      {submitting && (
+        <LoadingOverlay
+          topicName={topicName ?? ""}
+          staticMessage="채점 중이에요"
+          subMessage="잠시만 기다려주세요"
         />
       )}
 
