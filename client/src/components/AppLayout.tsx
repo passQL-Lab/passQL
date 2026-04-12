@@ -1,7 +1,10 @@
+import { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 import { Home, BarChart3, Settings, Sparkles } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import logo from "../assets/logo/logo.png";
+import MobileHeader from "./MobileHeader";
+import TeamModal from "./TeamModal";
 
 const NAV_ITEMS: readonly {
   readonly to: string;
@@ -62,15 +65,26 @@ function BottomTabNav() {
 }
 
 export default function AppLayout() {
+  const [teamModalOpen, setTeamModalOpen] = useState(false);
+
   return (
     <div className="flex min-h-screen bg-surface">
       <SidebarNav />
-      <main className="flex-1 min-w-0 overflow-x-hidden lg:py-8 pb-16 lg:pb-8">
-        <div className="mx-auto max-w-180 px-4 lg:px-0">
-          <Outlet />
-        </div>
-      </main>
+      <div className="flex-1 min-w-0 flex flex-col overflow-x-hidden">
+        {/* 모바일 상단 헤더 — 데스크톱에서는 숨김 */}
+        <MobileHeader onTeamClick={() => setTeamModalOpen(true)} />
+        <main className="flex-1 lg:py-8 pb-16 lg:pb-8">
+          <div className="mx-auto max-w-180 px-4 lg:px-0">
+            <Outlet />
+          </div>
+        </main>
+      </div>
       <BottomTabNav />
+
+      {/* 팀 모달 — AppLayout 최상단에서 렌더링해야 z-index가 정상 동작 */}
+      {teamModalOpen && (
+        <TeamModal onClose={() => setTeamModalOpen(false)} />
+      )}
     </div>
   );
 }
