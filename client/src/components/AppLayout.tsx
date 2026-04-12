@@ -47,6 +47,7 @@ function SidebarNav() {
 function BottomTabNav() {
   return (
     // dock: daisyUI 하단 탭 컴포넌트 (fixed bottom-0, flex, items-center 내장)
+    // h-14: dock 기본 높이(64px)를 56px로 재정의 — 기존 디자인 유지
     <nav className="dock lg:hidden h-14 bg-base-100 border-t border-base-300 z-30">
       {NAV_ITEMS.map((item) => (
         <NavLink
@@ -54,8 +55,8 @@ function BottomTabNav() {
           to={item.to}
           end={item.to === "/"}
           className={({ isActive }) =>
-            // active 클래스: daisyUI dock 활성 상태 (primary 색상 적용)
-            isActive ? "active text-primary" : "text-base-content/40"
+            // dock-active 클래스: daisyUI dock 활성 상태 (하단 인디케이터 + primary 색상 적용)
+            isActive ? "dock-active text-primary" : "text-base-content/40"
           }
         >
           <item.icon size={20} />
