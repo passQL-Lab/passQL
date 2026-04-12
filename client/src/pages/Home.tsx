@@ -178,9 +178,9 @@ export default function Home() {
           <h2 className="text-secondary text-sm">학습 현황</h2>
           {/* streak는 progress 에러 시 0 fallback → 뱃지 자연스럽게 미표시 */}
           {streak > 0 && (
-            <span className="inline-flex items-center rounded-full px-3 py-1 text-sm font-bold bg-sem-warning-light text-sem-warning-text">
+            <span className="badge badge-warning badge-soft font-bold gap-1">
               {/* fill 속성으로 불꽃 아이콘을 꽉 채운 스타일로 표시 */}
-              <Flame size={14} className="inline mr-1" fill="currentColor" />
+              <Flame size={14} fill="currentColor" />
               연속 {streak}일
             </span>
           )}
