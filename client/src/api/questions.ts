@@ -73,7 +73,6 @@ export function generateChoices(
   const abortController = new AbortController();
 
   (async () => {
-    // complete/error 이벤트를 정상 수신했는지 추적 — 스트림 종료 후 판단에 사용
     let receivedTerminalEvent = false;
 
     try {
@@ -89,7 +88,6 @@ export function generateChoices(
         },
       );
 
-      // HTTP 에러 응답 처리 (4xx/5xx)
       if (!response.ok) {
         callbacks.onError({ code: `HTTP_${response.status}`, message: `서버 오류 (${response.status})`, retryable: response.status >= 500 });
         return;
@@ -103,74 +101,103 @@ export function generateChoices(
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let buffer = "";
-      // PARSE_ERROR 발생 시 외부 while 루프까지 종료하기 위한 플래그
-      let abortProcessing = false;
 
-      // SSE 청크 파싱 헬퍼 — buffer를 \n\n으로 분리해 이벤트를 순차 처리
-      const processBuffer = () => {
-        const chunks = buffer.split("\n\n");
-        // 마지막 항목은 아직 완성되지 않은 청크일 수 있으므로 다시 버퍼에 보관
-        buffer = chunks.pop() ?? "";
+      // SSE 이벤트 파싱 — RFC 8895 준수
+      // Spring SseEmitter: "event:name\ndata:json\n\n" (콜론 뒤 공백 없음)
+      // 브라우저 EventSource 표준: 공백 있음 — 둘 다 허용
+      // 반환값: true = 루프 중단해야 하는 terminal 이벤트 처리됨
+      const parseAndDispatch = (raw: string): boolean => {
+        // \r\n, \r, \n 모두 \n으로 정규화
+        const block = raw.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
+        let eventName = "";
+        const dataLines: string[] = [];
 
-        for (const chunk of chunks) {
-          const eventMatch = chunk.match(/^event: (\w+)/m);
-          const dataMatch = chunk.match(/^data: (.+)/m);
-          if (!eventMatch || !dataMatch) continue;
-
-          const eventName = eventMatch[1];
-          // 잘못된 JSON을 받으면 루프 전체를 중단하고 에러로 전환
-          let data: unknown;
-          try {
-            data = JSON.parse(dataMatch[1]);
-          } catch {
-            receivedTerminalEvent = true;
-            abortProcessing = true; // while 루프도 종료
-            callbacks.onError({ code: "PARSE_ERROR", message: "잘못된 응답 형식", retryable: false });
-            return;
-          }
-
-          if (eventName === "status") {
-            callbacks.onStatus(data as SseStatusEvent);
-          } else if (eventName === "complete") {
-            receivedTerminalEvent = true;
-            callbacks.onComplete(data as ChoiceSetGenerateResponse);
-          } else if (eventName === "error") {
-            receivedTerminalEvent = true;
-            callbacks.onError(data as SseErrorEvent);
+        for (const line of block.split("\n")) {
+          if (line.startsWith("event:")) {
+            eventName = line.slice(6).trim();
+          } else if (line.startsWith("data:")) {
+            dataLines.push(line.slice(5).trim());
           }
         }
+
+        console.debug("[SSE] parseAndDispatch: event=", eventName, "dataLines=", dataLines.length);
+
+        if (!eventName || dataLines.length === 0) {
+          console.debug("[SSE] 이벤트 무시: event 또는 data 없음, raw=", JSON.stringify(raw));
+          return false;
+        }
+
+        const rawData = dataLines.join("\n");
+        let data: unknown;
+        try {
+          data = JSON.parse(rawData);
+        } catch {
+          // JSON 파싱 실패 — PARSE_ERROR를 terminal로 처리 후 루프 중단
+          console.error("[SSE] PARSE_ERROR: rawData=", rawData);
+          receivedTerminalEvent = true;
+          callbacks.onError({ code: "PARSE_ERROR", message: "잘못된 응답 형식", retryable: false });
+          return true;
+        }
+
+        if (eventName === "status") {
+          console.debug("[SSE] status 수신:", data);
+          callbacks.onStatus(data as SseStatusEvent);
+        } else if (eventName === "complete") {
+          console.debug("[SSE] complete 수신 → receivedTerminalEvent=true");
+          receivedTerminalEvent = true;
+          callbacks.onComplete(data as ChoiceSetGenerateResponse);
+          return true; // complete 후 스트림 남은 데이터를 읽을 필요 없음
+        } else if (eventName === "error") {
+          console.debug("[SSE] error 수신 → receivedTerminalEvent=true, data=", data);
+          receivedTerminalEvent = true;
+          callbacks.onError(data as SseErrorEvent);
+          return true;
+        } else {
+          console.debug("[SSE] 알 수 없는 이벤트 타입 무시:", eventName);
+        }
+        return false;
+      };
+
+      // 버퍼에서 완성된 이벤트 블록(\n\n 구분)을 꺼내 순차 처리
+      // 반환값: true = terminal 이벤트 처리됨 → while 루프 중단 신호
+      const flushBuffer = (): boolean => {
+        const blocks = buffer.split(/\n\n/);
+        buffer = blocks.pop() ?? ""; // 마지막은 미완성 청크일 수 있으므로 보관
+        console.debug("[SSE] flushBuffer: blocks=", blocks.length, "remainder=", JSON.stringify(buffer));
+        for (const block of blocks) {
+          if (!block.trim()) continue;
+          const shouldStop = parseAndDispatch(block);
+          if (shouldStop) return true;
+        }
+        return false;
       };
 
       while (true) {
         const { done, value } = await reader.read();
-        if (abortProcessing) break;
+        console.debug("[SSE] read: done=", done, "valueBytes=", value?.byteLength ?? 0);
 
         if (done) {
-          // done: true와 함께 마지막 value가 함께 도착하는 경우 처리
-          // (Spring SseEmitter.complete() 직전 이벤트와 스트림 종료가 같은 청크로 오면 여기서 수신)
-          if (value) {
-            buffer += decoder.decode(value, { stream: false });
-          }
-          // 버퍼에 남은 마지막 이벤트 처리
-          // (서버가 emitter.complete()를 호출하면 complete 이벤트가 마지막 청크로 남을 수 있음)
+          // 스트림 종료 — 버퍼에 남은 마지막 이벤트까지 처리
+          if (value) buffer += decoder.decode(value, { stream: false });
+          console.debug("[SSE] done: remaining buffer=", JSON.stringify(buffer), "receivedTerminal=", receivedTerminalEvent);
           if (buffer.trim()) {
-            buffer += "\n\n"; // 청크 구분자 강제 추가
-            processBuffer();
+            buffer += "\n\n";
+            flushBuffer();
           }
-          // processBuffer에서 PARSE_ERROR가 발생한 경우 abortProcessing=true이므로 STREAM_CLOSED 중복 방지
-          // complete/error 이벤트 없이 스트림이 닫힌 경우 — 서버 측 조용한 종료
-          // AbortError로 cleanup한 경우가 아닐 때만 에러 처리
-          if (!receivedTerminalEvent && !abortProcessing && !abortController.signal.aborted) {
+          // complete/error 없이 닫힌 경우 (서버 비정상 종료, abort 제외)
+          if (!receivedTerminalEvent && !abortController.signal.aborted) {
+            console.error("[SSE] STREAM_CLOSED: terminal 이벤트 없이 스트림 종료");
             callbacks.onError({ code: "STREAM_CLOSED", message: "선택지 생성이 중단되었습니다", retryable: true });
           }
           break;
         }
 
         buffer += decoder.decode(value, { stream: true });
-        processBuffer();
+        const shouldStop = flushBuffer();
+        if (shouldStop) break;
       }
     } catch (err) {
-      // AbortError는 정상 cleanup이므로 무시
+      // AbortError는 cleanup에 의한 정상 중단 — 에러 처리 불필요
       if (err instanceof Error && err.name !== "AbortError") {
         callbacks.onError({ code: "STREAM_ERROR", message: err.message, retryable: true });
       }
