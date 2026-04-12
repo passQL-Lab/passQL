@@ -45,7 +45,7 @@ export default function Questions() {
         ) : topicsLoading ? (
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {Array.from({ length: 9 }, (_, i) => (
-              <div key={i} className="card-base h-20 animate-pulse bg-border" />
+              <div key={i} className="bg-surface-card border border-border rounded-2xl p-4 h-20 animate-pulse bg-border" />
             ))}
           </div>
         ) : (
@@ -57,7 +57,7 @@ export default function Questions() {
                 <button
                   key={t.code}
                   type="button"
-                  className="card-base shadow-sm flex flex-col gap-2 cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:border-brand transition-all duration-200 text-left"
+                  className="bg-surface-card border border-border rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col gap-2 cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:border-brand transition-all duration-200 text-left"
                   onClick={() => selectTopic(t.code)}
                 >
                   <span className="text-body font-medium text-text-primary">{t.displayName}</span>
@@ -138,7 +138,7 @@ export default function Questions() {
       ) : isLoading ? (
         <div className="space-y-3">
           {Array.from({ length: 3 }, (_, i) => (
-            <div key={i} className="card-base h-24 animate-pulse bg-border" />
+            <div key={i} className="bg-surface-card border border-border rounded-2xl p-4 h-24 animate-pulse bg-border" />
           ))}
         </div>
       ) : data?.empty ? (
@@ -147,7 +147,7 @@ export default function Questions() {
         <section className="space-y-3">
           {data?.content.map((q) => (
             <Link key={q.questionUuid} to={`/questions/${q.questionUuid}`} className="block">
-              <div className="card-base shadow-sm flex flex-col gap-3 cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:border-brand transition-all duration-200">
+              <div className="bg-surface-card border border-border rounded-2xl p-4 sm:p-6 shadow-sm flex flex-col gap-3 cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:border-brand transition-all duration-200">
                 <div className="flex items-center justify-between">
                   <span className="font-mono text-xs text-text-caption">{q.questionUuid.slice(0, 8)}</span>
                   <span className="badge-topic">{q.topicName}</span>
