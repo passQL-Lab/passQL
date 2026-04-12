@@ -97,7 +97,7 @@ export default function Questions() {
       <section className="flex gap-3 mb-4 relative">
         <div className="relative">
           <button
-            className={`filter-dropdown ${difficulty ? "filter-dropdown--active" : ""}`}
+            className={`inline-flex items-center gap-1.5 h-10 px-4 border border-border rounded-full text-sm bg-surface-card cursor-pointer transition-all duration-[250ms] hover:border-text-caption hover:-translate-y-px ${difficulty ? "border-brand bg-brand-light" : ""}`}
             type="button"
             onClick={() => setDiffOpen(!diffOpen)}
           >
