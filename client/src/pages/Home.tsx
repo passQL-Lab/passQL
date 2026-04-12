@@ -188,7 +188,7 @@ export default function Home() {
 
         {/* 히트맵: 에러 시 해당 영역만 인라인 에러 표시 */}
         {heatmapLoading ? (
-          <div className="h-16 bg-border animate-pulse rounded" />
+          <div className="skeleton h-16" />
         ) : heatmapError ? (
           <div className="h-16 flex items-center justify-between px-1">
             <p className="text-caption text-sm">히트맵을 불러올 수 없습니다</p>
@@ -204,15 +204,15 @@ export default function Home() {
         ) : heatmap ? (
           <HeatmapCalendar entries={heatmap.entries} />
         ) : (
-          <div className="h-16 bg-border animate-pulse rounded" />
+          <div className="skeleton h-16" />
         )}
       </section>
 
       {/* ⑤ 합격 준비도 / 통계 섹션: progress 에러/로딩 독립 처리 */}
       {progressLoading ? (
         <section className={`grid grid-cols-2 gap-3 mb-4 ${s4.className}`} style={s4.style}>
-          <div className="h-24 rounded-xl bg-border animate-pulse" />
-          <div className="h-24 rounded-xl bg-border animate-pulse" />
+          <div className="skeleton h-24" />
+          <div className="skeleton h-24" />
         </section>
       ) : progressError ? (
         // progress 에러 시 해당 섹션만 인라인 에러 + 재시도 버튼
