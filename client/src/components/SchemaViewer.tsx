@@ -1,4 +1,5 @@
-import { memo } from "react";
+import { memo, useState } from "react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 
 interface ParsedColumn {
   readonly name: string;
@@ -100,6 +101,8 @@ export const SchemaViewer = memo(function SchemaViewer({
   schemaDdl,
   schemaSampleData,
 }: SchemaViewerProps) {
+  const [open, setOpen] = useState(false);
+
   const tables =
     schemaDisplay && schemaDisplay.trim()
       ? parseSchemaDisplay(schemaDisplay)
@@ -113,7 +116,20 @@ export const SchemaViewer = memo(function SchemaViewer({
   if (tables.length === 0) return null;
 
   return (
-    <div className="mt-1 flex gap-2 overflow-x-auto pb-1" style={{ scrollSnapType: "x mandatory" }}>
+    <div className="mt-2">
+      {/* 스키마 토글 버튼 */}
+      <button
+        type="button"
+        onClick={() => setOpen((prev) => !prev)}
+        className="flex items-center gap-1 text-xs font-medium mb-1"
+        style={{ color: "var(--color-text-caption)" }}
+      >
+        {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+        스키마 {open ? "접기" : "보기"}
+      </button>
+
+      {!open ? null : (
+    <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollSnapType: "x mandatory" }}>
       {tables.map((table) => {
         const rows = sampleRows.get(table.tableName.toUpperCase()) ?? [];
         const hasSample = rows.length > 0;
@@ -208,6 +224,8 @@ export const SchemaViewer = memo(function SchemaViewer({
           </div>
         );
       })}
+    </div>
+      )}
     </div>
   );
 });
