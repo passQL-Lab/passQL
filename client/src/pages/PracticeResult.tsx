@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { useParams, useNavigate, Navigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Check, RotateCcw, Target, Clock, Timer } from "lucide-react";
@@ -22,6 +22,14 @@ export default function PracticeResult() {
   const store = usePracticeStore();
   // 각 통계 항목의 등장 여부를 인덱스별로 관리 (0: 정답률, 1: 총시간, 2: 문제당 평균)
   const [visibleStats, setVisibleStats] = useState<boolean[]>([false, false, false]);
+
+  // 순차 등장 타이머 ID 보관 — 언마운트 시 클린업
+  const timerIdsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  useEffect(() => {
+    return () => {
+      timerIdsRef.current.forEach(clearTimeout);
+    };
+  }, []);
 
   // AI 코멘트: useQuery로 캐싱 및 StrictMode 이중 호출 방지
   const { data: aiCommentData, isLoading: aiCommentLoading } = useQuery({
@@ -55,18 +63,19 @@ export default function PracticeResult() {
     ? formatDuration(Math.round(analysis.totalDurationMs / analysis.totalCount))
     : "0초";
 
-  // 카운트업 완료 후 150ms 간격으로 순차 등장
-  const handleScoreComplete = () => {
+  // 카운트업 완료 후 150ms 간격으로 순차 등장 — 타이머 ID 보관하여 언마운트 시 클린업
+  const handleScoreComplete = useCallback(() => {
     [0, 1, 2].forEach((i) => {
-      setTimeout(() => {
+      const id = setTimeout(() => {
         setVisibleStats((prev) => {
           const next = [...prev];
           next[i] = true;
           return next;
         });
       }, i * 150);
+      timerIdsRef.current.push(id);
     });
-  };
+  }, []);
 
   const step1 = (
     <>
