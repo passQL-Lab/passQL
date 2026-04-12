@@ -356,6 +356,22 @@
                 </ul>
             </div>
 
+            <!-- stem SQL 마크다운 규칙 -->
+            <div class="mb-4">
+                <p class="font-semibold text-sm mb-2">⚠️ stem SQL 마크다운 코드 블록 규칙</p>
+                <div class="alert alert-warning text-xs mb-2">
+                    EXECUTABLE 문제에서 stem에 SQL이 포함될 경우 반드시 <code>```sql</code> 코드 블록으로 감싸야 합니다.
+                    화면에서 마크다운으로 렌더링되어 코드 블록으로 표시됩니다.
+                </div>
+                <div class="mockup-code text-xs">
+<pre class="p-4">// ❌ 잘못된 방식
+"stem": "다음 SQL의 실행 결과로 올바른 것은?\\n\\nSELECT A.NAME FROM EMP;"
+
+// ✅ 올바른 방식
+"stem": "다음 SQL의 실행 결과로 올바른 것은?\\n\\n```sql\\nSELECT A.NAME FROM EMP;\\n```"</pre>
+                </div>
+            </div>
+
             <!-- AI 프롬프트 -->
             <div class="mb-4">
                 <p class="font-semibold text-sm mb-2">AI 변환 프롬프트 <span class="text-base-content/50 font-normal">(복사 후 AI에게 문제 데이터 붙여넣기)</span></p>
