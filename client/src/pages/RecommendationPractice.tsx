@@ -117,7 +117,12 @@ export default function RecommendationPractice() {
           }}
           {...(!feedback.isCorrect && {
             secondaryLabel: "다시 풀기",
-            onSecondary: () => setFeedback(null),
+            // 피드백 닫힘 후 초이스카드 즉시 눌림 방지 — 300ms 쿨다운
+            onSecondary: () => {
+              isProcessingRef.current = true;
+              setFeedback(null);
+              setTimeout(() => { isProcessingRef.current = false; }, 300);
+            },
           })}
         />
       )}

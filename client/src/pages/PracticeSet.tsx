@@ -105,7 +105,13 @@ export default function PracticeSet() {
   );
 
   const handleNext = useCallback(() => {
+    // 피드백바 닫힘 → 다음 문제 렌더 직후 초이스카드가 즉시 눌리는 탭-스루 방지
+    // isProcessingRef를 잠근 뒤 렌더 완료 시점(~300ms)까지 새 제출 차단
+    isProcessingRef.current = true;
     setFeedback(null);
+    setTimeout(() => {
+      isProcessingRef.current = false;
+    }, 300);
   }, []);
 
   // useEffect는 훅 규칙상 조건부 return 이전에 위치해야 함

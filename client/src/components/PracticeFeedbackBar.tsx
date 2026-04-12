@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { Check, X } from "lucide-react";
 import type { SubmitResult } from "../types/api";
 
@@ -18,6 +19,13 @@ export default function PracticeFeedbackBar({
   secondaryLabel,
 }: PracticeFeedbackBarProps) {
   const isCorrect = result.isCorrect;
+  // 버튼 언마운트 전 이중 클릭 방지 — 한 번 눌리면 플래그 세팅, 부모 언마운트 시 자동 초기화
+  const hasActedRef = useRef(false);
+  const guard = (fn: () => void) => () => {
+    if (hasActedRef.current) return;
+    hasActedRef.current = true;
+    fn();
+  };
 
   return (
     <>
@@ -74,7 +82,7 @@ export default function PracticeFeedbackBar({
               <button
                 type="button"
                 className="flex-1 h-12 rounded-xl font-bold text-base text-white bg-brand"
-                onClick={onSecondary}
+                onClick={guard(onSecondary)}
               >
                 {secondaryLabel}
               </button>
@@ -99,7 +107,7 @@ export default function PracticeFeedbackBar({
                         : "var(--color-sem-error)",
                     }
               }
-              onClick={onNext}
+              onClick={guard(onNext)}
             >
               {nextLabel}
             </button>
