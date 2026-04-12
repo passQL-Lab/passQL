@@ -237,8 +237,11 @@ export default function QuestionDetail({
             schemaDdl: question.schemaDdl ?? null,
             schemaSampleData: question.schemaSampleData ?? null,
           };
-          // 제출 완료 시 추천 문제 캐시 무효화 — 홈 복귀 시 목록 즉시 갱신
+          // 제출 완료 시 추천 문제·학습 현황 캐시 무효화 — 홈 복귀 시 목록·heatmap 즉시 갱신
           queryClient.invalidateQueries({ queryKey: ["recommendations"] });
+          // heatmap·progress 무효화 — 학습 현황 캘린더와 streak 즉시 갱신
+          queryClient.invalidateQueries({ queryKey: ["heatmap"] });
+          queryClient.invalidateQueries({ queryKey: ["progress"] });
           if (onSubmitSuccess) {
             // 데일리 챌린지 등 호출자가 네비게이션 제어
             onSubmitSuccess(fullResult as SubmitResult, questionUuid!);

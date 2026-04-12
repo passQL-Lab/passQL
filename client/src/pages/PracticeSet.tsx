@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from "react";
 import { useParams, useNavigate, Navigate, useBlocker } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
 import { usePracticeStore } from "../stores/practiceStore";
 import { submitAnswer } from "../api/questions";
@@ -23,6 +24,7 @@ function WaitingForQuestion({ topicName }: { readonly topicName: string }) {
 export default function PracticeSet() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
 
   const storeSessionId = usePracticeStore((s) => s.sessionId);
   const questions = usePracticeStore((s) => s.questions);
@@ -81,6 +83,11 @@ export default function PracticeSet() {
           selectedChoiceKey,
           selectedChoiceBody,
         );
+        // 마지막 문제 제출 완료 시에만 무효화 — 도중 이탈은 갱신하지 않기로 결정
+        if (currentIndex + 1 >= totalQuestions) {
+          queryClient.invalidateQueries({ queryKey: ["heatmap"] });
+          queryClient.invalidateQueries({ queryKey: ["progress"] });
+        }
       } catch {
         const fallback: SubmitResult = {
           isCorrect: false,
@@ -103,7 +110,7 @@ export default function PracticeSet() {
         setSubmitting(false);
       }
     },
-    [displayQuestion, submitAndAdvance],
+    [displayQuestion, submitAndAdvance, currentIndex, totalQuestions, queryClient],
   );
 
   const handleNext = useCallback(() => {

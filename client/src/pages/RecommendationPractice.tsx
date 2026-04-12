@@ -48,8 +48,11 @@ export default function RecommendationPractice() {
       setSubmitting(true);
       try {
         const result = await submitAnswer(questionUuid, choiceSetId, selectedChoiceKey, sessionUuid);
-        // 추천 문제 캐시 무효화 — 홈 복귀 시 새 목록 반영
+        // 추천 문제·학습 현황 캐시 무효화 — 홈 복귀 시 새 목록·heatmap 반영
         queryClient.invalidateQueries({ queryKey: ["recommendations"] });
+        // heatmap·progress 무효화 — 학습 현황 캘린더와 streak 즉시 갱신
+        queryClient.invalidateQueries({ queryKey: ["heatmap"] });
+        queryClient.invalidateQueries({ queryKey: ["progress"] });
         // PracticeResult에서 진입한 경우 정답 시 store 결과 갱신
         if (result.isCorrect && isPracticeReview) {
           markCorrect(questionUuid);
