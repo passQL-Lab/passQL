@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useNavigate, useParams, useLocation, useBlocker } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { Home } from "lucide-react";
@@ -27,6 +27,8 @@ export default function RecommendationPractice() {
   const [feedback, setFeedback] = useState<SubmitResult | null>(null);
   // 제출 API 호출 중 화면 조작 차단
   const [submitting, setSubmitting] = useState(false);
+  // 연타 방지 — React state는 async 클로저에서 stale하므로 ref로 동기 플래그 관리
+  const isProcessingRef = useRef(false);
 
   // 제출 완료 전까지 이탈 차단 — submitting 중에는 해제 (catch navigate 허용)
   const blocker = useBlocker(feedback === null && !submitting);
@@ -34,6 +36,9 @@ export default function RecommendationPractice() {
   const handlePracticeSubmit = useCallback(
     async (selectedChoiceKey: string, choiceSetId: string, _choices: readonly ChoiceItem[]) => {
       if (!questionUuid) return;
+      // 연타로 인한 중복 제출 방지
+      if (isProcessingRef.current) return;
+      isProcessingRef.current = true;
 
       setSubmitting(true);
       try {
@@ -48,6 +53,7 @@ export default function RecommendationPractice() {
       } catch {
         navigate("/", { replace: true });
       } finally {
+        isProcessingRef.current = false;
         setSubmitting(false);
       }
     },

@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useNavigate, Navigate, useBlocker } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { Home } from "lucide-react";
@@ -19,6 +19,8 @@ export default function DailyChallenge() {
   const [feedback, setFeedback] = useState<SubmitResult | null>(null);
   // 답안 제출 API 호출 중 화면 조작 차단
   const [submitting, setSubmitting] = useState(false);
+  // 연타 방지 — React state는 async 클로저에서 stale하므로 ref로 동기 플래그 관리
+  const isProcessingRef = useRef(false);
 
   // 제출 완료 전까지 이탈 차단 — 로딩 중·제출 완료·제출 API 호출 중에는 차단 해제
   // submitting 중에도 해제: catch 블록의 navigate("/")가 모달 없이 통과되어야 함
@@ -29,6 +31,9 @@ export default function DailyChallenge() {
   const handlePracticeSubmit = useCallback(
     async (selectedChoiceKey: string, choiceSetId: string, choices: readonly ChoiceItem[]) => {
       if (!today?.question) return;
+      // 연타로 인한 중복 제출 방지
+      if (isProcessingRef.current) return;
+      isProcessingRef.current = true;
 
       const selectedChoice = choices.find((c) => c.key === selectedChoiceKey);
       const correctChoice = choices.find((c) => c.isCorrect);
@@ -45,6 +50,7 @@ export default function DailyChallenge() {
         } catch {
           navigate("/", { replace: true });
         } finally {
+          isProcessingRef.current = false;
           setSubmitting(false);
         }
       } else {
@@ -59,6 +65,7 @@ export default function DailyChallenge() {
           correctSql: null,
         };
         setFeedback(localResult);
+        isProcessingRef.current = false;
         setSubmitting(false);
       }
     },
