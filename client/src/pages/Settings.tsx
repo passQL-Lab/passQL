@@ -45,7 +45,7 @@ export default function Settings() {
       </section>
 
       {/* ② 설정 카드 */}
-      <section className={`card-base p-0 ${s1.className}`}>
+      <section className={`bg-surface-card border border-border rounded-2xl p-0 ${s1.className}`}>
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <div>
             <p className="text-secondary text-sm">디바이스 ID</p>
