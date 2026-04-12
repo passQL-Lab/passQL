@@ -12,7 +12,10 @@ const STATUS_CONFIG: Record<
 
 /** ISO 8601 문자열 → "방금 / N분 전 / N시간 전 / N일 전 / N주 전" */
 function formatRelativeTime(isoString: string): string {
-  const diff = Date.now() - new Date(isoString).getTime();
+  const date = new Date(isoString);
+  if (isNaN(date.getTime())) return "";
+  const diff = Date.now() - date.getTime();
+  if (diff < 0) return "방금";
   const minutes = Math.floor(diff / 60_000);
   if (minutes < 1) return "방금";
   if (minutes < 60) return `${minutes}분 전`;

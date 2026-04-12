@@ -33,7 +33,9 @@ export default function FeedbackForm({ disabled = false }: FeedbackFormProps) {
   const handleRetry = () => {
     if (!isValid || mutation.isPending) return;
     mutation.reset();
-    mutation.mutate(content);
+    mutation.mutate(content, {
+      onSuccess: () => setContent(""),
+    });
   };
 
   return (
