@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { useNavigate, useParams, useBlocker } from "react-router-dom";
+import { useNavigate, useParams, useLocation, useBlocker } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { Home } from "lucide-react";
 import { submitAnswer } from "../api/questions";
@@ -12,7 +12,11 @@ import type { ChoiceItem, SubmitResult } from "../types/api";
 export default function RecommendationPractice() {
   const { questionUuid } = useParams<{ questionUuid: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const queryClient = useQueryClient();
+
+  // PracticeResult 등 이전 화면으로 복귀할 경로 — 없으면 홈으로
+  const returnPath = (location.state as { returnPath?: string } | null)?.returnPath ?? "/";
 
   const [feedback, setFeedback] = useState<SubmitResult | null>(null);
   // 제출 API 호출 중 화면 조작 차단
@@ -85,12 +89,12 @@ export default function RecommendationPractice() {
         />
       </div>
 
-      {/* 제출 후 인라인 피드백 — 정답: 홈으로 / 오답: 홈으로 가기 + 다시 풀기 */}
+      {/* 제출 후 인라인 피드백 — returnPath 있으면 "돌아가기", 없으면 "홈으로 가기" */}
       {feedback && (
         <PracticeFeedbackBar
           result={feedback}
-          nextLabel="홈으로 가기"
-          onNext={() => navigate("/", { replace: true })}
+          nextLabel={returnPath === "/" ? "홈으로 가기" : "돌아가기"}
+          onNext={() => navigate(returnPath, { replace: true })}
           {...(!feedback.isCorrect && {
             secondaryLabel: "다시 풀기",
             onSecondary: () => setFeedback(null),
