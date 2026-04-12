@@ -1,21 +1,155 @@
-MIT License
+passQL Source-Available License 1.0
 
-Copyright (c) 2026 passQL-Lab
+Copyright (c) 2026 passQL-Lab. All rights reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+IMPORTANT NOTICE:
+This software is source-available, not open source.
+Any use of this software is permitted only under the terms of this License.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+1. Definitions
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+“Software” means the passQL source code, object code, documentation, configuration,
+examples, and any other materials distributed with this License.
+
+“Licensor” means passQL-Lab.
+
+“Non-Commercial Purpose” means personal learning, personal research, personal evaluation,
+or personal experimentation by a natural person, where such use:
+(a) is not primarily intended for or directed toward commercial advantage or monetary compensation,
+(b) is not performed on behalf of any company, organization, institution, school, government body,
+    or other entity,
+(c) does not support any revenue-generating, operational, institutional, client-facing,
+    internal business, or production activity.
+
+“Production Use” means any use of the Software in a live, staged, internal, external,
+organizational, academic, institutional, commercial, or service environment other than
+strictly local personal evaluation and study.
+
+“Hosted Service” means any service, platform, API, website, application, SaaS, PaaS,
+managed service, or similar offering that makes the Software or any material functionality
+of the Software available to any third party over a network.
+
+2. Limited License Grant
+
+Subject to your full compliance with this License, the Licensor grants you a limited,
+revocable, non-exclusive, non-transferable, non-sublicensable license to:
+
+(a) view, download, copy, and modify the Software; and
+(b) run the Software solely for your own personal, non-commercial learning, research,
+    evaluation, or experimentation purposes,
+
+provided that all such use is:
+(i) by an individual natural person,
+(ii) solely in a local environment under your control,
+(iii) non-production,
+(iv) non-commercial, and
+(v) not offered to or used for the benefit of any third party or organization.
+
+3. Conditions
+
+You may exercise the rights granted in Section 2 only if you:
+
+(a) keep this License and all copyright, attribution, and proprietary notices intact;
+(b) clearly mark any modifications you make;
+(c) do not represent the Software as open source;
+(d) do not use the Licensor’s name, trademarks, logos, or branding except to identify
+    the original source of the Software; and
+(e) comply with all applicable laws and regulations.
+
+4. Restrictions
+
+Except as expressly permitted in Section 2, you may not, and may not permit any other person or entity to:
+
+(a) use the Software for any commercial purpose;
+(b) use the Software in production;
+(c) use the Software as part of any company, organization, school, university, academy,
+    non-profit, public institution, or government activity;
+(d) provide, operate, or enable a Hosted Service using the Software or any modified version of it;
+(e) sell, license, sublicense, lease, rent, assign, distribute for a fee, or otherwise
+    commercially exploit the Software;
+(f) use the Software to provide services to third parties, whether paid or unpaid;
+(g) use the Software for client work, contract work, consulting, outsourcing, managed services,
+    system integration, training services, or internal business operations;
+(h) remove or obscure any copyright, license, or other proprietary notices;
+(i) claim or imply that your fork or derivative work is authorized, endorsed, or certified
+    by the Licensor; or
+(j) circumvent the purpose of this License through indirect, affiliated, staged, test,
+    pilot, internal-only, educational, or non-profit deployment where the Software is
+    used beyond strictly personal local study and evaluation.
+
+5. Distribution of Modified Versions
+
+You may publish or share modified versions or forks of the Software only if:
+
+(a) you do so strictly on a non-commercial basis;
+(b) you include this License in full;
+(c) you clearly state that your version is modified and is not the original Software;
+(d) you do not impose terms that contradict this License with respect to the original Software; and
+(e) such publication or sharing does not itself constitute Production Use, a Hosted Service,
+    organizational use, or commercial exploitation.
+
+For clarity, publishing source code to a public repository for discussion,
+study, or non-commercial collaboration is permitted, but operating that code as a service
+or deploying it for institutional or organizational purposes is prohibited without
+prior written permission from the Licensor.
+
+6. Commercial Licensing
+
+Any use not expressly permitted under this License, including any commercial use,
+Production Use, Hosted Service use, organizational use, institutional use, or use
+for the benefit of a third party, requires the Licensor’s prior written permission.
+
+Commercial licensing inquiries:
+Please contact ghd0106@gmail.com or chan4760@naver.com
+
+7. Ownership
+
+The Software is licensed, not sold.
+The Licensor retains all right, title, and interest in and to the Software,
+including all intellectual property rights not expressly granted under this License.
+
+8. Feedback
+
+If you provide feedback, suggestions, ideas, or recommendations regarding the Software,
+you grant the Licensor a non-exclusive, worldwide, perpetual, irrevocable, royalty-free
+license to use, reproduce, modify, and incorporate that feedback without restriction
+or compensation to you.
+
+9. Termination
+
+This License terminates automatically and immediately if you violate any term of this License.
+Upon termination, you must cease all use of the Software and destroy all copies in your possession
+or control, except to the extent retention is required by law.
+
+Sections 4, 6, 7, 8, 9, 10, 11, 12, 13, and 14 survive termination.
+
+10. No Trademark License
+
+This License does not grant you any right to use the Licensor’s or passQL’s trade names,
+trademarks, service marks, logos, brand features, or project names except for reasonable
+and customary reference to the Software.
+
+11. Disclaimer of Warranties
+
+TO THE MAXIMUM EXTENT PERMITTED BY LAW, THE SOFTWARE IS PROVIDED “AS IS” AND “AS AVAILABLE,”
+WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING WITHOUT LIMITATION ANY WARRANTIES
+OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, NON-INFRINGEMENT, ACCURACY,
+OR THAT THE SOFTWARE WILL BE ERROR-FREE OR UNINTERRUPTED.
+
+12. Limitation of Liability
+
+TO THE MAXIMUM EXTENT PERMITTED BY LAW, IN NO EVENT SHALL THE LICENSOR OR ANY COPYRIGHT HOLDER
+BE LIABLE FOR ANY INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, CONSEQUENTIAL, OR PUNITIVE DAMAGES,
+OR ANY LOSS OF DATA, PROFITS, REVENUE, GOODWILL, OR BUSINESS INTERRUPTION, ARISING OUT OF OR
+RELATING TO THE SOFTWARE OR THIS LICENSE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+13. Governing Law
+
+This License shall be governed by and construed in accordance with the laws of
+the Republic of Korea, excluding its conflict of law rules.
+
+14. Entire Agreement
+
+This License constitutes the entire agreement between you and the Licensor concerning
+the Software and supersedes any prior or contemporaneous understandings regarding the Software.
+Any waiver or modification must be in writing by the Licensor.
