@@ -60,9 +60,8 @@ export const ChoiceCard = memo(function ChoiceCard({
     >
       {isResultMatch ? (
         // RESULT_MATCH: JSON 결과 테이블 렌더링, 실행 버튼 없음
-        <div onClick={(e) => e.stopPropagation()}>
-          <ResultMatchTable body={choice.body} />
-        </div>
+        // stopPropagation 불필요 — 내부에 버튼 없으므로 카드 클릭 이벤트 그대로 전파
+        <ResultMatchTable body={choice.body} inverted={isSelected} />
       ) : isConceptText ? (
         // CONCEPT_ONLY: 일반 텍스트 렌더링 — 선택 시 흰색으로 반전
         <p className={`text-body ${isSelected ? "choice-text-inverted" : ""}`}>

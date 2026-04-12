@@ -514,6 +514,16 @@ body {
   animation: sparkle-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
+/* AI 선택지 생성 중 — 기본 pulse(2s)보다 1.5배 빠른 반짝임 */
+@keyframes pulse-fast {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.92); }
+}
+
+.animate-pulse-fast {
+  animation: pulse-fast 1.2s ease-in-out infinite;
+}
+
 /* ── 팝오버 진입 ── */
 @keyframes popover-in {
   from { opacity: 0; transform: translateY(4px) scale(0.97); }
@@ -724,4 +734,27 @@ body {
 
 .data-table--inverted tr:nth-child(even) {
   background-color: rgba(255, 255, 255, 0.06);
+}
+
+/* ── ResultMatchTable — RESULT_MATCH 선택지 컴팩트 테이블 스크롤 컨테이너 ── */
+.result-match-scroll {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 200px;
+  border-radius: 8px;
+}
+
+/* 선택(파란 배경) 상태에서 테이블을 감싸는 보더 컨테이너 */
+.result-match-border {
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+}
+
+.result-match-border--inverted {
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  /* 파란 카드 위에서 텍스트 가독성 확보 */
+  background-color: rgba(255, 255, 255, 0.15);
 }

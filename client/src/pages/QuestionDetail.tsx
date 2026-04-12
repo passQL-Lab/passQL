@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useParams, useNavigate, useBlocker } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, BookOpen, RefreshCw } from "lucide-react";
+import { ArrowLeft, BookOpen, RefreshCw, Sparkles } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { StarRating } from "../components/StarRating";
 import { ChoiceCard } from "../components/ChoiceCard";
@@ -83,7 +83,6 @@ export default function QuestionDetail({
     null,
   );
   const [sseChoiceSetId, setSseChoiceSetId] = useState<string | null>(null);
-  const [sseStatus, setSseStatus] = useState<string | null>(null);
   const [sseError, setSseError] = useState<{
     code: string;
     retryable: boolean;
@@ -97,7 +96,6 @@ export default function QuestionDetail({
   useEffect(() => {
     setSseChoices(null);
     setSseChoiceSetId(null);
-    setSseStatus(null);
     setSseError(null);
     setSseRetryCount(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -132,8 +130,6 @@ export default function QuestionDetail({
 
     if (!needsGeneration) return;
 
-    setSseStatus("선택지 생성 중...");
-
     // 60초 내에 complete/error가 오지 않으면 클라이언트 타임아웃으로 에러 전환
     // AI 호출 + 샌드박스 3회 재시도 합산 예상 시간 기준
     const SSE_TIMEOUT_MS = 60_000;
@@ -143,27 +139,22 @@ export default function QuestionDetail({
       streamCleanup?.();
       if (!cancelled) {
         setSseError({ code: "TIMEOUT", retryable: true });
-        setSseStatus(null);
       }
     }, SSE_TIMEOUT_MS);
 
     const cleanup = generateChoices(questionUuid, {
-      onStatus: (event) => {
-        if (!cancelled) setSseStatus(event.message);
-      },
+      onStatus: () => {},
       onComplete: (response) => {
         clearTimeout(timeoutId);
         if (!cancelled) {
           setSseChoices(response.choices);
           setSseChoiceSetId(response.choiceSetId);
-          setSseStatus(null);
         }
       },
       onError: (event) => {
         clearTimeout(timeoutId);
         if (!cancelled) {
           setSseError({ code: event.code, retryable: event.retryable });
-          setSseStatus(null);
         }
       },
     });
@@ -351,13 +342,14 @@ export default function QuestionDetail({
           </>
         ) : (
           <>
-            <div
-              role="status"
-              aria-label="선택지 생성 중"
-              className="w-6 h-6 border-2 border-accent-light border-t-brand rounded-full animate-spin mx-auto"
+            {/* Sparkles pulse-fast — AI 선택지 생성 중, 기본 pulse보다 1.5배 빠른 반짝임 */}
+            <Sparkles
+              size={28}
+              className="mx-auto text-brand animate-pulse-fast"
+              fill="currentColor"
             />
             <p className="text-text-caption text-sm">
-              {sseStatus ?? "선택지 준비 중..."}
+              AI가 선택지를 만들고 있어요
             </p>
           </>
         )}
