@@ -38,7 +38,10 @@ export const ResultTable = memo(function ResultTable({ result, onAskAi }: Result
         {result.rowCount}행 · {result.elapsedMs}ms
       </p>
       {result.columns.length > 0 && (
-        <div className="overflow-x-auto">
+        <div
+          className="overflow-x-auto rounded-xl border mt-2"
+          style={{ borderColor: "var(--color-border)" }}
+        >
           <table className="data-table w-full">
             <thead>
               <tr>
