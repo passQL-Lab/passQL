@@ -16,6 +16,8 @@ interface PracticeActions {
   readonly addQuestion: (question: QuestionSummary) => void;
   readonly startTimer: () => void;
   readonly submitAndAdvance: (questionUuid: string, isCorrect: boolean, selectedChoiceKey: string, selectedChoiceBody: string) => void;
+  // 다시 풀기로 정답 맞춘 경우 — 해당 문제 결과를 정답으로 갱신
+  readonly markCorrect: (questionUuid: string) => void;
   readonly reset: () => void;
 }
 
@@ -49,6 +51,13 @@ export const usePracticeStore = create<PracticeState & PracticeActions>()((set, 
       startedAt: Date.now(),
     }));
   },
+
+  markCorrect: (questionUuid) =>
+    set((s) => ({
+      results: s.results.map((r) =>
+        r.questionUuid === questionUuid ? { ...r, isCorrect: true } : r,
+      ),
+    })),
 
   reset: () => set(INITIAL_STATE),
 }));

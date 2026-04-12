@@ -3,6 +3,7 @@ import { useNavigate, useParams, useLocation, useBlocker } from "react-router-do
 import { useQueryClient } from "@tanstack/react-query";
 import { Home } from "lucide-react";
 import { submitAnswer } from "../api/questions";
+import { usePracticeStore } from "../stores/practiceStore";
 import QuestionDetail from "./QuestionDetail";
 import PracticeFeedbackBar from "../components/PracticeFeedbackBar";
 import ConfirmModal from "../components/ConfirmModal";
@@ -14,9 +15,14 @@ export default function RecommendationPractice() {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
+  const { markCorrect } = usePracticeStore();
 
   // PracticeResult 등 이전 화면으로 복귀할 경로 — 없으면 홈으로
-  const returnPath = (location.state as { returnPath?: string } | null)?.returnPath ?? "/";
+  const locationState = location.state as { returnPath?: string; initialStep?: number } | null;
+  const returnPath = locationState?.returnPath ?? "/";
+  // PracticeResult에서 진입한 경우 — 타이틀 "틀린 문제", 복귀 시 step3 유지
+  const isPracticeReview = returnPath !== "/";
+  const returnInitialStep = locationState?.initialStep ?? 0;
 
   const [feedback, setFeedback] = useState<SubmitResult | null>(null);
   // 제출 API 호출 중 화면 조작 차단
@@ -34,6 +40,10 @@ export default function RecommendationPractice() {
         const result = await submitAnswer(questionUuid, choiceSetId, selectedChoiceKey);
         // 추천 문제 캐시 무효화 — 홈 복귀 시 새 목록 반영
         queryClient.invalidateQueries({ queryKey: ["recommendations"] });
+        // PracticeResult에서 진입한 경우 정답 시 store 결과 갱신
+        if (result.isCorrect && isPracticeReview) {
+          markCorrect(questionUuid);
+        }
         setFeedback(result);
       } catch {
         navigate("/", { replace: true });
@@ -41,7 +51,7 @@ export default function RecommendationPractice() {
         setSubmitting(false);
       }
     },
-    [questionUuid, navigate, queryClient],
+    [questionUuid, navigate, queryClient, isPracticeReview, markCorrect],
   );
 
   if (!questionUuid) {
@@ -63,7 +73,7 @@ export default function RecommendationPractice() {
             </button>
           </div>
           <span className="text-sm font-semibold text-text-secondary text-center">
-            추천 문제
+            {isPracticeReview ? "틀린 문제" : "추천 문제"}
           </span>
           <div />
         </div>
@@ -93,8 +103,8 @@ export default function RecommendationPractice() {
       {feedback && (
         <PracticeFeedbackBar
           result={feedback}
-          nextLabel={returnPath === "/" ? "홈으로 가기" : "돌아가기"}
-          onNext={() => navigate(returnPath, { replace: true })}
+          nextLabel={isPracticeReview ? "돌아가기" : "홈으로 가기"}
+          onNext={() => navigate(returnPath, { replace: true, state: isPracticeReview ? { initialStep: returnInitialStep } : undefined })}
           {...(!feedback.isCorrect && {
             secondaryLabel: "다시 풀기",
             onSecondary: () => setFeedback(null),

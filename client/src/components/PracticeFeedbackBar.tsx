@@ -67,18 +67,13 @@ export default function PracticeFeedbackBar({
             </p>
           )}
 
-          {/* 액션 버튼 — 오답 + 보조 버튼 있으면 나란히, 아니면 전체 너비 */}
-          <div className={`flex gap-3 ${onSecondary ? "" : ""}`}>
+          {/* 액션 버튼 — 두 버튼 있을 때: 다시 풀기(주요 CTA) / 돌아가기(보조) 순서 */}
+          <div className="flex gap-3">
             {onSecondary && secondaryLabel && (
-              // 보조 버튼: outline 스타일 (다시 풀기 등)
+              // 다시 풀기: brand 인디고 solid — 권장 행동임을 강조
               <button
                 type="button"
-                className="flex-1 h-12 rounded-xl font-bold text-base border-2"
-                style={{
-                  borderColor: "var(--color-sem-error)",
-                  color: "var(--color-sem-error)",
-                  backgroundColor: "transparent",
-                }}
+                className="flex-1 h-12 rounded-xl font-bold text-base text-white bg-brand"
                 onClick={onSecondary}
               >
                 {secondaryLabel}
@@ -86,12 +81,24 @@ export default function PracticeFeedbackBar({
             )}
             <button
               type="button"
-              className={`h-12 rounded-xl font-bold text-base text-white ${onSecondary ? "flex-1" : "w-full"}`}
-              style={{
-                backgroundColor: isCorrect
-                  ? "var(--color-sem-success)"
-                  : "var(--color-sem-error)",
-              }}
+              className={`h-12 rounded-xl font-bold text-base ${
+                onSecondary
+                  // 보조 버튼: outline 스타일 — 탈출 경로임을 시각적으로 약화
+                  ? "flex-1 border-2 bg-transparent"
+                  : "w-full text-white"
+              }`}
+              style={
+                onSecondary
+                  ? {
+                      borderColor: "var(--color-sem-error)",
+                      color: "var(--color-sem-error)",
+                    }
+                  : {
+                      backgroundColor: isCorrect
+                        ? "var(--color-sem-success)"
+                        : "var(--color-sem-error)",
+                    }
+              }
               onClick={onNext}
             >
               {nextLabel}

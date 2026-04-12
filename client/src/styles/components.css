@@ -147,6 +147,17 @@
   transform: translateY(-1px);
 }
 
+/* brand 배경 위에서 사용하는 반전 variant — 선택된 ChoiceCard 내부 실행 버튼 */
+.btn-compact-inverted {
+  color: #fff;
+  border-color: #fff;
+  background-color: transparent;
+}
+
+.btn-compact-inverted:hover {
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
 /* ── 5. Code Block ── */
 .code-block {
   background-color: var(--color-surface-code);
