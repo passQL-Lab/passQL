@@ -1,4 +1,4 @@
-import { Flame, ChevronRight, Check, RefreshCw } from "lucide-react";
+import { Flame, ChevronRight, Check, RefreshCw, Sparkles } from "lucide-react";
 import { getReadinessCopy } from "../constants/readinessCopy";
 import { Link } from "react-router-dom";
 import { useProgress } from "../hooks/useProgress";
@@ -124,8 +124,8 @@ export default function Home() {
         ) : (
           <Link to="/questions" className="block">
             <div className="card-base shadow-sm h-full flex flex-col justify-center cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:border-brand transition-all duration-200">
-              <p className="text-secondary text-sm">문제 풀기</p>
-              <p className="text-body text-sm">SQL 문제를 풀어보세요</p>
+              <p className="text-secondary text-sm">AI문제 풀기</p>
+              <p className="text-body text-sm">SQL AI문제를 풀어보세요</p>
             </div>
           </Link>
         )}
@@ -260,7 +260,11 @@ export default function Home() {
       {/* 추천 문제 섹션: 에러 또는 데이터 없으면 섹션 전체 숨김 */}
       {!recommendationsError && recommendations && recommendations.questions.length > 0 && (
         <section className="mt-6">
-          <h2 className="text-secondary text-sm mb-3">추천 문제</h2>
+          {/* Sparkles 아이콘으로 AI 추천 기능임을 명시 */}
+          <h2 className="text-secondary text-sm mb-3 flex items-center gap-1">
+            <Sparkles size={14} fill="currentColor" />
+            AI 추천문제
+          </h2>
           <div className="space-y-3">
             {recommendations.questions.map((q) => (
               <Link key={q.questionUuid} to={`/questions/${q.questionUuid}`} className="block">

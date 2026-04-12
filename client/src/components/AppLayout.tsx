@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from "react-router-dom";
-import { Home, FileText, BarChart3, Settings } from "lucide-react";
+import { Home, FileText, BarChart3, Settings, Sparkles } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import logo from "../assets/logo/logo.png";
 
@@ -9,7 +9,7 @@ const NAV_ITEMS: readonly {
   readonly icon: LucideIcon;
 }[] = [
   { to: "/", label: "홈", icon: Home },
-  { to: "/questions", label: "문제", icon: FileText },
+  { to: "/questions", label: "AI문제", icon: Sparkles },
   { to: "/stats", label: "통계", icon: BarChart3 },
   { to: "/settings", label: "설정", icon: Settings },
 ] as const;
