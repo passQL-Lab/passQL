@@ -1,11 +1,36 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-12T12:45:26Z",
-    "currentVersion": "0.0.96",
+    "lastUpdated": "2026-04-12T13:38:43Z",
+    "currentVersion": "0.0.99",
     "projectType": "basic",
-    "totalReleases": 42
+    "totalReleases": 43
   },
   "releases": [
+    {
+      "version": "0.0.99",
+      "project_type": "basic",
+      "date": "2026-04-12",
+      "pr_number": 177,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새로운 기능**\n  * 통계 페이지 완전 개선: 아이콘 추가, 토픽별 학습 현황 시각화, 상세 분석 팝오버 추가\n  * 홈 페이지 추천 문제 새로고침 버튼 추가\n  * 자연스러운 텍스트 페이드인 및 UI 애니메이션 효과 추가\n\n* **개선 사항**\n  * 홈 페이지 카드 및 완료 상태 디자인 개선\n  * 테마 색상 및 스타일 최적화",
+      "parsed_changes": {
+        "새로운_기능": {
+          "title": "새로운 기능",
+          "items": [
+            "통계 페이지 완전 개선: 아이콘 추가, 토픽별 학습 현황 시각화, 상세 분석 팝오버 추가",
+            "홈 페이지 추천 문제 새로고침 버튼 추가",
+            "자연스러운 텍스트 페이드인 및 UI 애니메이션 효과 추가"
+          ]
+        },
+        "개선_사항": {
+          "title": "개선 사항",
+          "items": [
+            "홈 페이지 카드 및 완료 상태 디자인 개선",
+            "테마 색상 및 스타일 최적화"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.96",
       "project_type": "basic",
