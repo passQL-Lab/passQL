@@ -1,9 +1,10 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { useParams, useNavigate, Navigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Check, RotateCcw, Target, Clock, Timer, Sparkles } from "lucide-react";
+import { RotateCcw, Target, Clock, Timer, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
 import { usePracticeStore } from "../stores/practiceStore";
 import { fetchAiComment } from "../api/progress";
+import { useAiText } from "../hooks/useAiText";
 import ScoreCountUp from "../components/ScoreCountUp";
 import StepNavigator from "../components/StepNavigator";
 
@@ -16,62 +17,100 @@ function formatDuration(ms: number): string {
   return remSec > 0 ? `${min}분 ${remSec}초` : `${min}분`;
 }
 
+/** useAiText 단어 수 기반 총 애니메이션 시간 계산 (훅과 동일 상수) */
+function calcAiAnimDuration(text: string): number {
+  const wordCount = text.split(/\s+/).filter(Boolean).length;
+  // startDelay 200ms + 단어 간격 55ms + 마지막 fade 300ms + 여유 300ms
+  return 200 + (wordCount - 1) * 55 + 300 + 300;
+}
+
 export default function PracticeResult() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
   const store = usePracticeStore();
-  // 다시 풀기 후 복귀 시 step3으로 바로 진입 — store에서 한 번만 읽고 즉시 클리어
-  const initialStepRef = useRef(store.returnStep ?? 0);
+
+  // 다시 풀기 후 복귀 시 step2로 바로 진입 (기존 step3 → 통합 후 step2)
+  const initialStepRef = useRef(store.returnStep != null ? Math.min(store.returnStep, 1) : 0);
   const initialStep = initialStepRef.current;
-  // 각 통계 항목의 등장 여부를 인덱스별로 관리 (0: 정답률, 1: 총시간, 2: 문제당 평균)
-  const [visibleStats, setVisibleStats] = useState<boolean[]>([
-    false,
-    false,
-    false,
-  ]);
-  // 펼쳐진 문제 카드 인덱스 (null = 모두 닫힘)
+
+  const [visibleStats, setVisibleStats] = useState<boolean[]>([false, false, false]);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
-  // 순차 등장 타이머 ID 보관 — 언마운트 시 클린업
-  const timerIdsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  // 문제 카드 순차 등장 상태 — 인덱스별 visible 여부
+  const [visibleCards, setVisibleCards] = useState<boolean[]>([]);
+  // 문제 리스트 섹션 자체 등장 여부
+  const [resultVisible, setResultVisible] = useState(false);
+
+  // 타이머를 역할별로 분리 — scoreComplete 타이머와 AI/카드 타이머가 서로 취소하지 않도록
+  const scoreTimerIdsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const cardTimerIdsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
   useEffect(() => {
-    // 읽은 returnStep 즉시 클리어 — 다음 일반 진입 시 step1로 시작하도록
     store.clearReturnStep();
     return () => {
-      timerIdsRef.current.forEach(clearTimeout);
+      scoreTimerIdsRef.current.forEach(clearTimeout);
+      cardTimerIdsRef.current.forEach(clearTimeout);
     };
-    // store 인스턴스는 변하지 않으므로 의존성 배열에서 제외
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // AI 코멘트: useQuery로 캐싱 및 StrictMode 이중 호출 방지
-  const { data: aiCommentData, isLoading: aiCommentLoading } = useQuery({
-    queryKey: ["aiComment"],
-    queryFn: fetchAiComment,
-    staleTime: 1000 * 60 * 60 * 24, // 24시간 — Redis 캐시(24h)와 맞춤
+  // AI 코멘트: sessionId 단위 캐시 — 세션마다 새 피드백
+  const { data: aiCommentData, isLoading: aiCommentLoading, isError: aiCommentError } = useQuery({
+    queryKey: ["aiComment", sessionId],
+    queryFn: () => fetchAiComment(sessionId!),
+    staleTime: 1000 * 60 * 60 * 2, // 2시간 — 백엔드 Redis TTL과 맞춤
+    enabled: !!sessionId,
+    retry: 1,
   });
-  // null=로딩 중, ""=에러/데이터 없음, string=내용
-  const aiComment = aiCommentLoading ? null : (aiCommentData?.comment ?? "");
+  // AI 로딩 중: null(스켈레톤), 실패: false(에러 메시지), 성공: 텍스트
+  const aiComment: string | null | false = aiCommentLoading
+    ? null
+    : aiCommentError
+      ? false
+      : (aiCommentData?.comment ?? "");
+
+  // AI 텍스트 단어 fade-in 훅 — 실패 시 undefined로 훅 비활성
+  const aiTextRef = useAiText(typeof aiComment === "string" ? aiComment : undefined, { startDelay: 200 });
+
+  // AI 애니메이션 완료 or 실패 시 문제 카드 순차 등장
+  useEffect(() => {
+    // 로딩 중이면 대기
+    if (aiComment === null) return;
+    cardTimerIdsRef.current.forEach(clearTimeout);
+    cardTimerIdsRef.current = [];
+
+    // AI 실패 시 즉시 등장, 성공 시 애니메이션 완료 후 등장
+    const animDuration = typeof aiComment === "string" && aiComment
+      ? calcAiAnimDuration(aiComment)
+      : 0;
+    const cardCount = store.results.length;
+
+    // 문제 리스트 섹션 먼저 등장
+    const sectionId = setTimeout(() => {
+      setResultVisible(true);
+      setVisibleCards(new Array(cardCount).fill(false));
+    }, animDuration);
+    cardTimerIdsRef.current.push(sectionId);
+
+    // 카드 80ms 간격 순차 등장
+    store.results.forEach((_, i) => {
+      const id = setTimeout(() => {
+        setVisibleCards((prev) => {
+          const next = [...prev];
+          next[i] = true;
+          return next;
+        });
+      }, animDuration + 100 + i * 80);
+      cardTimerIdsRef.current.push(id);
+    });
+  }, [aiComment, store.results]);
 
   const analysis = useMemo(() => {
     const results = store.results;
     const correctCount = results.filter((r) => r.isCorrect).length;
     const totalCount = results.length;
     const totalDurationMs = results.reduce((sum, r) => sum + r.durationMs, 0);
-
-    return {
-      correctCount,
-      totalCount,
-      totalDurationMs,
-      greeting:
-        correctCount >= 9
-          ? "완벽해요!"
-          : correctCount >= 7
-            ? "꽤 잘했어요!"
-            : correctCount >= 5
-              ? "괜찮아요!"
-              : "다시 도전해봐요!",
-    };
+    return { correctCount, totalCount, totalDurationMs };
   }, [store.results]);
 
   if (!store.sessionId || store.sessionId !== sessionId) {
@@ -81,16 +120,12 @@ export default function PracticeResult() {
   const totalDuration = formatDuration(analysis.totalDurationMs);
   const avgDuration =
     analysis.totalCount > 0
-      ? formatDuration(
-          Math.round(analysis.totalDurationMs / analysis.totalCount),
-        )
+      ? formatDuration(Math.round(analysis.totalDurationMs / analysis.totalCount))
       : "0초";
 
-  // 카운트업 완료 후 150ms 간격으로 순차 등장 — 타이머 ID 보관하여 언마운트 시 클린업
-  // 이전 타이머를 먼저 클린업하여 중복 호출(StrictMode 등) 방어
   const handleScoreComplete = useCallback(() => {
-    timerIdsRef.current.forEach(clearTimeout);
-    timerIdsRef.current = [];
+    scoreTimerIdsRef.current.forEach(clearTimeout);
+    scoreTimerIdsRef.current = [];
     [0, 1, 2].forEach((i) => {
       const id = setTimeout(() => {
         setVisibleStats((prev) => {
@@ -99,7 +134,7 @@ export default function PracticeResult() {
           return next;
         });
       }, i * 150);
-      timerIdsRef.current.push(id);
+      scoreTimerIdsRef.current.push(id);
     });
   }, []);
 
@@ -113,149 +148,126 @@ export default function PracticeResult() {
         total={analysis.totalCount}
         onComplete={handleScoreComplete}
       />
-
       <div className="flex gap-8 mt-8">
-        {/* 정답률 */}
-        <div
-          className={`text-center transition-all duration-300 ease-out ${visibleStats[0] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}
-        >
+        <div className={`text-center transition-all duration-300 ease-out ${visibleStats[0] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}>
           <div className="text-lg font-bold">
-            {analysis.totalCount > 0
-              ? Math.round((analysis.correctCount / analysis.totalCount) * 100)
-              : 0}
-            %
+            {analysis.totalCount > 0 ? Math.round((analysis.correctCount / analysis.totalCount) * 100) : 0}%
           </div>
           <div className="flex items-center gap-1 text-xs text-text-caption mt-0.5 justify-center">
-            <Target size={11} className="text-text-caption" />
-            정답률
+            <Target size={11} className="text-text-caption" />정답률
           </div>
         </div>
-        {/* 총 시간 */}
-        <div
-          className={`text-center transition-all duration-300 ease-out ${visibleStats[1] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}
-        >
+        <div className={`text-center transition-all duration-300 ease-out ${visibleStats[1] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}>
           <div className="text-lg font-bold">{totalDuration}</div>
           <div className="flex items-center gap-1 text-xs text-text-caption mt-0.5 justify-center">
             <Clock size={11} className="text-text-caption" />총 시간
           </div>
         </div>
-        {/* 문제당 평균 */}
-        <div
-          className={`text-center transition-all duration-300 ease-out ${visibleStats[2] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}
-        >
+        <div className={`text-center transition-all duration-300 ease-out ${visibleStats[2] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}>
           <div className="text-lg font-bold">{avgDuration}</div>
           <div className="flex items-center gap-1 text-xs text-text-caption mt-0.5 justify-center">
-            <Timer size={11} className="text-text-caption" />
-            문제당 평균
+            <Timer size={11} className="text-text-caption" />문제당 평균
           </div>
         </div>
       </div>
     </>
   );
 
+  // Step2: AI 분석 + 문제별 결과 통합
+  // AI 실패 시 뱃지/텍스트 영역 전체 숨김 — 문제 결과만 바로 표시
   const step2 = (
-    <div className="text-left w-full max-w-90 px-2 sm:px-0">
-      {/* AI 브랜딩 뱃지 — AI 교육 프로젝트임을 명시 */}
-      <div className="flex justify-center mb-4">
-        <span className="inline-flex items-center gap-1.5 bg-accent-light text-brand text-xs font-semibold px-3 py-1 rounded-full">
-          <Sparkles size={13} />
-          AI 분석
-        </span>
-      </div>
-      <p className="text-2xl font-bold text-center mb-5">{analysis.greeting}</p>
-      {/* AI 코멘트: null=로딩, ""=에러, 문자열=내용 — 인디고 border 카드로 감싸기 */}
-      <div className="border-l-4 border-brand rounded-xl px-4 py-3 bg-accent-light/30">
-        {aiComment === null ? (
-          <div className="space-y-2 animate-pulse">
-            <div className="h-4 bg-border rounded w-full" />
-            <div className="h-4 bg-border rounded w-5/6" />
-            <div className="h-4 bg-border rounded w-4/6" />
+    <div className="text-left w-full">
+      {/* AI 성공 시에만 뱃지 + 텍스트 표시 */}
+      {aiComment !== false && (
+        <>
+          <div className="flex justify-center mb-5">
+            <span className="inline-flex items-center gap-2 bg-accent-light text-brand text-base font-semibold px-5 py-2 rounded-full">
+              <Sparkles size={16} />
+              AI 리포트
+            </span>
           </div>
-        ) : aiComment ? (
-          <p className="text-body leading-relaxed">{aiComment}</p>
-        ) : null}
-      </div>
-    </div>
-  );
 
-  const step3 = (
-    <div className="w-full text-left overflow-y-auto">
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-sm font-medium text-text-caption">문제별 결과</p>
-        {/* 탭으로 펼쳐서 복습 가능함을 안내 */}
-        <p className="text-xs text-text-caption">눌러서 내 답 확인</p>
-      </div>
-      <div className="flex flex-col gap-2">
-        {store.results.map((r, i) => {
-          // 인덱스 대신 uuid로 매핑 — questions 순서와 results 순서가 어긋날 경우 방어
-          const q = store.questions.find((q) => q.questionUuid === r.questionUuid);
-          const isOpen = openIndex === i;
-          return (
-            <div
-              key={r.questionUuid}
-              className={`bg-surface-card border rounded-[10px] overflow-hidden ${
-                r.isCorrect ? "border-border" : "border-red-300"
-              }`}
-            >
-              {/* 카드 헤더 — 클릭 시 아코디언 토글 */}
-              <button
-                type="button"
-                className="w-full flex items-center gap-3 p-3 text-left"
-                onClick={() => setOpenIndex(isOpen ? null : i)}
-              >
-                <span
-                  className={`text-sm font-bold w-5 text-center shrink-0 ${r.isCorrect ? "text-green-600" : "text-red-600"}`}
-                >
-                  {i + 1}
-                </span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm truncate">{q?.stemPreview}</p>
-                  <p className="text-xs text-text-caption mt-0.5">
-                    {formatDuration(r.durationMs)}
-                  </p>
-                </div>
-                {r.isCorrect ? (
-                  <Check size={16} className="text-green-500 shrink-0" />
-                ) : (
-                  <span className="text-xs font-medium text-red-400 shrink-0">
-                    오답
-                  </span>
-                )}
-              </button>
-
-              {/* 아코디언 본문 — grid-rows 전환으로 300ms ease-out 높이 애니메이션 */}
-              <div
-                className={`grid transition-all duration-300 ease-out ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}
-              >
-                <div className="overflow-hidden">
-                  <div className="px-3 pb-3 pt-2 border-t border-border space-y-2">
-                    {/* stemPreview가 현재 접근 가능한 최대 지문 */}
-                    <p className="text-sm text-text-secondary leading-relaxed">
-                      {q?.stemPreview}
-                    </p>
-                    {/* 실제 선택지 텍스트 표시 — selectedChoiceBody로 키(A/B/C/D) 대신 본문 노출 */}
-                    <p
-                      className={`text-xs font-medium ${r.isCorrect ? "text-green-600" : "text-red-500"}`}
-                    >
-                      내 답: {r.selectedChoiceBody}
-                    </p>
-                    {/* 정답/오답 모두 다시 풀기 제공 — 복습 목적 */}
-                    <Link
-                      to={`/recommendation/${r.questionUuid}`}
-                      state={{
-                        returnPath: `/practice/${sessionId}`,
-                        initialStep: 2,
-                      }}
-                      className="inline-flex items-center gap-1.5 text-xs font-medium text-brand bg-accent-light rounded-md px-3 py-1.5"
-                    >
-                      <RotateCcw size={12} /> 다시 풀기
-                    </Link>
-                  </div>
-                </div>
-              </div>
+          {/* AI 텍스트 — 로딩: 스켈레톤, 성공: 단어별 fade-in */}
+          {aiComment === null ? (
+            <div className="space-y-2 animate-pulse mb-6">
+              <div className="h-4 bg-border rounded w-full" />
+              <div className="h-4 bg-border rounded w-5/6" />
+              <div className="h-4 bg-border rounded w-4/6" />
             </div>
-          );
-        })}
+          ) : (
+            <p ref={aiTextRef} className="text-body leading-relaxed mb-6" />
+          )}
+        </>
+      )}
+
+      {/* 문제별 결과 — AI 애니메이션 완료 후 등장 */}
+      <div
+        className={`transition-all duration-400 ease-out ${
+          resultVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
+        }`}
+      >
+        {resultVisible && (
+          <>
+            <div className="w-full h-px bg-border mb-3" />
+            <div className="flex items-center justify-between mb-3">
+              <p className="text-sm font-medium text-text-caption">문제별 결과</p>
+            </div>
+            <div className="flex flex-col gap-2">
+              {store.results.map((r, i) => {
+                const q = store.questions.find((q) => q.questionUuid === r.questionUuid);
+                const isOpen = openIndex === i;
+                return (
+                  <div
+                    key={r.questionUuid}
+                    className={`bg-surface-card border rounded-[10px] overflow-hidden transition-all duration-350 ease-out ${
+                      r.isCorrect ? "border-border" : "border-red-300"
+                    } ${visibleCards[i] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}
+                  >
+                    <button
+                      type="button"
+                      className="w-full flex items-center gap-3 p-3 text-left"
+                      onClick={() => setOpenIndex(isOpen ? null : i)}
+                    >
+                      <span className={`text-sm font-bold w-5 text-center shrink-0 ${r.isCorrect ? "text-green-600" : "text-red-600"}`}>
+                        {i + 1}
+                      </span>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm truncate">{q?.stemPreview}</p>
+                        <p className="text-xs text-text-caption mt-0.5">{formatDuration(r.durationMs)}</p>
+                      </div>
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        {!r.isCorrect && (
+                          <span className="text-xs font-medium text-red-400">오답</span>
+                        )}
+                        {isOpen
+                          ? <ChevronUp size={14} className="text-text-caption" />
+                          : <ChevronDown size={14} className="text-text-caption" />
+                        }
+                      </div>
+                    </button>
+                    <div className={`grid transition-all duration-300 ease-out ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
+                      <div className="overflow-hidden">
+                        <div className="px-3 pb-3 pt-2 border-t border-border space-y-2">
+                          <p className="text-sm text-text-secondary leading-relaxed">{q?.stemPreview}</p>
+                          <p className={`text-xs font-medium ${r.isCorrect ? "text-green-600" : "text-red-500"}`}>
+                            내 답: {r.selectedChoiceBody}
+                          </p>
+                          <Link
+                            to={`/recommendation/${r.questionUuid}`}
+                            state={{ returnPath: `/practice/${sessionId}`, initialStep: 1 }}
+                            className="inline-flex items-center gap-1.5 text-xs font-medium text-brand bg-accent-light rounded-md px-3 py-1.5"
+                          >
+                            <RotateCcw size={12} /> 다시 풀기
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
       </div>
     </div>
   );
@@ -264,7 +276,7 @@ export default function PracticeResult() {
     <div className="h-screen max-w-120 mx-auto px-4 sm:px-0">
       <StepNavigator
         key={initialStep}
-        steps={[step1, step2, step3]}
+        steps={[step1, step2]}
         initialStep={initialStep}
         lastButtonLabel="카테고리 목록으로"
         onLastStep={() => {

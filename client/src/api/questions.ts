@@ -211,11 +211,12 @@ export function submitAnswer(
   questionUuid: string,
   choiceSetId: string,
   selectedChoiceKey: string,
+  sessionUuid: string,
 ): Promise<SubmitResult> {
   return apiFetch(`/questions/${questionUuid}/submit`, {
     method: "POST",
     headers: { "X-Member-UUID": getMemberUuid() },
-    body: JSON.stringify({ choiceSetId, selectedChoiceKey }),
+    body: JSON.stringify({ choiceSetId, selectedChoiceKey, sessionUuid }),
   });
 }
 

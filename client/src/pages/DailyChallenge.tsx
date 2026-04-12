@@ -23,6 +23,8 @@ export default function DailyChallenge() {
   const isProcessingRef = useRef(false);
   // 다시 풀기 시 QuestionDetail 강제 리마운트 — isSubmittingRef 초기화 목적
   const [retryCount, setRetryCount] = useState(0);
+  // sessionUuid — 마운트 시 1회 생성하여 정답/다시 풀기 시에도 동일 세션으로 집계
+  const [sessionUuid] = useState(() => crypto.randomUUID());
 
   // 제출 완료 전까지 이탈 차단 — 로딩 중·제출 완료·제출 API 호출 중에는 차단 해제
   // submitting 중에도 해제: catch 블록의 navigate("/")가 모달 없이 통과되어야 함
@@ -44,7 +46,7 @@ export default function DailyChallenge() {
       if (selectedChoice?.isCorrect) {
         // 정답: 백엔드에 제출 → 완료 처리 (alreadySolvedToday=true)
         try {
-          const result = await submitAnswer(today.question.questionUuid, choiceSetId, selectedChoiceKey);
+          const result = await submitAnswer(today.question.questionUuid, choiceSetId, selectedChoiceKey, sessionUuid);
           // 백그라운드에서 캐시 무효화 — 홈 복귀 시 완료 상태·추천 문제 목록 즉시 반영
           queryClient.invalidateQueries({ queryKey: ["todayQuestion", uuid] });
           queryClient.invalidateQueries({ queryKey: ["recommendations"] });
@@ -71,7 +73,7 @@ export default function DailyChallenge() {
         setSubmitting(false);
       }
     },
-    [today?.question, navigate, queryClient, uuid],
+    [today?.question, navigate, queryClient, uuid, sessionUuid],
   );
 
   // 이미 오늘 풀었으면 홈으로 리다이렉트 — 피드백바 표시 중엔 건너뜀

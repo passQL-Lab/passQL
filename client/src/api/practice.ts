@@ -12,7 +12,8 @@ export async function generatePractice(topicCode: string): Promise<GenerateRespo
     throw new Error("해당 카테고리에 풀 수 있는 문제가 없어요.");
   }
   return {
-    sessionId: `session-${Date.now()}`,
+    // UUID v4로 생성 — 백엔드 ai-comment 캐시 키에 UUID 타입으로 전달됨
+    sessionId: crypto.randomUUID(),
     questions: page.content,
   };
 }

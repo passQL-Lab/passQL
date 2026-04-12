@@ -120,15 +120,6 @@ export default function AnswerFeedback() {
     }
   }, [state]); // resultCache, executing deps 제거됨 — ref로 대체
 
-  const handleAskAi = useCallback(() => {
-    if (!state) return;
-    setAiSheetOpen(true);
-    setAiText("");
-    diffMutation.mutate({
-      questionUuid: state.questionUuid,
-      selectedChoiceKey: state.selectedKey,
-    });
-  }, [state, diffMutation.mutate]);
 
   if (!state) {
     navigate("/questions", { replace: true });
@@ -173,17 +164,23 @@ export default function AnswerFeedback() {
             : "var(--color-sem-error-text)",
         }}
       >
-        {isCorrect ? "정답입니다!" : "오답이에요"}
+        {isCorrect ? "정답이에요!" : "틀렸어요"}
       </h1>
       <p className="text-secondary mt-2">
         {isCorrect
-          ? "정확히 맞혔어요! 다음 문제도 도전해보세요"
-          : "오답이에요. 해설을 확인해보세요"}
+          ? "잘 맞혔어요. 다음 문제도 도전해보세요"
+          : "아래 해설을 확인하고 다시 도전해보세요"}
       </p>
     </div>
   );
 
-  // ── CONCEPT_ONLY: 기존 텍스트 비교 카드 (변경 없음) ────
+  // ── CONCEPT_ONLY: 기존 텍스트 비교 카드 ────
+  // selectedSql/correctSql이 null인 경우 choices 배열에서 body를 fallback으로 사용
+  const selectedBody =
+    selectedSql ?? choices?.find((c) => c.key === selectedKey)?.body ?? null;
+  const correctBody =
+    correctSql ?? choices?.find((c) => c.key === correctKey)?.body ?? null;
+
   const conceptSection = !isExecutable ? (
     <div className="card-base">
       {!isCorrect && (
@@ -197,7 +194,7 @@ export default function AnswerFeedback() {
           <p className="text-sm font-semibold mb-2" style={{ color: "var(--color-sem-error-text)" }}>
             내가 선택한 답
           </p>
-          {selectedSql && <p className="text-body text-sm">{selectedSql}</p>}
+          {selectedBody && <p className="text-body text-sm">{selectedBody}</p>}
         </div>
       )}
       <div
@@ -210,7 +207,7 @@ export default function AnswerFeedback() {
         <p className="text-sm font-semibold mb-2" style={{ color: "var(--color-sem-success-text)" }}>
           정답
         </p>
-        {correctSql && <p className="text-body text-sm">{correctSql}</p>}
+        {correctBody && <p className="text-body text-sm">{correctBody}</p>}
       </div>
     </div>
   ) : null;
@@ -222,11 +219,6 @@ export default function AnswerFeedback() {
       <p className="text-body leading-relaxed" style={{ color: "#374151" }}>
         {rationale}
       </p>
-      {!isCorrect && (
-        <button className="btn-primary w-full mt-4" type="button" onClick={handleAskAi}>
-          AI에게 자세히 물어보기
-        </button>
-      )}
     </div>
   );
 

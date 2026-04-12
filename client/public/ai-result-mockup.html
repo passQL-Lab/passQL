@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI 분석 → 문제별 결과 등장 mockup</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: #FAFAFA;
+      color: #111827;
+      padding: 28px 16px 60px;
+    }
+
+    h1 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    .subtitle { font-size: 13px; color: #6B7280; margin-bottom: 36px; }
+
+    /* ── 핸드폰 프레임 ── */
+    .phone-frame {
+      width: 340px;
+      height: 680px;
+      background: #FFFFFF;
+      border: 1.5px solid #E5E7EB;
+      border-radius: 36px;
+      overflow: hidden;
+      position: relative;
+      box-shadow: 0 4px 28px rgba(0,0,0,0.08);
+    }
+
+    /* 스크롤 가능한 내부 */
+    .phone-scroll {
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      padding: 44px 20px 72px;
+      scroll-behavior: smooth;
+    }
+
+    /* ── AI 섹션 ── */
+    .ai-section { text-align: center; margin-bottom: 0; }
+
+    .ai-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #EEF2FF;
+      color: #4F46E5;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+
+    .ai-badge svg {
+      width: 11px; height: 11px;
+      stroke: #4F46E5; fill: none; stroke-width: 2;
+    }
+
+    .greeting {
+      font-size: 22px;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 14px;
+    }
+
+    /* 카드 C형 (아이콘 없음, 테두리 강조) */
+    .ai-comment-card {
+      background: #FFFFFF;
+      border: 1.5px solid #818CF8;
+      border-radius: 10px;
+      padding: 14px 16px;
+      text-align: left;
+      min-height: 68px;
+    }
+
+    /* 단어 단위 fade-in — useAiText 훅과 동일한 로직 */
+    .ai-word {
+      opacity: 0;
+      display: inline-block;
+      transition: opacity 0.3s ease;
+    }
+    .ai-word.visible { opacity: 1; }
+
+    /* ── 문제 리스트 섹션 ── */
+    .result-section {
+      margin-top: 20px;
+      /* 초기에는 숨김 — JS로 등장 */
+      opacity: 0;
+      transform: translateY(14px);
+      transition: opacity 0.4s ease-out, transform 0.4s ease-out;
+    }
+
+    .result-section.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: #E5E7EB;
+      margin-bottom: 10px;
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .result-header span { font-size: 11px; color: #9CA3AF; font-weight: 500; }
+
+    /* 문제 카드 — 개별 순차 등장 */
+    .q-card {
+      background: #FFFFFF;
+      border: 1px solid #E5E7EB;
+      border-radius: 10px;
+      padding: 10px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 6px;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity 0.35s ease-out, transform 0.35s ease-out;
+    }
+
+    .q-card.wrong { border-color: #FECACA; }
+    .q-card.appear { opacity: 1; transform: translateY(0); }
+
+    .q-num { font-size: 13px; font-weight: 700; width: 16px; text-align: center; flex-shrink: 0; }
+    .q-num.c { color: #22C55E; }
+    .q-num.w { color: #EF4444; }
+
+    .q-body { flex: 1; min-width: 0; }
+    .q-stem { font-size: 12px; color: #111827; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .q-time { font-size: 11px; color: #9CA3AF; margin-top: 2px; }
+
+    .q-ok  { font-size: 11px; color: #22C55E; flex-shrink: 0; }
+    .q-ng  { font-size: 11px; color: #EF4444; font-weight: 600; flex-shrink: 0; }
+
+    /* ── 하단 고정 버튼 ── */
+    .bottom-btn {
+      position: absolute;
+      bottom: 16px; left: 16px; right: 16px;
+      background: #4F46E5;
+      color: #FFF;
+      font-size: 15px; font-weight: 700;
+      height: 48px; border-radius: 8px;
+      border: none; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-family: inherit;
+    }
+
+    /* ── 재생 버튼 ── */
+    .replay-btn {
+      margin-top: 14px;
+      background: #EEF2FF;
+      color: #4F46E5;
+      border: 1.5px solid #C7D2FE;
+      border-radius: 8px;
+      padding: 8px 20px;
+      font-size: 13px; font-weight: 600;
+      cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px;
+      font-family: inherit;
+    }
+
+    .replay-btn:hover { background: #E0E7FF; }
+
+    /* ── 레이아웃 ── */
+    .demos {
+      display: flex;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .demo-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .demo-label {
+      font-size: 14px; font-weight: 700;
+      color: #111827;
+      margin-bottom: 4px;
+      text-align: center;
+    }
+
+    .demo-desc {
+      font-size: 12px; color: #6B7280;
+      margin-bottom: 14px;
+      text-align: center;
+      max-width: 340px;
+      line-height: 1.6;
+    }
+
+    .tag-rec {
+      display: inline-block;
+      font-size: 11px; font-weight: 600;
+      background: #DCFCE7; color: #16A34A;
+      padding: 2px 8px; border-radius: 999px;
+      margin-bottom: 8px;
+    }
+
+    /* 타임라인 표시 */
+    .timeline {
+      margin-top: 12px;
+      background: #F9FAFB;
+      border: 1px solid #E5E7EB;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 11px;
+      color: #6B7280;
+      line-height: 1.8;
+      max-width: 340px;
+      width: 100%;
+    }
+
+    .timeline strong { color: #4F46E5; }
+  </style>
+</head>
+<body>
+
+<h1>AI 분석 → 문제별 결과 순차 등장</h1>
+<p class="subtitle">AI 단어 애니메이션 완료 후 문제 리스트 등장 (A 스타일 순차 페이드업). 재생 버튼으로 반복 확인.</p>
+
+<div class="demos">
+
+  <!-- ── Demo 1: AI 텍스트 짧을 때 (빠름) ── -->
+  <div class="demo-wrap">
+    <div class="demo-label">짧은 AI 텍스트일 때</div>
+    <p class="demo-desc">단어 10개 내외. 약 0.8초 후 문제 리스트 등장.</p>
+    <div class="phone-frame">
+      <div class="phone-scroll" id="scroll-1">
+
+        <div class="ai-section">
+          <div class="ai-badge">
+            <svg viewBox="0 0 24 24"><path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z"/></svg>
+            AI 분석
+          </div>
+          <p class="greeting">괜찮아요!</p>
+          <div class="ai-comment-card">
+            <p id="text-1"></p>
+          </div>
+        </div>
+
+        <div class="result-section" id="result-1">
+          <div class="divider"></div>
+          <div class="result-header">
+            <span>문제별 결과</span>
+            <span>눌러서 내 답 확인</span>
+          </div>
+          <div class="q-card">
+            <span class="q-num c">1</span>
+            <div class="q-body"><p class="q-stem">GROUP BY와 HAVING의 차이점은?</p><p class="q-time">18초</p></div>
+            <span class="q-ok">✓</span>
+          </div>
+          <div class="q-card wrong">
+            <span class="q-num w">2</span>
+            <div class="q-body"><p class="q-stem">JOIN을 사용하여 두 테이블을 결합하려면?</p><p class="q-time">32초</p></div>
+            <span class="q-ng">오답</span>
+          </div>
+          <div class="q-card">
+            <span class="q-num c">3</span>
+            <div class="q-body"><p class="q-stem">윈도우 함수 RANK()의 동작 방식은?</p><p class="q-time">27초</p></div>
+            <span class="q-ok">✓</span>
+          </div>
+          <div class="q-card wrong">
+            <span class="q-num w">4</span>
+            <div class="q-body"><p class="q-stem">서브쿼리를 활용한 집계 방법은?</p><p class="q-time">45초</p></div>
+            <span class="q-ng">오답</span>
+          </div>
+          <div class="q-card">
+            <span class="q-num c">5</span>
+            <div class="q-body"><p class="q-stem">NULL 처리 함수 NVL의 사용법은?</p><p class="q-time">14초</p></div>
+            <span class="q-ok">✓</span>
+          </div>
+        </div>
+
+      </div>
+      <button class="bottom-btn">카테고리 목록으로</button>
+    </div>
+    <button class="replay-btn" onclick="runDemo1()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+      다시 재생
+    </button>
+    <div class="timeline" id="timeline-1"></div>
+  </div>
+
+  <!-- ── Demo 2: AI 텍스트 길 때 (실제 케이스) ── -->
+  <div class="demo-wrap">
+    <div class="demo-label">실제 AI 텍스트 길이</div>
+    <p class="demo-desc">단어 30~40개 수준. 애니메이션 완료 후 문제 리스트 자동 등장 + 스크롤 유도.</p>
+    <span class="tag-rec">실제 케이스</span>
+    <div class="phone-frame">
+      <div class="phone-scroll" id="scroll-2">
+
+        <div class="ai-section">
+          <div class="ai-badge">
+            <svg viewBox="0 0 24 24"><path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z"/></svg>
+            AI 분석
+          </div>
+          <p class="greeting">다시 도전해봐요!</p>
+          <div class="ai-comment-card">
+            <p id="text-2"></p>
+          </div>
+        </div>
+
+        <div class="result-section" id="result-2">
+          <div class="divider"></div>
+          <div class="result-header">
+            <span>문제별 결과</span>
+            <span>눌러서 내 답 확인</span>
+          </div>
+          <div class="q-card wrong">
+            <span class="q-num w">1</span>
+            <div class="q-body"><p class="q-stem">JOIN을 사용하여 두 테이블을 결합하려면?</p><p class="q-time">32초</p></div>
+            <span class="q-ng">오답</span>
+          </div>
+          <div class="q-card">
+            <span class="q-num c">2</span>
+            <div class="q-body"><p class="q-stem">GROUP BY와 HAVING의 차이점은?</p><p class="q-time">18초</p></div>
+            <span class="q-ok">✓</span>
+          </div>
+          <div class="q-card wrong">
+            <span class="q-num w">3</span>
+            <div class="q-body"><p class="q-stem">서브쿼리를 활용한 집계 방법은?</p><p class="q-time">45초</p></div>
+            <span class="q-ng">오답</span>
+          </div>
+          <div class="q-card">
+            <span class="q-num c">4</span>
+            <div class="q-body"><p class="q-stem">윈도우 함수 RANK()의 동작 방식은?</p><p class="q-time">27초</p></div>
+            <span class="q-ok">✓</span>
+          </div>
+          <div class="q-card wrong">
+            <span class="q-num w">5</span>
+            <div class="q-body"><p class="q-stem">계층형 쿼리 CONNECT BY 사용법은?</p><p class="q-time">38초</p></div>
+            <span class="q-ng">오답</span>
+          </div>
+        </div>
+
+      </div>
+      <button class="bottom-btn">카테고리 목록으로</button>
+    </div>
+    <button class="replay-btn" onclick="runDemo2()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg>
+      다시 재생
+    </button>
+    <div class="timeline" id="timeline-2"></div>
+  </div>
+
+</div>
+
+<script>
+  const START_DELAY = 200;   // useAiText 기본값과 동일
+  const WORD_INTERVAL = 55;  // useAiText 단어 간격과 동일
+  const AFTER_AI_GAP = 300;  // AI 완료 후 리스트 등장 전 여유 시간
+  const CARD_INTERVAL = 80;  // 문제 카드 순차 간격
+
+  /**
+   * useAiText 훅과 동일한 로직으로 단어 fade-in 실행.
+   * 완료 시점을 계산해 onDone 콜백 호출.
+   */
+  function animateAiText(el, text, onDone) {
+    el.innerHTML = "";
+    const tokens = text.split(/(\s+)/);
+    let wordCount = 0;
+
+    tokens.forEach(token => {
+      if (/^\s+$/.test(token)) {
+        el.appendChild(document.createTextNode(token));
+        return;
+      }
+      const span = document.createElement("span");
+      span.className = "ai-word";
+      span.textContent = token;
+      el.appendChild(span);
+      wordCount++;
+    });
+
+    const words = el.querySelectorAll(".ai-word");
+    words.forEach((w, i) => {
+      setTimeout(() => { w.classList.add("visible"); }, START_DELAY + i * WORD_INTERVAL);
+    });
+
+    // 마지막 단어 fade-in 완료 후 onDone 호출
+    const totalMs = START_DELAY + (wordCount - 1) * WORD_INTERVAL + 300; // +300ms 여유
+    setTimeout(onDone, totalMs + AFTER_AI_GAP);
+    return totalMs;
+  }
+
+  /**
+   * 문제 카드 순차 등장
+   */
+  function showResultCards(resultEl, scrollEl, timelineEl, startAt) {
+    resultEl.classList.add("show");
+
+    const cards = resultEl.querySelectorAll(".q-card");
+    cards.forEach((card, i) => {
+      const delay = i * CARD_INTERVAL;
+      setTimeout(() => {
+        card.classList.add("appear");
+        // 마지막 카드 등장 시 스크롤 유도
+        if (i === cards.length - 1) {
+          setTimeout(() => {
+            scrollEl.scrollTo({ top: scrollEl.scrollHeight, behavior: "smooth" });
+          }, 200);
+        }
+      }, delay);
+    });
+
+    const lastCardAt = startAt + cards.length * CARD_INTERVAL;
+    updateTimeline(timelineEl, startAt, cards.length, lastCardAt);
+  }
+
+  function updateTimeline(el, aiEndMs, cardCount, lastCardMs) {
+    el.innerHTML = `
+      <strong>타임라인 (실제 구현 기준)</strong><br/>
+      0ms — AI 단어 첫 등장 시작<br/>
+      ~${aiEndMs}ms — AI 텍스트 완료<br/>
+      +${AFTER_AI_GAP}ms 여유 → <strong>${aiEndMs + AFTER_AI_GAP}ms</strong> — 문제 리스트 등장<br/>
+      이후 ${CARD_INTERVAL}ms 간격으로 카드 ${cardCount}장 순차 등장<br/>
+      <strong>총 ${lastCardAt(aiEndMs, cardCount)}ms</strong> 에 모든 카드 표시 완료
+    `;
+  }
+
+  function lastCardAt(aiEndMs, count) {
+    return aiEndMs + AFTER_AI_GAP + count * CARD_INTERVAL;
+  }
+
+  // ── 리셋 헬퍼 ──
+  function resetDemo(resultId, textId, scrollId) {
+    const result = document.getElementById(resultId);
+    const text   = document.getElementById(textId);
+    const scroll = document.getElementById(scrollId);
+
+    result.classList.remove("show");
+    result.querySelectorAll(".q-card").forEach(c => c.classList.remove("appear"));
+    text.innerHTML = "";
+    scroll.scrollTo({ top: 0 });
+  }
+
+  // ── Demo 1: 짧은 텍스트 ──
+  const SHORT_TEXT = "JOIN과 서브쿼리 부분을 집중적으로 복습해보세요. 기본기가 탄탄해지면 점수가 빠르게 오를 거예요!";
+
+  function runDemo1() {
+    resetDemo("result-1", "text-1", "scroll-1");
+    const textEl   = document.getElementById("text-1");
+    const resultEl = document.getElementById("result-1");
+    const scrollEl = document.getElementById("scroll-1");
+    const tlEl     = document.getElementById("timeline-1");
+
+    const aiEndMs = animateAiText(textEl, SHORT_TEXT, () => {
+      showResultCards(resultEl, scrollEl, tlEl, aiEndMs);
+    });
+  }
+
+  // ── Demo 2: 실제 길이 텍스트 ──
+  const LONG_TEXT = "JOIN 토픽의 정답률이 17%로 가장 낮아 개선이 시급해 보입니다. 서브쿼리, 그룹함수/집계, 윈도우 함수, 계층/PIVOT 등 4개의 토픽에서 아직 정답률이 0%이니 이 부분들을 집중적으로 학습하는 것을 추천합니다. 특히 JOIN은 SQL의 핵심 개념이므로 INNER JOIN부터 차근차근 시작해보세요.";
+
+  function runDemo2() {
+    resetDemo("result-2", "text-2", "scroll-2");
+    const textEl   = document.getElementById("text-2");
+    const resultEl = document.getElementById("result-2");
+    const scrollEl = document.getElementById("scroll-2");
+    const tlEl     = document.getElementById("timeline-2");
+
+    const aiEndMs = animateAiText(textEl, LONG_TEXT, () => {
+      showResultCards(resultEl, scrollEl, tlEl, aiEndMs);
+    });
+  }
+
+  // 페이지 로드 시 자동 실행
+  window.addEventListener("load", () => {
+    setTimeout(runDemo1, 300);
+    setTimeout(runDemo2, 500);
+  });
+</script>
+
+</body>
+</html>

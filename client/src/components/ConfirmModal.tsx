@@ -42,8 +42,7 @@ export default function ConfirmModal({
   return (
     // 오버레이 — 클릭 시 이탈 취소
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center"
-      style={{ backgroundColor: "rgba(17, 24, 39, 0.5)" }}
+      className="fixed inset-0 z-50 flex items-end justify-center bg-base-content/50"
       onClick={onCancel}
     >
       {/* 모달 카드 — 클릭 이벤트 버블링 방지 */}
@@ -63,7 +62,7 @@ export default function ConfirmModal({
           {/* 유지 액션: Primary 버튼 (파괴적 액션 비강조 원칙) */}
           <button
             type="button"
-            className="btn-primary w-full"
+            className="btn btn-primary w-full"
             onClick={onCancel}
           >
             {cancelLabel}
@@ -71,7 +70,7 @@ export default function ConfirmModal({
           {/* 파괴적 액션: Secondary 버튼 */}
           <button
             type="button"
-            className="btn-secondary w-full"
+            className="btn btn-secondary w-full"
             onClick={onConfirm}
           >
             {confirmLabel}

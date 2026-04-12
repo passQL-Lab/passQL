@@ -1,7 +1,34 @@
 # Changelog
 
-**현재 버전:** 0.0.99  
-**마지막 업데이트:** 2026-04-12T13:38:43Z  
+**현재 버전:** 0.0.105  
+**마지막 업데이트:** 2026-04-12T15:37:21Z  
+
+---
+
+## [0.0.105] - 2026-04-12
+
+**PR:** #188  
+
+**New Features**
+- Added session-based practice tracking for AI analysis aggregation
+- Introduced animated word-by-word AI analysis display on practice results
+- Added D-day counter and improved schedule card styling on home page
+- Added mobile header with team badge
+- New "result match" question format for answer validation
+
+**UI/UX Improvements**
+- Refreshed navigation styling across mobile and desktop layouts
+- Enhanced Stats page with animations and topic visualization
+- Improved practice result screen layout with sequential result animations
+- Applied consistent design system theme to components
+
+**Bug Fixes & Improvements**
+- Added fallback handling for multiple-correct answer scenarios
+- Improved session-scoped AI comment caching (reduced from 24h to 2h)
+- Better exit confirmation for in-progress practice sessions
+
+**License Change**
+- Updated to custom "passQL Source-Available License 1.0"
 
 ---
 

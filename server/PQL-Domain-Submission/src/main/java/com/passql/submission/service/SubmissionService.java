@@ -44,7 +44,7 @@ public class SubmissionService {
     private final RedisTemplate<String, Object> redisTemplate;
 
     @Transactional
-    public SubmitResult submit(UUID memberUuid, UUID questionUuid, UUID choiceSetId, String selectedChoiceKey) {
+    public SubmitResult submit(UUID memberUuid, UUID questionUuid, UUID choiceSetId, String selectedChoiceKey, UUID sessionUuid) {
         // 1. ChoiceSet 조회
         QuestionChoiceSet choiceSet = choiceSetRepository.findById(choiceSetId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CHOICE_SET_NOT_FOUND));
@@ -70,13 +70,14 @@ public class SubmissionService {
             choiceSetRepository.save(choiceSet);
         }
 
-        // 5. Submission 저장 (choiceSetUuid 포함)
+        // 5. Submission 저장 (sessionUuid 포함 — AI 코멘트 세션 집계에 사용)
         Submission submission = Submission.builder()
                 .memberUuid(memberUuid)
                 .questionUuid(questionUuid)
                 .choiceSetUuid(choiceSetId)
                 .selectedChoiceKey(selectedChoiceKey)
                 .isCorrect(isCorrect)
+                .sessionUuid(sessionUuid)
                 .submittedAt(LocalDateTime.now())
                 .build();
         submissionRepository.save(submission);
@@ -124,8 +125,8 @@ public class SubmissionService {
             }
         }
 
-        // 7. AI 코멘트 캐시 무효화 (새 Submission 발생 시 즉시 evict)
-        redisTemplate.delete("ai-comment:" + memberUuid);
+        // 7. AI 코멘트 캐시: 세션 단위(ai-comment:{memberUuid}:{sessionUuid})로 전환됨.
+        //    새 세션 시작 시 새 sessionUuid로 요청이 오므로 별도 evict 불필요.
 
         return new SubmitResult(
                 isCorrect,

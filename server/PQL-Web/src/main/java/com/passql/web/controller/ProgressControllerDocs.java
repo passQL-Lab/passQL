@@ -107,6 +107,7 @@ public interface ProgressControllerDocs {
 
     @ApiLogs({
         @ApiLog(date = "2026.04.10", author = Author.SUHSAECHAN, issueNumber = 71, description = "AI 영역 분석 코멘트 API 추가 (Redis 캐시 24h TTL, Submission 저장 시 evict)"),
+        @ApiLog(date = "2026.04.12", author = Author.SUHSAECHAN, issueNumber = 176, description = "sessionUuid 파라미터 추가. 캐시 키 세션 단위 변경(ai-comment:{memberUuid}:{sessionUuid}, TTL 2h). 프롬프트 DB 이관(ai_comment 키). 이번 세션 결과 + 누적 통계 통합 피드백."),
     })
     @Operation(
         summary = "AI 영역 분석 코멘트 조회",
@@ -115,18 +116,21 @@ public interface ProgressControllerDocs {
 
             ## 요청 파라미터
             - memberUuid (UUID, required): 회원 식별자
+            - sessionUuid (UUID, required): 퀴즈 세션 식별자
 
             ## 반환값 (AiCommentResponse)
             - comment: AI 생성 한국어 코멘트 (2~3문장, 약점 영역 파악 + 집중 학습 추천)
             - generatedAt: 코멘트 생성(캐시 저장) 시각
 
             ## 캐싱
-            - Redis key: ai-comment:{memberUuid}, TTL 24시간
-            - 새 Submission 저장 시 즉시 캐시 무효화 → 다음 호출 시 재생성
+            - Redis key: ai-comment:{memberUuid}:{sessionUuid}, TTL 2시간
+            - 같은 세션 재진입 시 동일 텍스트 반환 (불필요한 AI 호출 방지)
+            - 새 세션 시작 시 새 sessionUuid로 자동 새 AI 호출
             - AI 호출 latency를 고려해 프론트엔드에서 비동기 로딩 권장
             """
     )
     ResponseEntity<AiCommentResponse> getAiComment(
-        @RequestParam UUID memberUuid
+        @RequestParam UUID memberUuid,
+        @RequestParam(required = false) UUID sessionUuid
     );
 }

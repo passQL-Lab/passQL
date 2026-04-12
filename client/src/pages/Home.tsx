@@ -128,8 +128,39 @@ export default function Home() {
         )}
       </section>
 
-      {/* ③ 오늘의 문제 + 시험 일정 카드 섹션 */}
+      {/* ③ 시험 일정 + 오늘의 문제 카드 섹션 — 시험 일정을 앞에 배치 */}
       <section className={`grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 ${s2.className}`}>
+        {schedule ? (
+          // 인디고 단색 카드 — D-day를 전면에 강조해 시험 긴박감 전달
+          <div className="h-full rounded-xl p-4 sm:p-6 flex flex-col justify-center relative overflow-hidden bg-brand">
+            {/* 배경 장식 원 — 단색 배경의 단조로움을 덜어주는 subtle한 레이어 */}
+            <div className="absolute -right-4 -top-4 w-20 h-20 rounded-full bg-white/10" />
+            <div className="absolute right-4 -bottom-8 w-24 h-24 rounded-full bg-white/5" />
+            <p className="text-xs font-medium text-white/70 mb-1 relative z-10">
+              {schedule.certType} {schedule.round}회
+            </p>
+            <p className="text-3xl font-bold text-white leading-tight relative z-10">
+              {/* D-day 계산: 오늘 00:00 기준으로 시험일까지 남은 일수 */}
+              {(() => {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const exam = new Date(schedule.examDate);
+                exam.setHours(0, 0, 0, 0);
+                const diff = Math.round((exam.getTime() - today.getTime()) / 86400000);
+                if (diff > 0) return `D-${diff}`;
+                if (diff === 0) return "D-Day";
+                return `D+${Math.abs(diff)}`;
+              })()}
+            </p>
+            <p className="text-sm text-white/70 mt-1 relative z-10">{schedule.examDate}</p>
+          </div>
+        ) : (
+          <div className="card bg-white p-4 sm:p-6 shadow-sm h-full flex flex-col justify-center">
+            <p className="text-secondary text-sm">시험 일정</p>
+            <p className="text-caption">선택된 일정 없음</p>
+          </div>
+        )}
+
         {today?.question ? (
           today.alreadySolvedToday ? (
             // 완료 상태: 회색 dimmed 카드 — 이미 끝난 항목임을 시각적으로 표현
@@ -176,20 +207,6 @@ export default function Home() {
               <p className="text-body text-sm">SQL AI문제를 풀어보세요</p>
             </div>
           </Link>
-        )}
-
-        {schedule ? (
-          <div className="card bg-white p-4 sm:p-6 shadow-sm h-full flex flex-col justify-center">
-            <p className="text-secondary text-sm">
-              {schedule.certType} {schedule.round}회
-            </p>
-            <p className="text-h2 text-brand mt-1">{schedule.examDate}</p>
-          </div>
-        ) : (
-          <div className="card bg-white p-4 sm:p-6 shadow-sm h-full flex flex-col justify-center">
-            <p className="text-secondary text-sm">시험 일정</p>
-            <p className="text-caption">선택된 일정 없음</p>
-          </div>
         )}
       </section>
 

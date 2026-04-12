@@ -31,6 +31,8 @@ interface QuestionDetailProps {
   readonly practiceMode?: boolean;
   readonly practiceSubmitLabel?: string;
   readonly questionUuid?: string;
+  // AI 코멘트 세션 집계용 — 연습/다시풀기 모드에서 store의 sessionId 전달
+  readonly sessionUuid?: string;
   readonly onPracticeSubmit?: (
     selectedChoiceKey: string,
     choiceSetId: string,
@@ -49,6 +51,7 @@ export default function QuestionDetail({
   practiceMode,
   practiceSubmitLabel,
   questionUuid: propUuid,
+  sessionUuid,
   onPracticeSubmit,
   onSubmitSuccess,
   showExecution = false,
@@ -59,7 +62,7 @@ export default function QuestionDetail({
   const queryClient = useQueryClient();
   const { data: question, isLoading } = useQuestionDetail(questionUuid!);
   const executeMutation = useExecuteChoice(questionUuid!);
-  const submitMutation = useSubmitAnswer(questionUuid!);
+  const submitMutation = useSubmitAnswer(questionUuid!, sessionUuid);
 
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   // 제출 완료 여부 — true가 되면 이탈 차단 해제
@@ -225,9 +228,8 @@ export default function QuestionDetail({
             questionUuid,
             // executionMode는 QuestionDetail에서 전달 (SubmitResult에서 제거됨)
             executionMode: question.executionMode,
-            // EXECUTABLE 문제: 제출 후 오답노트에서 선택지 SQL 실행 비교용
-            choices:
-              question.executionMode === "EXECUTABLE" ? choices : undefined,
+            // 선택지 본문 전달: EXECUTABLE은 SQL 실행 비교용, CONCEPT_ONLY는 선택지 텍스트 표시용
+            choices,
           };
           // 제출 완료 시 추천 문제 캐시 무효화 — 홈 복귀 시 목록 즉시 갱신
           queryClient.invalidateQueries({ queryKey: ["recommendations"] });

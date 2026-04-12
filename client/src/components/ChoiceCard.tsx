@@ -11,7 +11,11 @@ interface ChoiceCardProps {
   readonly isExecuting: boolean;
   readonly onSelect: (key: string, sql: string) => void;
   readonly onExecute: (key: string, sql: string) => void;
-  readonly onAskAi?: (choiceKey: string, errorCode: string, errorMessage: string) => void;
+  readonly onAskAi?: (
+    choiceKey: string,
+    errorCode: string,
+    errorMessage: string,
+  ) => void;
 }
 
 /** body가 JSON 배열인지 판별 — RESULT_MATCH 선택지 감지용 */
@@ -61,7 +65,9 @@ export const ChoiceCard = memo(function ChoiceCard({
         </div>
       ) : isConceptText ? (
         // CONCEPT_ONLY: 일반 텍스트 렌더링 — 선택 시 흰색으로 반전
-        <p className={`text-body ${isSelected ? "choice-text-inverted" : ""}`}>{choice.body}</p>
+        <p className={`text-body ${isSelected ? "choice-text-inverted" : ""}`}>
+          {choice.body}
+        </p>
       ) : (
         // EXECUTABLE SQL: 모노 폰트 + 실행 버튼 (풀이 중 isExecutable=false로 숨김)
         <>
@@ -76,12 +82,12 @@ export const ChoiceCard = memo(function ChoiceCard({
               onClick={(e) => e.stopPropagation()}
             >
               <button
-                className={`btn-compact ${isSelected ? "btn-compact-inverted" : ""}`}
+                className={`btn btn-xs btn-outline${isSelected ? " bg-white text-primary border-white" : " text-primary border-primary"}`}
                 type="button"
                 onClick={() => onExecute(choice.key, choice.body)}
                 disabled={!!cached || isExecuting}
               >
-                {isExecuting ? "실행 중..." : "실행"}
+                {isExecuting ? "실행 중..." : "실행하기"}
               </button>
             </div>
           )}
@@ -94,7 +100,12 @@ export const ChoiceCard = memo(function ChoiceCard({
                     result={cached}
                     onAskAi={
                       cached.errorCode
-                        ? () => onAskAi?.(choice.key, cached.errorCode ?? "", cached.errorMessage ?? "")
+                        ? () =>
+                            onAskAi?.(
+                              choice.key,
+                              cached.errorCode ?? "",
+                              cached.errorMessage ?? "",
+                            )
                         : undefined
                     }
                   />
@@ -104,7 +115,12 @@ export const ChoiceCard = memo(function ChoiceCard({
                   result={cached}
                   onAskAi={
                     cached.errorCode
-                      ? () => onAskAi?.(choice.key, cached.errorCode ?? "", cached.errorMessage ?? "")
+                      ? () =>
+                          onAskAi?.(
+                            choice.key,
+                            cached.errorCode ?? "",
+                            cached.errorMessage ?? "",
+                          )
                       : undefined
                   }
                 />

@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { fetchQuestion, executeChoice, submitAnswer } from "../api/questions";
 
@@ -17,9 +18,13 @@ export function useExecuteChoice(questionUuid: string) {
   });
 }
 
-export function useSubmitAnswer(questionUuid: string) {
+export function useSubmitAnswer(questionUuid: string, sessionUuid?: string) {
+  // sessionUuid 미전달(단독 풀이 모드) 시 폴백 UUID — ref로 마운트 시 1회 생성 후 고정
+  // useMemo는 의존성 배열 관리 복잡도가 높아 ref 패턴 사용
+  const fallbackSessionUuidRef = useRef(crypto.randomUUID());
+
   return useMutation({
     mutationFn: ({ choiceSetId, selectedChoiceKey }: { choiceSetId: string; selectedChoiceKey: string }) =>
-      submitAnswer(questionUuid, choiceSetId, selectedChoiceKey),
+      submitAnswer(questionUuid, choiceSetId, selectedChoiceKey, sessionUuid ?? fallbackSessionUuidRef.current),
   });
 }

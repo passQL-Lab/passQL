@@ -9,5 +9,8 @@ public record SubmitRequest(
     UUID choiceSetId,
 
     @Schema(description = "선택한 선택지 키", example = "A")
-    String selectedChoiceKey
+    String selectedChoiceKey,
+
+    @Schema(description = "퀴즈 세션 UUID — AI 코멘트 세션 집계에 사용", example = "550e8400-e29b-41d4-a716-446655440001")
+    UUID sessionUuid
 ) {}

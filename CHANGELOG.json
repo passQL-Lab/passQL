@@ -1,11 +1,54 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-12T13:38:43Z",
-    "currentVersion": "0.0.99",
+    "lastUpdated": "2026-04-12T15:37:21Z",
+    "currentVersion": "0.0.105",
     "projectType": "basic",
-    "totalReleases": 43
+    "totalReleases": 44
   },
   "releases": [
+    {
+      "version": "0.0.105",
+      "project_type": "basic",
+      "date": "2026-04-12",
+      "pr_number": 188,
+      "raw_summary": "## Summary by CodeRabbit\n\n* **New Features**\n  * Added session-based practice tracking for AI analysis aggregation\n  * Introduced animated word-by-word AI analysis display on practice results\n  * Added D-day counter and improved schedule card styling on home page\n  * Added mobile header with team badge\n  * New \"result match\" question format for answer validation\n\n* **UI/UX Improvements**\n  * Refreshed navigation styling across mobile and desktop layouts\n  * Enhanced Stats page with animations and topic visualization\n  * Improved practice result screen layout with sequential result animations\n  * Applied consistent design system theme to components\n\n* **Bug Fixes & Improvements**\n  * Added fallback handling for multiple-correct answer scenarios\n  * Improved session-scoped AI comment caching (reduced from 24h to 2h)\n  * Better exit confirmation for in-progress practice sessions\n\n* **License Change**\n  * Updated to custom \"passQL Source-Available License 1.0\"",
+      "parsed_changes": {
+        "new_features": {
+          "title": "New Features",
+          "items": [
+            "Added session-based practice tracking for AI analysis aggregation",
+            "Introduced animated word-by-word AI analysis display on practice results",
+            "Added D-day counter and improved schedule card styling on home page",
+            "Added mobile header with team badge",
+            "New \"result match\" question format for answer validation"
+          ]
+        },
+        "ui_ux_improvements": {
+          "title": "UI/UX Improvements",
+          "items": [
+            "Refreshed navigation styling across mobile and desktop layouts",
+            "Enhanced Stats page with animations and topic visualization",
+            "Improved practice result screen layout with sequential result animations",
+            "Applied consistent design system theme to components"
+          ]
+        },
+        "bug_fixes___improvements": {
+          "title": "Bug Fixes & Improvements",
+          "items": [
+            "Added fallback handling for multiple-correct answer scenarios",
+            "Improved session-scoped AI comment caching (reduced from 24h to 2h)",
+            "Better exit confirmation for in-progress practice sessions"
+          ]
+        },
+        "license_change": {
+          "title": "License Change",
+          "items": [
+            "Updated to custom \"passQL Source-Available License 1.0\""
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.99",
       "project_type": "basic",
