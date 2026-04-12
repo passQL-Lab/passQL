@@ -34,7 +34,7 @@ export const SqlPlayground = memo(function SqlPlayground({
   };
 
   return (
-    <div className="card-base mt-3">
+    <div className="bg-surface-card border border-border rounded-2xl p-4 sm:p-6 mt-3">
       <button
         type="button"
         className="flex items-center justify-between w-full"

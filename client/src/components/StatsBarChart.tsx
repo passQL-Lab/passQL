@@ -28,7 +28,7 @@ export default function StatsBarChart({ topicStats }: StatsBarChartProps) {
   }));
 
   return (
-    <div className="card-base">
+    <div className="bg-surface-card border border-border rounded-2xl p-4 sm:p-6">
       <h2 className="text-lg font-bold mb-4">카테고리별 문제 수</h2>
       <div className="w-full" style={{ height: Math.max(256, topicStats.length * 32) }}>
         <ResponsiveContainer width="100%" height="100%">
