@@ -1,11 +1,36 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-12T17:38:37Z",
-    "currentVersion": "0.0.112",
+    "lastUpdated": "2026-04-12T22:54:13Z",
+    "currentVersion": "0.0.114",
     "projectType": "basic",
-    "totalReleases": 45
+    "totalReleases": 46
   },
   "releases": [
+    {
+      "version": "0.0.114",
+      "project_type": "basic",
+      "date": "2026-04-12",
+      "pr_number": 202,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **New Features**\n  * 설정 페이지에 사용자 의견 제출 및 조회 기능 추가\n  * 설정 페이지 레이아웃 개편으로 계정, 의견, 앱 정보 섹션 구분\n  * 앱의 온라인/오프라인 상태 감지 기능 추가\n\n* **Refactor**\n  * 전체 페이지와 컴포넌트의 디자인 시스템 표준화로 시각적 일관성 개선\n  * 여러 UI 요소의 스타일 토큰 통일",
+      "parsed_changes": {
+        "new_features": {
+          "title": "New Features",
+          "items": [
+            "설정 페이지에 사용자 의견 제출 및 조회 기능 추가",
+            "설정 페이지 레이아웃 개편으로 계정, 의견, 앱 정보 섹션 구분",
+            "앱의 온라인/오프라인 상태 감지 기능 추가"
+          ]
+        },
+        "refactor": {
+          "title": "Refactor",
+          "items": [
+            "전체 페이지와 컴포넌트의 디자인 시스템 표준화로 시각적 일관성 개선",
+            "여러 UI 요소의 스타일 토큰 통일"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.112",
       "project_type": "basic",
