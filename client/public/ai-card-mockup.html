@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI 분석 카드 디자인 비교</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: #FAFAFA;
+      color: #111827;
+      padding: 32px 16px;
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 8px;
+    }
+
+    .subtitle {
+      font-size: 14px;
+      color: #6B7280;
+      margin-bottom: 32px;
+    }
+
+    .section-label {
+      font-size: 12px;
+      font-weight: 700;
+      color: #9CA3AF;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .section {
+      margin-bottom: 48px;
+    }
+
+    /* 현재 (Before) */
+    .before-card {
+      background: #FFFFFF;
+      border: 1px solid #E5E7EB;
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 360px;
+    }
+
+    .before-ai-block {
+      border-left: 4px solid #4F46E5;
+      border-radius: 12px;
+      padding: 12px 16px;
+      background: rgba(238, 242, 255, 0.3);
+    }
+
+    .before-ai-block p {
+      font-size: 16px;
+      line-height: 1.6;
+      color: #111827;
+    }
+
+    /* AI 뱃지 공통 */
+    .ai-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #EEF2FF;
+      color: #4F46E5;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 4px 10px;
+      border-radius: 999px;
+      margin-bottom: 12px;
+    }
+
+    .ai-badge svg {
+      width: 12px;
+      height: 12px;
+    }
+
+    .card-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #111827;
+      margin-bottom: 16px;
+    }
+
+    /* ─── Option A: 심플 카드 ─── */
+    .option-a-card {
+      background: #FFFFFF;
+      border: 1px solid #E5E7EB;
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 360px;
+    }
+
+    .option-a-inner {
+      background: #F9FAFB;
+      border: 1px solid #E5E7EB;
+      border-radius: 10px;
+      padding: 16px;
+    }
+
+    .option-a-inner p {
+      font-size: 15px;
+      line-height: 1.7;
+      color: #374151;
+    }
+
+    /* ─── Option B: 그라디언트 카드 ─── */
+    .option-b-card {
+      background: #FFFFFF;
+      border: 1px solid #E5E7EB;
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 360px;
+    }
+
+    .option-b-inner {
+      background: linear-gradient(135deg, #EEF2FF 0%, #F5F3FF 100%);
+      border: 1px solid #C7D2FE;
+      border-radius: 10px;
+      padding: 16px;
+    }
+
+    .option-b-inner p {
+      font-size: 15px;
+      line-height: 1.7;
+      color: #374151;
+    }
+
+    /* ─── Option C: 아이콘 강조형 ─── */
+    .option-c-card {
+      background: #FFFFFF;
+      border: 1px solid #E5E7EB;
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 360px;
+    }
+
+    .option-c-inner {
+      background: #FFFFFF;
+      border: 1px solid #E5E7EB;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .option-c-icon-wrap {
+      width: 44px;
+      height: 44px;
+      background: #EEF2FF;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+    }
+
+    .option-c-icon-wrap svg {
+      width: 22px;
+      height: 22px;
+      color: #4F46E5;
+      stroke: #4F46E5;
+    }
+
+    .option-c-inner p {
+      font-size: 15px;
+      line-height: 1.7;
+      color: #374151;
+      text-align: left;
+    }
+
+    /* 레이아웃 */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 700px) {
+      .compare-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .option-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .option-label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #111827;
+    }
+
+    .option-desc {
+      font-size: 12px;
+      color: #6B7280;
+      margin-bottom: 8px;
+    }
+
+    .tag {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 500;
+      padding: 2px 8px;
+      border-radius: 999px;
+      margin-bottom: 8px;
+    }
+
+    .tag-recommend {
+      background: #DCFCE7;
+      color: #16A34A;
+    }
+
+    .tag-current {
+      background: #FEF3C7;
+      color: #D97706;
+    }
+
+    .divider {
+      width: 100%;
+      height: 1px;
+      background: #E5E7EB;
+      margin: 32px 0;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>AI 분석 카드 — 디자인 옵션 비교</h1>
+  <p class="subtitle">결과 화면 Step 2 / 왼쪽 줄 제거 후 3가지 방향</p>
+
+  <!-- 현재 상태 -->
+  <div class="section">
+    <div class="section-label">현재 (Before)</div>
+    <div class="option-wrap">
+      <div class="option-label">현재 디자인</div>
+      <span class="tag tag-current">변경 전</span>
+      <div class="before-card">
+        <div class="ai-badge">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/>
+          </svg>
+          AI 분석
+        </div>
+        <div class="card-title">다시 도전해봐요!</div>
+        <div class="before-ai-block">
+          <p>"JOIN" 토픽의 정답률이 17%로 가장 낮아 개선이 시급해 보입니다. 또한, "서브쿼리", "그룹함수/집계" 등 4개의 토픽에서 아직 정답률이 0%이니 이 부분들을 집중적으로 학습하는 것을 추천합니다.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- 옵션 비교 -->
+  <div class="section">
+    <div class="section-label">변경 후 옵션</div>
+    <div class="compare-grid">
+
+      <!-- Option A -->
+      <div class="option-wrap">
+        <div class="option-label">A — 심플 카드</div>
+        <p class="option-desc">줄 없음, 연회색 배경 + 보더만. 가장 조용하고 깔끔.</p>
+        <div class="option-a-card">
+          <div class="ai-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/>
+            </svg>
+            AI 분석
+          </div>
+          <div class="card-title">다시 도전해봐요!</div>
+          <div class="option-a-inner">
+            <p>"JOIN" 토픽의 정답률이 17%로 가장 낮아 개선이 시급해 보입니다. "서브쿼리", "그룹함수/집계" 등 약한 토픽을 집중적으로 학습해보세요.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Option B -->
+      <div class="option-wrap">
+        <div class="option-label">B — 인디고 그라디언트</div>
+        <p class="option-desc">인디고→퍼플 그라디언트 배경. AI 느낌 강조.</p>
+        <span class="tag tag-recommend">추천 고려</span>
+        <div class="option-b-card">
+          <div class="ai-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/>
+            </svg>
+            AI 분석
+          </div>
+          <div class="card-title">다시 도전해봐요!</div>
+          <div class="option-b-inner">
+            <p>"JOIN" 토픽의 정답률이 17%로 가장 낮아 개선이 시급해 보입니다. "서브쿼리", "그룹함수/집계" 등 약한 토픽을 집중적으로 학습해보세요.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Option C -->
+      <div class="option-wrap">
+        <div class="option-label">C — 아이콘 강조형</div>
+        <p class="option-desc">Sparkles 아이콘 원형 배지를 상단 중앙에 크게, 텍스트는 아래.</p>
+        <div class="option-c-card">
+          <div class="ai-badge">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/>
+            </svg>
+            AI 분석
+          </div>
+          <div class="card-title">다시 도전해봐요!</div>
+          <div class="option-c-inner">
+            <div class="option-c-icon-wrap">
+              <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8">
+                <path d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/>
+                <path d="M18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456z"/>
+              </svg>
+            </div>
+            <p>"JOIN" 토픽의 정답률이 17%로 가장 낮아 개선이 시급해 보입니다. "서브쿼리", "그룹함수/집계" 등 약한 토픽을 집중적으로 학습해보세요.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>

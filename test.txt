@@ -1,0 +1,2565 @@
+/opt/homebrew/Cellar/openjdk@21/21.0.9/libexec/openjdk.jdk/Contents/Home/bin/java -XX:TieredStopAtLevel=1 -Dspring.profiles.active=dev -Dspring.output.ansi.enabled=always -Dcom.sun.management.jmxremote -Dspring.jmx.enabled=true -Dspring.liveBeansView.mbeanDomain -Dspring.application.admin.enabled=true -Dmanagement.endpoints.jmx.exposure.include=* -javaagent:/Applications/IntelliJ IDEA.app/Contents/lib/idea_rt.jar=65153 -Dfile.encoding=UTF-8 -Dsun.stdout.encoding=UTF-8 -Dsun.stderr.encoding=UTF-8 -classpath /Users/suhsaechan/Desktop/Programming/project/passQL/server/PQL-Web/build/classes/java/main:/Users/suhsaechan/Desktop/Programming/project/passQL/server/PQL-Web/build/resources/main:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.36/5a30490a6e14977d97d9c73c924c1f1b5311ea95/lombok-1.18.36.jar:/Users/suhsaechan/Desktop/Programming/project/passQL/server/PQL-Application/build/classes/java/main:/Users/suhsaechan/Desktop/Programming/project/passQL/server/PQL-Domain-Submission/build/classes/java/main:/Users/suhsaechan/Desktop/Programming/project/passQL/server/PQL-Domain-Member/build/classes/java/main:/Users/suhsaechan/Desktop/Programming/project/passQL/server/PQL-Domain-Question/build/classes/java/main:/Users/suhsaechan/Desktop/Programming/project/passQL/server/PQL-Domain-AI/build/classes/java/main:/Users/suhsaechan/Desktop/Programming/project/passQL/server/PQL-Domain-Meta/build/classes/java/main:/Users/suhsaechan/Desktop/Programming/project/passQL/server/PQL-Common/build/classes/java/main:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/nz.net.ultraq.thymeleaf/thymeleaf-layout-dialect/3.3.0/275da01788302e514c0549a4db5fa6b29ef84ba6/thymeleaf-layout-dialect-3.3.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.datatype/jackson-datatype-jsr310/2.18.3/cc57924cccf42fc852081c36215272f84ffcd991/jackson-datatype-jsr310-2.18.3.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-databind/2.18.3/537e3886263e3b3464385040453e92567fd509e2/jackson-databind-2.18.3.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-starter-data-jpa/3.4.4/7e0ab04a0aa460295c7a2e485c7809a733469824/spring-boot-starter-data-jpa-3.4.4.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.flywaydb/flyway-database-postgresql/10.20.1/6072b9a325858f57c7b88b96f6ee2aacae16ffaa/flyway-database-postgresql-10.20.1.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.flywaydb/flyway-core/10.20.1/27c35cad285433947ef986c615ce2742f69145de/flyway-core-10.20.1.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/kr.suhsaechan/suh-logger/2.0.1/a552c6c9fa62aaeac5f1fbcf1f664d6764ae4ec2/suh-logger-2.0.1-plain.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/com.google.genai/google-genai/1.46.0/24725f5d4b8f1c1238b19559a77ea4b622f668af/google-genai-1.46.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springdoc/springdoc-openapi-starter-webmvc-ui/2.8.3/47ba0b7764cddfa10e7b36a301730d4aef36af6/springdoc-openapi-starter-webmvc-ui-2.8.3.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-starter-web/3.4.4/441c0c71f38783c1d34b8bac5f06f1fa6b103274/spring-boot-starter-web-3.4.4.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-starter-validation/3.4.4/fa0bc381ac02704bb56631c13e33c3be437aa5c/spring-boot-starter-validation-3.4.4.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-starter-security/3.4.4/796c83e0f08979c87b62d19d7d956d1ea453f4cd/spring-boot-starter-security-3.4.4.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-starter-data-redis/3.4.4/edcb05561bf12e4b9e7bb113ef22347af54018dc/spring-boot-starter-data-redis-3.4.4.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-starter-cache/3.4.4/d34736e2588eb31508a8af9d4f3cc4e5d20f2935/spring-boot-starter-cache-3.4.4.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-starter-thymeleaf/3.4.4/7518201f82759df8d0b2c4c1e45a1fcb4780ea90/spring-boot-starter-thymeleaf-3.4.4.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-starter-actuator/3.4.4/e574e9f17229988e61095b738102991e7f72fed/spring-boot-starter-actuator-3.4.4.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-starter/3.4.4/6ad00ebe69a28a5c1c97f80f81920d65e0e4250b/spring-boot-starter-3.4.4.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/com.github.ben-manes.caffeine/caffeine/3.1.8/24795585df8afaf70a2cd534786904ea5889c047/caffeine-3.1.8.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.postgresql/postgresql/42.7.5/747897987b86c741fb8b56f6b81929ae1e6e4b46/postgresql-42.7.5.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.github.resilience4j/resilience4j-spring-boot3/2.3.0/81c5c03cd43c99c588d82dcef3b20e6861addc99/resilience4j-spring-boot3-2.3.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.qdrant/client/1.13.0/4ca2a42ff4c0a645f5c03aa2da0b12fd8387ed35/client-1.13.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/me.suhsaechan/suh-random-engine/1.1.0/2d425dc1108f2c2437beb197490a050489496d55/suh-random-engine-1.1.0-plain.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/kr.suhsaechan/suh-api-log/2.0.1/b720031c20e004687a7de5b95e596cfddc93f5fa/suh-api-log-2.0.1-plain.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.apache.groovy/groovy/4.0.26/1031daf8a73986def8b43c9bbf5d67671eb26553/groovy-4.0.26.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-annotations/2.18.3/7fa21cf7da4598f8240e4ebd9779249622af1acd/jackson-annotations-2.18.3.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.core/jackson-core/2.18.3/78f80c259268200e588aa204dd97ecf09b76916e/jackson-core-2.18.3.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-starter-jdbc/3.4.4/c1059487b20babd2e0552d285d64d3cb655d0c4d/spring-boot-starter-jdbc-3.4.4.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework.data/spring-data-jpa/3.4.4/50f826d0dd60af289321bde6f5eea8fc48131c75/spring-data-jpa-3.4.4.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.hibernate.orm/hibernate-core/6.6.11.Final/d5330ab0dd5f5cc810086b7fb66cec8b2d2f5213/hibernate-core-6.6.11.Final.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework/spring-aspects/6.2.5/971b57bb59d4890a3db5f1e20f89effa7df8c149/spring-aspects-6.2.5.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.dataformat/jackson-dataformat-toml/2.18.3/336d144daa471ab11a7672f68565b6afb6914ced/jackson-dataformat-toml-2.18.3.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.datatype/jackson-datatype-jdk8/2.18.3/621558295660935134b171ce2b0d9ad6842ec2ff/jackson-datatype-jdk8-2.18.3.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/com.google.auth/google-auth-library-oauth2-http/1.33.0/2ffb447fa6ee8bd840955da276078e7c986e6001/google-auth-library-oauth2-http-1.33.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/com.google.api/api-common/2.45.0/de482ba30f33a918c5782e24de38438aaba4fda1/api-common-2.45.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.java-websocket/Java-WebSocket/1.6.0/52d7f6dc1b06607d4d12e438c840c25f1a0bb854/Java-WebSocket-1.6.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/com.squareup.okhttp3/okhttp/4.12.0/2f4525d4a200e97e1b87449c2cd9bd2e25b7e8cd/okhttp-4.12.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/com.google.protobuf/protobuf-java/3.25.5/5ae5c9ec39930ae9b5a61b32b93288818ec05ec1/protobuf-java-3.25.5.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.jspecify/jspecify/1.0.0/7425a601c1c7ec76645a78d22b8c6a627edee507/jspecify-1.0.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk8/1.9.25/20d44e880a284f7b5cd99dd69450b403073f49b2/kotlin-stdlib-jdk8-1.9.25.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springdoc/springdoc-openapi-starter-webmvc-api/2.8.3/ebc2134ba7b0973cd2c1dd551d398c1b40eca80d/springdoc-openapi-starter-webmvc-api-2.8.3.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.webjars/swagger-ui/5.18.2/368118833fc82beedbc17783972c836aa22e0872/swagger-ui-5.18.2.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.webjars/webjars-locator-lite/1.0.1/b4389136604123d4fe4199cc29b94a33206996bc/webjars-locator-lite-1.0.1.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-starter-json/3.4.4/7f7ca72abcab50661b7b5d23f63b3bc2375bb2b3/spring-boot-starter-json-3.4.4.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-starter-tomcat/3.4.4/4b18ac49cf13ef2c9a98418ebd8fc212a5259da9/spring-boot-starter-tomcat-3.4.4.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework/spring-webmvc/6.2.5/db8f1171041d7091f3de80cffdfb9d6c5fbf3015/spring-webmvc-6.2.5.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework/spring-web/6.2.5/b42d2c0acbe05bad4c849883aa8816c25b6c1d94/spring-web-6.2.5.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.apache.tomcat.embed/tomcat-embed-el/10.1.39/88ff05c768c4654097ab0a9f2b49368a0877ad76/tomcat-embed-el-10.1.39.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.hibernate.validator/hibernate-validator/8.0.2.Final/220e64815dd87535525331de20570017f899eb13/hibernate-validator-8.0.2.Final.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework.security/spring-security-web/6.4.4/b33b3eba22ef5242caef0cf3c0575b0cc303519b/spring-security-web-6.4.4.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework.security/spring-security-config/6.4.4/2bb5d949fc3b935a88c701555fdc3af3d0381228/spring-security-config-6.4.4.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework/spring-aop/6.2.5/9f436be65bf45ee8643d93e6823d6c81e8f9f91a/spring-aop-6.2.5.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework.data/spring-data-redis/3.4.4/4cbfe4e4743bb679dcba0f55eb684521d4016d0/spring-data-redis-3.4.4.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.lettuce/lettuce-core/6.4.2.RELEASE/8969c20697c74b71288d4d5e69b0fec4047d3d6d/lettuce-core-6.4.2.RELEASE.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework/spring-context-support/6.2.5/a084213d1f07c916e6bc3ff016eb9d3022a4da5c/spring-context-support-6.2.5.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.thymeleaf/thymeleaf-spring6/3.1.3.RELEASE/4b276ea2bd536a18e44b40ff1d9f4848965ff59c/thymeleaf-spring6-3.1.3.RELEASE.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-actuator-autoconfigure/3.4.4/d27aab003c7e79cf330117be5daaedecd8a9ebf6/spring-boot-actuator-autoconfigure-3.4.4.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.micrometer/micrometer-jakarta9/1.14.5/a8dcc8fd9d7eba30fa27d6026e439c3c917a80bb/micrometer-jakarta9-1.14.5.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.micrometer/micrometer-observation/1.14.5/b23dff6bf07a29f67fdae8f3f3f8f1c78fa7b126/micrometer-observation-1.14.5.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-autoconfigure/3.4.4/5ebc8c0682374768ee6eac9acf12f41e76762207/spring-boot-autoconfigure-3.4.4.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot/3.4.4/f9dbe14c2e5e35a2cd27156802ea6b7c42ab34fd/spring-boot-3.4.4.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-starter-logging/3.4.4/1a7bbfd57e0b2d0bde8ffd6aa7a0ebd94e4b0aed/spring-boot-starter-logging-3.4.4.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/jakarta.annotation/jakarta.annotation-api/2.1.1/48b9bda22b091b1f48b13af03fe36db3be6e1ae3/jakarta.annotation-api-2.1.1.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework/spring-core/6.2.5/d6786db7122037bf605e54e3b35f262a19b8d502/spring-core-6.2.5.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.yaml/snakeyaml/2.3/936b36210e27320f920536f695cf1af210c44586/snakeyaml-2.3.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.checkerframework/checker-qual/3.43.0/9425eee39e56b116d2b998b7c2cebcbd11a3c98b/checker-qual-3.43.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/com.google.errorprone/error_prone_annotations/2.36.0/227d4d4957ccc3dc5761bd897e3a0ee587e750a7/error_prone_annotations-2.36.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.github.resilience4j/resilience4j-spring6/2.3.0/2ed6c1cc76fd03c97c768ff4f2a525a3ef7819bf/resilience4j-spring6-2.3.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.reflections/reflections/0.10.2/b638d7ca0e0fe0146b60a0e7ba232ad852a73b31/reflections-0.10.2.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework/spring-jdbc/6.2.5/6eef7c5ac8266aa308522568d98669d82e8ef61f/spring-jdbc-6.2.5.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/com.zaxxer/HikariCP/5.1.0/8c96e36c14461fc436bb02b264b96ef3ca5dca8c/HikariCP-5.1.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework/spring-context/6.2.5/237de0c3afca2099ab497cc7464726c02b8ab5c5/spring-context-6.2.5.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework/spring-orm/6.2.5/b2edc79b16b9cad32666dfdc8cc92896429b9c/spring-orm-6.2.5.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework.data/spring-data-commons/3.4.4/24bb91254820f1dd3087ae95667e9bb0a6942b23/spring-data-commons-3.4.4.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework/spring-tx/6.2.5/99ecc1c976f58ad63df7205e18eac628f2f1fa9a/spring-tx-6.2.5.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework/spring-beans/6.2.5/6f8eb671d9905da5a73bc9ab7e703e9fed6a0c3f/spring-beans-6.2.5.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.antlr/antlr4-runtime/4.13.0/5a02e48521624faaf5ff4d99afc88b01686af655/antlr4-runtime-4.13.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.slf4j/slf4j-api/2.0.17/d9e58ac9c7779ba3bf8142aff6c830617a7fe60f/slf4j-api-2.0.17.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/jakarta.persistence/jakarta.persistence-api/3.1.0/66901fa1c373c6aff65c13791cc11da72060a8d6/jakarta.persistence-api-3.1.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/jakarta.transaction/jakarta.transaction-api/2.0.1/51a520e3fae406abb84e2e1148e6746ce3f80a1a/jakarta.transaction-api-2.0.1.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.aspectj/aspectjweaver/1.9.23/5b2fd88a62b334f51ac7d002b57dfccd68b22724/aspectjweaver-1.9.23.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/com.google.http-client/google-http-client-gson/1.46.2/f08d96e583884c583a87c73ea0f9b19de9ababcf/google-http-client-gson-1.46.2.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/com.google.http-client/google-http-client/1.46.2/7e498671525b5d70f0f9fbd7589666cd765ddf8f/google-http-client-1.46.2.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/com.google.guava/guava/33.4.0-jre/3fcc0a259f724c7de54a6a55ea7e26d3d5c0cac/guava-33.4.0-jre.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/com.google.code.gson/gson/2.11.0/527175ca6d81050b53bdd4c457a6d6e017626b0e/gson-2.11.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/com.google.code.findbugs/jsr305/3.0.2/25ea2e8b0c338a877313bd4672d3fe056ea78f0d/jsr305-3.0.2.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/com.google.auto.value/auto-value-annotations/1.11.0/f0d047931d07cfbc6fa4079854f181ff62891d6f/auto-value-annotations-1.11.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/com.google.auth/google-auth-library-credentials/1.33.0/85fb44162795ef6db75336013b7575984a76f4e3/google-auth-library-credentials-1.33.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/javax.annotation/javax.annotation-api/1.3.2/934c04d3cfef185a8008e7bf34331b79730a9d43/javax.annotation-api-1.3.2.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/com.google.j2objc/j2objc-annotations/3.0.0/7399e65dd7e9ff3404f4535b2f017093bdb134c7/j2objc-annotations-3.0.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib-jdk7/1.9.25/1c166692314a2639e5edfed0d23ed7eee4a5c7a5/kotlin-stdlib-jdk7-1.9.25.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.jetbrains.kotlin/kotlin-stdlib/1.9.25/f700a2f2b8f0d6d0fde48f56d894dc722fb029d7/kotlin-stdlib-1.9.25.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springdoc/springdoc-openapi-starter-common/2.8.3/eead566680edf7953465ee4ed51ab35a6ae8073a/springdoc-openapi-starter-common-2.8.3.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.module/jackson-module-parameter-names/2.18.3/fa63ae5eb3956b1a6d7a7ead2b513af89dea22e7/jackson-module-parameter-names-2.18.3.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.apache.tomcat.embed/tomcat-embed-websocket/10.1.39/abf50abbbae651f95dfcf9fae05f919bfa9b7046/tomcat-embed-websocket-10.1.39.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.apache.tomcat.embed/tomcat-embed-core/10.1.39/f6acead04214d5aaea82c2639392208df33b3abe/tomcat-embed-core-10.1.39.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework/spring-expression/6.2.5/cb39181911dabe3b3d9992c4b4da38468726ea72/spring-expression-6.2.5.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/jakarta.validation/jakarta.validation-api/3.0.2/92b6631659ba35ca09e44874d3eb936edfeee532/jakarta.validation-api-3.0.2.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.jboss.logging/jboss-logging/3.6.1.Final/886afbb445b4016a37c8960a7aef6ebd769ce7e5/jboss-logging-3.6.1.Final.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/com.fasterxml/classmate/1.7.0/e98374da1f2143ac8e6e0a95036994bb19137a3/classmate-1.7.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework.security/spring-security-core/6.4.4/adccc33ba9baf99b4e42436424a4013f89a8806a/spring-security-core-6.4.4.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework.data/spring-data-keyvalue/3.4.4/c328e8f91230b4f12b952e77ff558d22f18c06e0/spring-data-keyvalue-3.4.4.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework/spring-oxm/6.2.5/5c561804b5a2903efefd875d3b940595126a3172/spring-oxm-6.2.5.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.netty/netty-handler/4.1.119.Final/a0059b8d779ce566b524efd6d73ba4fcff3cd5d9/netty-handler-4.1.119.Final.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.netty/netty-transport/4.1.119.Final/d05df879054297962d056b77460fc4ff20e30073/netty-transport-4.1.119.Final.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.netty/netty-common/4.1.119.Final/2f7c360b03c0aceab7efc1f7c2b75274f0f35909/netty-common-4.1.119.Final.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.projectreactor/reactor-core/3.7.4/3f258a092f83615275d2b58b1e71d0d172dc374e/reactor-core-3.7.4.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.thymeleaf/thymeleaf/3.1.3.RELEASE/51474f2a90b282ee97dabcd159c7faf24790f373/thymeleaf-3.1.3.RELEASE.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework.boot/spring-boot-actuator/3.4.4/299e82b115220a6b36797a4259e506b67d2ee2d5/spring-boot-actuator-3.4.4.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.micrometer/micrometer-core/1.14.5/219117417c2893a62bfe84ea70c4ef8d1ea2da5e/micrometer-core-1.14.5.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.micrometer/micrometer-commons/1.14.5/6201a40489ccedc9539c5f7a2c84e9e64702bf10/micrometer-commons-1.14.5.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/ch.qos.logback/logback-classic/1.5.18/fc371f3fc97a639de2d67947cffb7518ec5e3d40/logback-classic-1.5.18.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.apache.logging.log4j/log4j-to-slf4j/2.24.3/da1143e2a2531ee1c2d90baa98eb50a28a39d5a7/log4j-to-slf4j-2.24.3.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.slf4j/jul-to-slf4j/2.0.17/524cb6ccc2b68a57604750e1ab8b13b5a786a6aa/jul-to-slf4j-2.0.17.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework/spring-jcl/6.2.5/1b8db3715dc78bd18b60869458d5ee8829ad8e99/spring-jcl-6.2.5.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.github.resilience4j/resilience4j-framework-common/2.3.0/deeea5a5d8ea1d4fa56c2d8bdad33ae5eba5211a/resilience4j-framework-common-2.3.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.github.resilience4j/resilience4j-annotations/2.3.0/c0dc3cfe04b88e65ee2dfb261a94ce2fbce70c65/resilience4j-annotations-2.3.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.github.resilience4j/resilience4j-consumer/2.3.0/5649b6e0db11eb78e4a07ba08575d23301c1993a/resilience4j-consumer-2.3.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.javassist/javassist/3.28.0-GA/9a958811a88381bb159cc2f5ed79c34a45c4af7a/javassist-3.28.0-GA.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.opencensus/opencensus-contrib-http-util/0.31.1/3c13fc5715231fadb16a9b74a44d9d59c460cfa8/opencensus-contrib-http-util-0.31.1.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpclient/4.5.14/1194890e6f56ec29177673f2f12d0b8e627dec98/httpclient-4.5.14.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.apache.httpcomponents/httpcore/4.4.16/51cf043c87253c9f58b539c9f7e44c8894223850/httpcore-4.4.16.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.opencensus/opencensus-api/0.31.1/66a60c7201c2b8b20ce495f0295b32bb0ccbbc57/opencensus-api-0.31.1.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.grpc/grpc-context/1.70.0/375570c198b9ff46f2202731d11271bb5cb396fa/grpc-context-1.70.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/com.google.guava/failureaccess/1.0.2/c4a06a64e650562f30b7bf9aaec1bfed43aca12b/failureaccess-1.0.2.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/com.google.guava/listenablefuture/9999.0-empty-to-avoid-conflict-with-guava/b421526c5f297295adef1c886e5246c39d4ac629/listenablefuture-9999.0-empty-to-avoid-conflict-with-guava.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/com.squareup.okio/okio-jvm/3.6.0/5600569133b7bdefe1daf9ec7f4abeb6d13e1786/okio-jvm-3.6.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.jetbrains/annotations/13.0/919f0dfe192fb4e063e7dacadee7f8bb9a2672a9/annotations-13.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.swagger.core.v3/swagger-core-jakarta/2.2.27/d6f4ce930c64dc653b3448412fd2cb600974657a/swagger-core-jakarta-2.2.27.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springframework.security/spring-security-crypto/6.4.4/914088f7c73375ee02cbe69c159b6460dc2f346b/spring-security-crypto-6.4.4.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.netty/netty-transport-native-unix-common/4.1.119.Final/55afdeb456bccf8eecb06431f3c1537269afe9af/netty-transport-native-unix-common-4.1.119.Final.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.netty/netty-codec/4.1.119.Final/337ca8e8c3ef23925e02d56347b414d7616d1d02/netty-codec-4.1.119.Final.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.netty/netty-resolver/4.1.119.Final/e1f7c90aff71bdf0e2294a200b5f89244f88dcf7/netty-resolver-4.1.119.Final.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.netty/netty-buffer/4.1.119.Final/5864149b2e5a2af7b05fe9e9dc3e4b70d3060a7c/netty-buffer-4.1.119.Final.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.reactivestreams/reactive-streams/1.0.4/3864a1320d97d7b045f729a326e1e077661f31b7/reactive-streams-1.0.4.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.attoparser/attoparser/2.0.7.RELEASE/e5d0e988d9124139d645bb5872b24dfa23e283cc/attoparser-2.0.7.RELEASE.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.unbescape/unbescape/1.1.6.RELEASE/7b90360afb2b860e09e8347112800d12c12b2a13/unbescape-1.1.6.RELEASE.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/ch.qos.logback/logback-core/1.5.18/6c0375624f6f36b4e089e2488ba21334a11ef13f/logback-core-1.5.18.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.apache.logging.log4j/log4j-api/2.24.3/b02c125db8b6d295adf72ae6e71af5d83bce2370/log4j-api-2.24.3.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.github.resilience4j/resilience4j-micrometer/2.3.0/79fbfe7fc77683bc0ecba5bfeb73709d5e0759ad/resilience4j-micrometer-2.3.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.github.resilience4j/resilience4j-circuitbreaker/2.3.0/995e75097efdd303cf4b2403841fe27a32d9e939/resilience4j-circuitbreaker-2.3.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.github.resilience4j/resilience4j-ratelimiter/2.3.0/6c303d40dd6320c009e780b427942871107d8c26/resilience4j-ratelimiter-2.3.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.github.resilience4j/resilience4j-retry/2.3.0/1953682ce8b7e69ff5a02d3772ef9c932f2bab3e/resilience4j-retry-2.3.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.github.resilience4j/resilience4j-bulkhead/2.3.0/3e3cc6330e2c6088316f06e58f6d0b2c7fdc5b5b/resilience4j-bulkhead-2.3.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.github.resilience4j/resilience4j-timelimiter/2.3.0/2de3016bd43ed1149ff1c035f1de11c9bbbec7fc/resilience4j-timelimiter-2.3.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/commons-codec/commons-codec/1.17.2/cd6bb9d856db5f61871a94d5801efd0b93b7fcb2/commons-codec-1.17.2.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.swagger.core.v3/swagger-models-jakarta/2.2.27/f59b7c434d6324b7b326580caef7b0ccd9b4e26d/swagger-models-jakarta-2.2.27.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/com.fasterxml.jackson.dataformat/jackson-dataformat-yaml/2.18.3/66658356a375664262c227dad09adc51dbc09c54/jackson-dataformat-yaml-2.18.3.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.apache.commons/commons-lang3/3.17.0/b17d2136f0460dcc0d2016ceefca8723bdf4ee70/commons-lang3-3.17.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.swagger.core.v3/swagger-annotations-jakarta/2.2.27/26983d1c4ebec171859a8861f45fefc842d712e0/swagger-annotations-jakarta-2.2.27.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/jakarta.xml.bind/jakarta.xml.bind-api/4.0.2/6cd5a999b834b63238005b7144136379dc36cad2/jakarta.xml.bind-api-4.0.2.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.github.resilience4j/resilience4j-core/2.3.0/4df5e76f2e2b15db6971d5102ffa9b494e38cfe/resilience4j-core-2.3.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/jakarta.activation/jakarta.activation-api/2.1.3/fa165bd70cda600368eee31555222776a46b881f/jakarta.activation-api-2.1.3.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springdoc/springdoc-openapi-starter-webmvc-ui/2.8.4/f96c8341b77ed4a113bdbf8a525dccefb53495d4/springdoc-openapi-starter-webmvc-ui-2.8.4.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/nz.net.ultraq.groovy/groovy-extensions/2.1.0/c869dc033867e8861957ff3ff4e1ce0a00260e3a/groovy-extensions-2.1.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/nz.net.ultraq.thymeleaf/thymeleaf-expression-processor/3.2.0/566d36d35ba24120e8cef0d55869868e042785cf/thymeleaf-expression-processor-3.2.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/commons-lang/commons-lang/2.6/ce1edb914c94ebc388f086c6827e8bdeec71ac2/commons-lang-2.6.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.jsoup/jsoup/1.18.1/cb7cd991d47b44101cbe4655dec611cdc01f8a02/jsoup-1.18.1.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springdoc/springdoc-openapi-starter-webmvc-api/2.8.4/76d14b6c8046ba9fafad77283289d4f17c65ad4/springdoc-openapi-starter-webmvc-api-2.8.4.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.checkerframework/checker-qual/3.48.3/c48effe7d78de3cf5e8a98c614281ec6a2466a77/checker-qual-3.48.3.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.grpc/grpc-protobuf/1.65.1/7e25214bd216bbf5c4f2092a984b6586759124/grpc-protobuf-1.65.1.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.grpc/grpc-stub/1.65.1/52f605e45be9c43079d8c8a6bc7142cab662ac62/grpc-stub-1.65.1.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.grpc/grpc-netty-shaded/1.65.1/b66df7a116527604f1aa70ea588e94a762c7d531/grpc-netty-shaded-1.65.1.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/ognl/ognl/3.3.4/1904789bdd96f226ad252a02f230be1015f4462b/ognl-3.3.4.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.hibernate.common/hibernate-commons-annotations/7.0.3.Final/e183c4be8bb41d12e9f19b374e00c34a0a85f439/hibernate-commons-annotations-7.0.3.Final.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.smallrye/jandex/3.2.0/f17ad860f62a08487b9edabde608f8ac55c62fa7/jandex-3.2.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/net.bytebuddy/byte-buddy/1.15.11/f61886478e0f9ee4c21d09574736f0ff45e0a46c/byte-buddy-1.15.11.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.glassfish.jaxb/jaxb-runtime/4.0.5/ca84c2a7169b5293e232b9d00d1e4e36d4c3914a/jaxb-runtime-4.0.5.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/jakarta.inject/jakarta.inject-api/2.0.1/4c28afe1991a941d7702fe1362c365f0a8641d1e/jakarta.inject-api-2.0.1.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.javassist/javassist/3.29.0-GA/d3959fa7e00bf04dbe519228a23213d2afb625d8/javassist-3.29.0-GA.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.springdoc/springdoc-openapi-starter-common/2.8.4/c22559871f68d638d22610a09350ab63521b86e2/springdoc-openapi-starter-common-2.8.4.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.grpc/grpc-protobuf-lite/1.65.1/f9427f4e41726d7510dc3b721cac62535eb6949c/grpc-protobuf-lite-1.65.1.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.grpc/grpc-api/1.70.0/c0d185f8435e2dbc9b0f430d1e89600858ee24ee/grpc-api-1.70.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/com.google.api.grpc/proto-google-common-protos/2.29.0/eb1cf1cf4c12d5eb9cef958dfd76af4101c55a62/proto-google-common-protos-2.29.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.grpc/grpc-util/1.65.1/54121cb0fd19af2f0e93321a5dc78d283ecefef8/grpc-util-1.65.1.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.grpc/grpc-core/1.65.1/7b80ccb2678b7d3ff2ec90bbe4ffbb0ff956eb54/grpc-core-1.65.1.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.perfmark/perfmark-api/0.26.0/ef65452adaf20bf7d12ef55913aba24037b82738/perfmark-api-0.26.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.glassfish.jaxb/jaxb-core/4.0.5/7b4b11ea5542eea4ad55e1080b23be436795b3/jaxb-core-4.0.5.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.swagger.core.v3/swagger-core-jakarta/2.2.28/d990934d07d250cedcf2bbc7632118ae316bf712/swagger-core-jakarta-2.2.28.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.hdrhistogram/HdrHistogram/2.2.2/7959933ebcc0f05b2eaa5af0a0c8689fa257b15c/HdrHistogram-2.2.2.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.latencyutils/LatencyUtils/2.0.3/769c0b82cb2421c8256300e907298a9410a2a3d3/LatencyUtils-2.0.3.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.github.resilience4j/resilience4j-circularbuffer/2.3.0/e6aa46ad14a40599fc5a4806e8132f5fe3aa649a/resilience4j-circularbuffer-2.3.0.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.codehaus.mojo/animal-sniffer-annotations/1.23/3c0daebd5f0e1ce72cc50c818321ac957aeb5d70/animal-sniffer-annotations-1.23.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/com.google.android/annotations/4.1.1.4/a1678ba907bf92691d879fef34e1a187038f9259/annotations-4.1.1.4.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.eclipse.angus/angus-activation/2.0.2/41f1e0ddd157c856926ed149ab837d110955a9fc/angus-activation-2.0.2.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/org.glassfish.jaxb/txw2/4.0.5/f36a4ef12120a9bb06d766d6a0e54b144fd7ed98/txw2-4.0.5.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/com.sun.istack/istack-commons-runtime/4.1.2/18ec117c85f3ba0ac65409136afa8e42bc74e739/istack-commons-runtime-4.1.2.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.swagger.core.v3/swagger-models-jakarta/2.2.28/72865af71d886a979322def19fc86753f267d4f7/swagger-models-jakarta-2.2.28.jar:/Users/suhsaechan/.gradle/caches/modules-2/files-2.1/io.swagger.core.v3/swagger-annotations-jakarta/2.2.28/4b303c4bf8940b417e50e3600eb63aa6f6531f0/swagger-annotations-jakarta-2.2.28.jar com.passql.web.PassqlApplication
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+
+ :: Spring Boot ::                (v3.4.4)
+
+2026-04-12T04:16:17.398+09:00  INFO 91809 --- [passql] [           main] com.passql.web.PassqlApplication         : Starting PassqlApplication using Java 21.0.9 with PID 91809 (/Users/suhsaechan/Desktop/Programming/project/passQL/server/PQL-Web/build/classes/java/main started by suhsaechan in /Users/suhsaechan/Desktop/Programming/project/passQL)
+2026-04-12T04:16:17.399+09:00 DEBUG 91809 --- [passql] [           main] com.passql.web.PassqlApplication         : Running with Spring Boot v3.4.4, Spring v6.2.5
+2026-04-12T04:16:17.399+09:00  INFO 91809 --- [passql] [           main] com.passql.web.PassqlApplication         : The following 1 profile is active: "dev"
+2026-04-12T04:16:18.146+09:00  INFO 91809 --- [passql] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-04-12T04:16:18.146+09:00  INFO 91809 --- [passql] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2026-04-12T04:16:18.252+09:00  INFO 91809 --- [passql] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 100 ms. Found 18 JPA repository interfaces.
+2026-04-12T04:16:18.549+09:00  INFO 91809 --- [passql] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode
+2026-04-12T04:16:18.550+09:00  INFO 91809 --- [passql] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data Redis repositories in DEFAULT mode.
+2026-04-12T04:16:18.562+09:00  INFO 91809 --- [passql] [           main] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 8 ms. Found 0 Redis repository interfaces.
+2026-04-12T04:16:19.219+09:00  INFO 91809 --- [passql] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2026-04-12T04:16:19.229+09:00  INFO 91809 --- [passql] [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2026-04-12T04:16:19.229+09:00  INFO 91809 --- [passql] [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.39]
+2026-04-12T04:16:19.262+09:00  INFO 91809 --- [passql] [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2026-04-12T04:16:19.262+09:00  INFO 91809 --- [passql] [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1730 ms
+2026-04-12T04:16:19.694+09:00  INFO 91809 --- [passql] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2026-04-12T04:16:19.749+09:00  INFO 91809 --- [passql] [           main] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@232be28d
+2026-04-12T04:16:19.751+09:00  INFO 91809 --- [passql] [           main] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2026-04-12T04:16:19.770+09:00  INFO 91809 --- [passql] [           main] org.flywaydb.core.FlywayExecutor         : Database: jdbc:postgresql://localhost:5432/passql_app (PostgreSQL 18.1)
+2026-04-12T04:16:19.777+09:00  WARN 91809 --- [passql] [           main] o.f.c.internal.database.base.Database    : Flyway upgrade recommended: PostgreSQL 18.1 is newer than this version of Flyway and support has not been tested. The latest supported version of PostgreSQL is 17.
+2026-04-12T04:16:19.908+09:00  INFO 91809 --- [passql] [           main] o.f.core.internal.command.DbMigrate      : Current version of schema "public": 0.0.73
+2026-04-12T04:16:19.914+09:00  INFO 91809 --- [passql] [           main] o.f.core.internal.command.DbMigrate      : Schema "public" is up to date. No migration necessary.
+2026-04-12T04:16:20.223+09:00  INFO 91809 --- [passql] [           main] o.hibernate.jpa.internal.util.LogHelper  : HHH000204: Processing PersistenceUnitInfo [name: default]
+2026-04-12T04:16:20.256+09:00  INFO 91809 --- [passql] [           main] org.hibernate.Version                    : HHH000412: Hibernate ORM core version 6.6.11.Final
+2026-04-12T04:16:20.274+09:00  INFO 91809 --- [passql] [           main] o.h.c.internal.RegionFactoryInitiator    : HHH000026: Second-level cache disabled
+2026-04-12T04:16:20.463+09:00  INFO 91809 --- [passql] [           main] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2026-04-12T04:16:20.525+09:00  INFO 91809 --- [passql] [           main] org.hibernate.orm.connections.pooling    : HHH10001005: Database info:
+	Database JDBC URL [Connecting through datasource 'HikariDataSource (HikariPool-1)']
+	Database driver: undefined/unknown
+	Database version: 18.1
+	Autocommit mode: undefined/unknown
+	Isolation level: undefined/unknown
+	Minimum pool size: undefined/unknown
+	Maximum pool size: undefined/unknown
+2026-04-12T04:16:22.899+09:00  INFO 91809 --- [passql] [           main] o.h.e.t.j.p.i.JtaPlatformInitiator       : HHH000489: No JTA platform available (set 'hibernate.transaction.jta.platform' to enable JTA platform integration)
+2026-04-12T04:16:22.998+09:00  INFO 91809 --- [passql] [           main] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2026-04-12T04:16:23.768+09:00  INFO 91809 --- [passql] [           main] o.s.d.j.r.query.QueryEnhancerFactory     : Hibernate is in classpath; If applicable, HQL parser will be used.
+2026-04-12T04:16:25.239+09:00  INFO 91809 --- [passql] [           main] c.passql.question.service.SandboxPool    : [SandboxPool] initialized — concurrency=30
+2026-04-12T04:16:25.662+09:00  WARN 91809 --- [passql] [           main] JpaBaseConfiguration$JpaWebConfiguration : spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+2026-04-12T04:16:25.703+09:00  WARN 91809 --- [passql] [           main] .s.s.UserDetailsServiceAutoConfiguration :
+
+Using generated security password: 21d93891-ebb9-406d-8134-f3c649d9c14d
+
+This generated password is for development use only. Your security configuration must be updated before running your application in production.
+
+2026-04-12T04:16:25.714+09:00  INFO 91809 --- [passql] [           main] r$InitializeUserDetailsManagerConfigurer : Global AuthenticationManager configured with UserDetailsService bean with name inMemoryUserDetailsManager
+2026-04-12T04:16:26.287+09:00  INFO 91809 --- [passql] [           main] o.s.b.a.e.web.EndpointLinksResolver      : Exposing 1 endpoint beneath base path '/actuator'
+2026-04-12T04:16:26.734+09:00  INFO 91809 --- [passql] [           main] k.s.s.config.SuhApiLogAutoConfiguration  : Swagger OperationCustomizer 생성됨 - API 변경 이력이 Swagger UI에 표시됩니다
+2026-04-12T04:16:27.290+09:00  INFO 91809 --- [passql] [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2026-04-12T04:16:27.302+09:00  INFO 91809 --- [passql] [           main] com.passql.web.PassqlApplication         : Started PassqlApplication in 10.168 seconds (process running for 10.979)
+Hibernate:
+    select
+        as1_0.app_setting_uuid,
+        as1_0.category,
+        as1_0.created_at,
+        as1_0.created_by,
+        as1_0.description,
+        as1_0.setting_key,
+        as1_0.updated_at,
+        as1_0.updated_by,
+        as1_0.value_text,
+        as1_0.value_type
+    from
+        app_setting as1_0
+    where
+        as1_0.setting_key=?
+Hibernate:
+    select
+        m1_0.member_uuid,
+        m1_0.auth_provider,
+        m1_0.created_at,
+        m1_0.created_by,
+        m1_0.deleted_at,
+        m1_0.deleted_by,
+        m1_0.email,
+        m1_0.email_verified,
+        m1_0.is_deleted,
+        m1_0.is_test_account,
+        m1_0.last_login_ip,
+        m1_0.last_seen_at,
+        m1_0.nickname,
+        m1_0.provider_user_id,
+        m1_0.role,
+        m1_0.status,
+        m1_0.suspend_until,
+        m1_0.updated_at,
+        m1_0.updated_by,
+        m1_0.withdrawn_at
+    from
+        member m1_0
+    where
+        m1_0.status=?
+        and m1_0.suspend_until<?
+        and not(m1_0.is_deleted)
+2026-04-12T04:16:27.368+09:00  INFO 91809 --- [passql] [           main] com.passql.web.init.AppInitializer       : [AppInitializer] ai.gemini_api_key Redis 워밍업 완료 (DB → Redis)
+Hibernate:
+    select
+        as1_0.app_setting_uuid,
+        as1_0.category,
+        as1_0.created_at,
+        as1_0.created_by,
+        as1_0.description,
+        as1_0.setting_key,
+        as1_0.updated_at,
+        as1_0.updated_by,
+        as1_0.value_text,
+        as1_0.value_type
+    from
+        app_setting as1_0
+    where
+        as1_0.setting_key=?
+2026-04-12T04:16:27.375+09:00  INFO 91809 --- [passql] [           main] com.passql.web.init.AppInitializer       : [AppInitializer] sandbox.pool.concurrency Redis 워밍업 완료 (DB → Redis)
+Hibernate:
+    select
+        as1_0.app_setting_uuid,
+        as1_0.category,
+        as1_0.created_at,
+        as1_0.created_by,
+        as1_0.description,
+        as1_0.setting_key,
+        as1_0.updated_at,
+        as1_0.updated_by,
+        as1_0.value_text,
+        as1_0.value_type
+    from
+        app_setting as1_0
+    where
+        as1_0.setting_key=?
+2026-04-12T04:16:27.388+09:00  INFO 91809 --- [passql] [           main] com.passql.web.init.AppInitializer       : [AppInitializer] sandbox.pool.wait_seconds Redis 워밍업 완료 (DB → Redis)
+2026-04-12T04:16:27.394+09:00  INFO 91809 --- [passql] [           main] k.s.s.config.SuhApiLogAutoConfiguration  : API 변경 이력 정보 초기화 시작...
+2026-04-12T04:16:27.411+09:00  INFO 91809 --- [passql] [           main] k.s.s.config.SuhApiLogAutoConfiguration  : API 변경 이력 정보 초기화 완료
+2026-04-12T04:16:27.845+09:00  INFO 91809 --- [passql] [-192.168.50.133] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2026-04-12T04:16:27.845+09:00  INFO 91809 --- [passql] [-192.168.50.133] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2026-04-12T04:16:27.848+09:00  INFO 91809 --- [passql] [-192.168.50.133] o.s.web.servlet.DispatcherServlet        : Completed initialization in 3 ms
+2026-04-12T04:17:22.178+09:00 DEBUG 91809 --- [passql] [    virtual-101] c.p.web.controller.QuestionController    : [generate-choices] VirtualThread 진입: questionUuid=572a8293-153d-476c-a261-715e7085f998, memberUuid=f540d91e-58e4-4881-a611-79e64cc60fab
+Hibernate:
+    select
+        q1_0.question_uuid,
+        q1_0.answer_sql,
+        q1_0.choice_set_policy,
+        q1_0.created_at,
+        q1_0.created_by,
+        q1_0.dialect,
+        q1_0.difficulty,
+        q1_0.execution_mode,
+        q1_0.explanation_summary,
+        q1_0.extra_meta_json,
+        q1_0.hint,
+        q1_0.is_active,
+        q1_0.sandbox_db_name,
+        q1_0.schema_ddl,
+        q1_0.schema_display,
+        q1_0.schema_intent,
+        q1_0.schema_sample_data,
+        q1_0.stem,
+        q1_0.subtopic_uuid,
+        q1_0.topic_uuid,
+        q1_0.updated_at,
+        q1_0.updated_by
+    from
+        question q1_0
+    where
+        q1_0.question_uuid=?
+Hibernate:
+    select
+        qcs1_0.choice_set_uuid,
+        qcs1_0.consumed_at,
+        qcs1_0.created_at,
+        qcs1_0.created_by,
+        qcs1_0.created_by_member_uuid,
+        qcs1_0.generated_for_member_uuid,
+        qcs1_0.generation_attempts,
+        qcs1_0.is_reusable,
+        qcs1_0.last_error_code,
+        qcs1_0.max_tokens,
+        qcs1_0.model_name,
+        qcs1_0.prompt_template_uuid,
+        qcs1_0.question_uuid,
+        qcs1_0.raw_response_json,
+        qcs1_0.sandbox_validation_passed,
+        qcs1_0.source,
+        qcs1_0.status,
+        qcs1_0.temperature,
+        qcs1_0.total_elapsed_ms,
+        qcs1_0.updated_at,
+        qcs1_0.updated_by
+    from
+        question_choice_set qcs1_0
+    where
+        qcs1_0.question_uuid=?
+        and qcs1_0.generated_for_member_uuid=?
+        and qcs1_0.source=?
+        and qcs1_0.status=?
+        and qcs1_0.consumed_at is null
+    order by
+        qcs1_0.created_at desc
+    fetch
+        first ? rows only
+2026-04-12T04:17:22.238+09:00  INFO 91809 --- [passql] [    virtual-101] c.p.question.service.ChoiceSetResolver   : [resolver] concept MISS, runtime generation: questionUuid=572a8293-153d-476c-a261-715e7085f998
+Hibernate:
+    select
+        q1_0.question_uuid,
+        q1_0.answer_sql,
+        q1_0.choice_set_policy,
+        q1_0.created_at,
+        q1_0.created_by,
+        q1_0.dialect,
+        q1_0.difficulty,
+        q1_0.execution_mode,
+        q1_0.explanation_summary,
+        q1_0.extra_meta_json,
+        q1_0.hint,
+        q1_0.is_active,
+        q1_0.sandbox_db_name,
+        q1_0.schema_ddl,
+        q1_0.schema_display,
+        q1_0.schema_intent,
+        q1_0.schema_sample_data,
+        q1_0.stem,
+        q1_0.subtopic_uuid,
+        q1_0.topic_uuid,
+        q1_0.updated_at,
+        q1_0.updated_by
+    from
+        question q1_0
+    where
+        q1_0.question_uuid=?
+Hibernate:
+    select
+        pt1_0.prompt_template_uuid,
+        pt1_0.created_at,
+        pt1_0.created_by,
+        pt1_0.extra_params_json,
+        pt1_0.is_active,
+        pt1_0.key_name,
+        pt1_0.max_tokens,
+        pt1_0.model,
+        pt1_0.note,
+        pt1_0.system_prompt,
+        pt1_0.temperature,
+        pt1_0.updated_at,
+        pt1_0.updated_by,
+        pt1_0.user_template,
+        pt1_0.version
+    from
+        prompt_template pt1_0
+    where
+        pt1_0.key_name=?
+        and pt1_0.is_active
+    order by
+        pt1_0.version desc
+    fetch
+        first ? rows only
+2026-04-12T04:17:22.265+09:00 DEBUG 91809 --- [passql] [    virtual-101] c.p.q.s.ChoiceSetGenerationService       : [choice-gen-concept] 요청 빌드 완료: questionUuid=572a8293-153d-476c-a261-715e7085f998, promptKey=generate_choice_set_concept
+2026-04-12T04:17:22.266+09:00 DEBUG 91809 --- [passql] [    virtual-101] c.p.q.s.ChoiceSetGenerationService       : [choice-gen-concept] AI 호출 시작: attempt=1/3, questionUuid=572a8293-153d-476c-a261-715e7085f998
+2026-04-12T04:17:22.435+09:00 ERROR 91809 --- [passql] [    virtual-101] com.passql.ai.client.AiGatewayClient     : [AiGateway] Python AI 서버 호출 실패: url=https://ai.passql.suhsaechan.kr/api/ai/generate-choice-set, error=422 Unprocessable Content on POST request for "https://ai.passql.suhsaechan.kr/api/ai/generate-choice-set": "{"detail":[{"type":"string_type","loc":["body","context","answer_sql"],"msg":"Input should be a valid string","input":null},{"type":"string_type","loc":["body","context","schema_ddl"],"msg":"Input should be a valid string","input":null},{"type":"string_type","loc":["body","context","schema_sample_data"],"msg":"Input should be a valid string","input":null}]}"
+2026-04-12T04:17:22.438+09:00  WARN 91809 --- [passql] [    virtual-101] com.passql.ai.client.AiGatewayClient     : [AiGateway] generateChoiceSet fallback 진입: AI 서버에 연결할 수 없습니다. - Python AI 서버 호출 실패: 422 Unprocessable Content on POST request for "https://ai.passql.suhsaechan.kr/api/ai/generate-choice-set": "{"detail":[{"type":"string_type","loc":["body","context","answer_sql"],"msg":"Input should be a valid string","input":null},{"type":"string_type","loc":["body","context","schema_ddl"],"msg":"Input should be a valid string","input":null},{"type":"string_type","loc":["body","context","schema_sample_data"],"msg":"Input should be a valid string","input":null}]}"
+2026-04-12T04:17:22.449+09:00 DEBUG 91809 --- [passql] [    virtual-101] com.passql.ai.client.GeminiClient        : Gemini chatStructured: model=gemini-2.5-flash-lite, maxTokens=1024
+2026-04-12T04:17:26.577+09:00 DEBUG 91809 --- [passql] [    virtual-101] c.p.q.s.ChoiceSetGenerationService       : [choice-gen-concept] AI 응답 수신: attempt=1, choiceCount=4, questionUuid=572a8293-153d-476c-a261-715e7085f998
+2026-04-12T04:17:26.577+09:00 DEBUG 91809 --- [passql] [    virtual-101] c.p.q.s.ChoiceSetGenerationService       : [choice-gen-concept] is_correct 집계: correctCount=1, attempt=1, questionUuid=572a8293-153d-476c-a261-715e7085f998
+2026-04-12T04:17:26.577+09:00 DEBUG 91809 --- [passql] [    virtual-101] c.p.q.s.ChoiceSetGenerationService       : [choice-gen-concept] 검증 통과, 저장 시작: attempt=1, questionUuid=572a8293-153d-476c-a261-715e7085f998
+Hibernate:
+    insert
+    into
+        question_choice_set
+        (consumed_at, created_at, created_by, created_by_member_uuid, generated_for_member_uuid, generation_attempts, is_reusable, last_error_code, max_tokens, model_name, prompt_template_uuid, question_uuid, raw_response_json, sandbox_validation_passed, source, status, temperature, total_elapsed_ms, updated_at, updated_by, choice_set_uuid)
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+2026-04-12T04:17:26.623+09:00  INFO 91809 --- [passql] [    virtual-101] c.p.q.service.ChoiceSetSaveService       : [choice-gen-concept] success: questionUuid=572a8293-153d-476c-a261-715e7085f998, attempts=1, setUuid=64ab5cb7-83bf-4d7b-8ff7-e0008ba77f58
+Hibernate:
+    insert
+    into
+        question_choice_set_item
+        (body, choice_key, choice_set_uuid, created_at, created_by, is_correct, kind, rationale, sandbox_execution_json, sort_order, updated_at, updated_by, choice_set_item_uuid)
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+Hibernate:
+    insert
+    into
+        question_choice_set_item
+        (body, choice_key, choice_set_uuid, created_at, created_by, is_correct, kind, rationale, sandbox_execution_json, sort_order, updated_at, updated_by, choice_set_item_uuid)
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+Hibernate:
+    insert
+    into
+        question_choice_set_item
+        (body, choice_key, choice_set_uuid, created_at, created_by, is_correct, kind, rationale, sandbox_execution_json, sort_order, updated_at, updated_by, choice_set_item_uuid)
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+Hibernate:
+    insert
+    into
+        question_choice_set_item
+        (body, choice_key, choice_set_uuid, created_at, created_by, is_correct, kind, rationale, sandbox_execution_json, sort_order, updated_at, updated_by, choice_set_item_uuid)
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+2026-04-12T04:17:26.626+09:00  INFO 91809 --- [passql] [    virtual-101] c.p.web.controller.QuestionController    : [generate-choices] resolveForUser 완료: questionUuid=572a8293-153d-476c-a261-715e7085f998, choiceSetUuid=64ab5cb7-83bf-4d7b-8ff7-e0008ba77f58
+2026-04-12T04:17:26.627+09:00 DEBUG 91809 --- [passql] [    virtual-101] c.p.web.controller.QuestionController    : [generate-choices] items 조회 시작: choiceSetUuid=64ab5cb7-83bf-4d7b-8ff7-e0008ba77f58
+Hibernate:
+    select
+        qcsi1_0.choice_set_item_uuid,
+        qcsi1_0.body,
+        qcsi1_0.choice_key,
+        qcsi1_0.choice_set_uuid,
+        qcsi1_0.created_at,
+        qcsi1_0.created_by,
+        qcsi1_0.is_correct,
+        qcsi1_0.kind,
+        qcsi1_0.rationale,
+        qcsi1_0.sandbox_execution_json,
+        qcsi1_0.sort_order,
+        qcsi1_0.updated_at,
+        qcsi1_0.updated_by
+    from
+        question_choice_set_item qcsi1_0
+    where
+        qcsi1_0.choice_set_uuid=?
+    order by
+        qcsi1_0.sort_order
+2026-04-12T04:17:26.630+09:00 DEBUG 91809 --- [passql] [    virtual-101] c.p.web.controller.QuestionController    : [generate-choices] items 조회 완료: count=4
+2026-04-12T04:17:26.631+09:00  INFO 91809 --- [passql] [    virtual-101] c.p.web.controller.QuestionController    : [generate-choices] SSE complete 전송: questionUuid=572a8293-153d-476c-a261-715e7085f998, choiceSetUuid=64ab5cb7-83bf-4d7b-8ff7-e0008ba77f58, itemCount=4
+Hibernate:
+    select
+        m1_0.member_uuid,
+        m1_0.auth_provider,
+        m1_0.created_at,
+        m1_0.created_by,
+        m1_0.deleted_at,
+        m1_0.deleted_by,
+        m1_0.email,
+        m1_0.email_verified,
+        m1_0.is_deleted,
+        m1_0.is_test_account,
+        m1_0.last_login_ip,
+        m1_0.last_seen_at,
+        m1_0.nickname,
+        m1_0.provider_user_id,
+        m1_0.role,
+        m1_0.status,
+        m1_0.suspend_until,
+        m1_0.updated_at,
+        m1_0.updated_by,
+        m1_0.withdrawn_at
+    from
+        member m1_0
+    where
+        m1_0.status=?
+        and m1_0.suspend_until<?
+        and not(m1_0.is_deleted)
+Hibernate:
+    select
+        t1_0.topic_uuid,
+        t1_0.code,
+        t1_0.created_at,
+        t1_0.created_by,
+        t1_0.display_name,
+        t1_0.is_active,
+        t1_0.sort_order,
+        t1_0.updated_at,
+        t1_0.updated_by
+    from
+        topic t1_0
+    where
+        t1_0.is_active
+    order by
+        t1_0.sort_order
+Hibernate:
+    select
+        s1_0.subtopic_uuid,
+        s1_0.code,
+        s1_0.created_at,
+        s1_0.created_by,
+        s1_0.display_name,
+        s1_0.is_active,
+        s1_0.sort_order,
+        s1_0.topic_uuid,
+        s1_0.updated_at,
+        s1_0.updated_by
+    from
+        subtopic s1_0
+    where
+        s1_0.topic_uuid=?
+    order by
+        s1_0.sort_order
+Hibernate:
+    select
+        s1_0.subtopic_uuid,
+        s1_0.code,
+        s1_0.created_at,
+        s1_0.created_by,
+        s1_0.display_name,
+        s1_0.is_active,
+        s1_0.sort_order,
+        s1_0.topic_uuid,
+        s1_0.updated_at,
+        s1_0.updated_by
+    from
+        subtopic s1_0
+    where
+        s1_0.topic_uuid=?
+    order by
+        s1_0.sort_order
+Hibernate:
+    select
+        s1_0.subtopic_uuid,
+        s1_0.code,
+        s1_0.created_at,
+        s1_0.created_by,
+        s1_0.display_name,
+        s1_0.is_active,
+        s1_0.sort_order,
+        s1_0.topic_uuid,
+        s1_0.updated_at,
+        s1_0.updated_by
+    from
+        subtopic s1_0
+    where
+        s1_0.topic_uuid=?
+    order by
+        s1_0.sort_order
+Hibernate:
+    select
+        s1_0.subtopic_uuid,
+        s1_0.code,
+        s1_0.created_at,
+        s1_0.created_by,
+        s1_0.display_name,
+        s1_0.is_active,
+        s1_0.sort_order,
+        s1_0.topic_uuid,
+        s1_0.updated_at,
+        s1_0.updated_by
+    from
+        subtopic s1_0
+    where
+        s1_0.topic_uuid=?
+    order by
+        s1_0.sort_order
+Hibernate:
+    select
+        s1_0.subtopic_uuid,
+        s1_0.code,
+        s1_0.created_at,
+        s1_0.created_by,
+        s1_0.display_name,
+        s1_0.is_active,
+        s1_0.sort_order,
+        s1_0.topic_uuid,
+        s1_0.updated_at,
+        s1_0.updated_by
+    from
+        subtopic s1_0
+    where
+        s1_0.topic_uuid=?
+    order by
+        s1_0.sort_order
+Hibernate:
+    select
+        count(*)
+    from
+        member m1_0
+    where
+        m1_0.member_uuid=?
+Hibernate:
+    select
+        s1_0.subtopic_uuid,
+        s1_0.code,
+        s1_0.created_at,
+        s1_0.created_by,
+        s1_0.display_name,
+        s1_0.is_active,
+        s1_0.sort_order,
+        s1_0.topic_uuid,
+        s1_0.updated_at,
+        s1_0.updated_by
+    from
+        subtopic s1_0
+    where
+        s1_0.topic_uuid=?
+    order by
+        s1_0.sort_order
+Hibernate:
+    select
+        s1_0.subtopic_uuid,
+        s1_0.code,
+        s1_0.created_at,
+        s1_0.created_by,
+        s1_0.display_name,
+        s1_0.is_active,
+        s1_0.sort_order,
+        s1_0.topic_uuid,
+        s1_0.updated_at,
+        s1_0.updated_by
+    from
+        subtopic s1_0
+    where
+        s1_0.topic_uuid=?
+    order by
+        s1_0.sort_order
+Hibernate:
+    select
+        s1_0.subtopic_uuid,
+        s1_0.code,
+        s1_0.created_at,
+        s1_0.created_by,
+        s1_0.display_name,
+        s1_0.is_active,
+        s1_0.sort_order,
+        s1_0.topic_uuid,
+        s1_0.updated_at,
+        s1_0.updated_by
+    from
+        subtopic s1_0
+    where
+        s1_0.topic_uuid=?
+    order by
+        s1_0.sort_order
+Hibernate:
+    select
+        s1_0.subtopic_uuid,
+        s1_0.code,
+        s1_0.created_at,
+        s1_0.created_by,
+        s1_0.display_name,
+        s1_0.is_active,
+        s1_0.sort_order,
+        s1_0.topic_uuid,
+        s1_0.updated_at,
+        s1_0.updated_by
+    from
+        subtopic s1_0
+    where
+        s1_0.topic_uuid=?
+    order by
+        s1_0.sort_order
+2026-04-12T04:17:32.634+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : ===================== RESPONSE LOGGING =====================
+2026-04-12T04:17:32.638+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : URI: /api/meta/topics
+2026-04-12T04:17:32.639+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Method: GET
+2026-04-12T04:17:32.639+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Status: 200
+2026-04-12T04:17:32.639+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Response Body: [{"topicUuid":"6404764a-bf5a-41e3-b008-2176b750a87b","code":"data_modeling","displayName":"데이터 모델링의 이해","sortOrder":1,"isActive":true,"subtopics":[]},{"topicUuid":"304f3774-7e89-454b-8c41-eb489ceda0aa","code":"sql_basic_select","displayName":"SELECT 기본","sortOrder":2,"isActive":true,"subtopics":[]},{"topicUuid":"302012c5-33ce-4b99-ac6f-169cfbb78fe2","code":"sql_ddl_dml_tcl","displayName":"DDL / DML / TCL","sortOrder":3,"isActive":true,"subtopics":[]},{"topicUuid":"2591d68c-8a85-44c2-8ea6-7de0ddf12bff","code":"sql_function","displayName":"SQL 함수 (문자/숫자/날짜/NULL)","sortOrder":4,"isActive":true,"subtopics":[]},{"topicUuid":"aba54657-f384-4a90-a802-32530e0d015b","code":"sql_join","displayName":"조인 (JOIN)","sortOrder":5,"isActive":true,"subtopics":[]},{"topicUuid":"de0bdd3c-a70b-4475-aa28-aafb4eb55297","code":"sql_subquery","displayName":"서브쿼리","sortOrder":6,"isActive":true,"subtopics":[]},{"topicUuid":"c563ae55-0076-4d87-aefc-71dec47dd87f","code":"sql_group_aggregate","displayName":"그룹함수 / 집계","sortOrder":7,"isActive":true,"subtopics":[]},{"topicUuid":"20ce9ead-44e4-4cba-8cc7-b8923ecc697d","code":"sql_window","displayName":"윈도우 함수","sortOrder":8,"isActive":true,"subtopics":[]},{"topicUuid":"98a7fb92-aaa6-437b-941f-16bca3fd07d5","code":"sql_hierarchy_pivot","displayName":"계층 쿼리 / PIVOT","sortOrder":9,"isActive":true,"subtopics":[]}]
+2026-04-12T04:17:32.640+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : ============================================================
+Hibernate:
+    WITH latest AS (     SELECT
+        s.question_uuid,            q.topic_uuid,            s.is_correct,            ROW_NUMBER() OVER (PARTITION
+    BY
+        s.question_uuid
+    ORDER BY
+        s.submitted_at DESC, s.submission_uuid DESC) AS rn
+    FROM
+        submission s
+    JOIN
+        question q
+            ON s.question_uuid = q.question_uuid
+    WHERE
+        s.member_uuid = CAST(? AS uuid)
+        AND s.submitted_at >= ? ) SELECT
+        topic_uuid,
+        COUNT(*) AS solved_count,
+        AVG(CASE
+            WHEN is_correct = true
+                THEN 1.0
+            ELSE 0.0
+    END) AS correct_rate
+FROM
+    latest
+WHERE
+    rn = 1
+GROUP BY
+    topic_uuid
+Hibernate:
+    SELECT
+        q.topic_uuid,
+        COUNT(*)
+    FROM
+        question q
+    WHERE
+        q.is_active = true
+    GROUP BY
+        q.topic_uuid
+Hibernate:
+    select
+        t1_0.topic_uuid,
+        t1_0.code,
+        t1_0.created_at,
+        t1_0.created_by,
+        t1_0.display_name,
+        t1_0.is_active,
+        t1_0.sort_order,
+        t1_0.updated_at,
+        t1_0.updated_by
+    from
+        topic t1_0
+    where
+        t1_0.is_active
+    order by
+        t1_0.sort_order
+2026-04-12T04:17:32.749+09:00 DEBUG 91809 --- [passql] [nio-8080-exec-6] com.passql.ai.client.GeminiClient        : Gemini chat: model=gemini-2.5-flash-lite, maxTokens=300
+Hibernate:
+    select
+        t1_0.topic_uuid,
+        t1_0.code,
+        t1_0.created_at,
+        t1_0.created_by,
+        t1_0.display_name,
+        t1_0.is_active,
+        t1_0.sort_order,
+        t1_0.updated_at,
+        t1_0.updated_by
+    from
+        topic t1_0
+    where
+        t1_0.code=?
+Hibernate:
+    select
+        q1_0.question_uuid,
+        q1_0.answer_sql,
+        q1_0.choice_set_policy,
+        q1_0.created_at,
+        q1_0.created_by,
+        q1_0.dialect,
+        q1_0.difficulty,
+        q1_0.execution_mode,
+        q1_0.explanation_summary,
+        q1_0.extra_meta_json,
+        q1_0.hint,
+        q1_0.is_active,
+        q1_0.sandbox_db_name,
+        q1_0.schema_ddl,
+        q1_0.schema_display,
+        q1_0.schema_intent,
+        q1_0.schema_sample_data,
+        q1_0.stem,
+        q1_0.subtopic_uuid,
+        q1_0.topic_uuid,
+        q1_0.updated_at,
+        q1_0.updated_by
+    from
+        question q1_0
+    where
+        q1_0.is_active=true
+        and (
+            ? is null
+            or q1_0.topic_uuid=?
+        )
+        and (
+            ? is null
+            or q1_0.difficulty=?
+        )
+        and (
+            ? is null
+            or q1_0.execution_mode=?
+        )
+    fetch
+        first ? rows only
+Hibernate:
+    select
+        count(q1_0.question_uuid)
+    from
+        question q1_0
+    where
+        q1_0.is_active=true
+        and (
+            ? is null
+            or q1_0.topic_uuid=?
+        )
+        and (
+            ? is null
+            or q1_0.difficulty=?
+        )
+        and (
+            ? is null
+            or q1_0.execution_mode=?
+        )
+2026-04-12T04:17:33.958+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : ===================== RESPONSE LOGGING =====================
+2026-04-12T04:17:33.959+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : URI: /api/progress/ai-comment
+2026-04-12T04:17:33.959+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Method: GET
+2026-04-12T04:17:33.959+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Status: 200
+2026-04-12T04:17:33.959+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Response Body: {"comment":"학습자님의 데이터 모델링의 이해, SELECT 기본, DDL/DML/TCL, SQL 함수, 서브쿼리, 그룹함수/집계, 윈도우 함수, 계층 쿼리/PIVOT 영역은 아직 학습이 시작되지 않았습니다. 특히 '조인 (JOIN)' 영역은 71%의 정답률을 기록하셨는데, 이 부분을 좀 더 복습하시면 실력 향상에 큰 도움이 될 것입니다.","generatedAt":"2026-04-12T04:17:33.946534"}
+2026-04-12T04:17:33.959+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : ============================================================
+2026-04-12T04:17:33.965+09:00  WARN 91809 --- [passql] [nio-8080-exec-9] ration$PageModule$WarningLoggingModifier : Serializing PageImpl instances as-is is not supported, meaning that there is no guarantee about the stability of the resulting JSON structure!
+	For a stable JSON structure, please use Spring Data's PagedModel (globally via @EnableSpringDataWebSupport(pageSerializationMode = VIA_DTO))
+	or Spring HATEOAS and Spring Data's PagedResourcesAssembler as documented in https://docs.spring.io/spring-data/commons/reference/repositories/core-extensions.html#core.web.pageables.
+
+2026-04-12T04:17:33.971+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : ===================== RESPONSE LOGGING =====================
+2026-04-12T04:17:33.972+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : URI: /api/questions
+2026-04-12T04:17:33.972+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Method: GET
+2026-04-12T04:17:33.972+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Status: 200
+2026-04-12T04:17:33.972+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Response Body: {"content":[{"questionUuid":"720484e3-8bd5-4b8b-9cf6-e3dcc03b0400","topicCode":"sql_join","topicName":"조인 (JOIN)","difficulty":3,"executionMode":"CONCEPT_ONLY","stemPreview":"다음 중 조인(JOIN) 종류와 그 설명이 올바르게 연결되지 않은 것은?","createdAt":"2026-04-12T01:47:12.72849"},{"questionUuid":"60aceda5-2876-4317-98fd-965efa4aac6e","topicCode":"sql_join","topicName":"조인 (JOIN)","difficulty":3,"executionMode":"EXECUTABLE","stemPreview":"다음 SQL과 동일한 실행 결과를 내는 SQL은?\n\nSELECT A.NAME, B.DEPT_NAME\nFROM EMP A\nJOIN DEPT B USING (DEPT_ID)\nWHERE","createdAt":"2026-04-12T01:47:12.753921"},{"questionUuid":"5c629721-5ac4-474c-b567-3cbf30e2374f","topicCode":"sql_join","topicName":"조인 (JOIN)","difficulty":3,"executionMode":"EXECUTABLE","stemPreview":"다음 중 SQL 실행 결과가 나머지와 다른 것은?\n\n테이블: EMP (ID INT, NAME VARCHAR, DEPT_ID INT), DEPT (DEPT_ID INT, DEPT_N","createdAt":"2026-04-12T01:47:12.755996"},{"questionUuid":"91f152eb-81ef-43df-98a1-9a64371254f5","topicCode":"sql_join","topicName":"조인 (JOIN)","difficulty":4,"executionMode":"EXECUTABLE","stemPreview":"다음 SQL과 동일한 실행 결과를 내는 SQL은?\n\nSELECT A.DEPT_ID, A.NAME, B.NAME AS PARTNER\nFROM EMP A\nINNER JOIN EMP B","createdAt":"2026-04-12T01:47:12.75759"},{"questionUuid":"cbef072c-51b8-46fb-9e0c-acee073f2523","topicCode":"sql_join","topicName":"조인 (JOIN)","difficulty":2,"executionMode":"CONCEPT_ONLY","stemPreview":"NATURAL JOIN에 대한 설명 중 옳지 않은 것은?","createdAt":"2026-04-12T01:47:12.760402"},{"questionUuid":"572a8293-153d-476c-a261-715e7085f998","topicCode":"sql_join","topicName":"조인 (JOIN)","difficulty":4,"executionMode":"CONCEPT_ONLY","stemPreview":"다음 SQL의 실행 결과로 올바른 것은?\r\n\r\nSELECT A.NAME, B.DEPT_NAME\r\nFROM EMP A\r\nFULL OUTER JOIN DEPT B ON A.DEPT_I","createdAt":"2026-04-12T01:47:12.762843"},{"questionUuid":"a907120f-2a2b-48cf-ae66-153ace9c060c","topicCode":"sql_join","topicName":"조인 (JOIN)","difficulty":3,"executionMode":"EXECUTABLE","stemPreview":"다음 SQL과 동일한 실행 결과를 내는 SQL은?\n\nSELECT A.NAME, B.DEPT_NAME\nFROM EMP A, DEPT B\nWHERE A.DEPT_ID = B.DEPT_","createdAt":"2026-04-12T01:47:12.764869"},{"questionUuid":"a2566baf-f320-472e-bc93-a9c06390e7ea","topicCode":"sql_join","topicName":"조인 (JOIN)","difficulty":4,"executionMode":"EXECUTABLE","stemPreview":"다음 중 SQL 실행 결과가 나머지와 다른 것은?\n\n테이블: T1 (COL1 INT), T2 (COL1 INT)\n\n데이터: T1에 (1),(2),(3) / T2에 (1),(NULL","createdAt":"2026-04-12T01:47:12.767629"},{"questionUuid":"b3d38293-4797-428f-b641-4368567eebb6","topicCode":"sql_join","topicName":"조인 (JOIN)","difficulty":3,"executionMode":"EXECUTABLE","stemPreview":"다음 SQL과 동일한 실행 결과를 내는 SQL은?\n\nSELECT A.DEPT_ID, COUNT(B.ID) AS EMP_CNT\nFROM DEPT A\nLEFT OUTER JOIN EM","createdAt":"2026-04-12T01:47:12.769571"},{"questionUuid":"50859287-36a5-4fa9-a318-52a9d2e8a043","topicCode":"sql_join","topicName":"조인 (JOIN)","difficulty":2,"executionMode":"CONCEPT_ONLY","stemPreview":"SQL 조인(JOIN)에 대한 설명 중 옳지 않은 것은?","createdAt":"2026-04-12T01:47:12.773179"}],"pageable":{"pageNumber":0,"pageSize":10,"sort":{"unsorted":true,"sorted":false,"empty":true},"offset":0,"unpaged":false,"paged":true},"totalElements":20,"totalPages":2,"last":false,"numberOfElements":10,"first":true,"size":10,"number":0,"sort":{"unsorted":true,"sorted":false,"empty":true},"empty":false}
+2026-04-12T04:17:33.973+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : ============================================================
+Hibernate:
+    select
+        q1_0.question_uuid,
+        q1_0.answer_sql,
+        q1_0.choice_set_policy,
+        q1_0.created_at,
+        q1_0.created_by,
+        q1_0.dialect,
+        q1_0.difficulty,
+        q1_0.execution_mode,
+        q1_0.explanation_summary,
+        q1_0.extra_meta_json,
+        q1_0.hint,
+        q1_0.is_active,
+        q1_0.sandbox_db_name,
+        q1_0.schema_ddl,
+        q1_0.schema_display,
+        q1_0.schema_intent,
+        q1_0.schema_sample_data,
+        q1_0.stem,
+        q1_0.subtopic_uuid,
+        q1_0.topic_uuid,
+        q1_0.updated_at,
+        q1_0.updated_by
+    from
+        question q1_0
+    where
+        q1_0.question_uuid=?
+Hibernate:
+    select
+        qcs1_0.choice_set_uuid,
+        qcs1_0.consumed_at,
+        qcs1_0.created_at,
+        qcs1_0.created_by,
+        qcs1_0.created_by_member_uuid,
+        qcs1_0.generated_for_member_uuid,
+        qcs1_0.generation_attempts,
+        qcs1_0.is_reusable,
+        qcs1_0.last_error_code,
+        qcs1_0.max_tokens,
+        qcs1_0.model_name,
+        qcs1_0.prompt_template_uuid,
+        qcs1_0.question_uuid,
+        qcs1_0.raw_response_json,
+        qcs1_0.sandbox_validation_passed,
+        qcs1_0.source,
+        qcs1_0.status,
+        qcs1_0.temperature,
+        qcs1_0.total_elapsed_ms,
+        qcs1_0.updated_at,
+        qcs1_0.updated_by
+    from
+        question_choice_set qcs1_0
+    where
+        qcs1_0.question_uuid=?
+    order by
+        qcs1_0.created_at desc
+Hibernate:
+    select
+        qcsi1_0.choice_set_item_uuid,
+        qcsi1_0.body,
+        qcsi1_0.choice_key,
+        qcsi1_0.choice_set_uuid,
+        qcsi1_0.created_at,
+        qcsi1_0.created_by,
+        qcsi1_0.is_correct,
+        qcsi1_0.kind,
+        qcsi1_0.rationale,
+        qcsi1_0.sandbox_execution_json,
+        qcsi1_0.sort_order,
+        qcsi1_0.updated_at,
+        qcsi1_0.updated_by
+    from
+        question_choice_set_item qcsi1_0
+    where
+        qcsi1_0.choice_set_uuid=?
+    order by
+        qcsi1_0.sort_order
+Hibernate:
+    select
+        qcsi1_0.choice_set_item_uuid,
+        qcsi1_0.body,
+        qcsi1_0.choice_key,
+        qcsi1_0.choice_set_uuid,
+        qcsi1_0.created_at,
+        qcsi1_0.created_by,
+        qcsi1_0.is_correct,
+        qcsi1_0.kind,
+        qcsi1_0.rationale,
+        qcsi1_0.sandbox_execution_json,
+        qcsi1_0.sort_order,
+        qcsi1_0.updated_at,
+        qcsi1_0.updated_by
+    from
+        question_choice_set_item qcsi1_0
+    where
+        qcsi1_0.choice_set_uuid=?
+    order by
+        qcsi1_0.sort_order
+Hibernate:
+    select
+        t1_0.topic_uuid,
+        t1_0.code,
+        t1_0.created_at,
+        t1_0.created_by,
+        t1_0.display_name,
+        t1_0.is_active,
+        t1_0.sort_order,
+        t1_0.updated_at,
+        t1_0.updated_by
+    from
+        topic t1_0
+    where
+        t1_0.topic_uuid=?
+2026-04-12T04:17:34.022+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : ===================== RESPONSE LOGGING =====================
+2026-04-12T04:17:34.022+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : URI: /api/questions/720484e3-8bd5-4b8b-9cf6-e3dcc03b0400
+2026-04-12T04:17:34.023+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Method: GET
+2026-04-12T04:17:34.023+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Status: 200
+2026-04-12T04:17:34.023+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Response Body: {"questionUuid":"720484e3-8bd5-4b8b-9cf6-e3dcc03b0400","topicName":"조인 (JOIN)","subtopicName":null,"difficulty":3,"executionMode":"CONCEPT_ONLY","choiceSetPolicy":"AI_ONLY","stem":"다음 중 조인(JOIN) 종류와 그 설명이 올바르게 연결되지 않은 것은?","schemaDisplay":null,"schemaDdl":null,"schemaSampleData":null,"schemaIntent":null,"answerSql":null,"hint":"CROSS JOIN은 조인 조건이 없어 두 테이블의 모든 행을 조합하며 결과 수는 M x N이다. FULL OUTER JOIN은 양쪽 테이블의 매칭되지 않는 행까지 모두 포함한다.","choiceSets":[{"choiceSetUuid":"e3745a87-d7a8-4767-bfa2-65f7cc07368a","source":"AI_RUNTIME","status":"OK","sandboxValidationPassed":false,"createdAt":"2026-04-12T02:02:46.903","items":[{"key":"A","kind":"TEXT","body":"INNER JOIN: 두 테이블에서 조인 조건에 일치하는 행만 반환한다.","isCorrect":false,"rationale":"INNER JOIN은 두 테이블에서 조인 조건에 일치하는 행만 반환하는 것이 맞습니다. 따라서 올바르게 연결된 설명입니다.","sortOrder":0},{"key":"B","kind":"TEXT","body":"LEFT JOIN: 왼쪽 테이블의 모든 행과 오른쪽 테이블에서 조인 조건에 일치하는 행을 반환한다.","isCorrect":false,"rationale":"LEFT JOIN은 왼쪽 테이블의 모든 행을 포함하고, 오른쪽 테이블에서는 조인 조건에 일치하는 행만 반환합니다. 일치하는 행이 없으면 NULL 값을 채웁니다. 따라서 올바르게 연결된 설명입니다.","sortOrder":1},{"key":"C","kind":"TEXT","body":"RIGHT JOIN: 오른쪽 테이블의 모든 행과 왼쪽 테이블에서 조인 조건에 일치하는 행을 반환한다.","isCorrect":false,"rationale":"RIGHT JOIN은 왼쪽 테이블과 반대로, 오른쪽 테이블의 모든 행을 포함하고 왼쪽 테이블에서는 조인 조건에 일치하는 행만 반환합니다. 일치하는 행이 없으면 NULL 값을 채웁니다. 따라서 올바르게 연결된 설명입니다.","sortOrder":2},{"key":"D","kind":"TEXT","body":"FULL OUTER JOIN: 양쪽 테이블에서 조인 조건에 일치하는 행만 반환한다.","isCorrect":true,"rationale":"FULL OUTER JOIN은 양쪽 테이블의 모든 행을 반환하며, 조인 조건에 일치하지 않는 행에 대해서는 NULL 값을 채웁니다. '일치하는 행만 반환한다'는 설명은 INNER JOIN에 해당하므로 올바르게 연결되지 않았습니다.","sortOrder":3}]},{"choiceSetUuid":"f4c7bfd9-b205-4115-b5b9-31cab1f32b93","source":"AI_RUNTIME","status":"OK","sandboxValidationPassed":false,"createdAt":"2026-04-12T02:02:23.541081","items":[{"key":"A","kind":"TEXT","body":"INNER JOIN: 두 테이블 간에 조인 조건이 일치하는 행만 반환한다.","isCorrect":false,"rationale":"INNER JOIN은 두 테이블의 조인 조건이 일치하는 행만 반환하는 것이 맞지만, 문제에서 잘못 연결된 것을 묻고 있으므로 정답이 될 수 없습니다.","sortOrder":0},{"key":"B","kind":"TEXT","body":"LEFT JOIN: 왼쪽 테이블의 모든 행과 오른쪽 테이블에서 조인 조건이 일치하는 행을 반환한다.","isCorrect":false,"rationale":"LEFT JOIN은 왼쪽 테이블의 모든 행을 포함하고 오른쪽 테이블에서 일치하는 행을 반환하는 것이 맞지만, 문제에서 잘못 연결된 것을 묻고 있으므로 정답이 될 수 없습니다.","sortOrder":1},{"key":"C","kind":"TEXT","body":"RIGHT JOIN: 오른쪽 테이블의 모든 행과 왼쪽 테이블에서 조인 조건이 일치하는 행을 반환한다.","isCorrect":false,"rationale":"RIGHT JOIN은 오른쪽 테이블의 모든 행을 포함하고 왼쪽 테이블에서 일치하는 행을 반환하는 것이 맞지만, 문제에서 잘못 연결된 것을 묻고 있으므로 정답이 될 수 없습니다.","sortOrder":2},{"key":"D","kind":"TEXT","body":"FULL OUTER JOIN: 양쪽 테이블에서 조인 조건이 일치하는 행만 반환한다.","isCorrect":true,"rationale":"FULL OUTER JOIN은 양쪽 테이블의 매칭되지 않는 행까지 모두 포함하는 조인 방식이므로, '일치하는 행만 반환한다'는 설명은 틀렸습니다.","sortOrder":3}]}]}
+2026-04-12T04:17:34.023+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : ============================================================
+Hibernate:
+    select
+        qcs1_0.choice_set_uuid,
+        qcs1_0.consumed_at,
+        qcs1_0.created_at,
+        qcs1_0.created_by,
+        qcs1_0.created_by_member_uuid,
+        qcs1_0.generated_for_member_uuid,
+        qcs1_0.generation_attempts,
+        qcs1_0.is_reusable,
+        qcs1_0.last_error_code,
+        qcs1_0.max_tokens,
+        qcs1_0.model_name,
+        qcs1_0.prompt_template_uuid,
+        qcs1_0.question_uuid,
+        qcs1_0.raw_response_json,
+        qcs1_0.sandbox_validation_passed,
+        qcs1_0.source,
+        qcs1_0.status,
+        qcs1_0.temperature,
+        qcs1_0.total_elapsed_ms,
+        qcs1_0.updated_at,
+        qcs1_0.updated_by
+    from
+        question_choice_set qcs1_0
+    where
+        qcs1_0.choice_set_uuid=?
+Hibernate:
+    select
+        qcsi1_0.choice_set_item_uuid,
+        qcsi1_0.body,
+        qcsi1_0.choice_key,
+        qcsi1_0.choice_set_uuid,
+        qcsi1_0.created_at,
+        qcsi1_0.created_by,
+        qcsi1_0.is_correct,
+        qcsi1_0.kind,
+        qcsi1_0.rationale,
+        qcsi1_0.sandbox_execution_json,
+        qcsi1_0.sort_order,
+        qcsi1_0.updated_at,
+        qcsi1_0.updated_by
+    from
+        question_choice_set_item qcsi1_0
+    where
+        qcsi1_0.choice_set_uuid=?
+        and qcsi1_0.choice_key=?
+Hibernate:
+    select
+        qcsi1_0.choice_set_item_uuid,
+        qcsi1_0.body,
+        qcsi1_0.choice_key,
+        qcsi1_0.choice_set_uuid,
+        qcsi1_0.created_at,
+        qcsi1_0.created_by,
+        qcsi1_0.is_correct,
+        qcsi1_0.kind,
+        qcsi1_0.rationale,
+        qcsi1_0.sandbox_execution_json,
+        qcsi1_0.sort_order,
+        qcsi1_0.updated_at,
+        qcsi1_0.updated_by
+    from
+        question_choice_set_item qcsi1_0
+    where
+        qcsi1_0.choice_set_uuid=?
+    order by
+        qcsi1_0.sort_order
+Hibernate:
+    select
+        q1_0.question_uuid,
+        q1_0.answer_sql,
+        q1_0.choice_set_policy,
+        q1_0.created_at,
+        q1_0.created_by,
+        q1_0.dialect,
+        q1_0.difficulty,
+        q1_0.execution_mode,
+        q1_0.explanation_summary,
+        q1_0.extra_meta_json,
+        q1_0.hint,
+        q1_0.is_active,
+        q1_0.sandbox_db_name,
+        q1_0.schema_ddl,
+        q1_0.schema_display,
+        q1_0.schema_intent,
+        q1_0.schema_sample_data,
+        q1_0.stem,
+        q1_0.subtopic_uuid,
+        q1_0.topic_uuid,
+        q1_0.updated_at,
+        q1_0.updated_by
+    from
+        question q1_0
+    where
+        q1_0.question_uuid=?
+Hibernate:
+    insert
+    into
+        submission
+        (choice_set_uuid, created_at, created_by, is_correct, member_uuid, question_index, question_uuid, selected_choice_key, session_uuid, submitted_at, updated_at, updated_by, submission_uuid)
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+2026-04-12T04:17:35.299+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : ===================== RESPONSE LOGGING =====================
+2026-04-12T04:17:35.300+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : URI: /api/questions/720484e3-8bd5-4b8b-9cf6-e3dcc03b0400/submit
+2026-04-12T04:17:35.300+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Method: POST
+2026-04-12T04:17:35.300+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Status: 200
+2026-04-12T04:17:35.300+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Response Body: {"isCorrect":true,"correctKey":"D","rationale":"FULL OUTER JOIN은 양쪽 테이블의 모든 행을 반환하며, 조인 조건에 일치하지 않는 행에 대해서는 NULL 값을 채웁니다. '일치하는 행만 반환한다'는 설명은 INNER JOIN에 해당하므로 올바르게 연결되지 않았습니다.","selectedResult":null,"correctResult":null,"correctSql":null,"selectedSql":null}
+2026-04-12T04:17:35.300+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : ============================================================
+Hibernate:
+    select
+        q1_0.question_uuid,
+        q1_0.answer_sql,
+        q1_0.choice_set_policy,
+        q1_0.created_at,
+        q1_0.created_by,
+        q1_0.dialect,
+        q1_0.difficulty,
+        q1_0.execution_mode,
+        q1_0.explanation_summary,
+        q1_0.extra_meta_json,
+        q1_0.hint,
+        q1_0.is_active,
+        q1_0.sandbox_db_name,
+        q1_0.schema_ddl,
+        q1_0.schema_display,
+        q1_0.schema_intent,
+        q1_0.schema_sample_data,
+        q1_0.stem,
+        q1_0.subtopic_uuid,
+        q1_0.topic_uuid,
+        q1_0.updated_at,
+        q1_0.updated_by
+    from
+        question q1_0
+    where
+        q1_0.question_uuid=?
+Hibernate:
+    select
+        qcs1_0.choice_set_uuid,
+        qcs1_0.consumed_at,
+        qcs1_0.created_at,
+        qcs1_0.created_by,
+        qcs1_0.created_by_member_uuid,
+        qcs1_0.generated_for_member_uuid,
+        qcs1_0.generation_attempts,
+        qcs1_0.is_reusable,
+        qcs1_0.last_error_code,
+        qcs1_0.max_tokens,
+        qcs1_0.model_name,
+        qcs1_0.prompt_template_uuid,
+        qcs1_0.question_uuid,
+        qcs1_0.raw_response_json,
+        qcs1_0.sandbox_validation_passed,
+        qcs1_0.source,
+        qcs1_0.status,
+        qcs1_0.temperature,
+        qcs1_0.total_elapsed_ms,
+        qcs1_0.updated_at,
+        qcs1_0.updated_by
+    from
+        question_choice_set qcs1_0
+    where
+        qcs1_0.question_uuid=?
+    order by
+        qcs1_0.created_at desc
+Hibernate:
+    select
+        qcsi1_0.choice_set_item_uuid,
+        qcsi1_0.body,
+        qcsi1_0.choice_key,
+        qcsi1_0.choice_set_uuid,
+        qcsi1_0.created_at,
+        qcsi1_0.created_by,
+        qcsi1_0.is_correct,
+        qcsi1_0.kind,
+        qcsi1_0.rationale,
+        qcsi1_0.sandbox_execution_json,
+        qcsi1_0.sort_order,
+        qcsi1_0.updated_at,
+        qcsi1_0.updated_by
+    from
+        question_choice_set_item qcsi1_0
+    where
+        qcsi1_0.choice_set_uuid=?
+    order by
+        qcsi1_0.sort_order
+Hibernate:
+    select
+        qcsi1_0.choice_set_item_uuid,
+        qcsi1_0.body,
+        qcsi1_0.choice_key,
+        qcsi1_0.choice_set_uuid,
+        qcsi1_0.created_at,
+        qcsi1_0.created_by,
+        qcsi1_0.is_correct,
+        qcsi1_0.kind,
+        qcsi1_0.rationale,
+        qcsi1_0.sandbox_execution_json,
+        qcsi1_0.sort_order,
+        qcsi1_0.updated_at,
+        qcsi1_0.updated_by
+    from
+        question_choice_set_item qcsi1_0
+    where
+        qcsi1_0.choice_set_uuid=?
+    order by
+        qcsi1_0.sort_order
+Hibernate:
+    select
+        t1_0.topic_uuid,
+        t1_0.code,
+        t1_0.created_at,
+        t1_0.created_by,
+        t1_0.display_name,
+        t1_0.is_active,
+        t1_0.sort_order,
+        t1_0.updated_at,
+        t1_0.updated_by
+    from
+        topic t1_0
+    where
+        t1_0.topic_uuid=?
+2026-04-12T04:17:36.232+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : ===================== RESPONSE LOGGING =====================
+2026-04-12T04:17:36.232+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : URI: /api/questions/60aceda5-2876-4317-98fd-965efa4aac6e
+2026-04-12T04:17:36.232+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Method: GET
+2026-04-12T04:17:36.232+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Status: 200
+2026-04-12T04:17:36.232+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Response Body: {"questionUuid":"60aceda5-2876-4317-98fd-965efa4aac6e","topicName":"조인 (JOIN)","subtopicName":null,"difficulty":3,"executionMode":"EXECUTABLE","choiceSetPolicy":"AI_ONLY","stem":"다음 SQL과 동일한 실행 결과를 내는 SQL은?\n\nSELECT A.NAME, B.DEPT_NAME\nFROM EMP A\nJOIN DEPT B USING (DEPT_ID)\nWHERE DEPT_ID = 10;","schemaDisplay":null,"schemaDdl":"CREATE TABLE DEPT (\n  DEPT_ID INT PRIMARY KEY,\n  DEPT_NAME VARCHAR(50)\n);\nCREATE TABLE EMP (\n  ID INT PRIMARY KEY,\n  NAME VARCHAR(50),\n  DEPT_ID INT\n);","schemaSampleData":"INSERT INTO DEPT VALUES (10, '개발팀');\nINSERT INTO DEPT VALUES (20, '영업팀');\nINSERT INTO EMP VALUES (1, '홍길동', 10);\nINSERT INTO EMP VALUES (2, '김영희', 10);\nINSERT INTO EMP VALUES (3, '이철수', 20);","schemaIntent":"USING 절 조인에서 공통 컬럼 참조 방식 및 필터링 테스트","answerSql":"SELECT A.NAME, B.DEPT_NAME FROM EMP A JOIN DEPT B USING (DEPT_ID) WHERE DEPT_ID = 10","hint":"USING 절로 조인하면 지정한 컬럼(DEPT_ID)은 하나로 합쳐지므로 WHERE 절에서 테이블 별칭 없이 컬럼명만으로 참조한다.","choiceSets":[{"choiceSetUuid":"3f289599-92c7-44e6-b882-652292417e86","source":"AI_RUNTIME","status":"OK","sandboxValidationPassed":true,"createdAt":"2026-04-12T03:22:57.799597","items":[{"key":"A","kind":"SQL","body":"SELECT A.NAME, B.DEPT_NAME FROM EMP A INNER JOIN DEPT B ON A.DEPT_ID = B.DEPT_ID WHERE A.DEPT_ID = 10","isCorrect":true,"rationale":"JOIN ON 절을 사용하여 동일한 DEPT_ID를 가진 EMP와 DEPT 테이블을 연결하고, WHERE 절에서 DEPT_ID가 10인 행만 필터링하여 기준 SQL과 동일한 결과를 반환합니다.","sortOrder":0},{"key":"B","kind":"SQL","body":"SELECT A.NAME, B.DEPT_NAME FROM EMP A JOIN DEPT B ON A.DEPT_ID = B.DEPT_ID WHERE B.DEPT_NAME = '영업팀'","isCorrect":false,"rationale":"기준 SQL은 DEPT_ID가 10인 '개발팀'의 데이터를 조회하지만, 이 SQL은 DEPT_NAME이 '영업팀'인 데이터를 조회하므로 다른 결과를 반환합니다.","sortOrder":1},{"key":"C","kind":"SQL","body":"SELECT A.NAME, B.DEPT_NAME FROM EMP A LEFT JOIN DEPT B ON A.DEPT_ID = B.DEPT_ID WHERE A.ID > 1","isCorrect":false,"rationale":"LEFT JOIN은 기준 SQL의 INNER JOIN과 동작 방식이 다르며, WHERE 절의 조건도 ID가 1보다 큰 경우로 필터링하여 기준 SQL과 다른 결과를 반환합니다.","sortOrder":2},{"key":"D","kind":"SQL","body":"SELECT E.NAME, D.DEPT_NAME FROM EMP E, DEPT D WHERE E.DEPT_ID = D.DEPT_ID AND D.DEPT_ID = 20","isCorrect":false,"rationale":"카테시안 곱과 WHERE 절 조건을 이용한 방식은 JOIN ON과 유사할 수 있지만, DEPT_ID를 20으로 필터링하여 기준 SQL의 DEPT_ID 10과 다른 결과를 반환합니다.","sortOrder":3}]},{"choiceSetUuid":"7c1701f4-a413-4c9e-a11f-eca49c5b2bcb","source":"AI_RUNTIME","status":"FAILED","sandboxValidationPassed":false,"createdAt":"2026-04-12T02:49:20.867356","items":[]}]}
+2026-04-12T04:17:36.232+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : ============================================================
+Hibernate:
+    select
+        qcs1_0.choice_set_uuid,
+        qcs1_0.consumed_at,
+        qcs1_0.created_at,
+        qcs1_0.created_by,
+        qcs1_0.created_by_member_uuid,
+        qcs1_0.generated_for_member_uuid,
+        qcs1_0.generation_attempts,
+        qcs1_0.is_reusable,
+        qcs1_0.last_error_code,
+        qcs1_0.max_tokens,
+        qcs1_0.model_name,
+        qcs1_0.prompt_template_uuid,
+        qcs1_0.question_uuid,
+        qcs1_0.raw_response_json,
+        qcs1_0.sandbox_validation_passed,
+        qcs1_0.source,
+        qcs1_0.status,
+        qcs1_0.temperature,
+        qcs1_0.total_elapsed_ms,
+        qcs1_0.updated_at,
+        qcs1_0.updated_by
+    from
+        question_choice_set qcs1_0
+    where
+        qcs1_0.choice_set_uuid=?
+Hibernate:
+    select
+        qcsi1_0.choice_set_item_uuid,
+        qcsi1_0.body,
+        qcsi1_0.choice_key,
+        qcsi1_0.choice_set_uuid,
+        qcsi1_0.created_at,
+        qcsi1_0.created_by,
+        qcsi1_0.is_correct,
+        qcsi1_0.kind,
+        qcsi1_0.rationale,
+        qcsi1_0.sandbox_execution_json,
+        qcsi1_0.sort_order,
+        qcsi1_0.updated_at,
+        qcsi1_0.updated_by
+    from
+        question_choice_set_item qcsi1_0
+    where
+        qcsi1_0.choice_set_uuid=?
+        and qcsi1_0.choice_key=?
+Hibernate:
+    select
+        qcsi1_0.choice_set_item_uuid,
+        qcsi1_0.body,
+        qcsi1_0.choice_key,
+        qcsi1_0.choice_set_uuid,
+        qcsi1_0.created_at,
+        qcsi1_0.created_by,
+        qcsi1_0.is_correct,
+        qcsi1_0.kind,
+        qcsi1_0.rationale,
+        qcsi1_0.sandbox_execution_json,
+        qcsi1_0.sort_order,
+        qcsi1_0.updated_at,
+        qcsi1_0.updated_by
+    from
+        question_choice_set_item qcsi1_0
+    where
+        qcsi1_0.choice_set_uuid=?
+    order by
+        qcsi1_0.sort_order
+Hibernate:
+    select
+        q1_0.question_uuid,
+        q1_0.answer_sql,
+        q1_0.choice_set_policy,
+        q1_0.created_at,
+        q1_0.created_by,
+        q1_0.dialect,
+        q1_0.difficulty,
+        q1_0.execution_mode,
+        q1_0.explanation_summary,
+        q1_0.extra_meta_json,
+        q1_0.hint,
+        q1_0.is_active,
+        q1_0.sandbox_db_name,
+        q1_0.schema_ddl,
+        q1_0.schema_display,
+        q1_0.schema_intent,
+        q1_0.schema_sample_data,
+        q1_0.stem,
+        q1_0.subtopic_uuid,
+        q1_0.topic_uuid,
+        q1_0.updated_at,
+        q1_0.updated_by
+    from
+        question q1_0
+    where
+        q1_0.question_uuid=?
+2026-04-12T04:17:39.298+09:00  INFO 91809 --- [passql] [nio-8080-exec-8] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Starting...
+2026-04-12T04:17:39.309+09:00  INFO 91809 --- [passql] [nio-8080-exec-8] com.zaxxer.hikari.pool.HikariPool        : HikariPool-2 - Added connection org.postgresql.jdbc.PgConnection@56c1f701
+2026-04-12T04:17:39.309+09:00  INFO 91809 --- [passql] [nio-8080-exec-8] com.zaxxer.hikari.HikariDataSource       : HikariPool-2 - Start completed.
+2026-04-12T04:17:39.503+09:00 DEBUG 91809 --- [passql] [nio-8080-exec-8] c.passql.question.service.SandboxPool    : [SandboxPool] acquired: sandbox_b2443386 (permits left=29)
+2026-04-12T04:17:39.504+09:00  INFO 91809 --- [passql] [nio-8080-exec-8] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Starting...
+2026-04-12T04:17:39.542+09:00  INFO 91809 --- [passql] [nio-8080-exec-8] com.zaxxer.hikari.pool.HikariPool        : HikariPool-3 - Added connection org.postgresql.jdbc.PgConnection@3376acc1
+2026-04-12T04:17:39.542+09:00  INFO 91809 --- [passql] [nio-8080-exec-8] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Start completed.
+2026-04-12T04:17:39.542+09:00 DEBUG 91809 --- [passql] [nio-8080-exec-8] c.p.question.service.SandboxExecutor     : [applyDdl] DB=sandbox_b2443386 총 8개 토큰
+2026-04-12T04:17:39.542+09:00 DEBUG 91809 --- [passql] [nio-8080-exec-8] c.p.question.service.SandboxExecutor     : [applyDdl] [1/8] 실행: CREATE TABLE IF NOT EXISTS DEPT (
+  DEPT_ID INT PRIMARY KEY,
+  DEPT_NAME VARCHAR(50)
+)
+2026-04-12T04:17:39.544+09:00 DEBUG 91809 --- [passql] [nio-8080-exec-8] c.p.question.service.SandboxExecutor     : [applyDdl] [2/8] 실행: CREATE TABLE IF NOT EXISTS EMP (
+  ID INT PRIMARY KEY,
+  NAME VARCHAR(50),
+  DEPT_ID INT
+)
+2026-04-12T04:17:39.545+09:00 DEBUG 91809 --- [passql] [nio-8080-exec-8] c.p.question.service.SandboxExecutor     : [applyDdl] [4/8] 실행: INSERT INTO DEPT VALUES (10, '개발팀')
+2026-04-12T04:17:39.546+09:00 DEBUG 91809 --- [passql] [nio-8080-exec-8] c.p.question.service.SandboxExecutor     : [applyDdl] [5/8] 실행: INSERT INTO DEPT VALUES (20, '영업팀')
+2026-04-12T04:17:39.546+09:00 DEBUG 91809 --- [passql] [nio-8080-exec-8] c.p.question.service.SandboxExecutor     : [applyDdl] [6/8] 실행: INSERT INTO EMP VALUES (1, '홍길동', 10)
+2026-04-12T04:17:39.547+09:00 DEBUG 91809 --- [passql] [nio-8080-exec-8] c.p.question.service.SandboxExecutor     : [applyDdl] [7/8] 실행: INSERT INTO EMP VALUES (2, '김영희', 10)
+2026-04-12T04:17:39.547+09:00 DEBUG 91809 --- [passql] [nio-8080-exec-8] c.p.question.service.SandboxExecutor     : [applyDdl] [8/8] 실행: INSERT INTO EMP VALUES (3, '이철수', 20)
+2026-04-12T04:17:39.548+09:00  INFO 91809 --- [passql] [nio-8080-exec-8] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Shutdown initiated...
+2026-04-12T04:17:39.549+09:00  INFO 91809 --- [passql] [nio-8080-exec-8] com.zaxxer.hikari.HikariDataSource       : HikariPool-3 - Shutdown completed.
+2026-04-12T04:17:39.549+09:00  INFO 91809 --- [passql] [nio-8080-exec-8] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Starting...
+2026-04-12T04:17:39.552+09:00  INFO 91809 --- [passql] [nio-8080-exec-8] com.zaxxer.hikari.pool.HikariPool        : HikariPool-4 - Added connection org.postgresql.jdbc.PgConnection@612f51cb
+2026-04-12T04:17:39.552+09:00  INFO 91809 --- [passql] [nio-8080-exec-8] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Start completed.
+2026-04-12T04:17:39.554+09:00  INFO 91809 --- [passql] [nio-8080-exec-8] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Shutdown initiated...
+2026-04-12T04:17:39.554+09:00  INFO 91809 --- [passql] [nio-8080-exec-8] com.zaxxer.hikari.HikariDataSource       : HikariPool-4 - Shutdown completed.
+2026-04-12T04:17:39.554+09:00  INFO 91809 --- [passql] [nio-8080-exec-8] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Starting...
+2026-04-12T04:17:39.558+09:00  INFO 91809 --- [passql] [nio-8080-exec-8] com.zaxxer.hikari.pool.HikariPool        : HikariPool-5 - Added connection org.postgresql.jdbc.PgConnection@60fe363b
+2026-04-12T04:17:39.558+09:00  INFO 91809 --- [passql] [nio-8080-exec-8] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Start completed.
+2026-04-12T04:17:39.558+09:00  INFO 91809 --- [passql] [nio-8080-exec-8] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Shutdown initiated...
+2026-04-12T04:17:39.559+09:00  INFO 91809 --- [passql] [nio-8080-exec-8] com.zaxxer.hikari.HikariDataSource       : HikariPool-5 - Shutdown completed.
+2026-04-12T04:17:39.582+09:00 DEBUG 91809 --- [passql] [nio-8080-exec-8] c.passql.question.service.SandboxPool    : [SandboxPool] released: sandbox_b2443386 (permits left=30)
+Hibernate:
+    insert
+    into
+        submission
+        (choice_set_uuid, created_at, created_by, is_correct, member_uuid, question_index, question_uuid, selected_choice_key, session_uuid, submitted_at, updated_at, updated_by, submission_uuid)
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+2026-04-12T04:17:39.587+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : ===================== RESPONSE LOGGING =====================
+2026-04-12T04:17:39.588+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : URI: /api/questions/60aceda5-2876-4317-98fd-965efa4aac6e/submit
+2026-04-12T04:17:39.588+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Method: POST
+2026-04-12T04:17:39.588+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Status: 200
+2026-04-12T04:17:39.588+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Response Body: {"isCorrect":false,"correctKey":"A","rationale":"카테시안 곱과 WHERE 절 조건을 이용한 방식은 JOIN ON과 유사할 수 있지만, DEPT_ID를 20으로 필터링하여 기준 SQL의 DEPT_ID 10과 다른 결과를 반환합니다.","selectedResult":{"status":"OK","columns":["name","dept_name"],"rows":[["이철수","영업팀"]],"rowCount":1,"elapsedMs":4,"errorCode":null,"errorMessage":null},"correctResult":{"status":"OK","columns":["name","dept_name"],"rows":[["홍길동","개발팀"],["김영희","개발팀"]],"rowCount":2,"elapsedMs":4,"errorCode":null,"errorMessage":null},"correctSql":"SELECT A.NAME, B.DEPT_NAME FROM EMP A INNER JOIN DEPT B ON A.DEPT_ID = B.DEPT_ID WHERE A.DEPT_ID = 10","selectedSql":"SELECT E.NAME, D.DEPT_NAME FROM EMP E, DEPT D WHERE E.DEPT_ID = D.DEPT_ID AND D.DEPT_ID = 20"}
+2026-04-12T04:17:39.588+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : ============================================================
+Hibernate:
+    select
+        q1_0.question_uuid,
+        q1_0.answer_sql,
+        q1_0.choice_set_policy,
+        q1_0.created_at,
+        q1_0.created_by,
+        q1_0.dialect,
+        q1_0.difficulty,
+        q1_0.execution_mode,
+        q1_0.explanation_summary,
+        q1_0.extra_meta_json,
+        q1_0.hint,
+        q1_0.is_active,
+        q1_0.sandbox_db_name,
+        q1_0.schema_ddl,
+        q1_0.schema_display,
+        q1_0.schema_intent,
+        q1_0.schema_sample_data,
+        q1_0.stem,
+        q1_0.subtopic_uuid,
+        q1_0.topic_uuid,
+        q1_0.updated_at,
+        q1_0.updated_by
+    from
+        question q1_0
+    where
+        q1_0.question_uuid=?
+Hibernate:
+    select
+        qcs1_0.choice_set_uuid,
+        qcs1_0.consumed_at,
+        qcs1_0.created_at,
+        qcs1_0.created_by,
+        qcs1_0.created_by_member_uuid,
+        qcs1_0.generated_for_member_uuid,
+        qcs1_0.generation_attempts,
+        qcs1_0.is_reusable,
+        qcs1_0.last_error_code,
+        qcs1_0.max_tokens,
+        qcs1_0.model_name,
+        qcs1_0.prompt_template_uuid,
+        qcs1_0.question_uuid,
+        qcs1_0.raw_response_json,
+        qcs1_0.sandbox_validation_passed,
+        qcs1_0.source,
+        qcs1_0.status,
+        qcs1_0.temperature,
+        qcs1_0.total_elapsed_ms,
+        qcs1_0.updated_at,
+        qcs1_0.updated_by
+    from
+        question_choice_set qcs1_0
+    where
+        qcs1_0.question_uuid=?
+    order by
+        qcs1_0.created_at desc
+Hibernate:
+    select
+        qcsi1_0.choice_set_item_uuid,
+        qcsi1_0.body,
+        qcsi1_0.choice_key,
+        qcsi1_0.choice_set_uuid,
+        qcsi1_0.created_at,
+        qcsi1_0.created_by,
+        qcsi1_0.is_correct,
+        qcsi1_0.kind,
+        qcsi1_0.rationale,
+        qcsi1_0.sandbox_execution_json,
+        qcsi1_0.sort_order,
+        qcsi1_0.updated_at,
+        qcsi1_0.updated_by
+    from
+        question_choice_set_item qcsi1_0
+    where
+        qcsi1_0.choice_set_uuid=?
+    order by
+        qcsi1_0.sort_order
+Hibernate:
+    select
+        t1_0.topic_uuid,
+        t1_0.code,
+        t1_0.created_at,
+        t1_0.created_by,
+        t1_0.display_name,
+        t1_0.is_active,
+        t1_0.sort_order,
+        t1_0.updated_at,
+        t1_0.updated_by
+    from
+        topic t1_0
+    where
+        t1_0.topic_uuid=?
+2026-04-12T04:17:40.182+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : ===================== RESPONSE LOGGING =====================
+2026-04-12T04:17:40.182+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : URI: /api/questions/5c629721-5ac4-474c-b567-3cbf30e2374f
+2026-04-12T04:17:40.182+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Method: GET
+2026-04-12T04:17:40.182+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Status: 200
+2026-04-12T04:17:40.183+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Response Body: {"questionUuid":"5c629721-5ac4-474c-b567-3cbf30e2374f","topicName":"조인 (JOIN)","subtopicName":null,"difficulty":3,"executionMode":"EXECUTABLE","choiceSetPolicy":"ODD_ONE_OUT","stem":"다음 중 SQL 실행 결과가 나머지와 다른 것은?\n\n테이블: EMP (ID INT, NAME VARCHAR, DEPT_ID INT), DEPT (DEPT_ID INT, DEPT_NAME VARCHAR)\n\n데이터: EMP에 (1,'홍길동',10),(2,'김영희',20),(3,'이철수',NULL) / DEPT에 (10,'개발팀'),(20,'영업팀')","schemaDisplay":null,"schemaDdl":"CREATE TABLE DEPT (\n  DEPT_ID INT PRIMARY KEY,\n  DEPT_NAME VARCHAR(50)\n);\nCREATE TABLE EMP (\n  ID INT PRIMARY KEY,\n  NAME VARCHAR(50),\n  DEPT_ID INT\n);","schemaSampleData":"INSERT INTO DEPT VALUES (10, '개발팀');\nINSERT INTO DEPT VALUES (20, '영업팀');\nINSERT INTO EMP VALUES (1, '홍길동', 10);\nINSERT INTO EMP VALUES (2, '김영희', 20);\nINSERT INTO EMP VALUES (3, '이철수', NULL);","schemaIntent":"FULL OUTER JOIN vs LEFT/RIGHT OUTER JOIN + UNION/UNION ALL 동치 여부 테스트","answerSql":"SELECT A.NAME, B.DEPT_NAME FROM EMP A LEFT OUTER JOIN DEPT B ON A.DEPT_ID = B.DEPT_ID UNION ALL SELECT A.NAME, B.DEPT_NAME FROM EMP A RIGHT OUTER JOIN DEPT B ON A.DEPT_ID = B.DEPT_ID","hint":"FULL OUTER JOIN은 LEFT OUTER JOIN UNION RIGHT OUTER JOIN과 같지만, UNION ALL은 중복 행이 포함될 수 있어 결과가 달라진다.","choiceSets":[{"choiceSetUuid":"6e078f38-dc06-4a41-900b-323958eac28a","source":"AI_RUNTIME","status":"OK","sandboxValidationPassed":true,"createdAt":"2026-04-12T02:45:05.917236","items":[{"key":"A","kind":"SQL","body":"SELECT A.NAME, B.DEPT_NAME FROM EMP A FULL OUTER JOIN DEPT B ON A.DEPT_ID = B.DEPT_ID","isCorrect":false,"rationale":"FULL OUTER JOIN은 LEFT JOIN과 RIGHT JOIN을 합친 것과 동일한 결과를 반환하므로 기준 SQL과 동일합니다.","sortOrder":0},{"key":"B","kind":"SQL","body":"SELECT A.NAME, B.DEPT_NAME FROM EMP A LEFT JOIN DEPT B ON A.DEPT_ID = B.DEPT_ID","isCorrect":false,"rationale":"이 쿼리는 EMP 테이블의 모든 행과 DEPT 테이블의 일치하는 행을 반환하지만, DEPT 테이블에만 있고 EMP 테이블에는 없는 행은 포함하지 않아 기준 SQL과 다른 결과를 반환합니다.","sortOrder":1},{"key":"C","kind":"SQL","body":"SELECT A.NAME, B.DEPT_NAME FROM EMP A RIGHT JOIN DEPT B ON A.DEPT_ID = B.DEPT_ID","isCorrect":true,"rationale":"이 쿼리는 DEPT 테이블의 모든 행과 EMP 테이블의 일치하는 행을 반환하지만, EMP 테이블에만 있고 DEPT 테이블에는 없는 행은 포함하지 않아 기준 SQL과 다른 결과를 반환합니다.","sortOrder":2},{"key":"D","kind":"SQL","body":"SELECT A.NAME, B.DEPT_NAME FROM EMP A LEFT JOIN DEPT B ON A.DEPT_ID = B.DEPT_ID UNION SELECT A.NAME, B.DEPT_NAME FROM EMP A RIGHT JOIN DEPT B ON A.DEPT_ID = B.DEPT_ID","isCorrect":false,"rationale":"UNION 연산은 중복된 행을 제거하므로, 기준 SQL의 UNION ALL과 다른 결과를 반환합니다. 특히, EMP 테이블에만 존재하는 행이 중복되어 나타날 경우 UNION은 한 번만 나타나게 됩니다.","sortOrder":3}]}]}
+2026-04-12T04:17:40.183+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : ============================================================
+Hibernate:
+    select
+        qcs1_0.choice_set_uuid,
+        qcs1_0.consumed_at,
+        qcs1_0.created_at,
+        qcs1_0.created_by,
+        qcs1_0.created_by_member_uuid,
+        qcs1_0.generated_for_member_uuid,
+        qcs1_0.generation_attempts,
+        qcs1_0.is_reusable,
+        qcs1_0.last_error_code,
+        qcs1_0.max_tokens,
+        qcs1_0.model_name,
+        qcs1_0.prompt_template_uuid,
+        qcs1_0.question_uuid,
+        qcs1_0.raw_response_json,
+        qcs1_0.sandbox_validation_passed,
+        qcs1_0.source,
+        qcs1_0.status,
+        qcs1_0.temperature,
+        qcs1_0.total_elapsed_ms,
+        qcs1_0.updated_at,
+        qcs1_0.updated_by
+    from
+        question_choice_set qcs1_0
+    where
+        qcs1_0.choice_set_uuid=?
+Hibernate:
+    select
+        qcsi1_0.choice_set_item_uuid,
+        qcsi1_0.body,
+        qcsi1_0.choice_key,
+        qcsi1_0.choice_set_uuid,
+        qcsi1_0.created_at,
+        qcsi1_0.created_by,
+        qcsi1_0.is_correct,
+        qcsi1_0.kind,
+        qcsi1_0.rationale,
+        qcsi1_0.sandbox_execution_json,
+        qcsi1_0.sort_order,
+        qcsi1_0.updated_at,
+        qcsi1_0.updated_by
+    from
+        question_choice_set_item qcsi1_0
+    where
+        qcsi1_0.choice_set_uuid=?
+        and qcsi1_0.choice_key=?
+Hibernate:
+    select
+        qcsi1_0.choice_set_item_uuid,
+        qcsi1_0.body,
+        qcsi1_0.choice_key,
+        qcsi1_0.choice_set_uuid,
+        qcsi1_0.created_at,
+        qcsi1_0.created_by,
+        qcsi1_0.is_correct,
+        qcsi1_0.kind,
+        qcsi1_0.rationale,
+        qcsi1_0.sandbox_execution_json,
+        qcsi1_0.sort_order,
+        qcsi1_0.updated_at,
+        qcsi1_0.updated_by
+    from
+        question_choice_set_item qcsi1_0
+    where
+        qcsi1_0.choice_set_uuid=?
+    order by
+        qcsi1_0.sort_order
+Hibernate:
+    select
+        q1_0.question_uuid,
+        q1_0.answer_sql,
+        q1_0.choice_set_policy,
+        q1_0.created_at,
+        q1_0.created_by,
+        q1_0.dialect,
+        q1_0.difficulty,
+        q1_0.execution_mode,
+        q1_0.explanation_summary,
+        q1_0.extra_meta_json,
+        q1_0.hint,
+        q1_0.is_active,
+        q1_0.sandbox_db_name,
+        q1_0.schema_ddl,
+        q1_0.schema_display,
+        q1_0.schema_intent,
+        q1_0.schema_sample_data,
+        q1_0.stem,
+        q1_0.subtopic_uuid,
+        q1_0.topic_uuid,
+        q1_0.updated_at,
+        q1_0.updated_by
+    from
+        question q1_0
+    where
+        q1_0.question_uuid=?
+2026-04-12T04:17:42.615+09:00 DEBUG 91809 --- [passql] [nio-8080-exec-1] c.passql.question.service.SandboxPool    : [SandboxPool] acquired: sandbox_6a6bfcbb (permits left=29)
+2026-04-12T04:17:42.616+09:00  INFO 91809 --- [passql] [nio-8080-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-6 - Starting...
+2026-04-12T04:17:42.623+09:00  INFO 91809 --- [passql] [nio-8080-exec-1] com.zaxxer.hikari.pool.HikariPool        : HikariPool-6 - Added connection org.postgresql.jdbc.PgConnection@76f58fdc
+2026-04-12T04:17:42.624+09:00  INFO 91809 --- [passql] [nio-8080-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-6 - Start completed.
+2026-04-12T04:17:42.624+09:00 DEBUG 91809 --- [passql] [nio-8080-exec-1] c.p.question.service.SandboxExecutor     : [applyDdl] DB=sandbox_6a6bfcbb 총 8개 토큰
+2026-04-12T04:17:42.624+09:00 DEBUG 91809 --- [passql] [nio-8080-exec-1] c.p.question.service.SandboxExecutor     : [applyDdl] [1/8] 실행: CREATE TABLE IF NOT EXISTS DEPT (
+  DEPT_ID INT PRIMARY KEY,
+  DEPT_NAME VARCHAR(50)
+)
+2026-04-12T04:17:42.626+09:00 DEBUG 91809 --- [passql] [nio-8080-exec-1] c.p.question.service.SandboxExecutor     : [applyDdl] [2/8] 실행: CREATE TABLE IF NOT EXISTS EMP (
+  ID INT PRIMARY KEY,
+  NAME VARCHAR(50),
+  DEPT_ID INT
+)
+2026-04-12T04:17:42.627+09:00 DEBUG 91809 --- [passql] [nio-8080-exec-1] c.p.question.service.SandboxExecutor     : [applyDdl] [4/8] 실행: INSERT INTO DEPT VALUES (10, '개발팀')
+2026-04-12T04:17:42.628+09:00 DEBUG 91809 --- [passql] [nio-8080-exec-1] c.p.question.service.SandboxExecutor     : [applyDdl] [5/8] 실행: INSERT INTO DEPT VALUES (20, '영업팀')
+2026-04-12T04:17:42.628+09:00 DEBUG 91809 --- [passql] [nio-8080-exec-1] c.p.question.service.SandboxExecutor     : [applyDdl] [6/8] 실행: INSERT INTO EMP VALUES (1, '홍길동', 10)
+2026-04-12T04:17:42.629+09:00 DEBUG 91809 --- [passql] [nio-8080-exec-1] c.p.question.service.SandboxExecutor     : [applyDdl] [7/8] 실행: INSERT INTO EMP VALUES (2, '김영희', 20)
+2026-04-12T04:17:42.629+09:00 DEBUG 91809 --- [passql] [nio-8080-exec-1] c.p.question.service.SandboxExecutor     : [applyDdl] [8/8] 실행: INSERT INTO EMP VALUES (3, '이철수', NULL)
+2026-04-12T04:17:42.630+09:00  INFO 91809 --- [passql] [nio-8080-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-6 - Shutdown initiated...
+2026-04-12T04:17:42.630+09:00  INFO 91809 --- [passql] [nio-8080-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-6 - Shutdown completed.
+2026-04-12T04:17:42.631+09:00  INFO 91809 --- [passql] [nio-8080-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-7 - Starting...
+2026-04-12T04:17:42.635+09:00  INFO 91809 --- [passql] [nio-8080-exec-1] com.zaxxer.hikari.pool.HikariPool        : HikariPool-7 - Added connection org.postgresql.jdbc.PgConnection@146c37ee
+2026-04-12T04:17:42.635+09:00  INFO 91809 --- [passql] [nio-8080-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-7 - Start completed.
+2026-04-12T04:17:42.636+09:00  INFO 91809 --- [passql] [nio-8080-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-7 - Shutdown initiated...
+2026-04-12T04:17:42.637+09:00  INFO 91809 --- [passql] [nio-8080-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-7 - Shutdown completed.
+2026-04-12T04:17:42.637+09:00  INFO 91809 --- [passql] [nio-8080-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-8 - Starting...
+2026-04-12T04:17:42.642+09:00  INFO 91809 --- [passql] [nio-8080-exec-1] com.zaxxer.hikari.pool.HikariPool        : HikariPool-8 - Added connection org.postgresql.jdbc.PgConnection@721bcfd3
+2026-04-12T04:17:42.643+09:00  INFO 91809 --- [passql] [nio-8080-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-8 - Start completed.
+2026-04-12T04:17:42.644+09:00  INFO 91809 --- [passql] [nio-8080-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-8 - Shutdown initiated...
+2026-04-12T04:17:42.645+09:00  INFO 91809 --- [passql] [nio-8080-exec-1] com.zaxxer.hikari.HikariDataSource       : HikariPool-8 - Shutdown completed.
+2026-04-12T04:17:42.663+09:00 DEBUG 91809 --- [passql] [nio-8080-exec-1] c.passql.question.service.SandboxPool    : [SandboxPool] released: sandbox_6a6bfcbb (permits left=30)
+Hibernate:
+    insert
+    into
+        submission
+        (choice_set_uuid, created_at, created_by, is_correct, member_uuid, question_index, question_uuid, selected_choice_key, session_uuid, submitted_at, updated_at, updated_by, submission_uuid)
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+2026-04-12T04:17:42.671+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : ===================== RESPONSE LOGGING =====================
+2026-04-12T04:17:42.672+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : URI: /api/questions/5c629721-5ac4-474c-b567-3cbf30e2374f/submit
+2026-04-12T04:17:42.672+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Method: POST
+2026-04-12T04:17:42.673+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Status: 200
+2026-04-12T04:17:42.673+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Response Body: {"isCorrect":true,"correctKey":"C","rationale":"이 쿼리는 DEPT 테이블의 모든 행과 EMP 테이블의 일치하는 행을 반환하지만, EMP 테이블에만 있고 DEPT 테이블에는 없는 행은 포함하지 않아 기준 SQL과 다른 결과를 반환합니다.","selectedResult":{"status":"OK","columns":["name","dept_name"],"rows":[["홍길동","개발팀"],["김영희","영업팀"]],"rowCount":2,"elapsedMs":5,"errorCode":null,"errorMessage":null},"correctResult":{"status":"OK","columns":["name","dept_name"],"rows":[["홍길동","개발팀"],["김영희","영업팀"]],"rowCount":2,"elapsedMs":7,"errorCode":null,"errorMessage":null},"correctSql":"SELECT A.NAME, B.DEPT_NAME FROM EMP A RIGHT JOIN DEPT B ON A.DEPT_ID = B.DEPT_ID","selectedSql":"SELECT A.NAME, B.DEPT_NAME FROM EMP A RIGHT JOIN DEPT B ON A.DEPT_ID = B.DEPT_ID"}
+2026-04-12T04:17:42.673+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : ============================================================
+Hibernate:
+    select
+        q1_0.question_uuid,
+        q1_0.answer_sql,
+        q1_0.choice_set_policy,
+        q1_0.created_at,
+        q1_0.created_by,
+        q1_0.dialect,
+        q1_0.difficulty,
+        q1_0.execution_mode,
+        q1_0.explanation_summary,
+        q1_0.extra_meta_json,
+        q1_0.hint,
+        q1_0.is_active,
+        q1_0.sandbox_db_name,
+        q1_0.schema_ddl,
+        q1_0.schema_display,
+        q1_0.schema_intent,
+        q1_0.schema_sample_data,
+        q1_0.stem,
+        q1_0.subtopic_uuid,
+        q1_0.topic_uuid,
+        q1_0.updated_at,
+        q1_0.updated_by
+    from
+        question q1_0
+    where
+        q1_0.question_uuid=?
+Hibernate:
+    select
+        qcs1_0.choice_set_uuid,
+        qcs1_0.consumed_at,
+        qcs1_0.created_at,
+        qcs1_0.created_by,
+        qcs1_0.created_by_member_uuid,
+        qcs1_0.generated_for_member_uuid,
+        qcs1_0.generation_attempts,
+        qcs1_0.is_reusable,
+        qcs1_0.last_error_code,
+        qcs1_0.max_tokens,
+        qcs1_0.model_name,
+        qcs1_0.prompt_template_uuid,
+        qcs1_0.question_uuid,
+        qcs1_0.raw_response_json,
+        qcs1_0.sandbox_validation_passed,
+        qcs1_0.source,
+        qcs1_0.status,
+        qcs1_0.temperature,
+        qcs1_0.total_elapsed_ms,
+        qcs1_0.updated_at,
+        qcs1_0.updated_by
+    from
+        question_choice_set qcs1_0
+    where
+        qcs1_0.question_uuid=?
+    order by
+        qcs1_0.created_at desc
+Hibernate:
+    select
+        qcsi1_0.choice_set_item_uuid,
+        qcsi1_0.body,
+        qcsi1_0.choice_key,
+        qcsi1_0.choice_set_uuid,
+        qcsi1_0.created_at,
+        qcsi1_0.created_by,
+        qcsi1_0.is_correct,
+        qcsi1_0.kind,
+        qcsi1_0.rationale,
+        qcsi1_0.sandbox_execution_json,
+        qcsi1_0.sort_order,
+        qcsi1_0.updated_at,
+        qcsi1_0.updated_by
+    from
+        question_choice_set_item qcsi1_0
+    where
+        qcsi1_0.choice_set_uuid=?
+    order by
+        qcsi1_0.sort_order
+Hibernate:
+    select
+        t1_0.topic_uuid,
+        t1_0.code,
+        t1_0.created_at,
+        t1_0.created_by,
+        t1_0.display_name,
+        t1_0.is_active,
+        t1_0.sort_order,
+        t1_0.updated_at,
+        t1_0.updated_by
+    from
+        topic t1_0
+    where
+        t1_0.topic_uuid=?
+2026-04-12T04:17:43.516+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : ===================== RESPONSE LOGGING =====================
+2026-04-12T04:17:43.516+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : URI: /api/questions/91f152eb-81ef-43df-98a1-9a64371254f5
+2026-04-12T04:17:43.516+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Method: GET
+2026-04-12T04:17:43.516+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Status: 200
+2026-04-12T04:17:43.516+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Response Body: {"questionUuid":"91f152eb-81ef-43df-98a1-9a64371254f5","topicName":"조인 (JOIN)","subtopicName":null,"difficulty":4,"executionMode":"EXECUTABLE","choiceSetPolicy":"AI_ONLY","stem":"다음 SQL과 동일한 실행 결과를 내는 SQL은?\n\nSELECT A.DEPT_ID, A.NAME, B.NAME AS PARTNER\nFROM EMP A\nINNER JOIN EMP B ON A.DEPT_ID = B.DEPT_ID\nWHERE A.ID <> B.ID\nORDER BY A.DEPT_ID, A.NAME;","schemaDisplay":null,"schemaDdl":"CREATE TABLE EMP (\n  ID INT PRIMARY KEY,\n  NAME VARCHAR(50),\n  DEPT_ID INT\n);","schemaSampleData":"INSERT INTO EMP VALUES (1, '홍길동', 10);\nINSERT INTO EMP VALUES (2, '김영희', 10);\nINSERT INTO EMP VALUES (3, '이철수', 20);\nINSERT INTO EMP VALUES (4, '박민수', 20);","schemaIntent":"Self Join으로 같은 부서 내 사원 쌍 조회 테스트","answerSql":"SELECT A.DEPT_ID, A.NAME, B.NAME AS PARTNER FROM EMP A INNER JOIN EMP B ON A.DEPT_ID = B.DEPT_ID WHERE A.ID <> B.ID ORDER BY A.DEPT_ID, A.NAME","hint":"같은 테이블을 두 번 조인하는 셀프 조인에서 A.ID <> B.ID 조건으로 자기 자신과의 매칭을 제외하면 같은 부서의 다른 사원 조합이 나온다.","choiceSets":[{"choiceSetUuid":"7bb6096c-b4b9-4604-b9d9-97674ed3a86a","source":"AI_RUNTIME","status":"OK","sandboxValidationPassed":true,"createdAt":"2026-04-12T03:33:45.647792","items":[{"key":"A","kind":"SQL","body":"SELECT A.DEPT_ID, A.NAME, B.NAME AS PARTNER FROM EMP A JOIN EMP B ON A.DEPT_ID = B.DEPT_ID WHERE A.ID < B.ID ORDER BY A.DEPT_ID, A.NAME","isCorrect":false,"rationale":"기준 SQL은 같은 부서 내 다른 사원 쌍을 조회하며, `A.ID <> B.ID` 조건을 사용합니다. 이 SQL은 `A.ID < B.ID` 조건을 사용하여 동일한 사원 쌍을 중복 없이 조회합니다. `ORDER BY` 절이 동일하므로 결과는 같습니다.","sortOrder":0},{"key":"B","kind":"SQL","body":"SELECT A.DEPT_ID, A.NAME, B.NAME AS PARTNER FROM EMP A INNER JOIN EMP B ON A.DEPT_ID = B.DEPT_ID WHERE A.ID = B.ID ORDER BY A.DEPT_ID, A.NAME","isCorrect":false,"rationale":"이 SQL은 `A.ID = B.ID` 조건을 사용하여 자기 자신과만 조인하므로, 각 사원은 자신의 정보만 결과로 반환합니다. 기준 SQL은 다른 사원과의 쌍을 조회하므로 결과가 다릅니다.","sortOrder":1},{"key":"C","kind":"SQL","body":"SELECT A.DEPT_ID, A.NAME, B.NAME AS PARTNER FROM EMP A INNER JOIN EMP B ON A.DEPT_ID = B.DEPT_ID WHERE A.ID > B.ID ORDER BY A.DEPT_ID, A.NAME","isCorrect":false,"rationale":"이 SQL은 `A.ID > B.ID` 조건을 사용하여 기준 SQL의 `A.ID <> B.ID` 조건과 동일한 사원 쌍을 조회하지만, 순서가 반대입니다. `ORDER BY` 절이 기준 SQL과 동일하게 `A.DEPT_ID, A.NAME`으로 정렬되지만, `A.ID > B.ID` 조건은 `A.ID < B.ID` 조건과 결과 집합이 다릅니다. 기준 SQL은 `A.ID <> B.ID`로 양방향을 모두 포함하지만, 이 쿼리는 한 방향만 포함하므로 결과가 다릅니다.","sortOrder":2},{"key":"D","kind":"SQL","body":"SELECT A.DEPT_ID, A.NAME, B.NAME AS PARTNER FROM EMP A INNER JOIN EMP B ON A.DEPT_ID = B.DEPT_ID WHERE A.ID <> B.ID GROUP BY A.DEPT_ID, A.NAME, B.NAME ORDER BY A.DEPT_ID, A.NAME","isCorrect":true,"rationale":"이 SQL은 `GROUP BY` 절을 추가했습니다. `A.ID <> B.ID` 조건으로 인해 각 사원 쌍이 고유하므로, `GROUP BY`를 추가해도 결과가 동일할 것으로 보일 수 있습니다. 하지만 `GROUP BY`는 기본적으로 중복을 제거하는 효과가 있으며, `ORDER BY` 절이 동일해도 `GROUP BY`의 존재 자체가 `SELECT` 절의 컬럼들이 유일하게 결정되지 않는 경우 결과에 영향을 줄 수 있습니다. 샘플 데이터와 같이 중복이 없는 경우에는 동일하게 보일 수 있으나, 논리적으로 `GROUP BY`의 사용은 결과에 영향을 줄 가능성이 있어 기준 SQL과 동일하다고 단정할 수 없습니다. 또한, `GROUP BY`는 집계 함수와 함께 사용될 때 의미가 있으며, 이 경우 집계 함수 없이 사용하면 의도치 않은 결과나 성능 저하를 유발할 수 있습니다.","sortOrder":3}]}]}
+2026-04-12T04:17:43.516+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : ============================================================
+Hibernate:
+    select
+        qcs1_0.choice_set_uuid,
+        qcs1_0.consumed_at,
+        qcs1_0.created_at,
+        qcs1_0.created_by,
+        qcs1_0.created_by_member_uuid,
+        qcs1_0.generated_for_member_uuid,
+        qcs1_0.generation_attempts,
+        qcs1_0.is_reusable,
+        qcs1_0.last_error_code,
+        qcs1_0.max_tokens,
+        qcs1_0.model_name,
+        qcs1_0.prompt_template_uuid,
+        qcs1_0.question_uuid,
+        qcs1_0.raw_response_json,
+        qcs1_0.sandbox_validation_passed,
+        qcs1_0.source,
+        qcs1_0.status,
+        qcs1_0.temperature,
+        qcs1_0.total_elapsed_ms,
+        qcs1_0.updated_at,
+        qcs1_0.updated_by
+    from
+        question_choice_set qcs1_0
+    where
+        qcs1_0.choice_set_uuid=?
+Hibernate:
+    select
+        qcsi1_0.choice_set_item_uuid,
+        qcsi1_0.body,
+        qcsi1_0.choice_key,
+        qcsi1_0.choice_set_uuid,
+        qcsi1_0.created_at,
+        qcsi1_0.created_by,
+        qcsi1_0.is_correct,
+        qcsi1_0.kind,
+        qcsi1_0.rationale,
+        qcsi1_0.sandbox_execution_json,
+        qcsi1_0.sort_order,
+        qcsi1_0.updated_at,
+        qcsi1_0.updated_by
+    from
+        question_choice_set_item qcsi1_0
+    where
+        qcsi1_0.choice_set_uuid=?
+        and qcsi1_0.choice_key=?
+Hibernate:
+    select
+        qcsi1_0.choice_set_item_uuid,
+        qcsi1_0.body,
+        qcsi1_0.choice_key,
+        qcsi1_0.choice_set_uuid,
+        qcsi1_0.created_at,
+        qcsi1_0.created_by,
+        qcsi1_0.is_correct,
+        qcsi1_0.kind,
+        qcsi1_0.rationale,
+        qcsi1_0.sandbox_execution_json,
+        qcsi1_0.sort_order,
+        qcsi1_0.updated_at,
+        qcsi1_0.updated_by
+    from
+        question_choice_set_item qcsi1_0
+    where
+        qcsi1_0.choice_set_uuid=?
+    order by
+        qcsi1_0.sort_order
+Hibernate:
+    select
+        q1_0.question_uuid,
+        q1_0.answer_sql,
+        q1_0.choice_set_policy,
+        q1_0.created_at,
+        q1_0.created_by,
+        q1_0.dialect,
+        q1_0.difficulty,
+        q1_0.execution_mode,
+        q1_0.explanation_summary,
+        q1_0.extra_meta_json,
+        q1_0.hint,
+        q1_0.is_active,
+        q1_0.sandbox_db_name,
+        q1_0.schema_ddl,
+        q1_0.schema_display,
+        q1_0.schema_intent,
+        q1_0.schema_sample_data,
+        q1_0.stem,
+        q1_0.subtopic_uuid,
+        q1_0.topic_uuid,
+        q1_0.updated_at,
+        q1_0.updated_by
+    from
+        question q1_0
+    where
+        q1_0.question_uuid=?
+2026-04-12T04:17:46.895+09:00 DEBUG 91809 --- [passql] [nio-8080-exec-4] c.passql.question.service.SandboxPool    : [SandboxPool] acquired: sandbox_7e65e073 (permits left=29)
+2026-04-12T04:17:46.896+09:00  INFO 91809 --- [passql] [nio-8080-exec-4] com.zaxxer.hikari.HikariDataSource       : HikariPool-9 - Starting...
+2026-04-12T04:17:46.902+09:00  INFO 91809 --- [passql] [nio-8080-exec-4] com.zaxxer.hikari.pool.HikariPool        : HikariPool-9 - Added connection org.postgresql.jdbc.PgConnection@430c57d2
+2026-04-12T04:17:46.902+09:00  INFO 91809 --- [passql] [nio-8080-exec-4] com.zaxxer.hikari.HikariDataSource       : HikariPool-9 - Start completed.
+2026-04-12T04:17:46.902+09:00 DEBUG 91809 --- [passql] [nio-8080-exec-4] c.p.question.service.SandboxExecutor     : [applyDdl] DB=sandbox_7e65e073 총 6개 토큰
+2026-04-12T04:17:46.902+09:00 DEBUG 91809 --- [passql] [nio-8080-exec-4] c.p.question.service.SandboxExecutor     : [applyDdl] [1/6] 실행: CREATE TABLE IF NOT EXISTS EMP (
+  ID INT PRIMARY KEY,
+  NAME VARCHAR(50),
+  DEPT_ID INT
+)
+2026-04-12T04:17:46.904+09:00 DEBUG 91809 --- [passql] [nio-8080-exec-4] c.p.question.service.SandboxExecutor     : [applyDdl] [3/6] 실행: INSERT INTO EMP VALUES (1, '홍길동', 10)
+2026-04-12T04:17:46.905+09:00 DEBUG 91809 --- [passql] [nio-8080-exec-4] c.p.question.service.SandboxExecutor     : [applyDdl] [4/6] 실행: INSERT INTO EMP VALUES (2, '김영희', 10)
+2026-04-12T04:17:46.906+09:00 DEBUG 91809 --- [passql] [nio-8080-exec-4] c.p.question.service.SandboxExecutor     : [applyDdl] [5/6] 실행: INSERT INTO EMP VALUES (3, '이철수', 20)
+2026-04-12T04:17:46.906+09:00 DEBUG 91809 --- [passql] [nio-8080-exec-4] c.p.question.service.SandboxExecutor     : [applyDdl] [6/6] 실행: INSERT INTO EMP VALUES (4, '박민수', 20)
+2026-04-12T04:17:46.906+09:00  INFO 91809 --- [passql] [nio-8080-exec-4] com.zaxxer.hikari.HikariDataSource       : HikariPool-9 - Shutdown initiated...
+2026-04-12T04:17:46.907+09:00  INFO 91809 --- [passql] [nio-8080-exec-4] com.zaxxer.hikari.HikariDataSource       : HikariPool-9 - Shutdown completed.
+2026-04-12T04:17:46.907+09:00  INFO 91809 --- [passql] [nio-8080-exec-4] com.zaxxer.hikari.HikariDataSource       : HikariPool-10 - Starting...
+2026-04-12T04:17:46.911+09:00  INFO 91809 --- [passql] [nio-8080-exec-4] com.zaxxer.hikari.pool.HikariPool        : HikariPool-10 - Added connection org.postgresql.jdbc.PgConnection@76e350b6
+2026-04-12T04:17:46.912+09:00  INFO 91809 --- [passql] [nio-8080-exec-4] com.zaxxer.hikari.HikariDataSource       : HikariPool-10 - Start completed.
+2026-04-12T04:17:46.913+09:00  INFO 91809 --- [passql] [nio-8080-exec-4] com.zaxxer.hikari.HikariDataSource       : HikariPool-10 - Shutdown initiated...
+2026-04-12T04:17:46.914+09:00  INFO 91809 --- [passql] [nio-8080-exec-4] com.zaxxer.hikari.HikariDataSource       : HikariPool-10 - Shutdown completed.
+2026-04-12T04:17:46.914+09:00  INFO 91809 --- [passql] [nio-8080-exec-4] com.zaxxer.hikari.HikariDataSource       : HikariPool-11 - Starting...
+2026-04-12T04:17:46.923+09:00  INFO 91809 --- [passql] [nio-8080-exec-4] com.zaxxer.hikari.pool.HikariPool        : HikariPool-11 - Added connection org.postgresql.jdbc.PgConnection@4a8f3dd1
+2026-04-12T04:17:46.923+09:00  INFO 91809 --- [passql] [nio-8080-exec-4] com.zaxxer.hikari.HikariDataSource       : HikariPool-11 - Start completed.
+2026-04-12T04:17:46.925+09:00  INFO 91809 --- [passql] [nio-8080-exec-4] com.zaxxer.hikari.HikariDataSource       : HikariPool-11 - Shutdown initiated...
+2026-04-12T04:17:46.926+09:00  INFO 91809 --- [passql] [nio-8080-exec-4] com.zaxxer.hikari.HikariDataSource       : HikariPool-11 - Shutdown completed.
+2026-04-12T04:17:46.945+09:00 DEBUG 91809 --- [passql] [nio-8080-exec-4] c.passql.question.service.SandboxPool    : [SandboxPool] released: sandbox_7e65e073 (permits left=30)
+Hibernate:
+    insert
+    into
+        submission
+        (choice_set_uuid, created_at, created_by, is_correct, member_uuid, question_index, question_uuid, selected_choice_key, session_uuid, submitted_at, updated_at, updated_by, submission_uuid)
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+2026-04-12T04:17:46.949+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : ===================== RESPONSE LOGGING =====================
+2026-04-12T04:17:46.949+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : URI: /api/questions/91f152eb-81ef-43df-98a1-9a64371254f5/submit
+2026-04-12T04:17:46.949+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Method: POST
+2026-04-12T04:17:46.950+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Status: 200
+2026-04-12T04:17:46.950+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Response Body: {"isCorrect":false,"correctKey":"D","rationale":"이 SQL은 `A.ID > B.ID` 조건을 사용하여 기준 SQL의 `A.ID <> B.ID` 조건과 동일한 사원 쌍을 조회하지만, 순서가 반대입니다. `ORDER BY` 절이 기준 SQL과 동일하게 `A.DEPT_ID, A.NAME`으로 정렬되지만, `A.ID > B.ID` 조건은 `A.ID < B.ID` 조건과 결과 집합이 다릅니다. 기준 SQL은 `A.ID <> B.ID`로 양방향을 모두 포함하지만, 이 쿼리는 한 방향만 포함하므로 결과가 다릅니다.","selectedResult":{"status":"OK","columns":["dept_id","name","partner"],"rows":[[10,"김영희","홍길동"],[20,"박민수","이철수"]],"rowCount":2,"elapsedMs":6,"errorCode":null,"errorMessage":null},"correctResult":{"status":"OK","columns":["dept_id","name","partner"],"rows":[[10,"김영희","홍길동"],[10,"홍길동","김영희"],[20,"박민수","이철수"],[20,"이철수","박민수"]],"rowCount":4,"elapsedMs":11,"errorCode":null,"errorMessage":null},"correctSql":"SELECT A.DEPT_ID, A.NAME, B.NAME AS PARTNER FROM EMP A INNER JOIN EMP B ON A.DEPT_ID = B.DEPT_ID WHERE A.ID <> B.ID GROUP BY A.DEPT_ID, A.NAME, B.NAME ORDER BY A.DEPT_ID, A.NAME","selectedSql":"SELECT A.DEPT_ID, A.NAME, B.NAME AS PARTNER FROM EMP A INNER JOIN EMP B ON A.DEPT_ID = B.DEPT_ID WHERE A.ID > B.ID ORDER BY A.DEPT_ID, A.NAME"}
+2026-04-12T04:17:46.950+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : ============================================================
+Hibernate:
+    select
+        q1_0.question_uuid,
+        q1_0.answer_sql,
+        q1_0.choice_set_policy,
+        q1_0.created_at,
+        q1_0.created_by,
+        q1_0.dialect,
+        q1_0.difficulty,
+        q1_0.execution_mode,
+        q1_0.explanation_summary,
+        q1_0.extra_meta_json,
+        q1_0.hint,
+        q1_0.is_active,
+        q1_0.sandbox_db_name,
+        q1_0.schema_ddl,
+        q1_0.schema_display,
+        q1_0.schema_intent,
+        q1_0.schema_sample_data,
+        q1_0.stem,
+        q1_0.subtopic_uuid,
+        q1_0.topic_uuid,
+        q1_0.updated_at,
+        q1_0.updated_by
+    from
+        question q1_0
+    where
+        q1_0.question_uuid=?
+Hibernate:
+    select
+        qcs1_0.choice_set_uuid,
+        qcs1_0.consumed_at,
+        qcs1_0.created_at,
+        qcs1_0.created_by,
+        qcs1_0.created_by_member_uuid,
+        qcs1_0.generated_for_member_uuid,
+        qcs1_0.generation_attempts,
+        qcs1_0.is_reusable,
+        qcs1_0.last_error_code,
+        qcs1_0.max_tokens,
+        qcs1_0.model_name,
+        qcs1_0.prompt_template_uuid,
+        qcs1_0.question_uuid,
+        qcs1_0.raw_response_json,
+        qcs1_0.sandbox_validation_passed,
+        qcs1_0.source,
+        qcs1_0.status,
+        qcs1_0.temperature,
+        qcs1_0.total_elapsed_ms,
+        qcs1_0.updated_at,
+        qcs1_0.updated_by
+    from
+        question_choice_set qcs1_0
+    where
+        qcs1_0.question_uuid=?
+    order by
+        qcs1_0.created_at desc
+Hibernate:
+    select
+        qcsi1_0.choice_set_item_uuid,
+        qcsi1_0.body,
+        qcsi1_0.choice_key,
+        qcsi1_0.choice_set_uuid,
+        qcsi1_0.created_at,
+        qcsi1_0.created_by,
+        qcsi1_0.is_correct,
+        qcsi1_0.kind,
+        qcsi1_0.rationale,
+        qcsi1_0.sandbox_execution_json,
+        qcsi1_0.sort_order,
+        qcsi1_0.updated_at,
+        qcsi1_0.updated_by
+    from
+        question_choice_set_item qcsi1_0
+    where
+        qcsi1_0.choice_set_uuid=?
+    order by
+        qcsi1_0.sort_order
+Hibernate:
+    select
+        qcsi1_0.choice_set_item_uuid,
+        qcsi1_0.body,
+        qcsi1_0.choice_key,
+        qcsi1_0.choice_set_uuid,
+        qcsi1_0.created_at,
+        qcsi1_0.created_by,
+        qcsi1_0.is_correct,
+        qcsi1_0.kind,
+        qcsi1_0.rationale,
+        qcsi1_0.sandbox_execution_json,
+        qcsi1_0.sort_order,
+        qcsi1_0.updated_at,
+        qcsi1_0.updated_by
+    from
+        question_choice_set_item qcsi1_0
+    where
+        qcsi1_0.choice_set_uuid=?
+    order by
+        qcsi1_0.sort_order
+Hibernate:
+    select
+        qcsi1_0.choice_set_item_uuid,
+        qcsi1_0.body,
+        qcsi1_0.choice_key,
+        qcsi1_0.choice_set_uuid,
+        qcsi1_0.created_at,
+        qcsi1_0.created_by,
+        qcsi1_0.is_correct,
+        qcsi1_0.kind,
+        qcsi1_0.rationale,
+        qcsi1_0.sandbox_execution_json,
+        qcsi1_0.sort_order,
+        qcsi1_0.updated_at,
+        qcsi1_0.updated_by
+    from
+        question_choice_set_item qcsi1_0
+    where
+        qcsi1_0.choice_set_uuid=?
+    order by
+        qcsi1_0.sort_order
+Hibernate:
+    select
+        t1_0.topic_uuid,
+        t1_0.code,
+        t1_0.created_at,
+        t1_0.created_by,
+        t1_0.display_name,
+        t1_0.is_active,
+        t1_0.sort_order,
+        t1_0.updated_at,
+        t1_0.updated_by
+    from
+        topic t1_0
+    where
+        t1_0.topic_uuid=?
+2026-04-12T04:17:47.199+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : ===================== RESPONSE LOGGING =====================
+2026-04-12T04:17:47.199+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : URI: /api/questions/cbef072c-51b8-46fb-9e0c-acee073f2523
+2026-04-12T04:17:47.199+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Method: GET
+2026-04-12T04:17:47.199+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Status: 200
+2026-04-12T04:17:47.199+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Response Body: {"questionUuid":"cbef072c-51b8-46fb-9e0c-acee073f2523","topicName":"조인 (JOIN)","subtopicName":null,"difficulty":2,"executionMode":"CONCEPT_ONLY","choiceSetPolicy":"AI_ONLY","stem":"NATURAL JOIN에 대한 설명 중 옳지 않은 것은?","schemaDisplay":null,"schemaDdl":null,"schemaSampleData":null,"schemaIntent":null,"answerSql":null,"hint":"NATURAL JOIN은 동일 컬럼명을 기준으로 자동 EQUI JOIN하며, WHERE 절이나 ON 절로 추가 조인 조건을 지정할 수 없다.","choiceSets":[{"choiceSetUuid":"7d130bdf-7541-47bc-82f3-916e16e131d1","source":"AI_RUNTIME","status":"OK","sandboxValidationPassed":false,"createdAt":"2026-04-12T04:08:21.293651","items":[{"key":"A","kind":"TEXT","body":"두 테이블 간에 이름이 같은 컬럼들을 모두 사용하여 조인한다.","isCorrect":false,"rationale":"NATURAL JOIN은 두 테이블 간에 이름과 데이터 타입이 모두 같은 컬럼들을 기준으로 조인하는 것이 맞습니다. 하지만 '모두 사용하여'라는 표현은 오해의 소지가 있습니다. 이름은 같지만 데이터 타입이 다른 컬럼은 조인 조건에 포함되지 않습니다.","sortOrder":0},{"key":"B","kind":"TEXT","body":"조인할 컬럼을 명시적으로 지정할 필요 없이, 두 테이블의 동일한 컬럼명을 기준으로 자동으로 조인된다.","isCorrect":true,"rationale":"NATURAL JOIN의 핵심 특징은 조인할 컬럼을 사용자가 명시적으로 지정하지 않아도, 두 테이블 간에 이름과 데이터 타입이 모두 같은 컬럼을 기준으로 자동으로 조인이 이루어진다는 점입니다.","sortOrder":1},{"key":"C","kind":"TEXT","body":"ON 절이나 WHERE 절을 사용하여 추가적인 조인 조건을 지정할 수 있다.","isCorrect":false,"rationale":"NATURAL JOIN은 조인할 컬럼을 자동으로 결정하기 때문에, ON 절이나 WHERE 절을 사용하여 추가적인 조인 조건을 명시적으로 지정할 수 없습니다. 만약 추가 조건이 필요하다면 INNER JOIN 등을 사용해야 합니다.","sortOrder":2},{"key":"D","kind":"TEXT","body":"두 테이블 간에 동일한 컬럼명이 없으면, 결과 테이블은 두 테이블의 모든 행을 포함하는 카테시안 곱(Cartesian Product)이 된다.","isCorrect":false,"rationale":"NATURAL JOIN은 두 테이블 간에 공통된 컬럼이 없을 경우, 조인 조건을 만족하는 행이 없으므로 결과 테이블은 빈 테이블이 됩니다. 카테시안 곱은 CROSS JOIN의 특징입니다.","sortOrder":3}]},{"choiceSetUuid":"3e84faa3-2bc8-47b0-805a-359fbe9ea31a","source":"AI_RUNTIME","status":"OK","sandboxValidationPassed":false,"createdAt":"2026-04-12T04:07:58.855383","items":[{"key":"A","kind":"TEXT","body":"두 테이블에서 이름이 같은 모든 컬럼을 기준으로 내부 조인을 수행한다.","isCorrect":false,"rationale":"NATURAL JOIN은 이름이 같은 컬럼을 기준으로 조인하는 것은 맞지만, 내부 조인(INNER JOIN)만을 의미하는 것은 아닙니다. 또한, 이름이 같은 모든 컬럼을 기준으로 한다는 점이 핵심입니다.","sortOrder":0},{"key":"B","kind":"TEXT","body":"조인할 컬럼을 명시적으로 지정할 필요 없이, 두 테이블 간에 이름이 같은 컬럼들을 자동으로 조인 조건으로 사용한다.","isCorrect":true,"rationale":"NATURAL JOIN의 가장 큰 특징은 두 테이블 간에 이름이 같은 컬럼들을 자동으로 찾아 조인 조건으로 사용한다는 점입니다. 따라서 ON 절이나 USING 절 없이도 조인이 가능합니다.","sortOrder":1},{"key":"C","kind":"TEXT","body":"ON 절이나 USING 절을 사용하여 조인 조건을 명시적으로 지정할 수 있다.","isCorrect":false,"rationale":"NATURAL JOIN은 조인할 컬럼을 자동으로 결정하기 때문에 ON 절이나 USING 절을 사용하여 조인 조건을 명시적으로 지정하는 것이 불가능합니다. 이를 명시적으로 지정하려면 JOIN ... ON 또는 JOIN ... USING 구문을 사용해야 합니다.","sortOrder":2},{"key":"D","kind":"TEXT","body":"두 테이블 간에 이름이 같은 컬럼이 하나도 없을 경우, 결과 테이블은 두 테이블의 카티션 곱(CROSS JOIN)이 된다.","isCorrect":false,"rationale":"두 테이블 간에 이름이 같은 컬럼이 하나도 없을 경우, NATURAL JOIN은 조인 조건을 만족하는 행이 없으므로 결과 테이블은 빈 집합이 됩니다. 카티션 곱(CROSS JOIN)과는 다릅니다.","sortOrder":3}]},{"choiceSetUuid":"c1acecca-197a-493e-b12a-9fa796a963ee","source":"AI_RUNTIME","status":"OK","sandboxValidationPassed":false,"createdAt":"2026-04-12T04:07:57.104879","items":[{"key":"A","kind":"TEXT","body":"두 테이블 간에 이름이 같은 컬럼을 기준으로 자동으로 조인을 수행한다.","isCorrect":false,"rationale":"NATURAL JOIN은 두 테이블 간에 이름과 데이터 타입이 모두 같은 컬럼들을 기준으로 자동으로 조인을 수행한다.","sortOrder":0},{"key":"B","kind":"TEXT","body":"조인할 컬럼을 명시적으로 지정하지 않아도 된다.","isCorrect":false,"rationale":"NATURAL JOIN은 조인할 컬럼을 명시적으로 지정하지 않는 것이 특징이지만, 이는 컬럼 이름이 같다는 것을 전제로 한다.","sortOrder":1},{"key":"C","kind":"TEXT","body":"ON 절이나 WHERE 절을 사용하여 조인 조건을 추가할 수 있다.","isCorrect":true,"rationale":"NATURAL JOIN은 ON 절이나 WHERE 절을 사용하여 추가적인 조인 조건을 지정할 수 없으며, 오직 이름이 같은 컬럼들만을 기준으로 조인을 수행한다.","sortOrder":2},{"key":"D","kind":"TEXT","body":"두 테이블 간에 이름이 같은 컬럼이 없으면 조인이 수행되지 않는다.","isCorrect":false,"rationale":"NATURAL JOIN은 두 테이블 간에 이름이 같은 컬럼이 없으면 조인이 수행되지 않는 것이 맞지만, 이는 '옳은 것'에 대한 설명이므로 문제의 '옳지 않은 것'이라는 조건에 부합하지 않는다.","sortOrder":3}]}]}
+2026-04-12T04:17:47.199+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : ============================================================
+Hibernate:
+    select
+        qcs1_0.choice_set_uuid,
+        qcs1_0.consumed_at,
+        qcs1_0.created_at,
+        qcs1_0.created_by,
+        qcs1_0.created_by_member_uuid,
+        qcs1_0.generated_for_member_uuid,
+        qcs1_0.generation_attempts,
+        qcs1_0.is_reusable,
+        qcs1_0.last_error_code,
+        qcs1_0.max_tokens,
+        qcs1_0.model_name,
+        qcs1_0.prompt_template_uuid,
+        qcs1_0.question_uuid,
+        qcs1_0.raw_response_json,
+        qcs1_0.sandbox_validation_passed,
+        qcs1_0.source,
+        qcs1_0.status,
+        qcs1_0.temperature,
+        qcs1_0.total_elapsed_ms,
+        qcs1_0.updated_at,
+        qcs1_0.updated_by
+    from
+        question_choice_set qcs1_0
+    where
+        qcs1_0.choice_set_uuid=?
+Hibernate:
+    select
+        qcsi1_0.choice_set_item_uuid,
+        qcsi1_0.body,
+        qcsi1_0.choice_key,
+        qcsi1_0.choice_set_uuid,
+        qcsi1_0.created_at,
+        qcsi1_0.created_by,
+        qcsi1_0.is_correct,
+        qcsi1_0.kind,
+        qcsi1_0.rationale,
+        qcsi1_0.sandbox_execution_json,
+        qcsi1_0.sort_order,
+        qcsi1_0.updated_at,
+        qcsi1_0.updated_by
+    from
+        question_choice_set_item qcsi1_0
+    where
+        qcsi1_0.choice_set_uuid=?
+        and qcsi1_0.choice_key=?
+Hibernate:
+    select
+        qcsi1_0.choice_set_item_uuid,
+        qcsi1_0.body,
+        qcsi1_0.choice_key,
+        qcsi1_0.choice_set_uuid,
+        qcsi1_0.created_at,
+        qcsi1_0.created_by,
+        qcsi1_0.is_correct,
+        qcsi1_0.kind,
+        qcsi1_0.rationale,
+        qcsi1_0.sandbox_execution_json,
+        qcsi1_0.sort_order,
+        qcsi1_0.updated_at,
+        qcsi1_0.updated_by
+    from
+        question_choice_set_item qcsi1_0
+    where
+        qcsi1_0.choice_set_uuid=?
+    order by
+        qcsi1_0.sort_order
+Hibernate:
+    select
+        q1_0.question_uuid,
+        q1_0.answer_sql,
+        q1_0.choice_set_policy,
+        q1_0.created_at,
+        q1_0.created_by,
+        q1_0.dialect,
+        q1_0.difficulty,
+        q1_0.execution_mode,
+        q1_0.explanation_summary,
+        q1_0.extra_meta_json,
+        q1_0.hint,
+        q1_0.is_active,
+        q1_0.sandbox_db_name,
+        q1_0.schema_ddl,
+        q1_0.schema_display,
+        q1_0.schema_intent,
+        q1_0.schema_sample_data,
+        q1_0.stem,
+        q1_0.subtopic_uuid,
+        q1_0.topic_uuid,
+        q1_0.updated_at,
+        q1_0.updated_by
+    from
+        question q1_0
+    where
+        q1_0.question_uuid=?
+Hibernate:
+    insert
+    into
+        submission
+        (choice_set_uuid, created_at, created_by, is_correct, member_uuid, question_index, question_uuid, selected_choice_key, session_uuid, submitted_at, updated_at, updated_by, submission_uuid)
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+2026-04-12T04:17:49.747+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : ===================== RESPONSE LOGGING =====================
+2026-04-12T04:17:49.747+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : URI: /api/questions/cbef072c-51b8-46fb-9e0c-acee073f2523/submit
+2026-04-12T04:17:49.747+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Method: POST
+2026-04-12T04:17:49.747+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Status: 200
+2026-04-12T04:17:49.748+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Response Body: {"isCorrect":true,"correctKey":"B","rationale":"NATURAL JOIN의 핵심 특징은 조인할 컬럼을 사용자가 명시적으로 지정하지 않아도, 두 테이블 간에 이름과 데이터 타입이 모두 같은 컬럼을 기준으로 자동으로 조인이 이루어진다는 점입니다.","selectedResult":null,"correctResult":null,"correctSql":null,"selectedSql":null}
+2026-04-12T04:17:49.748+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : ============================================================
+Hibernate:
+    select
+        q1_0.question_uuid,
+        q1_0.answer_sql,
+        q1_0.choice_set_policy,
+        q1_0.created_at,
+        q1_0.created_by,
+        q1_0.dialect,
+        q1_0.difficulty,
+        q1_0.execution_mode,
+        q1_0.explanation_summary,
+        q1_0.extra_meta_json,
+        q1_0.hint,
+        q1_0.is_active,
+        q1_0.sandbox_db_name,
+        q1_0.schema_ddl,
+        q1_0.schema_display,
+        q1_0.schema_intent,
+        q1_0.schema_sample_data,
+        q1_0.stem,
+        q1_0.subtopic_uuid,
+        q1_0.topic_uuid,
+        q1_0.updated_at,
+        q1_0.updated_by
+    from
+        question q1_0
+    where
+        q1_0.question_uuid=?
+Hibernate:
+    select
+        qcs1_0.choice_set_uuid,
+        qcs1_0.consumed_at,
+        qcs1_0.created_at,
+        qcs1_0.created_by,
+        qcs1_0.created_by_member_uuid,
+        qcs1_0.generated_for_member_uuid,
+        qcs1_0.generation_attempts,
+        qcs1_0.is_reusable,
+        qcs1_0.last_error_code,
+        qcs1_0.max_tokens,
+        qcs1_0.model_name,
+        qcs1_0.prompt_template_uuid,
+        qcs1_0.question_uuid,
+        qcs1_0.raw_response_json,
+        qcs1_0.sandbox_validation_passed,
+        qcs1_0.source,
+        qcs1_0.status,
+        qcs1_0.temperature,
+        qcs1_0.total_elapsed_ms,
+        qcs1_0.updated_at,
+        qcs1_0.updated_by
+    from
+        question_choice_set qcs1_0
+    where
+        qcs1_0.question_uuid=?
+    order by
+        qcs1_0.created_at desc
+Hibernate:
+    select
+        qcsi1_0.choice_set_item_uuid,
+        qcsi1_0.body,
+        qcsi1_0.choice_key,
+        qcsi1_0.choice_set_uuid,
+        qcsi1_0.created_at,
+        qcsi1_0.created_by,
+        qcsi1_0.is_correct,
+        qcsi1_0.kind,
+        qcsi1_0.rationale,
+        qcsi1_0.sandbox_execution_json,
+        qcsi1_0.sort_order,
+        qcsi1_0.updated_at,
+        qcsi1_0.updated_by
+    from
+        question_choice_set_item qcsi1_0
+    where
+        qcsi1_0.choice_set_uuid=?
+    order by
+        qcsi1_0.sort_order
+Hibernate:
+    select
+        qcsi1_0.choice_set_item_uuid,
+        qcsi1_0.body,
+        qcsi1_0.choice_key,
+        qcsi1_0.choice_set_uuid,
+        qcsi1_0.created_at,
+        qcsi1_0.created_by,
+        qcsi1_0.is_correct,
+        qcsi1_0.kind,
+        qcsi1_0.rationale,
+        qcsi1_0.sandbox_execution_json,
+        qcsi1_0.sort_order,
+        qcsi1_0.updated_at,
+        qcsi1_0.updated_by
+    from
+        question_choice_set_item qcsi1_0
+    where
+        qcsi1_0.choice_set_uuid=?
+    order by
+        qcsi1_0.sort_order
+Hibernate:
+    select
+        t1_0.topic_uuid,
+        t1_0.code,
+        t1_0.created_at,
+        t1_0.created_by,
+        t1_0.display_name,
+        t1_0.is_active,
+        t1_0.sort_order,
+        t1_0.updated_at,
+        t1_0.updated_by
+    from
+        topic t1_0
+    where
+        t1_0.topic_uuid=?
+2026-04-12T04:17:50.336+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : ===================== RESPONSE LOGGING =====================
+2026-04-12T04:17:50.336+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : URI: /api/questions/572a8293-153d-476c-a261-715e7085f998
+2026-04-12T04:17:50.336+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Method: GET
+2026-04-12T04:17:50.336+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Status: 200
+2026-04-12T04:17:50.337+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Response Body: {"questionUuid":"572a8293-153d-476c-a261-715e7085f998","topicName":"조인 (JOIN)","subtopicName":null,"difficulty":4,"executionMode":"CONCEPT_ONLY","choiceSetPolicy":"AI_ONLY","stem":"다음 SQL의 실행 결과로 올바른 것은?\r\n\r\nSELECT A.NAME, B.DEPT_NAME\r\nFROM EMP A\r\nFULL OUTER JOIN DEPT B ON A.DEPT_ID = B.DEPT_ID;","schemaDisplay":null,"schemaDdl":"CREATE TABLE DEPT (\r\n  DEPT_ID INT PRIMARY KEY,\r\n  DEPT_NAME VARCHAR(50)\r\n);\r\nCREATE TABLE EMP (\r\n  ID INT PRIMARY KEY,\r\n  NAME VARCHAR(50),\r\n  DEPT_ID INT\r\n);","schemaSampleData":"INSERT INTO DEPT VALUES (10, '개발팀');\r\nINSERT INTO DEPT VALUES (20, '영업팀');\r\nINSERT INTO DEPT VALUES (30, '인사팀');\r\nINSERT INTO EMP VALUES (1, '홍길동', 10);\r\nINSERT INTO EMP VALUES (2, '김영희', 20);\r\nINSERT INTO EMP VALUES (3, '이철수', 99);","schemaIntent":"FULL OUTER JOIN으로 양쪽 불일치 행 모두 포함 여부 확인","answerSql":"SELECT A.NAME, B.DEPT_NAME FROM EMP A FULL OUTER JOIN DEPT B ON A.DEPT_ID = B.DEPT_ID","hint":"FULL OUTER JOIN은 LEFT OUTER JOIN과 RIGHT OUTER JOIN의 합집합이다. 양쪽 모두 매칭되지 않는 행도 NULL로 포함한다.","choiceSets":[{"choiceSetUuid":"64ab5cb7-83bf-4d7b-8ff7-e0008ba77f58","source":"AI_RUNTIME","status":"OK","sandboxValidationPassed":false,"createdAt":"2026-04-12T04:17:26.59671","items":[{"key":"A","kind":"TEXT","body":"EMP 테이블과 DEPT 테이블에 모두 존재하는 직원의 이름과 해당 직원의 부서 이름을 모두 출력한다.","isCorrect":false,"rationale":"FULL OUTER JOIN은 양쪽 테이블에 모두 존재하는 데이터를 포함하지만, 어느 한쪽에만 존재하는 데이터도 NULL과 함께 포함한다.","sortOrder":0},{"key":"B","kind":"TEXT","body":"EMP 테이블에만 존재하는 직원의 이름과 해당 직원의 부서 이름을 출력한다.","isCorrect":false,"rationale":"FULL OUTER JOIN은 EMP 테이블에만 존재하는 데이터를 포함하지만, DEPT 테이블에만 존재하는 데이터도 NULL과 함께 포함하며, 양쪽 테이블에 모두 존재하는 데이터도 포함한다.","sortOrder":1},{"key":"C","kind":"TEXT","body":"EMP 테이블에 존재하는 모든 직원의 이름과 해당 직원의 부서 이름을 출력하고, DEPT 테이블에만 존재하는 부서의 이름은 NULL로 출력한다.","isCorrect":false,"rationale":"FULL OUTER JOIN은 EMP 테이블에만 존재하는 데이터, DEPT 테이블에만 존재하는 데이터, 양쪽 테이블에 모두 존재하는 데이터를 NULL과 함께 포함한다. 이 설명은 LEFT OUTER JOIN에 해당한다.","sortOrder":2},{"key":"D","kind":"TEXT","body":"EMP 테이블과 DEPT 테이블에서 매칭되는 직원의 이름과 부서 이름을 출력하고, 어느 한쪽에만 존재하는 데이터는 NULL과 함께 출력한다.","isCorrect":true,"rationale":"FULL OUTER JOIN은 두 테이블을 조인할 때, 조인 조건에 맞는 데이터를 모두 포함하며, 어느 한쪽 테이블에만 존재하는 데이터는 다른 쪽 테이블의 컬럼 값을 NULL로 채워서 결과를 포함한다. 따라서 EMP와 DEPT 테이블 간의 모든 데이터를 NULL과 함께 출력한다.","sortOrder":3}]},{"choiceSetUuid":"db12dde0-17e2-458f-b802-edf59706d1f2","source":"AI_RUNTIME","status":"OK","sandboxValidationPassed":false,"createdAt":"2026-04-12T04:10:40.205117","items":[{"key":"A","kind":"TEXT","body":"EMP 테이블에는 있지만 DEPT 테이블에는 없는 직원의 이름과 NULL 부서명을 보여준다.","isCorrect":false,"rationale":"FULL OUTER JOIN은 양쪽 테이블의 모든 행을 포함하며, 매칭되지 않는 경우 NULL로 표시합니다. 따라서 EMP에만 있는 직원뿐만 아니라 DEPT에만 있는 부서 정보도 포함되어야 합니다.","sortOrder":0},{"key":"B","kind":"TEXT","body":"EMP 테이블과 DEPT 테이블에 있는 모든 직원의 이름과 해당 부서명을 보여준다. EMP에 부서가 없거나 DEPT에 직원이 없는 경우 NULL로 표시한다.","isCorrect":true,"rationale":"FULL OUTER JOIN은 두 테이블의 모든 행을 반환하며, 조인 조건에 맞는 행이 없으면 해당 테이블의 컬럼 값은 NULL로 채워집니다. 따라서 EMP에만 있거나 DEPT에만 있는 정보도 NULL과 함께 반환됩니다.","sortOrder":1},{"key":"C","kind":"TEXT","body":"EMP 테이블에 있는 직원의 이름과 DEPT 테이블에 있는 부서명을 모두 보여준다. EMP에 부서가 없는 직원은 제외한다.","isCorrect":false,"rationale":"FULL OUTER JOIN은 LEFT JOIN과 RIGHT JOIN의 합집합이므로, EMP에만 있는 행이나 DEPT에만 있는 행도 결과에 포함됩니다. EMP에 부서가 없는 직원만 제외하는 것은 LEFT JOIN의 동작 방식입니다.","sortOrder":2},{"key":"D","kind":"TEXT","body":"EMP 테이블과 DEPT 테이블에 공통으로 존재하는 직원의 이름과 부서명만 보여준다.","isCorrect":false,"rationale":"이는 INNER JOIN의 동작 방식입니다. FULL OUTER JOIN은 두 테이블의 모든 행을 포함하여 공통되지 않는 행도 NULL과 함께 반환합니다.","sortOrder":3}]}]}
+2026-04-12T04:17:50.337+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : ============================================================
+Hibernate:
+    select
+        qcs1_0.choice_set_uuid,
+        qcs1_0.consumed_at,
+        qcs1_0.created_at,
+        qcs1_0.created_by,
+        qcs1_0.created_by_member_uuid,
+        qcs1_0.generated_for_member_uuid,
+        qcs1_0.generation_attempts,
+        qcs1_0.is_reusable,
+        qcs1_0.last_error_code,
+        qcs1_0.max_tokens,
+        qcs1_0.model_name,
+        qcs1_0.prompt_template_uuid,
+        qcs1_0.question_uuid,
+        qcs1_0.raw_response_json,
+        qcs1_0.sandbox_validation_passed,
+        qcs1_0.source,
+        qcs1_0.status,
+        qcs1_0.temperature,
+        qcs1_0.total_elapsed_ms,
+        qcs1_0.updated_at,
+        qcs1_0.updated_by
+    from
+        question_choice_set qcs1_0
+    where
+        qcs1_0.choice_set_uuid=?
+Hibernate:
+    select
+        qcsi1_0.choice_set_item_uuid,
+        qcsi1_0.body,
+        qcsi1_0.choice_key,
+        qcsi1_0.choice_set_uuid,
+        qcsi1_0.created_at,
+        qcsi1_0.created_by,
+        qcsi1_0.is_correct,
+        qcsi1_0.kind,
+        qcsi1_0.rationale,
+        qcsi1_0.sandbox_execution_json,
+        qcsi1_0.sort_order,
+        qcsi1_0.updated_at,
+        qcsi1_0.updated_by
+    from
+        question_choice_set_item qcsi1_0
+    where
+        qcsi1_0.choice_set_uuid=?
+        and qcsi1_0.choice_key=?
+Hibernate:
+    select
+        qcsi1_0.choice_set_item_uuid,
+        qcsi1_0.body,
+        qcsi1_0.choice_key,
+        qcsi1_0.choice_set_uuid,
+        qcsi1_0.created_at,
+        qcsi1_0.created_by,
+        qcsi1_0.is_correct,
+        qcsi1_0.kind,
+        qcsi1_0.rationale,
+        qcsi1_0.sandbox_execution_json,
+        qcsi1_0.sort_order,
+        qcsi1_0.updated_at,
+        qcsi1_0.updated_by
+    from
+        question_choice_set_item qcsi1_0
+    where
+        qcsi1_0.choice_set_uuid=?
+    order by
+        qcsi1_0.sort_order
+Hibernate:
+    select
+        q1_0.question_uuid,
+        q1_0.answer_sql,
+        q1_0.choice_set_policy,
+        q1_0.created_at,
+        q1_0.created_by,
+        q1_0.dialect,
+        q1_0.difficulty,
+        q1_0.execution_mode,
+        q1_0.explanation_summary,
+        q1_0.extra_meta_json,
+        q1_0.hint,
+        q1_0.is_active,
+        q1_0.sandbox_db_name,
+        q1_0.schema_ddl,
+        q1_0.schema_display,
+        q1_0.schema_intent,
+        q1_0.schema_sample_data,
+        q1_0.stem,
+        q1_0.subtopic_uuid,
+        q1_0.topic_uuid,
+        q1_0.updated_at,
+        q1_0.updated_by
+    from
+        question q1_0
+    where
+        q1_0.question_uuid=?
+Hibernate:
+    insert
+    into
+        submission
+        (choice_set_uuid, created_at, created_by, is_correct, member_uuid, question_index, question_uuid, selected_choice_key, session_uuid, submitted_at, updated_at, updated_by, submission_uuid)
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+Hibernate:
+    update
+        question_choice_set
+    set
+        consumed_at=?,
+        created_by_member_uuid=?,
+        generated_for_member_uuid=?,
+        generation_attempts=?,
+        is_reusable=?,
+        last_error_code=?,
+        max_tokens=?,
+        model_name=?,
+        prompt_template_uuid=?,
+        question_uuid=?,
+        raw_response_json=?,
+        sandbox_validation_passed=?,
+        source=?,
+        status=?,
+        temperature=?,
+        total_elapsed_ms=?,
+        updated_at=?,
+        updated_by=?
+    where
+        choice_set_uuid=?
+2026-04-12T04:17:52.430+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : ===================== RESPONSE LOGGING =====================
+2026-04-12T04:17:52.430+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : URI: /api/questions/572a8293-153d-476c-a261-715e7085f998/submit
+2026-04-12T04:17:52.431+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Method: POST
+2026-04-12T04:17:52.431+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Status: 200
+2026-04-12T04:17:52.431+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Response Body: {"isCorrect":false,"correctKey":"D","rationale":"FULL OUTER JOIN은 EMP 테이블에만 존재하는 데이터를 포함하지만, DEPT 테이블에만 존재하는 데이터도 NULL과 함께 포함하며, 양쪽 테이블에 모두 존재하는 데이터도 포함한다.","selectedResult":null,"correctResult":null,"correctSql":null,"selectedSql":null}
+2026-04-12T04:17:52.431+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : ============================================================
+Hibernate:
+    select
+        q1_0.question_uuid,
+        q1_0.answer_sql,
+        q1_0.choice_set_policy,
+        q1_0.created_at,
+        q1_0.created_by,
+        q1_0.dialect,
+        q1_0.difficulty,
+        q1_0.execution_mode,
+        q1_0.explanation_summary,
+        q1_0.extra_meta_json,
+        q1_0.hint,
+        q1_0.is_active,
+        q1_0.sandbox_db_name,
+        q1_0.schema_ddl,
+        q1_0.schema_display,
+        q1_0.schema_intent,
+        q1_0.schema_sample_data,
+        q1_0.stem,
+        q1_0.subtopic_uuid,
+        q1_0.topic_uuid,
+        q1_0.updated_at,
+        q1_0.updated_by
+    from
+        question q1_0
+    where
+        q1_0.question_uuid=?
+Hibernate:
+    select
+        qcs1_0.choice_set_uuid,
+        qcs1_0.consumed_at,
+        qcs1_0.created_at,
+        qcs1_0.created_by,
+        qcs1_0.created_by_member_uuid,
+        qcs1_0.generated_for_member_uuid,
+        qcs1_0.generation_attempts,
+        qcs1_0.is_reusable,
+        qcs1_0.last_error_code,
+        qcs1_0.max_tokens,
+        qcs1_0.model_name,
+        qcs1_0.prompt_template_uuid,
+        qcs1_0.question_uuid,
+        qcs1_0.raw_response_json,
+        qcs1_0.sandbox_validation_passed,
+        qcs1_0.source,
+        qcs1_0.status,
+        qcs1_0.temperature,
+        qcs1_0.total_elapsed_ms,
+        qcs1_0.updated_at,
+        qcs1_0.updated_by
+    from
+        question_choice_set qcs1_0
+    where
+        qcs1_0.question_uuid=?
+    order by
+        qcs1_0.created_at desc
+Hibernate:
+    select
+        t1_0.topic_uuid,
+        t1_0.code,
+        t1_0.created_at,
+        t1_0.created_by,
+        t1_0.display_name,
+        t1_0.is_active,
+        t1_0.sort_order,
+        t1_0.updated_at,
+        t1_0.updated_by
+    from
+        topic t1_0
+    where
+        t1_0.topic_uuid=?
+2026-04-12T04:17:52.679+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : ===================== RESPONSE LOGGING =====================
+2026-04-12T04:17:52.679+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : URI: /api/questions/a907120f-2a2b-48cf-ae66-153ace9c060c
+2026-04-12T04:17:52.679+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Method: GET
+2026-04-12T04:17:52.679+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Status: 200
+2026-04-12T04:17:52.679+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : Response Body: {"questionUuid":"a907120f-2a2b-48cf-ae66-153ace9c060c","topicName":"조인 (JOIN)","subtopicName":null,"difficulty":3,"executionMode":"EXECUTABLE","choiceSetPolicy":"AI_ONLY","stem":"다음 SQL과 동일한 실행 결과를 내는 SQL은?\n\nSELECT A.NAME, B.DEPT_NAME\nFROM EMP A, DEPT B\nWHERE A.DEPT_ID = B.DEPT_ID\nAND B.DEPT_NAME = '개발팀';","schemaDisplay":null,"schemaDdl":"CREATE TABLE DEPT (\n  DEPT_ID INT PRIMARY KEY,\n  DEPT_NAME VARCHAR(50)\n);\nCREATE TABLE EMP (\n  ID INT PRIMARY KEY,\n  NAME VARCHAR(50),\n  DEPT_ID INT\n);","schemaSampleData":"INSERT INTO DEPT VALUES (10, '개발팀');\nINSERT INTO DEPT VALUES (20, '영업팀');\nINSERT INTO EMP VALUES (1, '홍길동', 10);\nINSERT INTO EMP VALUES (2, '김영희', 10);\nINSERT INTO EMP VALUES (3, '이철수', 20);\nINSERT INTO EMP VALUES (4, '박민수', 20);","schemaIntent":"전통 조인 문법(WHERE 절)과 ANSI 조인 문법의 동치 관계 테스트","answerSql":"SELECT A.NAME, B.DEPT_NAME FROM EMP A, DEPT B WHERE A.DEPT_ID = B.DEPT_ID AND B.DEPT_NAME = '개발팀'","hint":"전통적인 WHERE 절 조인 문법은 ANSI 표준 INNER JOIN ON 문법과 동일한 결과를 낸다.","choiceSets":[]}
+2026-04-12T04:17:52.679+09:00  INFO 91809 --- [http-nio-8080-e] o.s.w.f.OncePerRequestFilter    : ============================================================
+2026-04-12T04:17:52.695+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.p.web.controller.QuestionController    : [generate-choices] VirtualThread 진입: questionUuid=a907120f-2a2b-48cf-ae66-153ace9c060c, memberUuid=f540d91e-58e4-4881-a611-79e64cc60fab
+Hibernate:
+    select
+        q1_0.question_uuid,
+        q1_0.answer_sql,
+        q1_0.choice_set_policy,
+        q1_0.created_at,
+        q1_0.created_by,
+        q1_0.dialect,
+        q1_0.difficulty,
+        q1_0.execution_mode,
+        q1_0.explanation_summary,
+        q1_0.extra_meta_json,
+        q1_0.hint,
+        q1_0.is_active,
+        q1_0.sandbox_db_name,
+        q1_0.schema_ddl,
+        q1_0.schema_display,
+        q1_0.schema_intent,
+        q1_0.schema_sample_data,
+        q1_0.stem,
+        q1_0.subtopic_uuid,
+        q1_0.topic_uuid,
+        q1_0.updated_at,
+        q1_0.updated_by
+    from
+        question q1_0
+    where
+        q1_0.question_uuid=?
+Hibernate:
+    select
+        qcs1_0.choice_set_uuid,
+        qcs1_0.consumed_at,
+        qcs1_0.created_at,
+        qcs1_0.created_by,
+        qcs1_0.created_by_member_uuid,
+        qcs1_0.generated_for_member_uuid,
+        qcs1_0.generation_attempts,
+        qcs1_0.is_reusable,
+        qcs1_0.last_error_code,
+        qcs1_0.max_tokens,
+        qcs1_0.model_name,
+        qcs1_0.prompt_template_uuid,
+        qcs1_0.question_uuid,
+        qcs1_0.raw_response_json,
+        qcs1_0.sandbox_validation_passed,
+        qcs1_0.source,
+        qcs1_0.status,
+        qcs1_0.temperature,
+        qcs1_0.total_elapsed_ms,
+        qcs1_0.updated_at,
+        qcs1_0.updated_by
+    from
+        question_choice_set qcs1_0
+    where
+        qcs1_0.question_uuid=?
+        and qcs1_0.generated_for_member_uuid=?
+        and qcs1_0.source=?
+        and qcs1_0.status=?
+        and qcs1_0.consumed_at is null
+    order by
+        qcs1_0.created_at desc
+    fetch
+        first ? rows only
+2026-04-12T04:17:52.704+09:00  INFO 91809 --- [passql] [    virtual-149] c.p.question.service.ChoiceSetResolver   : [resolver] prefetch MISS, runtime generation: questionUuid=a907120f-2a2b-48cf-ae66-153ace9c060c, memberUuid=f540d91e-58e4-4881-a611-79e64cc60fab
+Hibernate:
+    select
+        q1_0.question_uuid,
+        q1_0.answer_sql,
+        q1_0.choice_set_policy,
+        q1_0.created_at,
+        q1_0.created_by,
+        q1_0.dialect,
+        q1_0.difficulty,
+        q1_0.execution_mode,
+        q1_0.explanation_summary,
+        q1_0.extra_meta_json,
+        q1_0.hint,
+        q1_0.is_active,
+        q1_0.sandbox_db_name,
+        q1_0.schema_ddl,
+        q1_0.schema_display,
+        q1_0.schema_intent,
+        q1_0.schema_sample_data,
+        q1_0.stem,
+        q1_0.subtopic_uuid,
+        q1_0.topic_uuid,
+        q1_0.updated_at,
+        q1_0.updated_by
+    from
+        question q1_0
+    where
+        q1_0.question_uuid=?
+Hibernate:
+    select
+        pt1_0.prompt_template_uuid,
+        pt1_0.created_at,
+        pt1_0.created_by,
+        pt1_0.extra_params_json,
+        pt1_0.is_active,
+        pt1_0.key_name,
+        pt1_0.max_tokens,
+        pt1_0.model,
+        pt1_0.note,
+        pt1_0.system_prompt,
+        pt1_0.temperature,
+        pt1_0.updated_at,
+        pt1_0.updated_by,
+        pt1_0.user_template,
+        pt1_0.version
+    from
+        prompt_template pt1_0
+    where
+        pt1_0.key_name=?
+        and pt1_0.is_active
+    order by
+        pt1_0.version desc
+    fetch
+        first ? rows only
+2026-04-12T04:17:52.710+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.p.q.s.ChoiceSetGenerationService       : [choice-gen] 요청 빌드 완료: questionUuid=a907120f-2a2b-48cf-ae66-153ace9c060c, promptKey=generate_choice_set
+2026-04-12T04:17:52.710+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.p.q.s.ChoiceSetGenerationService       : [choice-gen] AI 호출 시작: attempt=1/3, questionUuid=a907120f-2a2b-48cf-ae66-153ace9c060c, feedbackCount=0
+2026-04-12T04:18:05.741+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.p.q.s.ChoiceSetGenerationService       : [choice-gen] AI 응답 수신: attempt=1, choiceCount=4, questionUuid=a907120f-2a2b-48cf-ae66-153ace9c060c
+2026-04-12T04:18:05.742+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.p.q.s.ChoiceSetGenerationService       : [choice-gen] Sandbox 검증 시작: attempt=1, questionUuid=a907120f-2a2b-48cf-ae66-153ace9c060c
+2026-04-12T04:18:05.825+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.passql.question.service.SandboxPool    : [SandboxPool] acquired: sandbox_7a4e4e32 (permits left=29)
+2026-04-12T04:18:05.826+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-12 - Starting...
+2026-04-12T04:18:05.836+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.pool.HikariPool        : HikariPool-12 - Added connection org.postgresql.jdbc.PgConnection@6dd37ba5
+2026-04-12T04:18:05.836+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-12 - Start completed.
+2026-04-12T04:18:05.836+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.p.question.service.SandboxExecutor     : [applyDdl] DB=sandbox_7a4e4e32 총 9개 토큰
+2026-04-12T04:18:05.836+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.p.question.service.SandboxExecutor     : [applyDdl] [1/9] 실행: CREATE TABLE IF NOT EXISTS DEPT (
+  DEPT_ID INT PRIMARY KEY,
+  DEPT_NAME VARCHAR(50)
+)
+2026-04-12T04:18:05.838+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.p.question.service.SandboxExecutor     : [applyDdl] [2/9] 실행: CREATE TABLE IF NOT EXISTS EMP (
+  ID INT PRIMARY KEY,
+  NAME VARCHAR(50),
+  DEPT_ID INT
+)
+2026-04-12T04:18:05.838+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.p.question.service.SandboxExecutor     : [applyDdl] [4/9] 실행: INSERT INTO DEPT VALUES (10, '개발팀')
+2026-04-12T04:18:05.839+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.p.question.service.SandboxExecutor     : [applyDdl] [5/9] 실행: INSERT INTO DEPT VALUES (20, '영업팀')
+2026-04-12T04:18:05.840+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.p.question.service.SandboxExecutor     : [applyDdl] [6/9] 실행: INSERT INTO EMP VALUES (1, '홍길동', 10)
+2026-04-12T04:18:05.840+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.p.question.service.SandboxExecutor     : [applyDdl] [7/9] 실행: INSERT INTO EMP VALUES (2, '김영희', 10)
+2026-04-12T04:18:05.840+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.p.question.service.SandboxExecutor     : [applyDdl] [8/9] 실행: INSERT INTO EMP VALUES (3, '이철수', 20)
+2026-04-12T04:18:05.841+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.p.question.service.SandboxExecutor     : [applyDdl] [9/9] 실행: INSERT INTO EMP VALUES (4, '박민수', 20)
+2026-04-12T04:18:05.841+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-12 - Shutdown initiated...
+2026-04-12T04:18:05.841+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-12 - Shutdown completed.
+2026-04-12T04:18:05.842+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-13 - Starting...
+2026-04-12T04:18:05.844+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.pool.HikariPool        : HikariPool-13 - Added connection org.postgresql.jdbc.PgConnection@894cdd3
+2026-04-12T04:18:05.844+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-13 - Start completed.
+2026-04-12T04:18:05.846+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-13 - Shutdown initiated...
+2026-04-12T04:18:05.846+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-13 - Shutdown completed.
+2026-04-12T04:18:05.847+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-14 - Starting...
+2026-04-12T04:18:05.853+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.pool.HikariPool        : HikariPool-14 - Added connection org.postgresql.jdbc.PgConnection@59dbf409
+2026-04-12T04:18:05.853+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-14 - Start completed.
+2026-04-12T04:18:05.856+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-14 - Shutdown initiated...
+2026-04-12T04:18:05.856+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-14 - Shutdown completed.
+2026-04-12T04:18:05.861+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-15 - Starting...
+2026-04-12T04:18:05.865+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.pool.HikariPool        : HikariPool-15 - Added connection org.postgresql.jdbc.PgConnection@7e45a243
+2026-04-12T04:18:05.865+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-15 - Start completed.
+2026-04-12T04:18:05.866+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-15 - Shutdown initiated...
+2026-04-12T04:18:05.866+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-15 - Shutdown completed.
+2026-04-12T04:18:05.866+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-16 - Starting...
+2026-04-12T04:18:05.869+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.pool.HikariPool        : HikariPool-16 - Added connection org.postgresql.jdbc.PgConnection@7d245cec
+2026-04-12T04:18:05.869+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-16 - Start completed.
+2026-04-12T04:18:05.870+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-16 - Shutdown initiated...
+2026-04-12T04:18:05.870+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-16 - Shutdown completed.
+2026-04-12T04:18:05.871+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-17 - Starting...
+2026-04-12T04:18:05.873+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.pool.HikariPool        : HikariPool-17 - Added connection org.postgresql.jdbc.PgConnection@6e19d9f1
+2026-04-12T04:18:05.873+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-17 - Start completed.
+2026-04-12T04:18:05.875+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-17 - Shutdown initiated...
+2026-04-12T04:18:05.875+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-17 - Shutdown completed.
+2026-04-12T04:18:05.894+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.passql.question.service.SandboxPool    : [SandboxPool] released: sandbox_7a4e4e32 (permits left=30)
+2026-04-12T04:18:05.894+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.p.q.s.ChoiceSetGenerationService       : [choice-gen] Sandbox 검증 완료: attempt=1, correctCount=3, questionUuid=a907120f-2a2b-48cf-ae66-153ace9c060c
+2026-04-12T04:18:05.895+09:00  INFO 91809 --- [passql] [    virtual-149] c.p.q.s.ChoiceSetGenerationService       : [choice-gen] validation failed: code=CHOICE_SET_VALIDATION_MULTIPLE_CORRECT, attempt=1/3, questionUuid=a907120f-2a2b-48cf-ae66-153ace9c060c
+2026-04-12T04:18:05.895+09:00  INFO 91809 --- [passql] [    virtual-149] c.p.q.s.ChoiceSetGenerationService       : [choice-gen] 동치 SQL 피드백 누적: count=3, attempt=1, questionUuid=a907120f-2a2b-48cf-ae66-153ace9c060c
+2026-04-12T04:18:05.895+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.p.q.s.ChoiceSetGenerationService       : [choice-gen] AI 호출 시작: attempt=2/3, questionUuid=a907120f-2a2b-48cf-ae66-153ace9c060c, feedbackCount=3
+2026-04-12T04:18:09.252+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.p.q.s.ChoiceSetGenerationService       : [choice-gen] AI 응답 수신: attempt=2, choiceCount=4, questionUuid=a907120f-2a2b-48cf-ae66-153ace9c060c
+2026-04-12T04:18:09.252+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.p.q.s.ChoiceSetGenerationService       : [choice-gen] Sandbox 검증 시작: attempt=2, questionUuid=a907120f-2a2b-48cf-ae66-153ace9c060c
+2026-04-12T04:18:09.330+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.passql.question.service.SandboxPool    : [SandboxPool] acquired: sandbox_5446b656 (permits left=29)
+2026-04-12T04:18:09.330+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-18 - Starting...
+2026-04-12T04:18:09.338+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.pool.HikariPool        : HikariPool-18 - Added connection org.postgresql.jdbc.PgConnection@b0af19c
+2026-04-12T04:18:09.339+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-18 - Start completed.
+2026-04-12T04:18:09.339+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.p.question.service.SandboxExecutor     : [applyDdl] DB=sandbox_5446b656 총 9개 토큰
+2026-04-12T04:18:09.339+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.p.question.service.SandboxExecutor     : [applyDdl] [1/9] 실행: CREATE TABLE IF NOT EXISTS DEPT (
+  DEPT_ID INT PRIMARY KEY,
+  DEPT_NAME VARCHAR(50)
+)
+2026-04-12T04:18:09.341+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.p.question.service.SandboxExecutor     : [applyDdl] [2/9] 실행: CREATE TABLE IF NOT EXISTS EMP (
+  ID INT PRIMARY KEY,
+  NAME VARCHAR(50),
+  DEPT_ID INT
+)
+2026-04-12T04:18:09.342+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.p.question.service.SandboxExecutor     : [applyDdl] [4/9] 실행: INSERT INTO DEPT VALUES (10, '개발팀')
+2026-04-12T04:18:09.343+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.p.question.service.SandboxExecutor     : [applyDdl] [5/9] 실행: INSERT INTO DEPT VALUES (20, '영업팀')
+2026-04-12T04:18:09.344+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.p.question.service.SandboxExecutor     : [applyDdl] [6/9] 실행: INSERT INTO EMP VALUES (1, '홍길동', 10)
+2026-04-12T04:18:09.344+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.p.question.service.SandboxExecutor     : [applyDdl] [7/9] 실행: INSERT INTO EMP VALUES (2, '김영희', 10)
+2026-04-12T04:18:09.344+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.p.question.service.SandboxExecutor     : [applyDdl] [8/9] 실행: INSERT INTO EMP VALUES (3, '이철수', 20)
+2026-04-12T04:18:09.345+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.p.question.service.SandboxExecutor     : [applyDdl] [9/9] 실행: INSERT INTO EMP VALUES (4, '박민수', 20)
+2026-04-12T04:18:09.345+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-18 - Shutdown initiated...
+2026-04-12T04:18:09.345+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-18 - Shutdown completed.
+2026-04-12T04:18:09.346+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-19 - Starting...
+2026-04-12T04:18:09.349+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.pool.HikariPool        : HikariPool-19 - Added connection org.postgresql.jdbc.PgConnection@6817b9ce
+2026-04-12T04:18:09.350+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-19 - Start completed.
+2026-04-12T04:18:09.351+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-19 - Shutdown initiated...
+2026-04-12T04:18:09.351+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-19 - Shutdown completed.
+2026-04-12T04:18:09.351+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-20 - Starting...
+2026-04-12T04:18:09.354+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.pool.HikariPool        : HikariPool-20 - Added connection org.postgresql.jdbc.PgConnection@14ea1329
+2026-04-12T04:18:09.354+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-20 - Start completed.
+2026-04-12T04:18:09.355+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-20 - Shutdown initiated...
+2026-04-12T04:18:09.356+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-20 - Shutdown completed.
+2026-04-12T04:18:09.356+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-21 - Starting...
+2026-04-12T04:18:09.359+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.pool.HikariPool        : HikariPool-21 - Added connection org.postgresql.jdbc.PgConnection@7293cc
+2026-04-12T04:18:09.359+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-21 - Start completed.
+2026-04-12T04:18:09.360+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-21 - Shutdown initiated...
+2026-04-12T04:18:09.361+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-21 - Shutdown completed.
+2026-04-12T04:18:09.361+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-22 - Starting...
+2026-04-12T04:18:09.364+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.pool.HikariPool        : HikariPool-22 - Added connection org.postgresql.jdbc.PgConnection@b9e8a0a
+2026-04-12T04:18:09.364+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-22 - Start completed.
+2026-04-12T04:18:09.366+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-22 - Shutdown initiated...
+2026-04-12T04:18:09.366+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-22 - Shutdown completed.
+2026-04-12T04:18:09.366+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-23 - Starting...
+2026-04-12T04:18:09.370+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.pool.HikariPool        : HikariPool-23 - Added connection org.postgresql.jdbc.PgConnection@4dfe68d0
+2026-04-12T04:18:09.370+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-23 - Start completed.
+2026-04-12T04:18:09.371+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-23 - Shutdown initiated...
+2026-04-12T04:18:09.371+09:00  INFO 91809 --- [passql] [    virtual-149] com.zaxxer.hikari.HikariDataSource       : HikariPool-23 - Shutdown completed.
+2026-04-12T04:18:09.389+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.passql.question.service.SandboxPool    : [SandboxPool] released: sandbox_5446b656 (permits left=30)
+2026-04-12T04:18:09.389+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.p.q.s.ChoiceSetGenerationService       : [choice-gen] Sandbox 검증 완료: attempt=2, correctCount=1, questionUuid=a907120f-2a2b-48cf-ae66-153ace9c060c
+2026-04-12T04:18:09.389+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.p.q.s.ChoiceSetGenerationService       : [choice-gen] 검증 통과, 저장 시작: attempt=2, questionUuid=a907120f-2a2b-48cf-ae66-153ace9c060c
+Hibernate:
+    insert
+    into
+        question_choice_set
+        (consumed_at, created_at, created_by, created_by_member_uuid, generated_for_member_uuid, generation_attempts, is_reusable, last_error_code, max_tokens, model_name, prompt_template_uuid, question_uuid, raw_response_json, sandbox_validation_passed, source, status, temperature, total_elapsed_ms, updated_at, updated_by, choice_set_uuid)
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+2026-04-12T04:18:09.399+09:00  INFO 91809 --- [passql] [    virtual-149] c.p.q.service.ChoiceSetSaveService       : [choice-gen] success: questionUuid=a907120f-2a2b-48cf-ae66-153ace9c060c, attempts=2, setUuid=098d51f9-7f7a-4871-96a7-27f8c1dfa853
+Hibernate:
+    insert
+    into
+        question_choice_set_item
+        (body, choice_key, choice_set_uuid, created_at, created_by, is_correct, kind, rationale, sandbox_execution_json, sort_order, updated_at, updated_by, choice_set_item_uuid)
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+Hibernate:
+    insert
+    into
+        question_choice_set_item
+        (body, choice_key, choice_set_uuid, created_at, created_by, is_correct, kind, rationale, sandbox_execution_json, sort_order, updated_at, updated_by, choice_set_item_uuid)
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+Hibernate:
+    insert
+    into
+        question_choice_set_item
+        (body, choice_key, choice_set_uuid, created_at, created_by, is_correct, kind, rationale, sandbox_execution_json, sort_order, updated_at, updated_by, choice_set_item_uuid)
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+Hibernate:
+    insert
+    into
+        question_choice_set_item
+        (body, choice_key, choice_set_uuid, created_at, created_by, is_correct, kind, rationale, sandbox_execution_json, sort_order, updated_at, updated_by, choice_set_item_uuid)
+    values
+        (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+2026-04-12T04:18:09.403+09:00  INFO 91809 --- [passql] [    virtual-149] c.p.web.controller.QuestionController    : [generate-choices] resolveForUser 완료: questionUuid=a907120f-2a2b-48cf-ae66-153ace9c060c, choiceSetUuid=098d51f9-7f7a-4871-96a7-27f8c1dfa853
+2026-04-12T04:18:09.403+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.p.web.controller.QuestionController    : [generate-choices] items 조회 시작: choiceSetUuid=098d51f9-7f7a-4871-96a7-27f8c1dfa853
+Hibernate:
+    select
+        qcsi1_0.choice_set_item_uuid,
+        qcsi1_0.body,
+        qcsi1_0.choice_key,
+        qcsi1_0.choice_set_uuid,
+        qcsi1_0.created_at,
+        qcsi1_0.created_by,
+        qcsi1_0.is_correct,
+        qcsi1_0.kind,
+        qcsi1_0.rationale,
+        qcsi1_0.sandbox_execution_json,
+        qcsi1_0.sort_order,
+        qcsi1_0.updated_at,
+        qcsi1_0.updated_by
+    from
+        question_choice_set_item qcsi1_0
+    where
+        qcsi1_0.choice_set_uuid=?
+    order by
+        qcsi1_0.sort_order
+2026-04-12T04:18:09.409+09:00 DEBUG 91809 --- [passql] [    virtual-149] c.p.web.controller.QuestionController    : [generate-choices] items 조회 완료: count=4
+2026-04-12T04:18:09.409+09:00  INFO 91809 --- [passql] [    virtual-149] c.p.web.controller.QuestionController    : [generate-choices] SSE complete 전송: questionUuid=a907120f-2a2b-48cf-ae66-153ace9c060c, choiceSetUuid=098d51f9-7f7a-4871-96a7-27f8c1dfa853, itemCount=4
+Hibernate:
+    select
+        m1_0.member_uuid,
+        m1_0.auth_provider,
+        m1_0.created_at,
+        m1_0.created_by,
+        m1_0.deleted_at,
+        m1_0.deleted_by,
+        m1_0.email,
+        m1_0.email_verified,
+        m1_0.is_deleted,
+        m1_0.is_test_account,
+        m1_0.last_login_ip,
+        m1_0.last_seen_at,
+        m1_0.nickname,
+        m1_0.provider_user_id,
+        m1_0.role,
+        m1_0.status,
+        m1_0.suspend_until,
+        m1_0.updated_at,
+        m1_0.updated_by,
+        m1_0.withdrawn_at
+    from
+        member m1_0
+    where
+        m1_0.status=?
+        and m1_0.suspend_until<?
+        and not(m1_0.is_deleted)

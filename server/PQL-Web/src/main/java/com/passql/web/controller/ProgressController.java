@@ -50,7 +50,7 @@ public class ProgressController implements ProgressControllerDocs {
     @GetMapping("/ai-comment")
     public ResponseEntity<AiCommentResponse> getAiComment(
         @RequestParam UUID memberUuid,
-        @RequestParam UUID sessionUuid
+        @RequestParam(required = false) UUID sessionUuid
     ) {
         return ResponseEntity.ok(aiCommentService.getAiComment(memberUuid, sessionUuid));
     }

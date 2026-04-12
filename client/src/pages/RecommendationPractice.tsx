@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Home } from "lucide-react";
 import { submitAnswer } from "../api/questions";
 import { usePracticeStore } from "../stores/practiceStore";
+
 import QuestionDetail from "./QuestionDetail";
 import PracticeFeedbackBar from "../components/PracticeFeedbackBar";
 import ConfirmModal from "../components/ConfirmModal";
@@ -15,7 +16,7 @@ export default function RecommendationPractice() {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
-  const { markCorrect, setReturnStep } = usePracticeStore();
+  const { markCorrect, setReturnStep, sessionId: storeSessionId } = usePracticeStore();
 
   // PracticeResult 등 이전 화면으로 복귀할 경로 — 없으면 홈으로
   const locationState = location.state as { returnPath?: string; initialStep?: number } | null;
@@ -31,6 +32,8 @@ export default function RecommendationPractice() {
   const isProcessingRef = useRef(false);
   // 다시 풀기 시 QuestionDetail 강제 리마운트 — isSubmittingRef 초기화 목적
   const [retryCount, setRetryCount] = useState(0);
+  // sessionUuid — 마운트 시 1회 생성하여 다시 풀기 시에도 동일 세션으로 집계
+  const [sessionUuid] = useState(() => storeSessionId ?? crypto.randomUUID());
 
   // 제출 완료 전까지 이탈 차단 — submitting 중에는 해제 (catch navigate 허용)
   const blocker = useBlocker(feedback === null && !submitting);
@@ -44,7 +47,7 @@ export default function RecommendationPractice() {
 
       setSubmitting(true);
       try {
-        const result = await submitAnswer(questionUuid, choiceSetId, selectedChoiceKey);
+        const result = await submitAnswer(questionUuid, choiceSetId, selectedChoiceKey, sessionUuid);
         // 추천 문제 캐시 무효화 — 홈 복귀 시 새 목록 반영
         queryClient.invalidateQueries({ queryKey: ["recommendations"] });
         // PracticeResult에서 진입한 경우 정답 시 store 결과 갱신
@@ -59,7 +62,7 @@ export default function RecommendationPractice() {
         setSubmitting(false);
       }
     },
-    [questionUuid, navigate, queryClient, isPracticeReview, markCorrect],
+    [questionUuid, navigate, queryClient, isPracticeReview, markCorrect, sessionUuid],
   );
 
   if (!questionUuid) {

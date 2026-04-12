@@ -131,6 +131,6 @@ public interface ProgressControllerDocs {
     )
     ResponseEntity<AiCommentResponse> getAiComment(
         @RequestParam UUID memberUuid,
-        @RequestParam UUID sessionUuid
+        @RequestParam(required = false) UUID sessionUuid
     );
 }

@@ -46,8 +46,10 @@ public class AiCommentService {
      * 프롬프트: prompt_template DB의 'ai_comment' 활성 버전
      */
     public AiCommentResponse getAiComment(UUID memberUuid, UUID sessionUuid) {
-        // 세션 단위 캐시 키 — 같은 세션 재진입 시 동일 텍스트 반환
-        String cacheKey = CACHE_KEY_PREFIX + memberUuid + ":" + sessionUuid;
+        // sessionUuid 있으면 세션 단위 캐시(결과 화면), 없으면 멤버 단위 캐시(통계 화면)
+        String cacheKey = sessionUuid != null
+                ? CACHE_KEY_PREFIX + memberUuid + ":" + sessionUuid
+                : CACHE_KEY_PREFIX + memberUuid;
 
         Object cached = redisTemplate.opsForValue().get(cacheKey);
         if (cached != null) {
@@ -61,8 +63,8 @@ public class AiCommentService {
         // DB에서 활성 프롬프트 조회
         PromptTemplate prompt = promptService.getActivePrompt("ai_comment");
 
-        // 이번 세션 결과 집계 (토픽명 + 정오답)
-        String sessionStats = buildSessionStats(sessionUuid);
+        // 이번 세션 결과 집계 — sessionUuid 없으면(통계 화면) 생략
+        String sessionStats = sessionUuid != null ? buildSessionStats(sessionUuid) : "세션 데이터 없음";
 
         // 누적 토픽 통계
         TopicAnalysisResponse analysis = topicAnalysisService.getTopicAnalysis(memberUuid);
@@ -128,6 +130,9 @@ public class AiCommentService {
      */
     @Transactional
     public void evictCache(UUID memberUuid, UUID sessionUuid) {
-        redisTemplate.delete(CACHE_KEY_PREFIX + memberUuid + ":" + sessionUuid);
+        String cacheKey = sessionUuid != null
+                ? CACHE_KEY_PREFIX + memberUuid + ":" + sessionUuid
+                : CACHE_KEY_PREFIX + memberUuid;
+        redisTemplate.delete(cacheKey);
     }
 }

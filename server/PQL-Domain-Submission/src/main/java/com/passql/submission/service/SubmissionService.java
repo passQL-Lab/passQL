@@ -44,7 +44,7 @@ public class SubmissionService {
     private final RedisTemplate<String, Object> redisTemplate;
 
     @Transactional
-    public SubmitResult submit(UUID memberUuid, UUID questionUuid, UUID choiceSetId, String selectedChoiceKey) {
+    public SubmitResult submit(UUID memberUuid, UUID questionUuid, UUID choiceSetId, String selectedChoiceKey, UUID sessionUuid) {
         // 1. ChoiceSet 조회
         QuestionChoiceSet choiceSet = choiceSetRepository.findById(choiceSetId)
                 .orElseThrow(() -> new CustomException(ErrorCode.CHOICE_SET_NOT_FOUND));
@@ -70,13 +70,14 @@ public class SubmissionService {
             choiceSetRepository.save(choiceSet);
         }
 
-        // 5. Submission 저장 (choiceSetUuid 포함)
+        // 5. Submission 저장 (sessionUuid 포함 — AI 코멘트 세션 집계에 사용)
         Submission submission = Submission.builder()
                 .memberUuid(memberUuid)
                 .questionUuid(questionUuid)
                 .choiceSetUuid(choiceSetId)
                 .selectedChoiceKey(selectedChoiceKey)
                 .isCorrect(isCorrect)
+                .sessionUuid(sessionUuid)
                 .submittedAt(LocalDateTime.now())
                 .build();
         submissionRepository.save(submission);

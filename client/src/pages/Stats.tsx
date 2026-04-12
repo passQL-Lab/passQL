@@ -101,10 +101,10 @@ export default function Stats() {
     staleTime: 1000 * 60 * 5,
   });
 
-  // AI 코멘트 (Redis 24h 캐싱 — 제출 시 서버에서 자동 무효화)
+  // AI 코멘트 — Stats 페이지는 세션 무관 전체 분석이므로 sessionUuid 빈 문자열 전달
   const { data: aiComment, isLoading: aiCommentLoading } = useQuery({
     queryKey: ["aiComment"],
-    queryFn: fetchAiComment,
+    queryFn: () => fetchAiComment(),
     staleTime: 1000 * 60 * 60,
   });
 

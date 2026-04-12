@@ -21,8 +21,10 @@ export function fetchTopicAnalysis(): Promise<TopicAnalysisResponse> {
   return apiFetch(`/progress/topic-analysis?memberUuid=${uuid}`);
 }
 
-// AI 영역 분석 코멘트 (Redis 24h 캐싱, 제출 시 자동 무효화)
-export function fetchAiComment(): Promise<AiCommentResponse> {
+// AI 영역 분석 코멘트
+// sessionUuid 있으면 세션 단위 캐시 2h (결과 화면), 없으면 멤버 단위 캐시 (통계 화면)
+export function fetchAiComment(sessionUuid?: string): Promise<AiCommentResponse> {
   const uuid = getMemberUuid();
-  return apiFetch(`/progress/ai-comment?memberUuid=${uuid}`);
+  const query = sessionUuid ? `&sessionUuid=${sessionUuid}` : "";
+  return apiFetch(`/progress/ai-comment?memberUuid=${uuid}${query}`);
 }

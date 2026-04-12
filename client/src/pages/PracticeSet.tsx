@@ -71,6 +71,8 @@ export default function PracticeSet() {
           displayQuestion.questionUuid,
           choiceSetId,
           selectedChoiceKey,
+          // sessionId는 startSession 시 crypto.randomUUID()로 생성 — AI 코멘트 세션 집계에 사용
+          storeSessionId ?? crypto.randomUUID(),
         );
         setFeedback(result);
         submitAndAdvance(

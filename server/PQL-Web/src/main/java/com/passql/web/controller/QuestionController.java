@@ -179,6 +179,6 @@ public class QuestionController implements QuestionControllerDocs {
         @RequestBody SubmitRequest request
     ) {
         return ResponseEntity.ok(submissionService.submit(
-                memberUuid, questionUuid, request.choiceSetId(), request.selectedChoiceKey()));
+                memberUuid, questionUuid, request.choiceSetId(), request.selectedChoiceKey(), request.sessionUuid()));
     }
 }

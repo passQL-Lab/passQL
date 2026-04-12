@@ -384,11 +384,12 @@ body {
   background-color: var(--color-sem-error);
 }
 
-/* next 버튼 outline (보조 버튼 있을 때 — 탈출 경로 약화) */
+/* next 버튼 outline (보조 버튼 있을 때 — 탈출 경로를 중립 색으로 약화)
+   빨간 피드백바 배경에서 빨간 outline이 묻히는 문제를 방지하기 위해 중립 흰색 outline 사용 */
 .feedback-bar-next-outline {
-  border: 2px solid var(--color-sem-error);
-  color: var(--color-sem-error);
-  background-color: transparent;
+  border: 1.5px solid var(--color-border);
+  color: var(--color-text-body);
+  background-color: #ffffff;
 }
 
 /* ── 추천 문제 새로고침 버튼 1회전 애니메이션 ── */
