@@ -265,6 +265,62 @@ body {
   animation: slide-up 0.25s ease-out;
 }
 
+/* ── AnswerFeedback 결과 화면 애니메이션 ── */
+
+/* 상단 컬러 바: 좌→우 scaleX 슬라이드인 */
+@keyframes bar-slide-in {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* 헤더 영역: 위에서 아래로 페이드인 */
+@keyframes header-slide-down {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* 카드 순차 등장: 아래에서 위로 페이드인 */
+@keyframes card-slide-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.feedback-bar-anim {
+  transform-origin: left;
+  animation: bar-slide-in 0.45s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.feedback-header-anim {
+  animation: header-slide-down 0.28s 0.08s ease both;
+}
+
+.feedback-card-anim-1 { animation: card-slide-up 0.28s 0.15s ease both; }
+.feedback-card-anim-2 { animation: card-slide-up 0.28s 0.23s ease both; }
+.feedback-card-anim-3 { animation: card-slide-up 0.28s 0.31s ease both; }
+.feedback-card-anim-4 { animation: card-slide-up 0.28s 0.39s ease both; }
+
+/* 선택지/정답 카드 — 왼쪽 보더 없이 배경+border만 */
+.ans-card-wrong {
+  background-color: var(--color-sem-error-light);
+  border: 1px solid #FECACA;
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.ans-card-correct {
+  background-color: var(--color-sem-success-light);
+  border: 1px solid #BBF7D0;
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.ans-card-neutral {
+  background-color: var(--color-surface-card);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
 /* ── Stagger fade-up animation ── */
 /* 네비게이션 탭 진입 시 섹션별 순차 페이드인. --stagger-delay는 useStagger 훅이 주입. */
 @keyframes staggerIn {
@@ -461,4 +517,109 @@ body {
 
 .animate-popover-in {
   animation: popover-in 0.18s ease-out both;
+}
+
+/* ── AnswerFeedback: 문제 보기 토글 카드 ── */
+.stem-toggle-card {
+  background-color: var(--color-surface-card);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.stem-toggle-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+}
+
+.stem-toggle-preview {
+  flex: 1;
+  font-size: 0.6875rem; /* 11px */
+  color: var(--color-text-caption);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.stem-toggle-body {
+  border-top: 1px solid var(--color-border-muted);
+  padding: 8px 12px 12px;
+}
+
+/* ── AnswerFeedback: SQL 아코디언 카드 ── */
+.acc-sql-card {
+  background-color: var(--color-surface-card);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.acc-sql-card.is-wrong {
+  background-color: #FEF2F2;
+  border-color: #FECACA;
+}
+
+.acc-sql-card.is-correct {
+  background-color: #F0FDF4;
+  border-color: #BBF7D0;
+}
+
+.acc-sql-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  cursor: pointer;
+}
+
+.acc-sql-preview {
+  flex: 1;
+  font-size: 0.625rem; /* 10px */
+  color: var(--color-text-caption);
+  font-family: 'JetBrains Mono', monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.acc-sql-body {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 9px 12px;
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
+/* ── AnswerFeedback: 모두 실행 버튼 ── */
+.btn-run-all {
+  font-size: 0.625rem; /* 10px */
+  font-weight: 600;
+  color: #4F46E5;
+  border: 1px solid #C7D2FE;
+  border-radius: 6px;
+  padding: 3px 9px;
+  background-color: #EEF2FF;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: background-color 150ms ease;
+}
+
+.btn-run-all:active {
+  background-color: #E0E7FF;
+}
+
+/* ── AnswerFeedback: 행수 pill ── */
+.row-count-pill {
+  font-size: 0.625rem; /* 10px */
+  font-weight: 600;
+  color: #16A34A;
+  background-color: #F0FDF4;
+  padding: 2px 7px;
+  border-radius: 999px;
+  flex-shrink: 0;
 }
