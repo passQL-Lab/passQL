@@ -1,11 +1,34 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-12T07:29:51Z",
-    "currentVersion": "0.0.89",
+    "lastUpdated": "2026-04-12T07:47:02Z",
+    "currentVersion": "0.0.90",
     "projectType": "basic",
-    "totalReleases": 34
+    "totalReleases": 35
   },
   "releases": [
+    {
+      "version": "0.0.90",
+      "project_type": "basic",
+      "date": "2026-04-12",
+      "pr_number": 150,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **New Features**\n  * AI 문제 풀기 기능을 강조하기 위해 애플리케이션 전역의 네비게이션 라벨 및 페이지 헤더를 업데이트했습니다.\n  * 문제 풀이 섹션에 새로운 시각적 아이콘을 추가하여 AI 기능 부각을 개선했습니다.\n\n* **Chores**\n  * 프로젝트 버전을 0.0.90으로 업데이트했습니다.",
+      "parsed_changes": {
+        "new_features": {
+          "title": "New Features",
+          "items": [
+            "AI 문제 풀기 기능을 강조하기 위해 애플리케이션 전역의 네비게이션 라벨 및 페이지 헤더를 업데이트했습니다.",
+            "문제 풀이 섹션에 새로운 시각적 아이콘을 추가하여 AI 기능 부각을 개선했습니다."
+          ]
+        },
+        "chores": {
+          "title": "Chores",
+          "items": [
+            "프로젝트 버전을 0.0.90으로 업데이트했습니다."
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.89",
       "project_type": "basic",
