@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { useParams, useNavigate, useBlocker } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, BookOpen, RefreshCw } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 import { StarRating } from "../components/StarRating";
 import { ChoiceCard } from "../components/ChoiceCard";
 import AiExplanationSheet from "../components/AiExplanationSheet";
@@ -17,6 +18,14 @@ import {
 import { explainError } from "../api/ai";
 import ConfirmModal from "../components/ConfirmModal";
 import type { ChoiceItem, ExecuteResult, SubmitResult } from "../types/api";
+
+/** 접힌 상태용 미리보기 — 마크다운 문법 제거 후 한 줄로 */
+function stemPreview(stem: string): string {
+  return stem
+    .replace(/```[\s\S]*?```/g, "[SQL]")
+    .replace(/\n/g, " ")
+    .trim();
+}
 
 interface QuestionDetailProps {
   readonly practiceMode?: boolean;
@@ -342,11 +351,31 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
         className="card-base shadow-sm w-full text-left flex items-start gap-2 mt-2"
         onClick={() => setStemOpen((prev) => !prev)}
       >
-        <BookOpen size={16} className="text-brand mt-0.5 shrink-0" />
+        {!stemOpen && <BookOpen size={16} className="text-brand mt-0.5 shrink-0" />}
         {stemOpen ? (
-          <p className="text-body text-sm">{question.stem}</p>
+          // 펼친 상태: react-markdown으로 코드 블록 포함 마크다운 렌더링
+          <div className="text-sm text-body min-w-0 w-full">
+            <ReactMarkdown
+              components={{
+                code({ children, className }) {
+                  // 코드 블록은 디자인 시스템 code-block 스타일 적용
+                  const isBlock = className?.includes("language-");
+                  return isBlock ? (
+                    <pre className="bg-[#F3F4F6] rounded-lg px-4 py-3 text-xs leading-relaxed whitespace-pre-wrap break-words font-mono">
+                      <code>{children}</code>
+                    </pre>
+                  ) : (
+                    <code className="bg-[#F3F4F6] px-1 rounded text-xs font-mono">{children}</code>
+                  );
+                },
+              }}
+            >
+              {question.stem}
+            </ReactMarkdown>
+          </div>
         ) : (
-          <p className="text-body text-sm truncate">{question.stem}</p>
+          // 접힌 상태: 마크다운 문법 제거 후 한 줄 truncate
+          <p className="text-body text-sm truncate">{stemPreview(question.stem)}</p>
         )}
       </button>
 
