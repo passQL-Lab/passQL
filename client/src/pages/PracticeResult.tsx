@@ -40,8 +40,8 @@ export default function PracticeResult() {
     return () => {
       timerIdsRef.current.forEach(clearTimeout);
     };
-  // store 인스턴스는 변하지 않으므로 의존성 배열에서 제외
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // store 인스턴스는 변하지 않으므로 의존성 배열에서 제외
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // AI 코멘트: useQuery로 캐싱 및 StrictMode 이중 호출 방지
@@ -238,7 +238,10 @@ export default function PracticeResult() {
                     {/* 정답/오답 모두 다시 풀기 제공 — 복습 목적 */}
                     <Link
                       to={`/recommendation/${r.questionUuid}`}
-                      state={{ returnPath: `/practice/${sessionId}`, initialStep: 2 }}
+                      state={{
+                        returnPath: `/practice/${sessionId}`,
+                        initialStep: 2,
+                      }}
                       className="inline-flex items-center gap-1.5 text-xs font-medium text-brand bg-accent-light rounded-md px-3 py-1.5"
                     >
                       <RotateCcw size={12} /> 다시 풀기

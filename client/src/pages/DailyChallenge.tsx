@@ -21,6 +21,8 @@ export default function DailyChallenge() {
   const [submitting, setSubmitting] = useState(false);
   // 연타 방지 — React state는 async 클로저에서 stale하므로 ref로 동기 플래그 관리
   const isProcessingRef = useRef(false);
+  // 다시 풀기 시 QuestionDetail 강제 리마운트 — isSubmittingRef 초기화 목적
+  const [retryCount, setRetryCount] = useState(0);
 
   // 제출 완료 전까지 이탈 차단 — 로딩 중·제출 완료·제출 API 호출 중에는 차단 해제
   // submitting 중에도 해제: catch 블록의 navigate("/")가 모달 없이 통과되어야 함
@@ -125,7 +127,7 @@ export default function DailyChallenge() {
       <div className={`flex-1 overflow-y-auto px-4 transition-[padding] duration-300 ${feedback ? "pb-52" : "pb-4"}`}>
         {/* 제출 후 showExecution=true — ChoiceCard 안에 SQL 실행 버튼 표시 */}
         <QuestionDetail
-          key={today?.question?.questionUuid}
+          key={`${today?.question?.questionUuid}-${retryCount}`}
           questionUuid={today?.question?.questionUuid}
           practiceMode
           practiceSubmitLabel="확인"
@@ -142,7 +144,8 @@ export default function DailyChallenge() {
           onNext={() => navigate("/", { replace: true })}
           {...(!feedback.isCorrect && {
             secondaryLabel: "다시 풀기",
-            onSecondary: () => setFeedback(null),
+            // retryCount 변경 → QuestionDetail 리마운트 → isSubmittingRef 초기화
+            onSecondary: () => { setFeedback(null); setRetryCount((c) => c + 1); },
           })}
         />
       )}

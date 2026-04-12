@@ -70,6 +70,8 @@ export default function QuestionDetail({
   >({});
   const executeCacheRef = useRef(executeCache);
   executeCacheRef.current = executeCache;
+  // 연타 방지 — key 변경(문제 교체) 시 컴포넌트 리마운트로 자동 초기화
+  const isSubmittingRef = useRef(false);
   const [aiSheetOpen, setAiSheetOpen] = useState(false);
   const [aiText, setAiText] = useState("");
 
@@ -205,6 +207,8 @@ export default function QuestionDetail({
 
   const handleSubmit = useCallback(() => {
     if (!selectedKey || !question || !choiceSetId) return;
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
     if (practiceMode && onPracticeSubmit) {
       onPracticeSubmit(selectedKey, choiceSetId, choices);
       return;

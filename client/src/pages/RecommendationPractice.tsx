@@ -29,6 +29,8 @@ export default function RecommendationPractice() {
   const [submitting, setSubmitting] = useState(false);
   // 연타 방지 — React state는 async 클로저에서 stale하므로 ref로 동기 플래그 관리
   const isProcessingRef = useRef(false);
+  // 다시 풀기 시 QuestionDetail 강제 리마운트 — isSubmittingRef 초기화 목적
+  const [retryCount, setRetryCount] = useState(0);
 
   // 제출 완료 전까지 이탈 차단 — submitting 중에는 해제 (catch navigate 허용)
   const blocker = useBlocker(feedback === null && !submitting);
@@ -96,7 +98,7 @@ export default function RecommendationPractice() {
       <div className={`flex-1 overflow-y-auto px-4 transition-[padding] duration-300 ${feedback ? "pb-52" : "pb-4"}`}>
         {/* 제출 후 showExecution=true — ChoiceCard 안에 SQL 실행 버튼 표시 */}
         <QuestionDetail
-          key={questionUuid}
+          key={`${questionUuid}-${retryCount}`}
           questionUuid={questionUuid}
           practiceMode
           practiceSubmitLabel="확인"
@@ -118,9 +120,11 @@ export default function RecommendationPractice() {
           {...(!feedback.isCorrect && {
             secondaryLabel: "다시 풀기",
             // 피드백 닫힘 후 초이스카드 즉시 눌림 방지 — 300ms 쿨다운
+            // retryCount 변경 → QuestionDetail 리마운트 → isSubmittingRef 초기화
             onSecondary: () => {
               isProcessingRef.current = true;
               setFeedback(null);
+              setRetryCount((c) => c + 1);
               setTimeout(() => { isProcessingRef.current = false; }, 300);
             },
           })}
