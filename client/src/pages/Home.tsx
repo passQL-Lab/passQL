@@ -134,7 +134,7 @@ export default function Home() {
           ) : (
             // 미완료 상태: 데일리 챌린지 페이지로 이동
             <Link to="/daily-challenge" className="block">
-              <div className="card p-4 sm:p-6 shadow-sm h-full flex flex-col gap-2 cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:border-brand transition-all duration-200">
+              <div className="card bg-white p-4 sm:p-6 shadow-sm h-full flex flex-col gap-2 cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:border-brand transition-all duration-200">
                 <p className="text-secondary text-sm">오늘의 문제</p>
                 <p className="text-body text-sm truncate">
                   {today.question.stemPreview}
@@ -150,7 +150,7 @@ export default function Home() {
           )
         ) : (
           <Link to="/questions" className="block">
-            <div className="card p-4 sm:p-6 shadow-sm h-full flex flex-col justify-center cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:border-brand transition-all duration-200">
+            <div className="card bg-white p-4 sm:p-6 shadow-sm h-full flex flex-col justify-center cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:border-brand transition-all duration-200">
               <p className="text-secondary text-sm">AI문제 풀기</p>
               <p className="text-body text-sm">SQL AI문제를 풀어보세요</p>
             </div>
@@ -158,14 +158,14 @@ export default function Home() {
         )}
 
         {schedule ? (
-          <div className="card p-4 sm:p-6 shadow-sm h-full flex flex-col justify-center">
+          <div className="card bg-white p-4 sm:p-6 shadow-sm h-full flex flex-col justify-center">
             <p className="text-secondary text-sm">
               {schedule.certType} {schedule.round}회
             </p>
             <p className="text-h2 text-brand mt-1">{schedule.examDate}</p>
           </div>
         ) : (
-          <div className="card p-4 sm:p-6 shadow-sm h-full flex flex-col justify-center">
+          <div className="card bg-white p-4 sm:p-6 shadow-sm h-full flex flex-col justify-center">
             <p className="text-secondary text-sm">시험 일정</p>
             <p className="text-caption">선택된 일정 없음</p>
           </div>
@@ -173,12 +173,12 @@ export default function Home() {
       </section>
 
       {/* ④ 학습 현황 섹션: heatmap 에러/로딩만 독립 처리 */}
-      <section className={`card p-4 sm:p-6 shadow-sm mb-4 ${s3.className}`} style={s3.style}>
+      <section className={`card bg-white p-4 sm:p-6 shadow-sm mb-4 ${s3.className}`} style={s3.style}>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-secondary text-sm">학습 현황</h2>
           {/* streak는 progress 에러 시 0 fallback → 뱃지 자연스럽게 미표시 */}
           {streak > 0 && (
-            <span className="badge badge-warning badge-soft font-bold gap-1">
+            <span className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-bold bg-sem-warning-light text-sem-warning-text">
               {/* fill 속성으로 불꽃 아이콘을 꽉 채운 스타일로 표시 */}
               <Flame size={14} fill="currentColor" />
               연속 {streak}일
@@ -216,7 +216,7 @@ export default function Home() {
         </section>
       ) : progressError ? (
         // progress 에러 시 해당 섹션만 인라인 에러 + 재시도 버튼
-        <section className={`card p-4 sm:p-6 mb-4 flex items-center justify-between ${s4.className}`} style={s4.style}>
+        <section className={`card bg-white p-4 sm:p-6 mb-4 flex flex-row items-center justify-between ${s4.className}`} style={s4.style}>
           <p className="text-secondary text-sm">학습 데이터를 불러올 수 없습니다</p>
           <button
             type="button"
@@ -229,7 +229,7 @@ export default function Home() {
         </section>
       ) : progress?.readiness ? (
         // readiness 데이터가 있으면 합격 준비도 카드
-        <section className={`card p-4 sm:p-6 shadow-sm mb-4 ${s4.className}`} style={s4.style}>
+        <section className={`card bg-white p-4 sm:p-6 shadow-sm mb-4 ${s4.className}`} style={s4.style}>
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-secondary text-sm">합격 준비도</h2>
             <span className="text-h1 text-brand">
@@ -259,11 +259,11 @@ export default function Home() {
       ) : (
         // readiness 없으면 간략 통계 카드
         <section className={`grid grid-cols-2 gap-3 mb-4 ${s4.className}`} style={s4.style}>
-          <div className="card p-4 sm:p-6 shadow-sm flex flex-col items-start">
+          <div className="card bg-white p-4 sm:p-6 shadow-sm flex flex-col items-start">
             <span className="text-h1 text-brand">{solved}</span>
             <span className="text-secondary mt-1">푼 문제</span>
           </div>
-          <div className="card p-4 sm:p-6 shadow-sm flex flex-col items-start">
+          <div className="card bg-white p-4 sm:p-6 shadow-sm flex flex-col items-start">
             <span className="text-h1 text-brand">
               {Math.round(correctRate * 100)}%
             </span>
@@ -289,7 +289,7 @@ export default function Home() {
           <div className="space-y-3">
             {recommendations.questions.map((q) => (
               <Link key={q.questionUuid} to={`/recommendation/${q.questionUuid}`} className="block">
-                <div className="card p-4 sm:p-6 shadow-sm flex items-center gap-3 cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:border-brand transition-all duration-200">
+                <div className="card bg-white p-4 sm:p-6 shadow-sm flex flex-row items-center gap-3 cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:border-brand transition-all duration-200">
                   <div className="flex-1 min-w-0">
                     <p className="text-body truncate">{q.stemPreview}</p>
                     <div className="flex items-center gap-2 mt-1">
