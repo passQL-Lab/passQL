@@ -59,7 +59,7 @@ export default function Stats() {
     <div className="py-6 space-y-6">
       {/* CSS variable(--stagger-delay) 주입 — Tailwind로 표현 불가하여 style prop 예외 허용 */}
       {/* ① 제목 + 서브텍스트 */}
-      <section className={s0.className} style={s0.style}>
+      <section className={s0.className}>
         <h1 className="text-h1">내 실력, 한눈에</h1>
         <p className="text-secondary mt-1">
           약한 영역을 눌러 바로 연습해보세요
@@ -67,7 +67,7 @@ export default function Stats() {
       </section>
 
       {/* ② 상단 요약 카드 */}
-      <section className={`card-base flex items-center divide-x divide-border ${s1.className}`} style={s1.style}>
+      <section className={`card-base flex items-center divide-x divide-border ${s1.className}`}>
         {[
           { value: `${progress?.solvedCount ?? 0}문제`, label: "푼 문제" },
           {
@@ -89,23 +89,23 @@ export default function Stats() {
       {topicStats.length > 0 ? (
         <>
           {/* ③ AI 코멘트 */}
-          <section className={s2.className} style={s2.style}>
+          <section className={s2.className}>
             <StatsAnalysisCard
               comment={aiComment?.comment ?? null}
               isLoading={aiCommentLoading}
             />
           </section>
           {/* ④ 레이더 차트 */}
-          <section className={s3.className} style={s3.style}>
+          <section className={s3.className}>
             <StatsRadarChart topicStats={topicStats} />
           </section>
           {/* ⑤ 바 차트 */}
-          <section className={s4.className} style={s4.style}>
+          <section className={s4.className}>
             <StatsBarChart topicStats={topicStats} />
           </section>
         </>
       ) : (
-        <section className={`card-base text-center py-12 ${s2.className}`} style={s2.style}>
+        <section className={`card-base text-center py-12 ${s2.className}`}>
           <p className="text-text-caption">아직 풀이 기록이 없어요</p>
           <p className="text-xs text-text-caption mt-1">
             문제를 풀면 여기에 실력이 나타나요

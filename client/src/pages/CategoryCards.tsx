@@ -40,7 +40,7 @@ export default function CategoryCards() {
     <div className="py-6">
       {/* CSS variable(--stagger-delay) 주입 — Tailwind로 표현 불가하여 style prop 예외 허용 */}
       {/* ① 제목 + 서브텍스트 */}
-      <section className={s0.className} style={s0.style}>
+      <section className={s0.className}>
         <h1 className="text-h1 mb-1 flex items-center gap-2">
           <Sparkles size={24} fill="currentColor" />
           AI문제 풀기
@@ -52,7 +52,7 @@ export default function CategoryCards() {
 
       {/* ② 카드 그리드 */}
       {isLoading ? (
-        <section className={`grid grid-cols-2 lg:grid-cols-3 gap-3 ${s1.className}`} style={s1.style}>
+        <section className={`grid grid-cols-2 lg:grid-cols-3 gap-3 ${s1.className}`}>
           {Array.from({ length: 6 }, (_, i) => (
             <div key={i} className="card-topic pointer-events-none">
               {/* daisyUI skeleton — animate-pulse 대신 shimmer 효과 */}
@@ -62,7 +62,7 @@ export default function CategoryCards() {
           ))}
         </section>
       ) : (
-        <section className={`grid grid-cols-2 lg:grid-cols-3 gap-3 ${s1.className}`} style={s1.style}>
+        <section className={`grid grid-cols-2 lg:grid-cols-3 gap-3 ${s1.className}`}>
           {topics?.map((t) => {
             const Icon = getTopicIcon(t.code);
             return (

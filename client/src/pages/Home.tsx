@@ -77,7 +77,7 @@ export default function Home() {
     <div className="py-6 space-y-0">
       {/* ① 그리팅 줄1: 첫 번째 줄만 렌더링 */}
       {/* CSS variable(--stagger-delay) 주입 — Tailwind로 표현 불가하여 style prop 예외 허용 */}
-      <section className={`mb-1 ${s0.className}`} style={s0.style}>
+      <section className={`mb-1 ${s0.className}`}>
         <h1 className="text-h2 leading-snug">
           {greeting ? (
             parseGreetingLines(greeting.message, greeting.nickname).map((line, i) =>
@@ -90,7 +90,7 @@ export default function Home() {
       </section>
 
       {/* ② 그리팅 줄2 + 서브메시지(EXAM_DAY/URGENT) */}
-      <section className={`mb-6 ${s1.className}`} style={s1.style}>
+      <section className={`mb-6 ${s1.className}`}>
         <h1 className="text-h2 leading-snug">
           {greeting &&
             parseGreetingLines(greeting.message, greeting.nickname).map((line, i) =>
@@ -110,25 +110,27 @@ export default function Home() {
       </section>
 
       {/* ③ 오늘의 문제 + 시험 일정 카드 섹션 */}
-      <section className={`grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 ${s2.className}`} style={s2.style}>
+      <section className={`grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 ${s2.className}`}>
         {today?.question ? (
           today.alreadySolvedToday ? (
-            // 완료 상태: 성공 카드 스타일 (초록 left border + 배경)
-            <div className="h-full flex flex-col gap-2 rounded-xl p-5 cursor-default bg-sem-success-light border-l-4 border-sem-success">
+            {/* 완료 상태: 회색 dimmed 카드 — 이미 끝난 항목임을 시각적으로 표현 */}
+            <div className="h-full flex flex-col gap-2 rounded-xl p-5 cursor-default bg-[#F3F4F6] border border-border">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-sem-success-text">
+                <p className="text-sm font-medium text-text-caption">
                   오늘의 문제
                 </p>
-                <div className="w-6 h-6 rounded-full flex items-center justify-center bg-sem-success">
-                  <Check size={14} className="text-white" />
-                </div>
+                {/* 완료 인디케이터: 원형 아이콘 대신 텍스트 레이블 */}
+                <span className="flex items-center gap-1 text-xs font-semibold text-sem-success-text">
+                  <Check size={11} strokeWidth={3} />
+                  완료
+                </span>
               </div>
-              <p className="text-body text-sm truncate">
+              <p className="text-text-caption text-sm truncate">
                 {today.question.stemPreview}
               </p>
               <div className="flex items-center gap-2 mt-auto">
-                <span className="badge-topic">{today.question.topicName}</span>
-                <StarRating level={today.question.difficulty} />
+                <span className="badge-topic opacity-50">{today.question.topicName}</span>
+                <span className="opacity-40"><StarRating level={today.question.difficulty} /></span>
               </div>
             </div>
           ) : (
@@ -173,7 +175,7 @@ export default function Home() {
       </section>
 
       {/* ④ 학습 현황 섹션: heatmap 에러/로딩만 독립 처리 */}
-      <section className={`card bg-white p-4 sm:p-6 shadow-sm mb-4 ${s3.className}`} style={s3.style}>
+      <section className={`card bg-white p-4 sm:p-6 shadow-sm mb-4 ${s3.className}`}>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-secondary text-sm">학습 현황</h2>
           {/* streak는 progress 에러 시 0 fallback → 뱃지 자연스럽게 미표시 */}
@@ -210,13 +212,13 @@ export default function Home() {
 
       {/* ⑤ 합격 준비도 / 통계 섹션: progress 에러/로딩 독립 처리 */}
       {progressLoading ? (
-        <section className={`grid grid-cols-2 gap-3 mb-4 ${s4.className}`} style={s4.style}>
+        <section className={`grid grid-cols-2 gap-3 mb-4 ${s4.className}`}>
           <div className="skeleton h-24" />
           <div className="skeleton h-24" />
         </section>
       ) : progressError ? (
         // progress 에러 시 해당 섹션만 인라인 에러 + 재시도 버튼
-        <section className={`card bg-white p-4 sm:p-6 mb-4 flex flex-row items-center justify-between ${s4.className}`} style={s4.style}>
+        <section className={`card bg-white p-4 sm:p-6 mb-4 flex flex-row items-center justify-between ${s4.className}`}>
           <p className="text-secondary text-sm">학습 데이터를 불러올 수 없습니다</p>
           <button
             type="button"
@@ -229,7 +231,7 @@ export default function Home() {
         </section>
       ) : progress?.readiness ? (
         // readiness 데이터가 있으면 합격 준비도 카드
-        <section className={`card bg-white p-4 sm:p-6 shadow-sm mb-4 ${s4.className}`} style={s4.style}>
+        <section className={`card bg-white p-4 sm:p-6 shadow-sm mb-4 ${s4.className}`}>
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-secondary text-sm">합격 준비도</h2>
             <span className="text-h1 text-brand">
@@ -258,7 +260,7 @@ export default function Home() {
         </section>
       ) : (
         // readiness 없으면 간략 통계 카드
-        <section className={`grid grid-cols-2 gap-3 mb-4 ${s4.className}`} style={s4.style}>
+        <section className={`grid grid-cols-2 gap-3 mb-4 ${s4.className}`}>
           <div className="card bg-white p-4 sm:p-6 shadow-sm flex flex-col items-start">
             <span className="text-h1 text-brand">{solved}</span>
             <span className="text-secondary mt-1">푼 문제</span>
@@ -280,7 +282,7 @@ export default function Home() {
 
       {/* ⑥ 추천 문제 섹션: 에러 또는 데이터 없으면 섹션 전체 숨김 */}
       {!recommendationsError && recommendations && recommendations.questions.length > 0 && (
-        <section className={`mt-6 ${s5.className}`} style={s5.style}>
+        <section className={`mt-6 ${s5.className}`}>
           {/* Sparkles 아이콘으로 AI 추천 기능임을 명시 */}
           <h2 className="text-secondary text-sm mb-3 flex items-center gap-1">
             <Sparkles size={14} fill="currentColor" />
