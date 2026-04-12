@@ -45,7 +45,7 @@ export default function ErrorFallback({
   const meta = ERROR_META[errorType];
 
   return (
-    <div className="bg-surface-card border border-border rounded-2xl p-4 sm:p-6 flex flex-col items-center text-center gap-4 py-10 px-6 my-6">
+    <div className="bg-surface-card border border-border rounded-2xl py-10 px-6 my-6 flex flex-col items-center text-center gap-4">
       {/* 에러 아이콘 — 회색 원형 배경으로 severity 없이 차분하게 */}
       <div className="w-14 h-14 rounded-full bg-surface flex items-center justify-center">
         {meta.icon}
