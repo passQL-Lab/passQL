@@ -307,3 +307,23 @@ export interface PracticeAnalysis {
   readonly tip: string;
 }
 
+// === Feedback ===
+export type FeedbackStatus = "PENDING" | "REVIEWED" | "APPLIED";
+
+export interface FeedbackItem {
+  readonly feedbackUuid: string;
+  readonly content: string;
+  readonly status: FeedbackStatus;
+  readonly createdAt: string; // ISO 8601
+}
+
+export interface FeedbackListResponse {
+  readonly items: readonly FeedbackItem[];
+}
+
+export interface FeedbackSubmitResponse {
+  readonly feedbackUuid: string;
+  readonly status: FeedbackStatus;
+  readonly createdAt: string;
+}
+

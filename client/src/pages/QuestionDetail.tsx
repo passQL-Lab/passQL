@@ -319,7 +319,7 @@ export default function QuestionDetail({
 
   const choicesSection =
     choices.length === 0 ? (
-      <div className="mt-4 card-base text-center py-8 space-y-2">
+      <div className="mt-4 bg-surface-card border border-border rounded-2xl text-center py-8 space-y-2">
         {/* SSE 에러 → 재시도 UI (EXECUTABLE, CONCEPT_ONLY 공통) */}
         {sseError ? (
           <>
@@ -420,7 +420,7 @@ export default function QuestionDetail({
       {/* 문제 지문 (토글) */}
       <button
         type="button"
-        className="card-base shadow-sm w-full text-left flex items-start gap-2 mt-2"
+        className="bg-surface-card border border-border rounded-2xl p-4 sm:p-6 shadow-sm w-full text-left flex items-start gap-2 mt-2"
         onClick={() => setStemOpen((prev) => !prev)}
       >
         {!stemOpen && (

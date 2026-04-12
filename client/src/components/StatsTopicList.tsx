@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { HelpCircle } from "lucide-react";
 import type { TopicStat } from "../types/api";
@@ -103,7 +103,7 @@ export default function StatsTopicList({ topicStats }: StatsTopicListProps) {
   const maxSolved = Math.max(...topicStats.map((s) => s.solvedCount), 1);
 
   return (
-    <div className="card-base">
+    <div className="bg-surface-card border border-border rounded-2xl p-4 sm:p-6">
       {/* 헤더 + ? 버튼 */}
       <div className="flex items-center gap-1.5 mb-4">
         <h2 className="text-base font-bold text-text-primary">토픽별 학습 현황</h2>
@@ -146,8 +146,8 @@ export default function StatsTopicList({ topicStats }: StatsTopicListProps) {
               <div className="w-full h-2 bg-surface-code rounded-full overflow-hidden">
                 {!unsolved && (
                   <div
-                    className={`h-full rounded-full transition-all duration-500 ${colors!.bar}`}
-                    style={{ width: `${barWidth}%` }}
+                    className={`h-full rounded-full transition-all duration-500 [width:var(--bar-w)] ${colors!.bar}`}
+                    style={{ "--bar-w": `${barWidth}%` } as CSSProperties}
                   />
                 )}
               </div>

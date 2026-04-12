@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { useQuery } from "@tanstack/react-query";
 import { CheckSquare, BarChart2, Zap, HelpCircle } from "lucide-react";
@@ -68,8 +68,8 @@ function ReadinessPopover({
             <span className="text-[11px] text-gray-400 w-12 shrink-0">{label}</span>
             <div className="flex-1 h-1 bg-white/15 rounded-full overflow-hidden">
               <div
-                className="h-full bg-brand-medium rounded-full"
-                style={{ width: `${Math.round(value * 100)}%` }}
+                className="h-full bg-brand-medium rounded-full [width:var(--bar-w)]"
+                style={{ "--bar-w": `${Math.round(value * 100)}%` } as CSSProperties}
               />
             </div>
             <span className="text-[11px] text-brand-medium w-7 text-right shrink-0">
@@ -163,7 +163,7 @@ export default function Stats() {
       </section>
 
       {/* ② 상단 요약 카드 */}
-      <section className={`card-base !p-0 ${s1.className}`}>
+      <section className={`bg-surface-card border border-border rounded-2xl p-0 ${s1.className}`}>
         <div className="flex divide-x divide-border">
 
           {/* 푼 문제 */}
@@ -240,7 +240,7 @@ export default function Stats() {
           </section>
         </>
       ) : (
-        <section className={`card-base text-center py-12 ${s2.className}`}>
+        <section className={`bg-surface-card border border-border rounded-2xl text-center py-12 ${s2.className}`}>
           <p className="text-text-caption">아직 풀이 기록이 없어요</p>
           <p className="text-xs text-text-caption mt-1">
             문제를 풀면 여기에 실력이 나타나요
