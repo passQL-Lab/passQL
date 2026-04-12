@@ -576,19 +576,20 @@ body {
 /* ── AnswerFeedback: SQL 아코디언 카드 ── */
 .acc-sql-card {
   background-color: var(--color-surface-card);
-  border: 1px solid var(--color-border);
+  /* 기본 border보다 진한 값으로 카드 구분선 가시성 확보 */
+  border: 1px solid #C4C9D4;
   border-radius: 10px;
   overflow: hidden;
 }
 
 .acc-sql-card.is-wrong {
   background-color: #FEF2F2;
-  border-color: #FECACA;
+  border: 2px solid #FECACA;
 }
 
 .acc-sql-card.is-correct {
   background-color: #F0FDF4;
-  border-color: #BBF7D0;
+  border: 2px solid #BBF7D0;
 }
 
 .acc-sql-header {
@@ -705,12 +706,13 @@ body {
 
 .result-table-border {
   border: 1px solid var(--color-border);
-  border-radius: 12px;
+  border-radius: 6px;
 }
+
 
 .result-table-border--inverted {
   border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 12px;
+  border-radius: 6px;
   /* 반투명 흰색 배경 — 파란 카드 위에서 텍스트 가독성 확보 */
   background-color: rgba(255, 255, 255, 0.15);
 }
