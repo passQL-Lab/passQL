@@ -67,7 +67,7 @@ export default function PracticeFeedbackBar({
               // 다시 풀기: brand 인디고 solid — 권장 행동임을 강조
               <button
                 type="button"
-                className="flex-1 h-12 rounded-xl font-bold text-base text-white bg-brand"
+                className="btn-primary flex-1"
                 onClick={guard(onSecondary)}
               >
                 {secondaryLabel}
@@ -75,7 +75,7 @@ export default function PracticeFeedbackBar({
             )}
             <button
               type="button"
-              className={`h-12 rounded-xl font-bold text-base ${
+              className={`h-11 rounded-lg font-bold text-base ${
                 onSecondary
                   // 보조 버튼: outline 스타일 — 탈출 경로임을 시각적으로 약화
                   ? "flex-1 feedback-bar-next-outline"
