@@ -106,63 +106,74 @@ export default function QuestionDetail({
   const choices = sseChoices ?? activeChoiceSet?.items ?? [];
   const choiceSetId = sseChoiceSetId ?? activeChoiceSet?.choiceSetUuid ?? "";
 
-  // 선택지가 없고 에러도 없을 때 SSE 선택지 생성 호출
-  // EXECUTABLE: 샌드박스 검증을 포함한 SQL 선택지 생성
-  // CONCEPT_ONLY: 샌드박스 없이 AI가 텍스트 선택지를 직접 생성 (서버의 generateConcept 호출)
-  const needsSseGeneration =
-    question != null &&
-    (question.executionMode === "EXECUTABLE" ||
-      question.executionMode === "CONCEPT_ONLY") &&
-    activeChoiceSet == null &&
-    sseChoices == null &&
-    !sseError;
-
   useEffect(() => {
-    // question이 아직 로드되지 않았거나 SSE 불필요한 경우 스킵
-    if (!needsSseGeneration || !questionUuid) return;
+    // question 비동기 로드 전이거나 UUID 없으면 스킵
+    if (!question || !questionUuid) return;
 
-    setSseError(null);
+    // SSE 생성이 필요 없는 조건:
+    //   - GET 응답에 이미 OK 선택지 있음 (activeChoiceSet != null)
+    //   - SSE complete로 받은 선택지 있음 (sseChoices != null)
+    //   - 에러 상태 (재시도 버튼 대기 중, sseRetryCount 변경 시 다시 실행됨)
+    const needsGeneration =
+      (question.executionMode === "EXECUTABLE" ||
+        question.executionMode === "CONCEPT_ONLY") &&
+      activeChoiceSet == null &&
+      sseChoices == null &&
+      !sseError;
+
+    if (!needsGeneration) return;
+
     setSseStatus("선택지 생성 중...");
 
     // 60초 내에 complete/error가 오지 않으면 클라이언트 타임아웃으로 에러 전환
     // AI 호출 + 샌드박스 3회 재시도 합산 예상 시간 기준
     const SSE_TIMEOUT_MS = 60_000;
+    let cancelled = false;
     let streamCleanup: (() => void) | null = null;
     const timeoutId = setTimeout(() => {
-      // 타임아웃 시 스트림도 abort — 이후 onComplete/onError 콜백 차단
       streamCleanup?.();
-      setSseError({ code: "TIMEOUT", retryable: true });
-      setSseStatus(null);
+      if (!cancelled) {
+        setSseError({ code: "TIMEOUT", retryable: true });
+        setSseStatus(null);
+      }
     }, SSE_TIMEOUT_MS);
 
     const cleanup = generateChoices(questionUuid, {
-      onStatus: (event) => setSseStatus(event.message),
+      onStatus: (event) => { if (!cancelled) setSseStatus(event.message); },
       onComplete: (response) => {
         clearTimeout(timeoutId);
-        setSseChoices(response.choices);
-        setSseChoiceSetId(response.choiceSetId);
-        setSseStatus(null);
+        if (!cancelled) {
+          setSseChoices(response.choices);
+          setSseChoiceSetId(response.choiceSetId);
+          setSseStatus(null);
+        }
       },
       onError: (event) => {
         clearTimeout(timeoutId);
-        setSseError({ code: event.code, retryable: event.retryable });
-        setSseStatus(null);
+        if (!cancelled) {
+          setSseError({ code: event.code, retryable: event.retryable });
+          setSseStatus(null);
+        }
       },
     });
-    // 타임아웃 콜백에서 abort할 수 있도록 참조 저장
     streamCleanup = cleanup;
 
     return () => {
+      // StrictMode 이중 실행: 첫 번째 cleanup에서 cancelled=true로 콜백 무력화 + abort
+      // 두 번째 effect 실행 시 sseChoices/sseError가 여전히 null → needsGeneration=true
+      // → 두 번째 effect가 실제 SSE 연결을 담당 (React 권장 패턴)
+      cancelled = true;
       clearTimeout(timeoutId);
       cleanup();
     };
-    // needsSseGeneration을 deps에 넣되, sseChoices/sseError의 변화는
-    // onComplete/onError 콜백 내부에서만 일어나므로 실질적으로 effect가 재실행되는 시점은:
-    //   1. question 첫 로드 완료 (null → 객체)
-    //   2. sseRetryCount 증가 (재시도 버튼)
-    //   3. questionUuid 변경 (다른 문제로 이동)
-    // background refetch는 staleTime: 60_000 설정으로 SSE 진행 중 발생하지 않음
-  }, [needsSseGeneration, questionUuid, sseRetryCount]);
+    // deps 설계:
+    //   question      — 비동기 로드 완료 시 effect 실행 (null → 객체 전환 감지)
+    //   questionUuid  — 문제 변경 시 새 SSE 시작
+    //   sseRetryCount — 재시도 버튼 클릭 시 새 SSE 시작
+    // sseChoices/sseError/activeChoiceSet은 effect 내부 needsGeneration 판단에만 사용
+    // deps에 포함하면 onComplete/onError 콜백 후 effect가 재실행되어 중복 요청 발생
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [question, questionUuid, sseRetryCount]);
 
   const explainMutation = useMutation({
     mutationFn: explainError,
