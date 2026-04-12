@@ -1,6 +1,6 @@
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
-import { ChevronRight, AlertCircle, RefreshCw, BookOpen, ChevronDown } from "lucide-react";
+import { ChevronRight, AlertCircle, RefreshCw, BookOpen, ChevronDown, FileText, GitCompare } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { executeChoice } from "../api/questions";
 import { ResultTable } from "../components/ResultTable";
@@ -25,6 +25,8 @@ interface FeedbackState {
   readonly stem?: string;
   readonly topicName?: string;
   readonly schemaDisplay?: string | null;
+  readonly schemaDdl?: string | null;
+  readonly schemaSampleData?: string | null;
 }
 
 /** EXECUTABLE 선택지 카드 상태에 따른 클래스 반환 — A/B/C/D 키 레이블 없이 뱃지로만 구분 */
@@ -81,6 +83,11 @@ export default function AnswerFeedback() {
 
   const similarQuery = useSimilarQuestions(state?.questionUuid ?? "");
 
+  // state 없으면 렌더 중 직접 navigate 대신 effect로 이동 — 렌더 중 side effect 방지
+  useEffect(() => {
+    if (!state) navigate("/questions", { replace: true });
+  }, [state, navigate]);
+
   // 실행 중인 선택지 키 Set — 병렬 실행 시 각 카드의 로딩 상태를 독립적으로 관리
   const executingKeyRef = useRef<Set<string>>(new Set());
   // 캐시 guard 조회용 ref — resultCache state와 동기화
@@ -130,10 +137,7 @@ export default function AnswerFeedback() {
     }
   }, [state]);
 
-  if (!state) {
-    navigate("/questions", { replace: true });
-    return null;
-  }
+  if (!state) return null;
 
   const {
     isCorrect,
@@ -146,22 +150,33 @@ export default function AnswerFeedback() {
     selectedKey,
     correctKey,
     stem,
-    topicName,
     schemaDisplay,
+    schemaDdl,
+    schemaSampleData,
   } = state;
 
   const isExecutable = executionMode === "EXECUTABLE";
-  const sqlChoices = isExecutable
-    ? (choices ?? []).filter((c) => c.kind === "SQL")
-    : [];
+
+  // 정답 → 내 선택 → 나머지 순 정렬 — choices/키가 바뀔 때만 재계산
+  const sqlChoices = useMemo(() => {
+    if (!isExecutable) return [];
+    return (choices ?? [])
+      .filter((c) => c.kind === "SQL")
+      .slice()
+      .sort((a, b) => {
+        const rank = (key: string) =>
+          key === correctKey ? 0 : key === selectedKey ? 1 : 2;
+        return rank(a.key) - rank(b.key);
+      });
+  }, [isExecutable, choices, correctKey, selectedKey]);
 
   // 미실행 선택지 전체 병렬 실행 — 이미 실행 중이거나 캐시된 항목은 guard로 자동 스킵
-  const handleRunAll = async () => {
+  const handleRunAll = useCallback(async () => {
     const unexecuted = sqlChoices.filter(
       (c) => !resultCacheRef.current[c.key] && !executingKeyRef.current.has(c.key)
     );
     await Promise.allSettled(unexecuted.map((c) => handleExecute(c)));
-  };
+  }, [sqlChoices, handleExecute]);
 
   // ── 헤더: 상단 3px 컬러 바 + 도트 상태 eyebrow + 제목 ──
   const headerSection = (
@@ -209,8 +224,8 @@ export default function AnswerFeedback() {
       onClick={() => setStemOpen((v) => !v)}
     >
       <div className="stem-toggle-header">
-        <BookOpen size={13} className="text-base-content/50 shrink-0" />
-        <span className="text-xs font-semibold text-base-content/50">문제 보기</span>
+        <BookOpen size={13} className="text-base-content/60 shrink-0" />
+        <span className="text-xs font-semibold text-base-content/60">문제 보기</span>
         {/* 접혀있을 때 지문 첫 줄 미리보기 */}
         {!stemOpen && (
           <span className="stem-toggle-preview">{stem}</span>
@@ -222,9 +237,6 @@ export default function AnswerFeedback() {
       </div>
       {stemOpen && (
         <div className="stem-toggle-body" onClick={(e) => e.stopPropagation()}>
-          {topicName && (
-            <span className="badge-topic mb-2 inline-block">{topicName}</span>
-          )}
           {/* stem에 마크다운 테이블/코드 포함 가능 — components prop으로 스타일 적용 */}
           <ReactMarkdown
             components={{
@@ -274,10 +286,14 @@ export default function AnswerFeedback() {
           >
             {stem}
           </ReactMarkdown>
-          {/* 스키마가 있으면 stem 아래에 표시 — QuestionDetail과 동일한 SchemaViewer 재사용 */}
-          {schemaDisplay && (
+          {/* 스키마가 있으면 stem 아래에 표시 — schemaDisplay 없어도 schemaDdl로 폴백 */}
+          {(schemaDisplay || schemaDdl) && (
             <div className="mt-3">
-              <SchemaViewer schemaDisplay={schemaDisplay} />
+              <SchemaViewer
+                schemaDisplay={schemaDisplay ?? undefined}
+                schemaDdl={schemaDdl ?? undefined}
+                schemaSampleData={schemaSampleData ?? undefined}
+              />
             </div>
           )}
         </div>
@@ -312,10 +328,13 @@ export default function AnswerFeedback() {
     </div>
   ) : null;
 
-  // ── 해설 카드 ──
+  // ── 해설 카드 — acc-sql-card와 동일한 10px 라운드로 통일 ──
   const rationaleSection = (
-    <div className="card-base feedback-card-anim-2">
-      <p className="text-xs text-base-content/40 mb-2 uppercase tracking-widest font-medium">해설</p>
+    <div className="rationale-card feedback-card-anim-2">
+      <div className="flex items-center gap-1.5 mb-2">
+        <FileText size={13} className="text-base-content/60 shrink-0" />
+        <p className="text-xs text-base-content/60 uppercase tracking-widest font-semibold">해설</p>
+      </div>
       <p className="text-sm text-base-content leading-relaxed">{rationale}</p>
     </div>
   );
@@ -325,9 +344,12 @@ export default function AnswerFeedback() {
     <section className="space-y-2 feedback-card-anim-3">
       {/* 섹션 헤더: 레이블 + 모두 실행 버튼 */}
       <div className="flex items-center justify-between px-0.5">
-        <p className="text-xs text-base-content/40 uppercase tracking-widest font-medium">
-          SQL 실행 비교
-        </p>
+        <div className="flex items-center gap-1.5">
+          <GitCompare size={13} className="text-base-content/60 shrink-0" />
+          <p className="text-xs text-base-content/60 uppercase tracking-widest font-semibold">
+            SQL 실행 비교
+          </p>
+        </div>
         <button
           type="button"
           className="btn-run-all"

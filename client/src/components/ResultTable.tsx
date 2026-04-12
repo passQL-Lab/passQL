@@ -11,7 +11,7 @@ export const ResultTable = memo(function ResultTable({ result, onAskAi }: Result
   if (result.errorCode) {
     return (
       <div className="error-card mt-3">
-        <span className="text-code font-bold" style={{ color: "var(--color-sem-error)" }}>
+        <span className="text-code font-bold error-code-text">
           <AlertTriangle size={14} className="inline mr-1" />
           {result.errorCode}
         </span>

@@ -234,6 +234,8 @@ export default function QuestionDetail({
             stem: question.stem,
             topicName: question.topicName,
             schemaDisplay: question.schemaDisplay ?? null,
+            schemaDdl: question.schemaDdl ?? null,
+            schemaSampleData: question.schemaSampleData ?? null,
           };
           // 제출 완료 시 추천 문제 캐시 무효화 — 홈 복귀 시 목록 즉시 갱신
           queryClient.invalidateQueries({ queryKey: ["recommendations"] });

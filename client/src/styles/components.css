@@ -206,6 +206,11 @@
 }
 
 /* ── 7. Error Card ── */
+/* inline style 금지 규칙에 따라 error 색상을 클래스로 분리 */
+.error-code-text {
+  color: var(--color-sem-error);
+}
+
 .error-card {
   background-color: var(--color-sem-error-light);
   border-left: 4px solid var(--color-sem-error);
@@ -548,6 +553,14 @@ body {
 .stem-toggle-body {
   border-top: 1px solid var(--color-border-muted);
   padding: 8px 12px 12px;
+}
+
+/* ── AnswerFeedback: 해설 카드 — acc-sql-card와 10px 라운드 통일 ── */
+.rationale-card {
+  background-color: var(--color-surface-card);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 12px 14px;
 }
 
 /* ── AnswerFeedback: SQL 아코디언 카드 ── */
