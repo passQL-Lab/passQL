@@ -1,11 +1,41 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-12T10:20:58Z",
-    "currentVersion": "0.0.94",
+    "lastUpdated": "2026-04-12T11:56:45Z",
+    "currentVersion": "0.0.95",
     "projectType": "basic",
-    "totalReleases": 40
+    "totalReleases": 41
   },
   "releases": [
+    {
+      "version": "0.0.95",
+      "project_type": "basic",
+      "date": "2026-04-12",
+      "pr_number": 166,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 새로운 기능\n* 추천 문제 풀이 페이지 추가\n* 오답 시 \"다시 풀기\" 옵션 제공\n\n## 버그 수정\n* 연속 제출 방지 기능 강화\n* 네비게이션 차단 로직 최적화\n\n## 스타일\n* 선택지 카드 및 피드백 화면 스타일 개선",
+      "parsed_changes": {
+        "추천_문제_풀이_페이지_추가": {
+          "title": "추천 문제 풀이 페이지 추가",
+          "items": []
+        },
+        "오답_시__다시_풀기__옵션_제공": {
+          "title": "오답 시 \"다시 풀기\" 옵션 제공",
+          "items": []
+        },
+        "연속_제출_방지_기능_강화": {
+          "title": "연속 제출 방지 기능 강화",
+          "items": []
+        },
+        "네비게이션_차단_로직_최적화": {
+          "title": "네비게이션 차단 로직 최적화",
+          "items": []
+        },
+        "선택지_카드_및_피드백_화면_스타일_개선": {
+          "title": "선택지 카드 및 피드백 화면 스타일 개선",
+          "items": []
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.94",
       "project_type": "basic",
