@@ -19,24 +19,34 @@ const NAV_ITEMS: readonly {
 
 function SidebarNav() {
   return (
-    <aside className="hidden lg:flex flex-col w-55 border-r border-border bg-surface-card h-screen sticky top-0 py-6 px-3 gap-1">
+    <aside className="hidden lg:flex flex-col w-55 border-r border-base-300 bg-base-100 h-screen sticky top-0 py-6 px-3">
       <div className="px-4 mb-8">
         <img src={logo} alt="passQL" className="h-6 w-auto" />
       </div>
-      {NAV_ITEMS.map((item) => (
-        <NavLink
-          key={item.to}
-          to={item.to}
-          end={item.to === "/"}
-          className={({ isActive }) =>
-            `nav-sidebar-item ${isActive ? "nav-sidebar-item--active" : ""}`
-          }
-        >
-          <item.icon size={20} />
-          <span>{item.label}</span>
-        </NavLink>
-      ))}
-      <div className="mt-auto px-4 pt-4 border-t border-border">
+      {/* menu: daisyUI 메뉴 컴포넌트 래퍼 */}
+      <ul className="menu p-0 gap-1">
+        {NAV_ITEMS.map((item) => (
+          <li key={item.to}>
+            <NavLink
+              to={item.to}
+              end={item.to === "/"}
+              className={({ isActive }) =>
+                // 활성: accent 배경(#EEF2FF) + primary 텍스트(#4F46E5)
+                // 비활성: 회색 텍스트 + hover 시 base-200 배경
+                `flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                  isActive
+                    ? "bg-accent text-primary"
+                    : "text-base-content/60 hover:bg-base-200"
+                }`
+              }
+            >
+              <item.icon size={20} />
+              <span>{item.label}</span>
+            </NavLink>
+          </li>
+        ))}
+      </ul>
+      <div className="mt-auto px-4 pt-4 border-t border-base-300">
         <img src={logo} alt="passQL" className="h-4 w-auto opacity-40 mb-1" />
         <p className="text-[10px] text-text-caption">© 2026 passQL</p>
       </div>
