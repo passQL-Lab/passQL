@@ -42,7 +42,7 @@ export default function ConfirmModal({
   return (
     // 오버레이 — 클릭 시 이탈 취소
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-neutral/50"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-base-content/50"
       onClick={onCancel}
     >
       {/* 모달 카드 — 클릭 이벤트 버블링 방지 */}
