@@ -127,7 +127,7 @@ export default function AnswerFeedback() {
       questionUuid: state.questionUuid,
       selectedChoiceKey: state.selectedKey,
     });
-  }, [state, diffMutation]);
+  }, [state, diffMutation.mutate]);
 
   if (!state) {
     navigate("/questions", { replace: true });
