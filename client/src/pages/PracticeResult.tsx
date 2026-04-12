@@ -193,7 +193,7 @@ export default function PracticeResult() {
                     </p>
                     {/* 정답/오답 모두 다시 풀기 제공 — 복습 목적 */}
                     <Link
-                      to={`/questions/${r.questionUuid}`}
+                      to={`/recommendation/${r.questionUuid}`}
                       className="inline-flex items-center gap-1.5 text-xs font-medium text-brand bg-accent-light rounded-md px-3 py-1.5"
                     >
                       <RotateCcw size={12} /> 다시 풀기
