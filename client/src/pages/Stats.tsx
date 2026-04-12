@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { useQuery } from "@tanstack/react-query";
 import { CheckSquare, BarChart2, Zap, HelpCircle } from "lucide-react";
@@ -68,7 +68,8 @@ function ReadinessPopover({
             <span className="text-[11px] text-gray-400 w-12 shrink-0">{label}</span>
             <div className="flex-1 h-1 bg-white/15 rounded-full overflow-hidden">
               <div
-                className={`h-full bg-brand-medium rounded-full w-[${Math.round(value * 100)}%]`}
+                className="h-full bg-brand-medium rounded-full [width:var(--bar-w)]"
+                style={{ "--bar-w": `${Math.round(value * 100)}%` } as CSSProperties}
               />
             </div>
             <span className="text-[11px] text-brand-medium w-7 text-right shrink-0">
