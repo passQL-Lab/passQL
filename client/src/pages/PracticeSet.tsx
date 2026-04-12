@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { useParams, useNavigate, Navigate, useBlocker } from "react-router-dom";
-import { Home } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { usePracticeStore } from "../stores/practiceStore";
 import { submitAnswer } from "../api/questions";
 import { getRandomMessage } from "../constants/microcopy";
@@ -31,6 +31,10 @@ export default function PracticeSet() {
   const submitAndAdvance = usePracticeStore((s) => s.submitAndAdvance);
 
   const [feedback, setFeedback] = useState<SubmitResult | null>(null);
+  // Home 버튼 클릭 시 이탈 확인 모달 — blocker와 독립적으로 제어
+  const [exitModalOpen, setExitModalOpen] = useState(false);
+  // exitConfirmed=true 시 blocker를 우회하여 홈으로 이동 — 이중 확인 방지
+  const [exitConfirmed, setExitConfirmed] = useState(false);
   // EXECUTABLE 문제 오답노트용 상태
   const [reviewChoices, setReviewChoices] = useState<
     readonly ChoiceItem[] | null
@@ -48,8 +52,9 @@ export default function PracticeSet() {
   const shouldNavigateToResult = !feedback && currentIndex >= totalQuestions;
 
   // 마지막 문제 완료 전까지 이탈 차단 — 중간 이탈 시 세션 기록 유실 방지
+  // exitConfirmed=true이면 차단 해제 → useEffect에서 navigate("/") 호출
   // useBlocker는 훅이므로 조건부 return 이전에 호출해야 함
-  const blocker = useBlocker(!shouldNavigateToResult);
+  const blocker = useBlocker(!shouldNavigateToResult && !exitConfirmed);
 
   const handleSelect = useCallback(
     async (
@@ -109,6 +114,13 @@ export default function PracticeSet() {
     }
   }, [shouldNavigateToResult, navigate, sessionId]);
 
+  // exitConfirmed 시 blocker가 비활성화된 후 홈으로 이동 — 이중 차단 방지
+  useEffect(() => {
+    if (exitConfirmed) {
+      navigate("/");
+    }
+  }, [exitConfirmed, navigate]);
+
   if (!storeSessionId || storeSessionId !== sessionId) {
     return <Navigate to="/questions" replace />;
   }
@@ -124,10 +136,11 @@ export default function PracticeSet() {
           <div className="justify-self-start">
             <button
               type="button"
+              aria-label="풀이 나가기"
               className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-border transition-colors"
-              onClick={() => navigate("/")}
+              onClick={() => setExitModalOpen(true)}
             >
-              <Home size={18} className="text-text-secondary" />
+              <ArrowLeft size={18} className="text-text-secondary" />
             </button>
           </div>
           <span className="text-sm font-semibold text-text-secondary text-center">
@@ -178,15 +191,27 @@ export default function PracticeSet() {
         />
       )}
 
-      {/* 이탈 방지 확인 모달 */}
+      {/* 이탈 방지 확인 모달 — Home 버튼(exitModalOpen) 또는 브라우저 뒤로가기(blocker) 대응 */}
       <ConfirmModal
-        isOpen={blocker.state === "blocked"}
+        isOpen={blocker.state === "blocked" || exitModalOpen}
         title="풀이를 그만할까요?"
         description="지금 나가면 현재 풀이 기록이 저장되지 않아요."
         cancelLabel="계속 풀기"
         confirmLabel="나가기"
-        onCancel={() => blocker.reset?.()}
-        onConfirm={() => blocker.proceed?.()}
+        onCancel={() => {
+          blocker.reset?.();
+          setExitModalOpen(false);
+        }}
+        onConfirm={() => {
+          // blocker가 활성화된 경우(브라우저 뒤로가기 등) → proceed로 원래 이동 허용
+          // exitModalOpen인 경우(Home 버튼) → exitConfirmed=true로 blocker 먼저 해제 후 navigate
+          if (blocker.state === "blocked") {
+            blocker.proceed?.();
+          } else {
+            setExitConfirmed(true);
+          }
+          setExitModalOpen(false);
+        }}
       />
     </div>
   );

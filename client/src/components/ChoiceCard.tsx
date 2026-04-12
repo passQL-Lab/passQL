@@ -73,7 +73,7 @@ export const ChoiceCard = memo(function ChoiceCard({
         // EXECUTABLE SQL: 모노 폰트 + 실행 버튼 (풀이 중 isExecutable=false로 숨김)
         <>
           <p
-            className="text-sm leading-relaxed whitespace-pre-wrap break-words"
+            className="text-sm leading-relaxed whitespace-pre-wrap wrap-break-word"
             style={{ fontFamily: "var(--font-mono)", color: "var(--color-text-primary)" }}
           >
             {choice.body}
