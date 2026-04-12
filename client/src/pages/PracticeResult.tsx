@@ -20,17 +20,28 @@ export default function PracticeResult() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
   const store = usePracticeStore();
+  // 다시 풀기 후 복귀 시 step3으로 바로 진입 — store에서 한 번만 읽고 즉시 클리어
+  const initialStepRef = useRef(store.returnStep ?? 0);
+  const initialStep = initialStepRef.current;
   // 각 통계 항목의 등장 여부를 인덱스별로 관리 (0: 정답률, 1: 총시간, 2: 문제당 평균)
-  const [visibleStats, setVisibleStats] = useState<boolean[]>([false, false, false]);
+  const [visibleStats, setVisibleStats] = useState<boolean[]>([
+    false,
+    false,
+    false,
+  ]);
   // 펼쳐진 문제 카드 인덱스 (null = 모두 닫힘)
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   // 순차 등장 타이머 ID 보관 — 언마운트 시 클린업
   const timerIdsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   useEffect(() => {
+    // 읽은 returnStep 즉시 클리어 — 다음 일반 진입 시 step1로 시작하도록
+    store.clearReturnStep();
     return () => {
       timerIdsRef.current.forEach(clearTimeout);
     };
+    // store 인스턴스는 변하지 않으므로 의존성 배열에서 제외
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // AI 코멘트: useQuery로 캐싱 및 StrictMode 이중 호출 방지
@@ -52,7 +63,14 @@ export default function PracticeResult() {
       correctCount,
       totalCount,
       totalDurationMs,
-      greeting: correctCount >= 9 ? "완벽해요!" : correctCount >= 7 ? "꽤 잘했어요!" : correctCount >= 5 ? "괜찮아요!" : "다시 도전해봐요!",
+      greeting:
+        correctCount >= 9
+          ? "완벽해요!"
+          : correctCount >= 7
+            ? "꽤 잘했어요!"
+            : correctCount >= 5
+              ? "괜찮아요!"
+              : "다시 도전해봐요!",
     };
   }, [store.results]);
 
@@ -61,9 +79,12 @@ export default function PracticeResult() {
   }
 
   const totalDuration = formatDuration(analysis.totalDurationMs);
-  const avgDuration = analysis.totalCount > 0
-    ? formatDuration(Math.round(analysis.totalDurationMs / analysis.totalCount))
-    : "0초";
+  const avgDuration =
+    analysis.totalCount > 0
+      ? formatDuration(
+          Math.round(analysis.totalDurationMs / analysis.totalCount),
+        )
+      : "0초";
 
   // 카운트업 완료 후 150ms 간격으로 순차 등장 — 타이머 ID 보관하여 언마운트 시 클린업
   const handleScoreComplete = useCallback(() => {
@@ -92,23 +113,33 @@ export default function PracticeResult() {
 
       <div className="flex gap-8 mt-8">
         {/* 정답률 */}
-        <div className={`text-center transition-all duration-300 ease-out ${visibleStats[0] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}>
-          <div className="text-lg font-bold">{analysis.totalCount > 0 ? Math.round((analysis.correctCount / analysis.totalCount) * 100) : 0}%</div>
+        <div
+          className={`text-center transition-all duration-300 ease-out ${visibleStats[0] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}
+        >
+          <div className="text-lg font-bold">
+            {analysis.totalCount > 0
+              ? Math.round((analysis.correctCount / analysis.totalCount) * 100)
+              : 0}
+            %
+          </div>
           <div className="flex items-center gap-1 text-xs text-text-caption mt-0.5 justify-center">
             <Target size={11} className="text-text-caption" />
             정답률
           </div>
         </div>
         {/* 총 시간 */}
-        <div className={`text-center transition-all duration-300 ease-out ${visibleStats[1] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}>
+        <div
+          className={`text-center transition-all duration-300 ease-out ${visibleStats[1] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}
+        >
           <div className="text-lg font-bold">{totalDuration}</div>
           <div className="flex items-center gap-1 text-xs text-text-caption mt-0.5 justify-center">
-            <Clock size={11} className="text-text-caption" />
-            총 시간
+            <Clock size={11} className="text-text-caption" />총 시간
           </div>
         </div>
         {/* 문제당 평균 */}
-        <div className={`text-center transition-all duration-300 ease-out ${visibleStats[2] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}>
+        <div
+          className={`text-center transition-all duration-300 ease-out ${visibleStats[2] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}
+        >
           <div className="text-lg font-bold">{avgDuration}</div>
           <div className="flex items-center gap-1 text-xs text-text-caption mt-0.5 justify-center">
             <Timer size={11} className="text-text-caption" />
@@ -168,32 +199,49 @@ export default function PracticeResult() {
                 className="w-full flex items-center gap-3 p-3 text-left"
                 onClick={() => setOpenIndex(isOpen ? null : i)}
               >
-                <span className={`text-sm font-bold w-5 text-center shrink-0 ${r.isCorrect ? "text-green-600" : "text-red-600"}`}>
+                <span
+                  className={`text-sm font-bold w-5 text-center shrink-0 ${r.isCorrect ? "text-green-600" : "text-red-600"}`}
+                >
                   {i + 1}
                 </span>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm truncate">{q?.stemPreview}</p>
-                  <p className="text-xs text-text-caption mt-0.5">{formatDuration(r.durationMs)}</p>
+                  <p className="text-xs text-text-caption mt-0.5">
+                    {formatDuration(r.durationMs)}
+                  </p>
                 </div>
-                {r.isCorrect
-                  ? <Check size={16} className="text-green-500 shrink-0" />
-                  : <span className="text-xs font-medium text-red-400 shrink-0">오답</span>
-                }
+                {r.isCorrect ? (
+                  <Check size={16} className="text-green-500 shrink-0" />
+                ) : (
+                  <span className="text-xs font-medium text-red-400 shrink-0">
+                    오답
+                  </span>
+                )}
               </button>
 
               {/* 아코디언 본문 — grid-rows 전환으로 300ms ease-out 높이 애니메이션 */}
-              <div className={`grid transition-all duration-300 ease-out ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
+              <div
+                className={`grid transition-all duration-300 ease-out ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}
+              >
                 <div className="overflow-hidden">
                   <div className="px-3 pb-3 pt-2 border-t border-border space-y-2">
                     {/* stemPreview가 현재 접근 가능한 최대 지문 */}
-                    <p className="text-sm text-text-secondary leading-relaxed">{q?.stemPreview}</p>
+                    <p className="text-sm text-text-secondary leading-relaxed">
+                      {q?.stemPreview}
+                    </p>
                     {/* 실제 선택지 텍스트 표시 — selectedChoiceBody로 키(A/B/C/D) 대신 본문 노출 */}
-                    <p className={`text-xs font-medium ${r.isCorrect ? "text-green-600" : "text-red-500"}`}>
+                    <p
+                      className={`text-xs font-medium ${r.isCorrect ? "text-green-600" : "text-red-500"}`}
+                    >
                       내 답: {r.selectedChoiceBody}
                     </p>
                     {/* 정답/오답 모두 다시 풀기 제공 — 복습 목적 */}
                     <Link
-                      to={`/questions/${r.questionUuid}`}
+                      to={`/recommendation/${r.questionUuid}`}
+                      state={{
+                        returnPath: `/practice/${sessionId}`,
+                        initialStep: 2,
+                      }}
                       className="inline-flex items-center gap-1.5 text-xs font-medium text-brand bg-accent-light rounded-md px-3 py-1.5"
                     >
                       <RotateCcw size={12} /> 다시 풀기
@@ -211,7 +259,9 @@ export default function PracticeResult() {
   return (
     <div className="h-screen max-w-120 mx-auto px-4 sm:px-0">
       <StepNavigator
+        key={initialStep}
         steps={[step1, step2, step3]}
+        initialStep={initialStep}
         lastButtonLabel="카테고리 목록으로"
         onLastStep={() => {
           store.reset();

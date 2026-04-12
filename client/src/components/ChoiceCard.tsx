@@ -45,14 +45,7 @@ export const ChoiceCard = memo(function ChoiceCard({
       role="button"
       tabIndex={0}
       aria-pressed={isSelected}
-      className="w-full text-left rounded-xl p-4 shadow-sm transition-all duration-200 cursor-pointer"
-      style={{
-        backgroundColor: isSelected
-          ? "var(--color-brand-light)"
-          : "var(--color-surface-card)",
-        border: `1px solid ${isSelected ? "var(--color-brand)" : "var(--color-border)"}`,
-        borderLeft: `4px solid ${isSelected ? "var(--color-brand)" : "var(--color-border)"}`,
-      }}
+      className={`w-full text-left rounded-xl p-4 shadow-sm transition-all duration-200 cursor-pointer border ${isSelected ? "choice-card-selected" : "choice-card-unselected"}`}
       onClick={() => onSelect(choice.key, choice.body)}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
@@ -67,14 +60,13 @@ export const ChoiceCard = memo(function ChoiceCard({
           <ResultMatchTable body={choice.body} />
         </div>
       ) : isConceptText ? (
-        // CONCEPT_ONLY: 일반 텍스트 렌더링
-        <p className="text-body text-sm">{choice.body}</p>
+        // CONCEPT_ONLY: 일반 텍스트 렌더링 — 선택 시 흰색으로 반전
+        <p className={`text-body ${isSelected ? "choice-text-inverted" : ""}`}>{choice.body}</p>
       ) : (
         // EXECUTABLE SQL: 모노 폰트 + 실행 버튼 (풀이 중 isExecutable=false로 숨김)
         <>
           <p
-            className="text-sm leading-relaxed whitespace-pre-wrap wrap-break-word"
-            style={{ fontFamily: "var(--font-mono)", color: "var(--color-text-primary)" }}
+            className={`text-mono text-sm leading-relaxed whitespace-pre-wrap wrap-break-word ${isSelected ? "choice-text-inverted" : ""}`}
           >
             {choice.body}
           </p>
@@ -84,7 +76,7 @@ export const ChoiceCard = memo(function ChoiceCard({
               onClick={(e) => e.stopPropagation()}
             >
               <button
-                className="btn-compact"
+                className={`btn-compact ${isSelected ? "btn-compact-inverted" : ""}`}
                 type="button"
                 onClick={() => onExecute(choice.key, choice.body)}
                 disabled={!!cached || isExecuting}
@@ -95,14 +87,28 @@ export const ChoiceCard = memo(function ChoiceCard({
           )}
           {cached && (
             <div onClick={(e) => e.stopPropagation()}>
-              <ResultTable
-                result={cached}
-                onAskAi={
-                  cached.errorCode
-                    ? () => onAskAi?.(choice.key, cached.errorCode ?? "", cached.errorMessage ?? "")
-                    : undefined
-                }
-              />
+              {/* 선택된 카드(brand 배경)에서는 흰색 카드로 감싸 가독성 확보 */}
+              {isSelected ? (
+                <div className="bg-white rounded-xl mt-2 px-2 pb-2">
+                  <ResultTable
+                    result={cached}
+                    onAskAi={
+                      cached.errorCode
+                        ? () => onAskAi?.(choice.key, cached.errorCode ?? "", cached.errorMessage ?? "")
+                        : undefined
+                    }
+                  />
+                </div>
+              ) : (
+                <ResultTable
+                  result={cached}
+                  onAskAi={
+                    cached.errorCode
+                      ? () => onAskAi?.(choice.key, cached.errorCode ?? "", cached.errorMessage ?? "")
+                      : undefined
+                  }
+                />
+              )}
             </div>
           )}
         </>

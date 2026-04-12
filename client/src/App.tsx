@@ -8,6 +8,7 @@ import PracticeSet from "./pages/PracticeSet";
 import PracticeResult from "./pages/PracticeResult";
 import QuestionDetail from "./pages/QuestionDetail";
 import AnswerFeedback from "./pages/AnswerFeedback";
+import RecommendationPractice from "./pages/RecommendationPractice";
 import Stats from "./pages/Stats";
 import Settings from "./pages/Settings";
 import { ensureRegistered } from "./stores/memberStore";
@@ -42,6 +43,11 @@ const router = createBrowserRouter([
   {
     path: "practice/:sessionId/result",
     element: <PracticeResult />,
+  },
+  // 홈 추천 문제 — DailyChallenge 패턴의 단건 풀이 모드
+  {
+    path: "recommendation/:questionUuid",
+    element: <RecommendationPractice />,
   },
 ]);
 

@@ -4,10 +4,13 @@ interface StepNavigatorProps {
   readonly steps: readonly ReactNode[];
   readonly lastButtonLabel?: string;
   readonly onLastStep?: () => void;
+  // 특정 단계에서 시작 — 다시 풀기 후 복귀 시 step3으로 바로 진입
+  readonly initialStep?: number;
 }
 
-export default function StepNavigator({ steps, lastButtonLabel = "카테고리 목록으로", onLastStep }: StepNavigatorProps) {
-  const [current, setCurrent] = useState(0);
+export default function StepNavigator({ steps, lastButtonLabel = "카테고리 목록으로", onLastStep, initialStep = 0 }: StepNavigatorProps) {
+  // initialStep을 0..steps.length-1 범위로 clamp — 음수/초과 인덱스 방어
+  const [current, setCurrent] = useState(() => Math.max(0, Math.min(initialStep, steps.length - 1)));
   const touchStartX = useRef(0);
   const total = steps.length;
   const isLast = current === total - 1;

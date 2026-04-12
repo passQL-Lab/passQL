@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useRef } from "react";
 import { useParams, useNavigate, Navigate, useBlocker } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { usePracticeStore } from "../stores/practiceStore";
@@ -35,6 +35,8 @@ export default function PracticeSet() {
   const [submitting, setSubmitting] = useState(false);
   // Home 버튼 클릭 시 이탈 확인 모달 — blocker와 독립적으로 제어
   const [exitModalOpen, setExitModalOpen] = useState(false);
+  // 연타 방지 — React state는 async 클로저에서 stale하므로 ref로 동기 플래그 관리
+  const isProcessingRef = useRef(false);
   // exitConfirmed=true 시 blocker를 우회하여 홈으로 이동 — 이중 확인 방지
   const [exitConfirmed, setExitConfirmed] = useState(false);
 
@@ -58,9 +60,11 @@ export default function PracticeSet() {
       choices: readonly ChoiceItem[],
     ) => {
       if (!displayQuestion) return;
+      // 연타로 인한 중복 제출 방지 — ref는 동기적으로 즉시 반영됨
+      if (isProcessingRef.current) return;
+      isProcessingRef.current = true;
       // 결과 화면에서 선택지 키(A/B/C/D) 대신 실제 선택지 텍스트를 보여주기 위해 body 추출
       const selectedChoiceBody = choices.find((c) => c.key === selectedChoiceKey)?.body ?? selectedChoiceKey;
-      // 제출 중 중복 호출 및 화면 조작 방지
       setSubmitting(true);
       try {
         const result = await submitAnswer(
@@ -93,6 +97,7 @@ export default function PracticeSet() {
           selectedChoiceBody,
         );
       } finally {
+        isProcessingRef.current = false;
         setSubmitting(false);
       }
     },
@@ -100,7 +105,13 @@ export default function PracticeSet() {
   );
 
   const handleNext = useCallback(() => {
+    // 피드백바 닫힘 → 다음 문제 렌더 직후 초이스카드가 즉시 눌리는 탭-스루 방지
+    // isProcessingRef를 잠근 뒤 렌더 완료 시점(~300ms)까지 새 제출 차단
+    isProcessingRef.current = true;
     setFeedback(null);
+    setTimeout(() => {
+      isProcessingRef.current = false;
+    }, 300);
   }, []);
 
   // useEffect는 훅 규칙상 조건부 return 이전에 위치해야 함
