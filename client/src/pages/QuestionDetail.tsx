@@ -230,9 +230,10 @@ export default function QuestionDetail({
             executionMode: question.executionMode,
             // 선택지 본문 전달: EXECUTABLE은 SQL 실행 비교용, CONCEPT_ONLY는 선택지 텍스트 표시용
             choices,
-            // 결과 화면에서 문제 지문/토픽 표시용 — 백엔드 추가 호출 없이 전달
+            // 결과 화면에서 문제 지문/토픽/스키마 표시용 — 백엔드 추가 호출 없이 전달
             stem: question.stem,
             topicName: question.topicName,
+            schemaDisplay: question.schemaDisplay ?? null,
           };
           // 제출 완료 시 추천 문제 캐시 무효화 — 홈 복귀 시 목록 즉시 갱신
           queryClient.invalidateQueries({ queryKey: ["recommendations"] });

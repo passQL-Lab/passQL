@@ -33,16 +33,13 @@ export const ResultTable = memo(function ResultTable({ result, onAskAi }: Result
 
   return (
     <div className="mt-2">
-      {/* 실행 결과 요약 — 행 수·소요 시간 compact 표시 */}
-      <p className="text-xs font-medium mb-1" style={{ color: "var(--color-sem-success-text)" }}>
-        <Check size={12} className="inline mr-0.5" />
-        {result.rowCount}행 · {result.elapsedMs}ms
+      {/* 실행 결과 레이블 + 행 수·소요 시간 — inline style 금지 규칙에 따라 CSS 클래스 사용 */}
+      <p className="result-table-meta">
+        <Check size={12} className="inline mr-0.5" aria-hidden="true" />
+        실행결과 · {result.rowCount}행 · {result.elapsedMs}ms
       </p>
       {result.columns.length > 0 && (
-        <div
-          className="overflow-hidden rounded-xl border"
-          style={{ borderColor: "var(--color-border)" }}
-        >
+        <div className="overflow-hidden rounded-xl result-table-border">
           {/* overflow-x-auto: 컬럼 수가 많거나 셀 값이 긴 경우 가로 스크롤 허용 */}
           <div className="overflow-x-auto">
           <table className="data-table w-full">
@@ -57,7 +54,10 @@ export const ResultTable = memo(function ResultTable({ result, onAskAi }: Result
               {result.rows.map((row, i) => (
                 <tr key={i}>
                   {(row as unknown[]).map((cell, j) => (
-                    <td key={j}>{String(cell ?? "")}</td>
+                    // null/undefined는 SQL 의미상 NULL로 명시 표시
+                    <td key={j} className={cell == null ? "result-table-null" : ""}>
+                      {cell == null ? "NULL" : String(cell)}
+                    </td>
                   ))}
                 </tr>
               ))}

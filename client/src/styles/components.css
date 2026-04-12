@@ -178,18 +178,18 @@
 
 .data-table th {
   text-align: left;
-  padding: 8px 12px;
+  padding: 5px 10px;
   font-family: var(--font-ui);
   font-weight: 700;
-  font-size: 13px;
+  font-size: 11px;
   color: var(--color-text-secondary);
 }
 
 .data-table td {
-  padding: 8px 12px;
-  height: 36px;
+  padding: 4px 10px;
+  height: 28px;
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -579,12 +579,23 @@ body {
 .acc-sql-preview {
   flex: 1;
   font-size: 0.625rem; /* 10px */
-  color: var(--color-text-caption);
+  /* caption이 아닌 secondary로 올려 가독성 확보 */
+  color: var(--color-text-secondary);
   font-family: 'JetBrains Mono', monospace;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   min-width: 0;
+}
+
+/* 정답 카드: 초록 톤 SQL 미리보기 */
+.acc-sql-card.is-correct .acc-sql-preview {
+  color: #166534; /* success-text 진한 버전 */
+}
+
+/* 오답 카드: 빨간 톤 SQL 미리보기 */
+.acc-sql-card.is-wrong .acc-sql-preview {
+  color: #991B1B; /* error-text 진한 버전 */
 }
 
 .acc-sql-body {
@@ -613,13 +624,23 @@ body {
   background-color: #E0E7FF;
 }
 
-/* ── AnswerFeedback: 행수 pill ── */
-.row-count-pill {
-  font-size: 0.625rem; /* 10px */
-  font-weight: 600;
-  color: #16A34A;
-  background-color: #F0FDF4;
-  padding: 2px 7px;
-  border-radius: 999px;
-  flex-shrink: 0;
+/* ── ResultTable: 실행결과 메타 레이블 & 테이블 테두리 ── */
+/* inline style 금지 규칙에 따라 CSS 변수 색상을 클래스로 분리 */
+
+/* NULL 셀 — SQL에서 NULL은 의미 있는 값이므로 시각적으로 구분 */
+.result-table-null {
+  color: var(--color-text-caption);
+  font-style: italic;
+}
+
+.result-table-meta {
+  font-size: 0.75rem; /* 12px */
+  font-weight: 500;
+  color: var(--color-sem-success-text);
+  margin-bottom: 6px;
+}
+
+.result-table-border {
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
 }

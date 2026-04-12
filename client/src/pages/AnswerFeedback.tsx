@@ -1,8 +1,10 @@
 import { useState, useCallback, useRef } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { ChevronRight, AlertCircle, RefreshCw, BookOpen, ChevronDown } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 import { executeChoice } from "../api/questions";
 import { ResultTable } from "../components/ResultTable";
+import { SchemaViewer } from "../components/SchemaViewer";
 import { useSimilarQuestions } from "../hooks/useSimilarQuestions";
 import type { ChoiceItem, ExecuteResult, ExecutionMode } from "../types/api";
 
@@ -22,6 +24,7 @@ interface FeedbackState {
   // 결과 화면 상단 문제 보기 토글용
   readonly stem?: string;
   readonly topicName?: string;
+  readonly schemaDisplay?: string | null;
 }
 
 /** EXECUTABLE 선택지 카드 상태에 따른 클래스 반환 — A/B/C/D 키 레이블 없이 뱃지로만 구분 */
@@ -33,21 +36,22 @@ function getChoiceCardClass(isAnswer: boolean, isMyChoice: boolean): {
   if (isAnswer && isMyChoice) {
     return {
       cardClass: "acc-sql-card is-correct",
-      badgeClass: "badge badge-sm bg-success/20 text-success-content border-0",
+      // text-success-content는 흰색이라 연초록 배경에서 안 보임 — 직접 초록 텍스트 지정
+      badgeClass: "badge badge-sm border-0 bg-success/20 text-success",
       badgeText: "내 선택 · 정답",
     };
   }
   if (isAnswer) {
     return {
       cardClass: "acc-sql-card is-correct",
-      badgeClass: "badge badge-sm bg-success/20 text-success-content border-0",
+      badgeClass: "badge badge-sm border-0 bg-success/20 text-success",
       badgeText: "정답",
     };
   }
   if (isMyChoice) {
     return {
       cardClass: "acc-sql-card is-wrong",
-      badgeClass: "badge badge-sm bg-error/20 text-error border-0",
+      badgeClass: "badge badge-sm border-0 bg-error/20 text-error",
       badgeText: "내 선택",
     };
   }
@@ -143,6 +147,7 @@ export default function AnswerFeedback() {
     correctKey,
     stem,
     topicName,
+    schemaDisplay,
   } = state;
 
   const isExecutable = executionMode === "EXECUTABLE";
@@ -220,7 +225,61 @@ export default function AnswerFeedback() {
           {topicName && (
             <span className="badge-topic mb-2 inline-block">{topicName}</span>
           )}
-          <p className="text-sm text-base-content leading-relaxed">{stem}</p>
+          {/* stem에 마크다운 테이블/코드 포함 가능 — components prop으로 스타일 적용 */}
+          <ReactMarkdown
+            components={{
+              // 단일 \n도 시각적으로 줄바꿈 되도록 whitespace-pre-line 적용
+              p({ children }) {
+                return (
+                  <p className="text-sm text-base-content leading-relaxed mb-2 whitespace-pre-line">
+                    {children}
+                  </p>
+                );
+              },
+              code({ children, className }) {
+                const isBlock = className?.includes("language-");
+                return isBlock ? (
+                  <pre className="bg-[#F3F4F6] rounded-lg px-4 py-3 text-xs leading-relaxed whitespace-pre-wrap font-mono">
+                    <code>{children}</code>
+                  </pre>
+                ) : (
+                  <code className="bg-[#F3F4F6] px-1 rounded text-xs font-mono">
+                    {children}
+                  </code>
+                );
+              },
+              table({ children }) {
+                // 마크다운 테이블을 스크롤 가능한 컨테이너로 감쌈
+                return (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-xs border-collapse">{children}</table>
+                  </div>
+                );
+              },
+              th({ children }) {
+                return (
+                  <th className="border border-[#E5E7EB] px-2 py-1 bg-[#F3F4F6] text-left font-semibold text-[#6B7280]">
+                    {children}
+                  </th>
+                );
+              },
+              td({ children }) {
+                return (
+                  <td className="border border-[#E5E7EB] px-2 py-1 font-mono text-[#111827]">
+                    {children}
+                  </td>
+                );
+              },
+            }}
+          >
+            {stem}
+          </ReactMarkdown>
+          {/* 스키마가 있으면 stem 아래에 표시 — QuestionDetail과 동일한 SchemaViewer 재사용 */}
+          {schemaDisplay && (
+            <div className="mt-3">
+              <SchemaViewer schemaDisplay={schemaDisplay} />
+            </div>
+          )}
         </div>
       )}
     </div>
@@ -278,7 +337,7 @@ export default function AnswerFeedback() {
           <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
             <polygon points="5 3 19 12 5 21 5 3" />
           </svg>
-          모두 실행
+          모두 실행하기
         </button>
       </div>
 
@@ -299,20 +358,13 @@ export default function AnswerFeedback() {
               className="acc-sql-header"
               onClick={() => toggleOpen(choice.key)}
             >
-              {/* 뱃지 (정답/내 선택만 표시, 나머지는 없음) */}
+              {/* 뱃지 (정답/내 선택만 표시, 나머지는 없음) — 열림/닫힘 모두 표시 */}
               {badgeText && (
                 <span className={`${badgeClass} shrink-0`}>{badgeText}</span>
               )}
 
-              {/* SQL 미리보기 — 닫혀 있을 때만 표시 */}
-              {!isOpen && (
-                <span className="acc-sql-preview">{choice.body}</span>
-              )}
-
-              {/* 행수 pill — 캐시 있고 닫혀있을 때 */}
-              {!isOpen && cached && !cached.errorCode && (
-                <span className="row-count-pill">{cached.rows?.length ?? 0}행</span>
-              )}
+              {/* SQL 미리보기 — 항상 표시 (열려도 컨텍스트 유지) */}
+              <span className="acc-sql-preview">{choice.body}</span>
 
               {/* 실행 중 인디케이터 */}
               {isRunning && (
@@ -342,23 +394,28 @@ export default function AnswerFeedback() {
                     </div>
                     <button
                       type="button"
-                      className="btn-compact inline-flex items-center gap-1.5 shrink-0"
+                      className="btn-run-all shrink-0"
                       onClick={() => handleExecute(choice)}
                     >
-                      <RefreshCw size={12} />
+                      <RefreshCw size={8} />
                       재시도
                     </button>
                   </div>
                 ) : !cached ? (
-                  /* 미실행 — 개별 실행 버튼 */
+                  /* 미실행 — 개별 실행 버튼 (btn-run-all과 동일 스타일) */
                   <div className="flex justify-end">
                     <button
                       type="button"
-                      className="btn-compact inline-flex items-center gap-1.5"
+                      className="btn-run-all"
                       onClick={() => handleExecute(choice)}
                       disabled={isRunning}
                     >
-                      {isRunning ? "실행 중…" : "실행"}
+                      {!isRunning && (
+                        <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                          <polygon points="5 3 19 12 5 21 5 3" />
+                        </svg>
+                      )}
+                      {isRunning ? "실행 중…" : "쿼리 실행"}
                     </button>
                   </div>
                 ) : null}
