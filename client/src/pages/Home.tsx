@@ -194,7 +194,7 @@ export default function Home() {
             <p className="text-caption text-sm">히트맵을 불러올 수 없습니다</p>
             <button
               type="button"
-              className="btn-compact inline-flex items-center gap-1 text-xs"
+              className="btn btn-xs btn-outline btn-primary gap-1"
               onClick={() => refetchHeatmap()}
             >
               <RefreshCw size={12} />
@@ -220,7 +220,7 @@ export default function Home() {
           <p className="text-secondary text-sm">학습 데이터를 불러올 수 없습니다</p>
           <button
             type="button"
-            className="btn-compact inline-flex items-center gap-1 text-xs"
+            className="btn btn-xs btn-outline btn-primary gap-1"
             onClick={() => refetchProgress()}
           >
             <RefreshCw size={12} />
