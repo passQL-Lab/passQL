@@ -48,10 +48,9 @@ export const ChoiceCard = memo(function ChoiceCard({
       className="w-full text-left rounded-xl p-4 shadow-sm transition-all duration-200 cursor-pointer"
       style={{
         backgroundColor: isSelected
-          ? "var(--color-brand-light)"
+          ? "var(--color-brand)"
           : "var(--color-surface-card)",
         border: `1px solid ${isSelected ? "var(--color-brand)" : "var(--color-border)"}`,
-        borderLeft: `4px solid ${isSelected ? "var(--color-brand)" : "var(--color-border)"}`,
       }}
       onClick={() => onSelect(choice.key, choice.body)}
       onKeyDown={(e) => {
@@ -67,14 +66,14 @@ export const ChoiceCard = memo(function ChoiceCard({
           <ResultMatchTable body={choice.body} />
         </div>
       ) : isConceptText ? (
-        // CONCEPT_ONLY: 일반 텍스트 렌더링
-        <p className="text-body text-sm">{choice.body}</p>
+        // CONCEPT_ONLY: 일반 텍스트 렌더링 — 선택 시 흰색으로 반전
+        <p className="text-body text-sm" style={{ color: isSelected ? "#fff" : undefined }}>{choice.body}</p>
       ) : (
         // EXECUTABLE SQL: 모노 폰트 + 실행 버튼 (풀이 중 isExecutable=false로 숨김)
         <>
           <p
             className="text-sm leading-relaxed whitespace-pre-wrap wrap-break-word"
-            style={{ fontFamily: "var(--font-mono)", color: "var(--color-text-primary)" }}
+            style={{ fontFamily: "var(--font-mono)", color: isSelected ? "#fff" : "var(--color-text-primary)" }}
           >
             {choice.body}
           </p>
