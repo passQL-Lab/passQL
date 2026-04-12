@@ -178,18 +178,18 @@
 
 .data-table th {
   text-align: left;
-  padding: 8px 12px;
+  padding: 5px 10px;
   font-family: var(--font-ui);
   font-weight: 700;
-  font-size: 13px;
+  font-size: 11px;
   color: var(--color-text-secondary);
 }
 
 .data-table td {
-  padding: 8px 12px;
-  height: 36px;
+  padding: 4px 10px;
+  height: 28px;
   font-family: var(--font-mono);
-  font-size: 13px;
+  font-size: 11px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -206,6 +206,11 @@
 }
 
 /* ── 7. Error Card ── */
+/* inline style 금지 규칙에 따라 error 색상을 클래스로 분리 */
+.error-code-text {
+  color: var(--color-sem-error);
+}
+
 .error-card {
   background-color: var(--color-sem-error-light);
   border-left: 4px solid var(--color-sem-error);
@@ -263,6 +268,62 @@ body {
 
 .animate-slide-up {
   animation: slide-up 0.25s ease-out;
+}
+
+/* ── AnswerFeedback 결과 화면 애니메이션 ── */
+
+/* 상단 컬러 바: 좌→우 scaleX 슬라이드인 */
+@keyframes bar-slide-in {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* 헤더 영역: 위에서 아래로 페이드인 */
+@keyframes header-slide-down {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* 카드 순차 등장: 아래에서 위로 페이드인 */
+@keyframes card-slide-up {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.feedback-bar-anim {
+  transform-origin: left;
+  animation: bar-slide-in 0.45s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+.feedback-header-anim {
+  animation: header-slide-down 0.28s 0.08s ease both;
+}
+
+.feedback-card-anim-1 { animation: card-slide-up 0.28s 0.15s ease both; }
+.feedback-card-anim-2 { animation: card-slide-up 0.28s 0.23s ease both; }
+.feedback-card-anim-3 { animation: card-slide-up 0.28s 0.31s ease both; }
+.feedback-card-anim-4 { animation: card-slide-up 0.28s 0.39s ease both; }
+
+/* 선택지/정답 카드 — 왼쪽 보더 없이 배경+border만 */
+.ans-card-wrong {
+  background-color: var(--color-sem-error-light);
+  border: 1px solid #FECACA;
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.ans-card-correct {
+  background-color: var(--color-sem-success-light);
+  border: 1px solid #BBF7D0;
+  border-radius: 10px;
+  padding: 10px 14px;
+}
+
+.ans-card-neutral {
+  background-color: var(--color-surface-card);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 10px 14px;
 }
 
 /* ── Stagger fade-up animation ── */
@@ -453,6 +514,16 @@ body {
   animation: sparkle-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 }
 
+/* AI 선택지 생성 중 — 기본 pulse(2s)보다 1.5배 빠른 반짝임 */
+@keyframes pulse-fast {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50%       { opacity: 0.4; transform: scale(0.92); }
+}
+
+.animate-pulse-fast {
+  animation: pulse-fast 1.2s ease-in-out infinite;
+}
+
 /* ── 팝오버 진입 ── */
 @keyframes popover-in {
   from { opacity: 0; transform: translateY(4px) scale(0.97); }
@@ -461,4 +532,231 @@ body {
 
 .animate-popover-in {
   animation: popover-in 0.18s ease-out both;
+}
+
+/* ── AnswerFeedback: 문제 보기 토글 카드 ── */
+.stem-toggle-card {
+  background-color: var(--color-surface-card);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+.stem-toggle-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+}
+
+.stem-toggle-preview {
+  flex: 1;
+  font-size: 0.6875rem; /* 11px */
+  color: var(--color-text-caption);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+.stem-toggle-body {
+  border-top: 1px solid var(--color-border-muted);
+  padding: 8px 12px 12px;
+}
+
+/* ── AnswerFeedback: 해설 카드 — acc-sql-card와 10px 라운드 통일 ── */
+.rationale-card {
+  background-color: var(--color-surface-card);
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  padding: 12px 14px;
+}
+
+/* ── AnswerFeedback: SQL 아코디언 카드 ── */
+.acc-sql-card {
+  background-color: var(--color-surface-card);
+  /* 기본 border보다 진한 값으로 카드 구분선 가시성 확보 */
+  border: 1px solid #C4C9D4;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.acc-sql-card.is-wrong {
+  background-color: #FEF2F2;
+  border: 2px solid #FECACA;
+}
+
+.acc-sql-card.is-correct {
+  background-color: #F0FDF4;
+  border: 2px solid #BBF7D0;
+}
+
+.acc-sql-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  cursor: pointer;
+}
+
+.acc-sql-preview {
+  flex: 1;
+  font-size: 0.625rem; /* 10px */
+  /* caption이 아닌 secondary로 올려 가독성 확보 */
+  color: var(--color-text-secondary);
+  font-family: 'JetBrains Mono', monospace;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+
+/* 정답 카드: 초록 톤 SQL 미리보기 */
+.acc-sql-card.is-correct .acc-sql-preview {
+  color: #166534; /* success-text 진한 버전 */
+}
+
+/* 오답 카드: 빨간 톤 SQL 미리보기 */
+.acc-sql-card.is-wrong .acc-sql-preview {
+  color: #991B1B; /* error-text 진한 버전 */
+}
+
+.acc-sql-body {
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 9px 12px;
+  background-color: rgba(255, 255, 255, 0.7);
+}
+
+/* ── AnswerFeedback: 모두 실행 버튼 ── */
+.btn-run-all {
+  font-size: 0.625rem; /* 10px */
+  font-weight: 600;
+  color: #4F46E5;
+  border: 1px solid #C7D2FE;
+  border-radius: 6px;
+  padding: 3px 9px;
+  background-color: #EEF2FF;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  transition: background-color 150ms ease;
+}
+
+.btn-run-all:active {
+  background-color: #E0E7FF;
+}
+
+/* 선택된 ChoiceCard(brand 파란 배경) 위에서 사용하는 반전 variant */
+.btn-run-all--inverted {
+  color: #fff;
+  background-color: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.btn-run-all--inverted:active {
+  background-color: rgba(255, 255, 255, 0.25);
+}
+
+/* ── SqlPlayground: 직접 실행 textarea ── */
+.sql-playground-textarea {
+  width: 100%;
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.6;
+  resize: none;
+  min-height: 100px;
+  background-color: var(--color-surface-code);
+  border: 1px solid var(--color-border);
+  color: var(--color-text-body);
+  outline: none;
+  transition: border-color 150ms ease;
+}
+
+.sql-playground-textarea:focus {
+  border-color: var(--color-brand-medium);
+}
+
+/* ── ResultTable: 실행결과 메타 레이블 & 테이블 테두리 ── */
+/* inline style 금지 규칙에 따라 CSS 변수 색상을 클래스로 분리 */
+
+/* NULL 셀 — SQL에서 NULL은 의미 있는 값이므로 시각적으로 구분 */
+.result-table-null {
+  color: var(--color-text-caption);
+  font-style: italic;
+}
+
+.result-table-meta {
+  font-size: 0.75rem; /* 12px */
+  font-weight: 500;
+  color: var(--color-sem-success-text);
+  margin-bottom: 6px;
+}
+
+/* 파란 선택 카드 위 — 흰색 계열로 반전 */
+.result-table-meta--inverted {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.75);
+  margin-bottom: 6px;
+}
+
+.result-table-border {
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+}
+
+
+.result-table-border--inverted {
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 6px;
+  /* 반투명 흰색 배경 — 파란 카드 위에서 텍스트 가독성 확보 */
+  background-color: rgba(255, 255, 255, 0.15);
+}
+
+/* 파란 배경 위 data-table — 기본 텍스트 색 유지, 배경만 반투명으로 */
+.data-table--inverted thead tr {
+  background-color: rgba(255, 255, 255, 0.12);
+}
+
+.data-table--inverted th {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.data-table--inverted td {
+  color: #fff;
+}
+
+.data-table--inverted tr {
+  border-bottom-color: rgba(255, 255, 255, 0.15);
+}
+
+.data-table--inverted tr:nth-child(even) {
+  background-color: rgba(255, 255, 255, 0.06);
+}
+
+/* ── ResultMatchTable — RESULT_MATCH 선택지 컴팩트 테이블 스크롤 컨테이너 ── */
+.result-match-scroll {
+  overflow-x: auto;
+  overflow-y: auto;
+  max-height: 200px;
+  border-radius: 8px;
+}
+
+/* 선택(파란 배경) 상태에서 테이블을 감싸는 보더 컨테이너 */
+.result-match-border {
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+}
+
+.result-match-border--inverted {
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  /* 파란 카드 위에서 텍스트 가독성 확보 */
+  background-color: rgba(255, 255, 255, 0.15);
 }

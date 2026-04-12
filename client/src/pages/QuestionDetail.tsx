@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useParams, useNavigate, useBlocker } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { ArrowLeft, BookOpen, RefreshCw } from "lucide-react";
+import { ArrowLeft, BookOpen, RefreshCw, Sparkles } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import { StarRating } from "../components/StarRating";
 import { ChoiceCard } from "../components/ChoiceCard";
@@ -83,7 +83,6 @@ export default function QuestionDetail({
     null,
   );
   const [sseChoiceSetId, setSseChoiceSetId] = useState<string | null>(null);
-  const [sseStatus, setSseStatus] = useState<string | null>(null);
   const [sseError, setSseError] = useState<{
     code: string;
     retryable: boolean;
@@ -97,7 +96,6 @@ export default function QuestionDetail({
   useEffect(() => {
     setSseChoices(null);
     setSseChoiceSetId(null);
-    setSseStatus(null);
     setSseError(null);
     setSseRetryCount(0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -132,8 +130,6 @@ export default function QuestionDetail({
 
     if (!needsGeneration) return;
 
-    setSseStatus("선택지 생성 중...");
-
     // 60초 내에 complete/error가 오지 않으면 클라이언트 타임아웃으로 에러 전환
     // AI 호출 + 샌드박스 3회 재시도 합산 예상 시간 기준
     const SSE_TIMEOUT_MS = 60_000;
@@ -143,27 +139,22 @@ export default function QuestionDetail({
       streamCleanup?.();
       if (!cancelled) {
         setSseError({ code: "TIMEOUT", retryable: true });
-        setSseStatus(null);
       }
     }, SSE_TIMEOUT_MS);
 
     const cleanup = generateChoices(questionUuid, {
-      onStatus: (event) => {
-        if (!cancelled) setSseStatus(event.message);
-      },
+      onStatus: () => {},
       onComplete: (response) => {
         clearTimeout(timeoutId);
         if (!cancelled) {
           setSseChoices(response.choices);
           setSseChoiceSetId(response.choiceSetId);
-          setSseStatus(null);
         }
       },
       onError: (event) => {
         clearTimeout(timeoutId);
         if (!cancelled) {
           setSseError({ code: event.code, retryable: event.retryable });
-          setSseStatus(null);
         }
       },
     });
@@ -204,7 +195,7 @@ export default function QuestionDetail({
   );
 
   const handleSelect = useCallback((choiceKey: string, _sql: string) => {
-    // 풀이 중 SQL 자동 실행 없음 — 제출 후 ChoiceReview에서 직접 실행
+    // 풀이 중 SQL 자동 실행 없음 — 제출 후 결과 화면에서 실행
     setSelectedKey(choiceKey);
   }, []);
 
@@ -230,9 +221,18 @@ export default function QuestionDetail({
             executionMode: question.executionMode,
             // 선택지 본문 전달: EXECUTABLE은 SQL 실행 비교용, CONCEPT_ONLY는 선택지 텍스트 표시용
             choices,
+            // 결과 화면에서 문제 지문/토픽/스키마 표시용 — 백엔드 추가 호출 없이 전달
+            stem: question.stem,
+            topicName: question.topicName,
+            schemaDisplay: question.schemaDisplay ?? null,
+            schemaDdl: question.schemaDdl ?? null,
+            schemaSampleData: question.schemaSampleData ?? null,
           };
-          // 제출 완료 시 추천 문제 캐시 무효화 — 홈 복귀 시 목록 즉시 갱신
+          // 제출 완료 시 추천 문제·학습 현황 캐시 무효화 — 홈 복귀 시 목록·heatmap 즉시 갱신
           queryClient.invalidateQueries({ queryKey: ["recommendations"] });
+          // heatmap·progress 무효화 — 학습 현황 캘린더와 streak 즉시 갱신
+          queryClient.invalidateQueries({ queryKey: ["heatmap"] });
+          queryClient.invalidateQueries({ queryKey: ["progress"] });
           if (onSubmitSuccess) {
             // 데일리 챌린지 등 호출자가 네비게이션 제어
             onSubmitSuccess(fullResult as SubmitResult, questionUuid!);
@@ -342,13 +342,14 @@ export default function QuestionDetail({
           </>
         ) : (
           <>
-            <div
-              role="status"
-              aria-label="선택지 생성 중"
-              className="w-6 h-6 border-2 border-accent-light border-t-brand rounded-full animate-spin mx-auto"
+            {/* Sparkles pulse-fast — AI 선택지 생성 중, 기본 pulse보다 1.5배 빠른 반짝임 */}
+            <Sparkles
+              size={28}
+              className="mx-auto text-brand animate-pulse-fast"
+              fill="currentColor"
             />
             <p className="text-text-caption text-sm">
-              {sseStatus ?? "선택지 준비 중..."}
+              AI가 선택지를 만들고 있어요
             </p>
           </>
         )}
@@ -360,12 +361,10 @@ export default function QuestionDetail({
             key={choice.key}
             choice={choice}
             isSelected={selectedKey === choice.key}
-            // showExecution=false(재시도 등) 시 이전 실행 결과 노출 방지
+            // showExecution=true(제출 후)일 때만 실행 결과 표시
             cached={showExecution ? executeCache[choice.key] : undefined}
-            // 풀이 중 실행 버튼 숨김, 제출 후(showExecution=true) 버튼 표시
-            isExecutable={
-              showExecution && question.executionMode === "EXECUTABLE"
-            }
+            // 제출 후(showExecution=true)에만 실행 버튼 표시
+            isExecutable={showExecution && question.executionMode === "EXECUTABLE"}
             isExecuting={
               executeMutation.isPending &&
               executeMutation.variables === choice.body
@@ -465,7 +464,6 @@ export default function QuestionDetail({
       {choicesSection}
       {question.executionMode === "EXECUTABLE" && (
         <SqlPlayground
-          questionUuid={questionUuid!}
           onExecute={(sql) => executeChoice(questionUuid!, sql)}
         />
       )}

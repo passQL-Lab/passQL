@@ -75,16 +75,25 @@ export function parseSampleData(
   schemaSampleData: string,
 ): Map<string, string[][]> {
   const result = new Map<string, string[][]>();
-  const insertRegex = /INSERT INTO\s+(\w+)\s+VALUES\s*\((.+?)\)\s*;/gi;
+  // VALUES 이후 세미콜론까지 전체를 캡처 — 다중 행 INSERT (1),(2),(3) 형식 지원
+  const insertRegex = /INSERT INTO\s+(\w+)\s+VALUES\s*(.+?)\s*;/gi;
   let match: RegExpExecArray | null;
   while ((match = insertRegex.exec(schemaSampleData)) !== null) {
     const tableName = match[1].toUpperCase();
-    const valuesStr = match[2];
-    const values = valuesStr
-      .split(",")
-      .map((v) => v.trim().replace(/^'(.*)'$/, "$1"));
-    const rows = result.get(tableName) ?? [];
-    result.set(tableName, [...rows, values]);
+    const allValuesStr = match[2];
+
+    // (v1, v2, ...) 단위로 각 행을 분리 — (1),(2,'홍길동') 등 다양한 형식 처리
+    const rowRegex = /\(([^)]*)\)/g;
+    let rowMatch: RegExpExecArray | null;
+    const existingRows = result.get(tableName) ?? [];
+    const newRows: string[][] = [];
+    while ((rowMatch = rowRegex.exec(allValuesStr)) !== null) {
+      const cells = rowMatch[1]
+        .split(",")
+        .map((v) => v.trim().replace(/^'(.*)'$/s, "$1"));
+      newRows.push(cells);
+    }
+    result.set(tableName, [...existingRows, ...newRows]);
   }
   return result;
 }

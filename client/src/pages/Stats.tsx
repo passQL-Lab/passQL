@@ -141,8 +141,17 @@ export default function Stats() {
     );
   }
 
+  // 에러 시 헤딩은 보여주고 에러 카드만 아래에 배치
   if (isError) {
-    return <ErrorFallback onRetry={() => refetch()} />;
+    return (
+      <div className="py-6 space-y-6">
+        <section>
+          <h1 className="text-h1">내 실력, 한눈에</h1>
+          <p className="text-secondary mt-1">약한 영역을 눌러 바로 연습해보세요</p>
+        </section>
+        <ErrorFallback onRetry={() => refetch()} />
+      </div>
+    );
   }
 
   return (

@@ -372,6 +372,23 @@
                 </div>
             </div>
 
+            <!-- 테이블 이름 규칙 -->
+            <div class="mb-4">
+                <p class="font-semibold text-sm mb-2">⚠️ 테이블 이름 작성 규칙</p>
+                <div class="alert alert-info text-xs mb-2">
+                    각 문제는 <strong>독립된 Sandbox(격리된 DB)</strong>에서 실행됩니다.
+                    문제 간 테이블 이름 충돌이 없으므로, 시험 회차나 문제 번호를 테이블 이름에 포함할 필요가 없습니다.
+                </div>
+                <div class="mockup-code text-xs">
+<pre class="p-4">// ❌ 나쁜 예 — 시험 회차/문제 번호가 테이블명에 포함된 경우
+"schemaDdl": "CREATE TABLE SQLD_14 (NUM INT, CODE VARCHAR(1));"
+
+// ✅ 좋은 예 — 역할이 드러나는 짧고 명확한 이름
+"schemaDdl": "CREATE TABLE EMP (EMP_ID INT, NAME VARCHAR(50));"  -- 임직원/인사
+"schemaDdl": "CREATE TABLE T1 (COL1 INT, COL2 VARCHAR(1));"     -- 더미 데이터</pre>
+                </div>
+            </div>
+
             <!-- AI 프롬프트 -->
             <div class="mb-4">
                 <p class="font-semibold text-sm mb-2">AI 변환 프롬프트 <span class="text-base-content/50 font-normal">(복사 후 AI에게 문제 데이터 붙여넣기)</span></p>
@@ -469,6 +486,8 @@ schemaDdl 작성:
   - 부모 테이블 먼저 생성 (FK 순서)
   - 문제에서 쓰는 컬럼만 포함
   - 줄바꿈은 \\n
+  - [테이블 이름] 각 문제는 독립 Sandbox(격리 DB)에서 실행되므로 시험 회차/번호를 테이블명에 포함하지 않는다
+    나쁜 예: SQLD_14, SQLD46_01_EMP / 좋은 예: EMP, DEPT, T1, T2, TAB_A
 
 schemaSampleData 작성:
   - answerSql 실행 시 의미 있는 결과가 나오는 최소 INSERT 문

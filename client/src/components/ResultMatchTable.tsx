@@ -3,6 +3,8 @@ import { memo } from "react";
 interface ResultMatchTableProps {
   /** JSON 배열 형태의 선택지 body 문자열 */
   readonly body: string;
+  /** 파란 선택 카드 위에서 사용 시 true — 흰색 계열 텍스트로 반전 */
+  readonly inverted?: boolean;
 }
 
 /**
@@ -10,7 +12,7 @@ interface ResultMatchTableProps {
  * body는 JSON 배열 문자열 ([{"COL":"VAL",...}]) — 파싱 후 테이블로 렌더링.
  * 실행 상태(성공/실패) 표시 없음 — 순수 데이터 테이블.
  */
-export const ResultMatchTable = memo(function ResultMatchTable({ body }: ResultMatchTableProps) {
+export const ResultMatchTable = memo(function ResultMatchTable({ body, inverted = false }: ResultMatchTableProps) {
   // JSON 파싱 — 실패 시 raw body 텍스트 표시
   let rows: Record<string, unknown>[] = [];
   let parseError = false;
@@ -34,7 +36,7 @@ export const ResultMatchTable = memo(function ResultMatchTable({ body }: ResultM
   // 빈 결과
   if (rows.length === 0) {
     return (
-      <div className="mt-2 p-2 rounded" style={{ background: "var(--color-code-bg)" }}>
+      <div className="mt-2 p-2 rounded code-block">
         <p className="text-caption text-sm text-center">(결과 없음)</p>
       </div>
     );
@@ -44,25 +46,27 @@ export const ResultMatchTable = memo(function ResultMatchTable({ body }: ResultM
   const columns = Object.keys(rows[0]);
 
   return (
-    <div className="mt-2 overflow-x-auto rounded" style={{ maxHeight: "200px", overflowY: "auto" }}>
-      <table className="data-table w-full">
-        <thead>
-          <tr>
-            {columns.map((col) => (
-              <th key={col}>{col}</th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {rows.map((row, i) => (
-            <tr key={i}>
+    <div className={`mt-2 result-match-border${inverted ? "--inverted" : ""}`}>
+      <div className="result-match-scroll">
+        <table className={`data-table w-full${inverted ? " data-table--inverted" : ""}`}>
+          <thead>
+            <tr>
               {columns.map((col) => (
-                <td key={col}>{String(row[col] ?? "")}</td>
+                <th key={col}>{col}</th>
               ))}
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {rows.map((row, i) => (
+              <tr key={i}>
+                {columns.map((col) => (
+                  <td key={col}>{String(row[col] ?? "")}</td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 });

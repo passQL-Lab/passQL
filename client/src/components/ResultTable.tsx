@@ -5,13 +5,15 @@ import type { ExecuteResult } from "../types/api";
 interface ResultTableProps {
   readonly result: ExecuteResult;
   readonly onAskAi?: () => void;
+  // 파란 선택 카드 위에서 사용 시 true — 흰색 계열 텍스트로 반전
+  readonly inverted?: boolean;
 }
 
-export const ResultTable = memo(function ResultTable({ result, onAskAi }: ResultTableProps) {
+export const ResultTable = memo(function ResultTable({ result, onAskAi, inverted = false }: ResultTableProps) {
   if (result.errorCode) {
     return (
       <div className="error-card mt-3">
-        <span className="text-code font-bold" style={{ color: "var(--color-sem-error)" }}>
+        <span className="text-code font-bold error-code-text">
           <AlertTriangle size={14} className="inline mr-1" />
           {result.errorCode}
         </span>
@@ -33,36 +35,34 @@ export const ResultTable = memo(function ResultTable({ result, onAskAi }: Result
 
   return (
     <div className="mt-2">
-      {/* 실행 결과 요약 — 행 수·소요 시간 compact 표시 */}
-      <p className="text-xs font-medium mb-1" style={{ color: "var(--color-sem-success-text)" }}>
-        <Check size={12} className="inline mr-0.5" />
-        {result.rowCount}행 · {result.elapsedMs}ms
+      {/* 실행 결과 레이블 + 행 수·소요 시간 */}
+      <p className={inverted ? "result-table-meta--inverted" : "result-table-meta"}>
+        <Check size={12} className="inline mr-0.5" aria-hidden="true" />
+        실행결과 · {result.rowCount}행 · {result.elapsedMs}ms
       </p>
       {result.columns.length > 0 && (
-        <div
-          className="overflow-hidden rounded-xl border"
-          style={{ borderColor: "var(--color-border)" }}
-        >
-          {/* overflow-x-auto: 컬럼 수가 많거나 셀 값이 긴 경우 가로 스크롤 허용 */}
+        <div className={`overflow-hidden rounded-xl ${inverted ? "result-table-border--inverted" : "result-table-border"}`}>
           <div className="overflow-x-auto">
-          <table className="data-table w-full">
-            <thead>
-              <tr>
-                {result.columns.map((col) => (
-                  <th key={col}>{col}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {result.rows.map((row, i) => (
-                <tr key={i}>
-                  {(row as unknown[]).map((cell, j) => (
-                    <td key={j}>{String(cell ?? "")}</td>
+            <table className={`data-table w-full ${inverted ? "data-table--inverted" : ""}`}>
+              <thead>
+                <tr>
+                  {result.columns.map((col) => (
+                    <th key={col}>{col}</th>
                   ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {result.rows.map((row, i) => (
+                  <tr key={i}>
+                    {(row as unknown[]).map((cell, j) => (
+                      <td key={j} className={cell == null ? "result-table-null" : ""}>
+                        {cell == null ? "NULL" : String(cell)}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}

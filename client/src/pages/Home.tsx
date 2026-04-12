@@ -155,9 +155,9 @@ export default function Home() {
             <p className="text-sm text-white/70 mt-1 relative z-10">{schedule.examDate}</p>
           </div>
         ) : (
-          <div className="card bg-white p-4 sm:p-6 shadow-sm h-full flex flex-col justify-center">
-            <p className="text-secondary text-sm">시험 일정</p>
-            <p className="text-caption">선택된 일정 없음</p>
+          <div className="card-base h-full flex flex-col justify-center">
+            <p className="text-sm text-text-secondary">시험 일정</p>
+            <p className="text-sm text-text-caption mt-1">선택된 일정 없음</p>
           </div>
         )}
 
@@ -186,9 +186,9 @@ export default function Home() {
           ) : (
             // 미완료 상태: 데일리 챌린지 페이지로 이동
             <Link to="/daily-challenge" className="block">
-              <div className="card bg-white p-4 sm:p-6 shadow-sm h-full flex flex-col gap-2 cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:border-brand transition-all duration-200">
-                <p className="text-secondary text-sm">오늘의 문제</p>
-                <p className="text-body text-sm truncate">
+              <div className="card-base h-full flex flex-col gap-2 cursor-pointer hover:-translate-y-0.5 hover:border-brand transition-all duration-200">
+                <p className="text-sm text-text-secondary">오늘의 문제</p>
+                <p className="text-sm text-text-primary truncate">
                   {today.question.stemPreview}
                 </p>
                 <div className="flex items-center gap-2 mt-auto">
@@ -202,16 +202,16 @@ export default function Home() {
           )
         ) : (
           <Link to="/questions" className="block">
-            <div className="card bg-white p-4 sm:p-6 shadow-sm h-full flex flex-col justify-center cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:border-brand transition-all duration-200">
-              <p className="text-secondary text-sm">AI문제 풀기</p>
-              <p className="text-body text-sm">SQL AI문제를 풀어보세요</p>
+            <div className="card-base h-full flex flex-col justify-center cursor-pointer hover:-translate-y-0.5 hover:border-brand transition-all duration-200">
+              <p className="text-sm text-text-caption">오늘의 문제</p>
+              <p className="text-sm text-text-primary mt-1">오늘은 등록된 문제가 없어요</p>
             </div>
           </Link>
         )}
       </section>
 
       {/* ④ 학습 현황 섹션: heatmap 에러/로딩만 독립 처리 */}
-      <section className={`card bg-white p-4 sm:p-6 shadow-sm mb-4 ${s3.className}`}>
+      <section className={`card-base mb-4 ${s3.className}`}>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-secondary text-sm">학습 현황</h2>
           {/* streak는 progress 에러 시 0 fallback → 뱃지 자연스럽게 미표시 */}
@@ -228,11 +228,12 @@ export default function Home() {
         {heatmapLoading ? (
           <div className="skeleton h-16" />
         ) : heatmapError ? (
-          <div className="h-16 flex items-center justify-between px-1">
-            <p className="text-caption text-sm">히트맵을 불러올 수 없습니다</p>
+          /* 히트맵 영역만 실패 — 카드 구조는 유지하고 영역 안에서 재시도 유도 */
+          <div className="flex flex-col items-center gap-2 py-4 text-center">
+            <p className="text-sm text-text-caption">히트맵을 불러올 수 없습니다</p>
             <button
               type="button"
-              className="btn btn-xs btn-outline btn-primary gap-1"
+              className="btn-compact inline-flex items-center gap-1.5"
               onClick={() => refetchHeatmap()}
             >
               <RefreshCw size={12} />
@@ -253,23 +254,25 @@ export default function Home() {
           <div className="skeleton h-24" />
         </section>
       ) : progressError ? (
-        // progress 에러 시 해당 섹션만 인라인 에러 + 재시도 버튼
-        <section className={`card bg-white p-4 sm:p-6 mb-4 flex flex-row items-center justify-between ${s4.className}`}>
-          <p className="text-secondary text-sm">학습 데이터를 불러올 수 없습니다</p>
-          <button
-            type="button"
-            className="btn btn-xs btn-outline btn-primary gap-1"
-            onClick={() => refetchProgress()}
-          >
-            <RefreshCw size={12} />
-            재시도
-          </button>
+        /* progress 에러 — 로딩 skeleton과 동일한 2칸 그리드 자리에 배치해 레이아웃 안정 */
+        <section className={`grid grid-cols-2 gap-3 mb-4 ${s4.className}`}>
+          <div className="card-base flex flex-col items-center justify-center gap-2 text-center col-span-2 py-5">
+            <p className="text-sm text-text-caption">학습 데이터를 불러올 수 없습니다</p>
+            <button
+              type="button"
+              className="btn-compact inline-flex items-center gap-1.5"
+              onClick={() => refetchProgress()}
+            >
+              <RefreshCw size={12} />
+              재시도
+            </button>
+          </div>
         </section>
       ) : progress?.readiness ? (
         // readiness 데이터가 있으면 합격 준비도 카드
-        <section className={`card bg-white p-4 sm:p-6 shadow-sm mb-4 ${s4.className}`}>
+        <section className={`card-base mb-4 ${s4.className}`}>
           <div className="flex items-center justify-between mb-2">
-            <h2 className="text-secondary text-sm">합격 준비도</h2>
+            <h2 className="text-sm text-text-secondary">합격 준비도</h2>
             <span className="text-h1 text-brand">
               {Math.round(progress.readiness.score * 100)}%
             </span>
@@ -297,15 +300,15 @@ export default function Home() {
       ) : (
         // readiness 없으면 간략 통계 카드
         <section className={`grid grid-cols-2 gap-3 mb-4 ${s4.className}`}>
-          <div className="card bg-white p-4 sm:p-6 shadow-sm flex flex-col items-start">
+          <div className="card-base flex flex-col items-start">
             <span className="text-h1 text-brand">{solved}</span>
-            <span className="text-secondary mt-1">푼 문제</span>
+            <span className="text-sm text-text-secondary mt-1">푼 문제</span>
           </div>
-          <div className="card bg-white p-4 sm:p-6 shadow-sm flex flex-col items-start">
+          <div className="card-base flex flex-col items-start">
             <span className="text-h1 text-brand">
               {Math.round(correctRate * 100)}%
             </span>
-            <span className="text-secondary mt-1">정답률</span>
+            <span className="text-sm text-text-secondary mt-1">정답률</span>
             <div className="w-full mt-2 h-1 rounded-full bg-border">
               <div
                 className="h-full rounded-full bg-brand"
