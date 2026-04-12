@@ -48,7 +48,8 @@ export default function PracticeSet() {
   // 마지막 문제 완료 전까지 이탈 차단 — 중간 이탈 시 세션 기록 유실 방지
   // exitConfirmed=true이면 차단 해제 → useEffect에서 navigate("/") 호출
   // useBlocker는 훅이므로 조건부 return 이전에 호출해야 함
-  const blocker = useBlocker(!shouldNavigateToResult && !exitConfirmed);
+  // submitting 중에는 이탈 차단 해제 — 채점 API 진행 중 모달 충돌 방지
+  const blocker = useBlocker(!shouldNavigateToResult && !exitConfirmed && !submitting);
 
   const handleSelect = useCallback(
     async (

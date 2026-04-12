@@ -353,7 +353,8 @@ export default function QuestionDetail({
             key={choice.key}
             choice={choice}
             isSelected={selectedKey === choice.key}
-            cached={executeCache[choice.key]}
+            // showExecution=false(재시도 등) 시 이전 실행 결과 노출 방지
+            cached={showExecution ? executeCache[choice.key] : undefined}
             // 풀이 중 실행 버튼 숨김, 제출 후(showExecution=true) 버튼 표시
             isExecutable={
               showExecution && question.executionMode === "EXECUTABLE"

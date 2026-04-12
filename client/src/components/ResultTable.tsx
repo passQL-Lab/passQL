@@ -43,6 +43,8 @@ export const ResultTable = memo(function ResultTable({ result, onAskAi }: Result
           className="overflow-hidden rounded-xl border"
           style={{ borderColor: "var(--color-border)" }}
         >
+          {/* overflow-x-auto: 컬럼 수가 많거나 셀 값이 긴 경우 가로 스크롤 허용 */}
+          <div className="overflow-x-auto">
           <table className="data-table w-full">
             <thead>
               <tr>
@@ -61,6 +63,7 @@ export const ResultTable = memo(function ResultTable({ result, onAskAi }: Result
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
     </div>

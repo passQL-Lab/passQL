@@ -78,8 +78,8 @@ export default function AnswerFeedback() {
   });
   const similarQuery = useSimilarQuestions(state?.questionUuid ?? "");
 
-  // 실행 중인 선택지 키 — useCallback deps에서 제거하기 위해 ref로 추적
-  const executingKeyRef = useRef<string | null>(null);
+  // 실행 중인 선택지 키 Set — 병렬 실행 시 각 카드의 로딩 상태를 독립적으로 관리
+  const executingKeyRef = useRef<Set<string>>(new Set());
   // 캐시 guard 조회용 ref — resultCache state와 동기화
   const resultCacheRef = useRef<Record<string, ExecuteResult>>({});
 
@@ -97,15 +97,16 @@ export default function AnswerFeedback() {
     }
     return cache;
   });
-  const [executing, setExecuting] = useState<string | null>(null);
+  // 실행 중인 선택지 키 집합 — 카드별 독립 로딩 상태 (string | null 단일값은 병렬 실행 시 꼬임)
+  const [executing, setExecuting] = useState<Set<string>>(new Set());
   const [execErrors, setExecErrors] = useState<Record<string, string>>({});
 
   const handleExecute = useCallback(async (choice: ChoiceItem) => {
     // ref로 중복 실행 방지 — state 캡처 없이 최신 값 조회
-    if (!state || resultCacheRef.current[choice.key] || executingKeyRef.current === choice.key) return;
+    if (!state || resultCacheRef.current[choice.key] || executingKeyRef.current.has(choice.key)) return;
     setExecErrors((prev) => { const next = { ...prev }; delete next[choice.key]; return next; });
-    executingKeyRef.current = choice.key;
-    setExecuting(choice.key);
+    executingKeyRef.current.add(choice.key);
+    setExecuting((prev) => new Set([...prev, choice.key]));
     try {
       const result = await executeChoice(state.questionUuid, choice.body);
       resultCacheRef.current = { ...resultCacheRef.current, [choice.key]: result };
@@ -114,8 +115,8 @@ export default function AnswerFeedback() {
       const message = err instanceof Error ? err.message : "실행에 실패했습니다";
       setExecErrors((prev) => ({ ...prev, [choice.key]: message }));
     } finally {
-      executingKeyRef.current = null;
-      setExecuting(null);
+      executingKeyRef.current.delete(choice.key);
+      setExecuting((prev) => { const next = new Set(prev); next.delete(choice.key); return next; });
     }
   }, [state]); // resultCache, executing deps 제거됨 — ref로 대체
 
@@ -237,7 +238,7 @@ export default function AnswerFeedback() {
         const isAnswer = choice.key === correctKey;
         const isMyChoice = choice.key === selectedKey;
         const cached = resultCache[choice.key];
-        const isRunning = executing === choice.key;
+        const isRunning = executing.has(choice.key);
         const error = execErrors[choice.key];
 
         // 카드 스타일 결정 — 정답/내선택/기타 3가지 상태
