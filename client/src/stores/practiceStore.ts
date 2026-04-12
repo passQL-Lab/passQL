@@ -15,7 +15,7 @@ interface PracticeActions {
   readonly startSession: (sessionId: string, topicCode: string, topicName: string, questions: readonly QuestionSummary[]) => void;
   readonly addQuestion: (question: QuestionSummary) => void;
   readonly startTimer: () => void;
-  readonly submitAndAdvance: (questionUuid: string, isCorrect: boolean, selectedChoiceKey: string) => void;
+  readonly submitAndAdvance: (questionUuid: string, isCorrect: boolean, selectedChoiceKey: string, selectedChoiceBody: string) => void;
   readonly reset: () => void;
 }
 
@@ -39,10 +39,10 @@ export const usePracticeStore = create<PracticeState & PracticeActions>()((set, 
 
   startTimer: () => set({ startedAt: Date.now() }),
 
-  submitAndAdvance: (questionUuid, isCorrect, selectedChoiceKey) => {
+  submitAndAdvance: (questionUuid, isCorrect, selectedChoiceKey, selectedChoiceBody) => {
     const { startedAt, results } = get();
     const durationMs = startedAt ? Date.now() - startedAt : 0;
-    const newResult: PracticeQuestionResult = { questionUuid, isCorrect, selectedChoiceKey, durationMs };
+    const newResult: PracticeQuestionResult = { questionUuid, isCorrect, selectedChoiceKey, selectedChoiceBody, durationMs };
     set((s) => ({
       results: [...results, newResult],
       currentIndex: s.currentIndex + 1,

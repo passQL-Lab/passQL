@@ -5,6 +5,7 @@ import ErrorFallback from "../components/ErrorFallback";
 import StatsAnalysisCard from "../components/StatsAnalysisCard";
 import StatsRadarChart from "../components/StatsRadarChart";
 import StatsBarChart from "../components/StatsBarChart";
+import { useStagger } from "../hooks/useStagger";
 
 export default function Stats() {
   const {
@@ -32,6 +33,14 @@ export default function Stats() {
   const readinessPercent = readiness ? Math.round(readiness.score * 100) : null;
   const topicStats = topicAnalysis?.topicStats ?? [];
 
+  // 섹션별 순차 페이드인 딜레이 생성
+  const stagger = useStagger();
+  const s0 = stagger(0); // 제목 + 서브텍스트
+  const s1 = stagger(1); // 상단 요약 카드
+  const s2 = stagger(2); // AI 코멘트 or 빈 상태
+  const s3 = stagger(3); // 레이더 차트
+  const s4 = stagger(4); // 바 차트
+
   if (progressLoading) {
     return (
       <div className="py-6 space-y-6">
@@ -48,15 +57,17 @@ export default function Stats() {
 
   return (
     <div className="py-6 space-y-6">
-      <div>
+      {/* CSS variable(--stagger-delay) 주입 — Tailwind로 표현 불가하여 style prop 예외 허용 */}
+      {/* ① 제목 + 서브텍스트 */}
+      <section className={s0.className} style={s0.style}>
         <h1 className="text-h1">내 실력, 한눈에</h1>
         <p className="text-secondary mt-1">
           약한 영역을 눌러 바로 연습해보세요
         </p>
-      </div>
+      </section>
 
-      {/* 상단 요약 카드 */}
-      <div className="card-base flex items-center divide-x divide-border">
+      {/* ② 상단 요약 카드 */}
+      <section className={`card-base flex items-center divide-x divide-border ${s1.className}`} style={s1.style}>
         {[
           { value: `${progress?.solvedCount ?? 0}문제`, label: "푼 문제" },
           {
@@ -69,29 +80,37 @@ export default function Stats() {
           { value: `${progress?.streakDays ?? 0}일`, label: "연속 학습" },
         ].map((m) => (
           <div key={m.label} className="flex-1 text-center py-2">
-            <p className="text-h1 text-text-primary">{m.value}</p>
+            <p className="text-h1">{m.value}</p>
             <p className="text-secondary mt-1">{m.label}</p>
           </div>
         ))}
-      </div>
+      </section>
 
       {topicStats.length > 0 ? (
         <>
-          {/* AI 영역 분석 코멘트 */}
-          <StatsAnalysisCard
-            comment={aiComment?.comment ?? null}
-            isLoading={aiCommentLoading}
-          />
-          <StatsRadarChart topicStats={topicStats} />
-          <StatsBarChart topicStats={topicStats} />
+          {/* ③ AI 코멘트 */}
+          <section className={s2.className} style={s2.style}>
+            <StatsAnalysisCard
+              comment={aiComment?.comment ?? null}
+              isLoading={aiCommentLoading}
+            />
+          </section>
+          {/* ④ 레이더 차트 */}
+          <section className={s3.className} style={s3.style}>
+            <StatsRadarChart topicStats={topicStats} />
+          </section>
+          {/* ⑤ 바 차트 */}
+          <section className={s4.className} style={s4.style}>
+            <StatsBarChart topicStats={topicStats} />
+          </section>
         </>
       ) : (
-        <div className="card-base text-center py-12">
+        <section className={`card-base text-center py-12 ${s2.className}`} style={s2.style}>
           <p className="text-text-caption">아직 풀이 기록이 없어요</p>
           <p className="text-xs text-text-caption mt-1">
             문제를 풀면 여기에 실력이 나타나요
           </p>
-        </div>
+        </section>
       )}
     </div>
   );

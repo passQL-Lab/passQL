@@ -1,6 +1,4 @@
-import { useState, useRef, type ReactNode } from "react";
-import { ChevronLeft, ChevronRight, Grid2x2, Home } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import React, { useState, useRef, type ReactNode } from "react";
 
 interface StepNavigatorProps {
   readonly steps: readonly ReactNode[];
@@ -8,13 +6,13 @@ interface StepNavigatorProps {
   readonly onLastStep?: () => void;
 }
 
-export default function StepNavigator({ steps, lastButtonLabel = "다른 카테고리", onLastStep }: StepNavigatorProps) {
+export default function StepNavigator({ steps, lastButtonLabel = "카테고리 목록으로", onLastStep }: StepNavigatorProps) {
   const [current, setCurrent] = useState(0);
   const touchStartX = useRef(0);
-  const navigate = useNavigate();
   const total = steps.length;
-  const isFirst = current === 0;
+  const isLast = current === total - 1;
 
+  // 범위 가드 내장 — 첫/마지막 단계에서 경계 초과 호출 안전
   const goTo = (idx: number) => {
     if (idx >= 0 && idx < total) setCurrent(idx);
   };
@@ -23,39 +21,47 @@ export default function StepNavigator({ steps, lastButtonLabel = "다른 카테�
     if (current < total - 1) goTo(current + 1);
     else onLastStep?.();
   };
+  // 이전 단계 이동은 스와이프(좌)만 지원 — 결과 화면은 단방향 흐름이 의도적
 
-  const isLast = current === total - 1;
+  const handleTap = (e: React.MouseEvent<HTMLDivElement>) => {
+    // 버튼, 링크, input 등 인터랙티브 요소 클릭은 탭으로 처리하지 않음
+    const target = e.target as HTMLElement;
+    if (target.closest("button, a, input, select, textarea")) return;
+    handleNext();
+  };
 
   return (
     <div
       className="flex flex-col h-full"
+      onClick={handleTap}
       onTouchStart={(e) => { touchStartX.current = e.touches[0].clientX; }}
       onTouchEnd={(e) => {
         const diff = touchStartX.current - e.changedTouches[0].clientX;
+        // 50px 이상 스와이프 시 앞/뒤 이동
         if (diff > 50) handleNext();
         else if (diff < -50) goTo(current - 1);
       }}
     >
-      {/* Top bar */}
-      <div className="flex items-center justify-between px-4 h-14">
-        <button
-          type="button"
-          className="w-10 h-10 flex items-center justify-center bg-surface-card border border-border rounded-xl"
-          onClick={() => isFirst ? navigate("/") : goTo(current - 1)}
-        >
-          {isFirst ? <Home size={18} className="text-text-primary" /> : <ChevronLeft size={20} className="text-text-primary" />}
-        </button>
-        <span className="text-sm text-text-secondary font-semibold">
-          {current + 1} / {total}
-        </span>
-        <div className="w-10" />
+      {/* 단계 인디케이터 — 스크린리더에 현재 단계 정보 전달 */}
+      <div role="tablist" aria-label="단계 표시" className="flex justify-center gap-1.5 pt-4 pb-2">
+        {Array.from({ length: total }, (_, i) => (
+          <div
+            key={i}
+            role="tab"
+            aria-selected={i === current}
+            aria-label={`${i + 1}단계 / 전체 ${total}단계`}
+            className={`h-2 rounded-full transition-all duration-300 ${
+              i === current ? "w-6 bg-brand" : "w-2 bg-border"
+            }`}
+          />
+        ))}
       </div>
 
-      {/* Content */}
+      {/* 콘텐츠 영역 */}
       <div className="flex-1 overflow-hidden">
         <div
-          className="flex h-full transition-transform duration-400 ease-out"
-          style={{ transform: `translateX(-${current * 100}%)` }}
+          className="step-slider"
+          style={{ "--step-offset": `-${current * 100}%` } as React.CSSProperties}
         >
           {steps.map((step, i) => (
             <div key={i} className="min-w-full h-full flex flex-col items-center justify-center px-6 text-center">
@@ -65,27 +71,14 @@ export default function StepNavigator({ steps, lastButtonLabel = "다른 카테�
         </div>
       </div>
 
-      {/* Dot indicators */}
-      <div className="flex justify-center gap-1.5 py-3">
-        {Array.from({ length: total }, (_, i) => (
-          <div
-            key={i}
-            className={`h-2 rounded-full transition-all duration-300 ${
-              i === current ? "w-6 bg-brand" : "w-2 bg-border"
-            }`}
-          />
-        ))}
-      </div>
-
-      {/* Bottom button */}
+      {/* 하단 버튼 — 아이콘 없이 텍스트만 */}
       <div className="px-6 pb-6">
         <button
           type="button"
-          className="w-full h-12 bg-brand text-white font-bold rounded-xl flex items-center justify-center gap-1.5"
+          className="w-full h-12 bg-brand text-white font-bold rounded-xl"
           onClick={handleNext}
         >
           {isLast ? lastButtonLabel : "다음"}
-          {isLast ? <Grid2x2 size={18} /> : <ChevronRight size={18} />}
         </button>
       </div>
     </div>

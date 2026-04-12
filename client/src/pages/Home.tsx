@@ -13,6 +13,7 @@ import {
   useSelectedSchedule,
   useHeatmap,
 } from "../hooks/useHome";
+import { useStagger } from "../hooks/useStagger";
 
 /**
  * greeting 메시지의 {nickname}을 강조 span으로 치환하고
@@ -35,6 +36,15 @@ function parseGreetingLines(message: string, nickname: string): React.ReactNode[
 }
 
 export default function Home() {
+  const stagger = useStagger();
+  // 각 섹션의 stagger 결과를 미리 선언 — 동일 인덱스 이중 호출 방지
+  const s0 = stagger(0); // 그리팅 줄1
+  const s1 = stagger(1); // 그리팅 줄2 + 서브메시지
+  const s2 = stagger(2); // 오늘의 문제 + 시험 일정
+  const s3 = stagger(3); // 학습 현황
+  const s4 = stagger(4); // 합격 준비도 / 통계
+  const s5 = stagger(5); // AI 추천문제
+
   // 각 훅의 상태를 개별 구조분해 — 섹션별 독립 에러/로딩 처리를 위해
   const {
     data: progress,
@@ -65,58 +75,51 @@ export default function Home() {
 
   return (
     <div className="py-6 space-y-0">
-      {/* 인사 섹션: 페이드인+슬라이드업 애니메이션, \n 두 줄 렌더링, 닉네임 인디고 강조 */}
-      <section className="mb-6 animate-greeting">
+      {/* ① 그리팅 줄1: 첫 번째 줄만 렌더링 */}
+      {/* CSS variable(--stagger-delay) 주입 — Tailwind로 표현 불가하여 style prop 예외 허용 */}
+      <section className={`mb-1 ${s0.className}`} style={s0.style}>
         <h1 className="text-h2 leading-snug">
           {greeting ? (
-            parseGreetingLines(greeting.message, greeting.nickname).map((line, i) => (
-              <span key={i} className="block">{line}</span>
-            ))
+            parseGreetingLines(greeting.message, greeting.nickname).map((line, i) =>
+              i === 0 ? <span key={i} className="block">{line}</span> : null
+            )
           ) : (
             <span>안녕하세요, {displayName}</span>
           )}
         </h1>
+      </section>
+
+      {/* ② 그리팅 줄2 + 서브메시지(EXAM_DAY/URGENT) */}
+      <section className={`mb-6 ${s1.className}`} style={s1.style}>
+        <h1 className="text-h2 leading-snug">
+          {greeting &&
+            parseGreetingLines(greeting.message, greeting.nickname).map((line, i) =>
+              i > 0 ? <span key={i} className="block">{line}</span> : null
+            )}
+        </h1>
         {greeting?.messageType === "EXAM_DAY" && (
-          <p
-            className="text-sm font-medium mt-1 animate-greeting-delayed"
-            style={{ color: "var(--color-sem-error-text)" }}
-          >
+          <p className="text-sm font-medium mt-1 text-sem-error-text">
             오늘 시험이에요!
           </p>
         )}
         {greeting?.messageType === "URGENT" && (
-          <p
-            className="text-sm font-medium mt-1 animate-greeting-delayed"
-            style={{ color: "var(--color-sem-warning-text)" }}
-          >
+          <p className="text-sm font-medium mt-1 text-sem-warning-text">
             시험이 얼마 남지 않았어요
           </p>
         )}
       </section>
 
-      {/* 오늘의 문제 + 시험 일정 카드 섹션 */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+      {/* ③ 오늘의 문제 + 시험 일정 카드 섹션 */}
+      <section className={`grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 ${s2.className}`} style={s2.style}>
         {today?.question ? (
           today.alreadySolvedToday ? (
             // 완료 상태: 성공 카드 스타일 (초록 left border + 배경)
-            <div
-              className="h-full flex flex-col gap-2 rounded-xl p-5 cursor-default"
-              style={{
-                backgroundColor: "var(--color-sem-success-light)",
-                borderLeft: "4px solid var(--color-sem-success)",
-              }}
-            >
+            <div className="h-full flex flex-col gap-2 rounded-xl p-5 cursor-default bg-sem-success-light border-l-4 border-sem-success">
               <div className="flex items-center justify-between">
-                <p
-                  className="text-sm font-medium"
-                  style={{ color: "var(--color-sem-success-text)" }}
-                >
+                <p className="text-sm font-medium text-sem-success-text">
                   오늘의 문제
                 </p>
-                <div
-                  className="w-6 h-6 rounded-full flex items-center justify-center"
-                  style={{ backgroundColor: "var(--color-sem-success)" }}
-                >
+                <div className="w-6 h-6 rounded-full flex items-center justify-center bg-sem-success">
                   <Check size={14} className="text-white" />
                 </div>
               </div>
@@ -169,19 +172,13 @@ export default function Home() {
         )}
       </section>
 
-      {/* 학습 현황 섹션: heatmap 에러/로딩만 독립 처리 */}
-      <section className="card-base shadow-sm mb-4">
+      {/* ④ 학습 현황 섹션: heatmap 에러/로딩만 독립 처리 */}
+      <section className={`card-base shadow-sm mb-4 ${s3.className}`} style={s3.style}>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-secondary text-sm">학습 현황</h2>
           {/* streak는 progress 에러 시 0 fallback → 뱃지 자연스럽게 미표시 */}
           {streak > 0 && (
-            <span
-              className="inline-flex items-center rounded-full px-3 py-1 text-sm font-bold"
-              style={{
-                backgroundColor: "var(--color-sem-warning-light)",
-                color: "var(--color-sem-warning-text)",
-              }}
-            >
+            <span className="inline-flex items-center rounded-full px-3 py-1 text-sm font-bold bg-sem-warning-light text-sem-warning-text">
               {/* fill 속성으로 불꽃 아이콘을 꽉 채운 스타일로 표시 */}
               <Flame size={14} className="inline mr-1" fill="currentColor" />
               연속 {streak}일
@@ -211,15 +208,15 @@ export default function Home() {
         )}
       </section>
 
-      {/* 합격 준비도 / 통계 섹션: progress 에러/로딩 독립 처리 */}
+      {/* ⑤ 합격 준비도 / 통계 섹션: progress 에러/로딩 독립 처리 */}
       {progressLoading ? (
-        <section className="grid grid-cols-2 gap-3 mb-4">
+        <section className={`grid grid-cols-2 gap-3 mb-4 ${s4.className}`} style={s4.style}>
           <div className="h-24 rounded-xl bg-border animate-pulse" />
           <div className="h-24 rounded-xl bg-border animate-pulse" />
         </section>
       ) : progressError ? (
         // progress 에러 시 해당 섹션만 인라인 에러 + 재시도 버튼
-        <section className="card-base mb-4 flex items-center justify-between">
+        <section className={`card-base mb-4 flex items-center justify-between ${s4.className}`} style={s4.style}>
           <p className="text-secondary text-sm">학습 데이터를 불러올 수 없습니다</p>
           <button
             type="button"
@@ -232,7 +229,7 @@ export default function Home() {
         </section>
       ) : progress?.readiness ? (
         // readiness 데이터가 있으면 합격 준비도 카드
-        <section className="card-base shadow-sm mb-4">
+        <section className={`card-base shadow-sm mb-4 ${s4.className}`} style={s4.style}>
           <div className="flex items-center justify-between mb-2">
             <h2 className="text-secondary text-sm">합격 준비도</h2>
             <span className="text-h1 text-brand">
@@ -261,7 +258,7 @@ export default function Home() {
         </section>
       ) : (
         // readiness 없으면 간략 통계 카드
-        <section className="grid grid-cols-2 gap-3 mb-4">
+        <section className={`grid grid-cols-2 gap-3 mb-4 ${s4.className}`} style={s4.style}>
           <div className="card-base shadow-sm flex flex-col items-start">
             <span className="text-h1 text-brand">{solved}</span>
             <span className="text-secondary mt-1">푼 문제</span>
@@ -281,9 +278,9 @@ export default function Home() {
         </section>
       )}
 
-      {/* 추천 문제 섹션: 에러 또는 데이터 없으면 섹션 전체 숨김 */}
+      {/* ⑥ 추천 문제 섹션: 에러 또는 데이터 없으면 섹션 전체 숨김 */}
       {!recommendationsError && recommendations && recommendations.questions.length > 0 && (
-        <section className="mt-6">
+        <section className={`mt-6 ${s5.className}`} style={s5.style}>
           {/* Sparkles 아이콘으로 AI 추천 기능임을 명시 */}
           <h2 className="text-secondary text-sm mb-3 flex items-center gap-1">
             <Sparkles size={14} fill="currentColor" />

@@ -288,6 +288,8 @@ export interface PracticeQuestionResult {
   readonly questionUuid: string;
   readonly isCorrect: boolean;
   readonly selectedChoiceKey: string;
+  // 결과 화면에서 선택지 키(A/B/C/D) 대신 실제 선택지 텍스트를 보여주기 위해 저장
+  readonly selectedChoiceBody: string;
   readonly durationMs: number;
 }
 
