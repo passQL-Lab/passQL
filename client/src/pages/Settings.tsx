@@ -17,16 +17,19 @@ export default function Settings() {
   const truncatedUuid = `${uuid.slice(0, 20)}...`;
   const regenerateMutation = useRegenerateNickname();
   const [copied, setCopied] = useState(false);
-  const copyTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
+  const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isOnline = useOnline();
   // 건의사항 섹션 헤더 카운트 pill용 — FeedbackList 내부와 캐시 공유 (dedup)
   const { data: feedbackData } = useMyFeedback();
-  const feedbackCount = feedbackData?.items.length || undefined;
+  const feedbackCount =
+    feedbackData && feedbackData.items.length > 0
+      ? feedbackData.items.length
+      : undefined;
 
   // localStorage 초기화 2단계 확인 상태 (실수 방지)
   const [confirmClear, setConfirmClear] = useState(false);
-  const confirmTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
+  const confirmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // 섹션별 순차 페이드인 (50ms 간격)
   const stagger = useStagger();
@@ -127,6 +130,8 @@ export default function Settings() {
       <section className={`mt-6 ${s2.className}`}>
         <SettingsSection label="건의사항" count={feedbackCount}>
           {/* 오프라인 배너 */}
+          {/* border-[#FDE68A]: 토큰 없음 — sem-warning-light(#FEF3C7)의 border 버전 없음 */}
+          {/* text-[#92400E]: 토큰 없음 — sem-warning-text(#D97706)와 다른 딥 앰버 색상 */}
           {!isOnline && (
             <div className="flex items-center gap-2.5 px-3.5 py-2.5 bg-sem-warning-light border border-[#FDE68A] rounded-xl text-xs text-[#92400E] mb-2.5">
               <WifiOff size={14} className="text-sem-warning-text shrink-0" />
@@ -149,7 +154,7 @@ export default function Settings() {
             <SettingsRow
               label="버전"
               value={
-                <p className="text-caption text-sm text-text-caption">{__APP_VERSION__}</p>
+                <p className="text-caption">{__APP_VERSION__}</p>
               }
               isLast
             />

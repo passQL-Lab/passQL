@@ -23,7 +23,7 @@ export default function SettingsSection({
   className,
 }: SettingsSectionProps) {
   return (
-    <div className={`${isFirst ? "" : "mt-6"} ${className ?? ""}`}>
+    <div className={[isFirst ? "" : "mt-6", className ?? ""].filter(Boolean).join(" ")}>
       <div className="flex items-center gap-2 mb-2 px-0.5">
         <span className="text-text-secondary text-sm font-medium">{label}</span>
         {!!count && (

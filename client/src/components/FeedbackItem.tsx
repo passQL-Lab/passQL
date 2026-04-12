@@ -1,4 +1,3 @@
-import { useStagger } from "../hooks/useStagger";
 import type { FeedbackItem as FeedbackItemType, FeedbackStatus } from "../types/api";
 
 // 상태별 pill 디자인 설정 (기존 디자인 토큰 사용)
@@ -6,9 +5,9 @@ const STATUS_CONFIG: Record<
   FeedbackStatus,
   { label: string; bg: string; text: string; dot: string }
 > = {
-  PENDING:  { label: "대기",   bg: "bg-sem-warning-light", text: "text-sem-warning-text", dot: "bg-[#D97706]" },
-  REVIEWED: { label: "확인됨", bg: "bg-brand-light",       text: "text-brand",            dot: "bg-brand"    },
-  APPLIED:  { label: "반영됨", bg: "bg-sem-success-light", text: "text-sem-success-text", dot: "bg-[#16A34A]" },
+  PENDING:  { label: "대기",   bg: "bg-sem-warning-light", text: "text-sem-warning-text", dot: "bg-sem-warning-text" },
+  REVIEWED: { label: "확인됨", bg: "bg-brand-light",       text: "text-brand",            dot: "bg-brand"           },
+  APPLIED:  { label: "반영됨", bg: "bg-sem-success-light", text: "text-sem-success-text", dot: "bg-sem-success-text" },
 };
 
 /** ISO 8601 문자열 → "방금 / N분 전 / N시간 전 / N일 전 / N주 전" */
@@ -26,24 +25,22 @@ function formatRelativeTime(isoString: string): string {
 
 interface FeedbackItemProps {
   readonly item: FeedbackItemType;
-  /** 목록 내 위치 인덱스 — useStagger 순차 페이드인에 사용 */
-  readonly index: number;
+  /** 부모(FeedbackList)에서 생성한 stagger 클래스 — 목록 순차 페이드인에 사용 */
+  readonly className?: string;
 }
 
 /**
  * 건의사항 단일 row
  * - 상단: 상태 pill + 상대 시간
  * - 하단: 본문 텍스트
- * - useStagger로 목록 진입 시 순차 페이드인
+ * - 부모로부터 className으로 stagger 클래스를 받아 진입 애니메이션 적용
  */
-export default function FeedbackItem({ item, index }: FeedbackItemProps) {
-  const stagger = useStagger();
-  const s = stagger(index);
+export default function FeedbackItem({ item, className }: FeedbackItemProps) {
   const config = STATUS_CONFIG[item.status];
 
   return (
     <div
-      className={`px-4 py-3.5 border-b border-[#F3F4F6] last:border-b-0 hover:bg-surface transition-colors ${s.className}`}
+      className={`px-4 py-3.5 border-b border-surface-code last:border-b-0 hover:bg-surface transition-colors${className ? ` ${className}` : ""}`}
     >
       {/* 상단: 상태 pill + 시간 */}
       <div className="flex items-center justify-between mb-1.5">

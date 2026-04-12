@@ -31,7 +31,7 @@ export default function FeedbackForm({ disabled = false }: FeedbackFormProps) {
   };
 
   const handleRetry = () => {
-    if (!isValid) return;
+    if (!isValid || mutation.isPending) return;
     mutation.reset();
     mutation.mutate(content);
   };
@@ -60,7 +60,7 @@ export default function FeedbackForm({ disabled = false }: FeedbackFormProps) {
       />
 
       {/* 푸터: 카운터 + 보내기 버튼 */}
-      <div className="flex items-center justify-between border-t border-[#F3F4F6] pt-2.5 mt-2.5">
+      <div className="flex items-center justify-between border-t border-surface-code pt-2.5 mt-2.5">
         <span className="text-[11px] text-text-caption tabular-nums">
           {/* 1자 이상이면 카운터 숫자만 인디고 강조 */}
           <span className={content.length > 0 ? "text-brand font-semibold" : ""}>
