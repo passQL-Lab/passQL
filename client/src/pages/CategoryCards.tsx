@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AlertCircle } from "lucide-react";
+import { AlertCircle, Sparkles } from "lucide-react";
 import { useTopics } from "../hooks/useTopics";
 import { getTopicIcon } from "../constants/topicIcons";
 import { generatePractice } from "../api/practice";
@@ -32,7 +32,10 @@ export default function CategoryCards() {
 
   return (
     <div className="py-6">
-      <h1 className="text-h1 mb-1">문제 풀기</h1>
+      <h1 className="text-h1 mb-1 flex items-center gap-2">
+        <Sparkles size={24} fill="currentColor" />
+        AI문제 풀기
+      </h1>
       <p className="text-secondary mb-6">
         골라보세요, AI가 딱 맞는 문제를 만들어드릴게요
       </p>

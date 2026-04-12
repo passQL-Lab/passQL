@@ -37,7 +37,7 @@ export default function Questions() {
   if (topic === undefined) {
     return (
       <div className="py-6 space-y-4">
-        <h1 className="text-h1">문제</h1>
+        <h1 className="text-h1">AI문제</h1>
         <p className="text-secondary">토픽을 선택하세요</p>
 
         {topicsError ? (
