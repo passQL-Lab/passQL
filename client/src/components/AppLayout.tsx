@@ -1,5 +1,5 @@
 import { NavLink, Outlet } from "react-router-dom";
-import { Home, FileText, BarChart3, Settings, Sparkles } from "lucide-react";
+import { Home, BarChart3, Settings, Sparkles } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import logo from "../assets/logo/logo.png";
 

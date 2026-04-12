@@ -41,6 +41,8 @@ interface QuestionDetailProps {
     result: SubmitResult,
     questionUuid: string,
   ) => void;
+  // 연습 모드에서 제출 후 true — ChoiceCard 안에 SQL 실행 버튼 표시
+  readonly showExecution?: boolean;
 }
 
 export default function QuestionDetail({
@@ -49,6 +51,7 @@ export default function QuestionDetail({
   questionUuid: propUuid,
   onPracticeSubmit,
   onSubmitSuccess,
+  showExecution = false,
 }: QuestionDetailProps = {}) {
   const { questionUuid: paramUuid } = useParams<{ questionUuid: string }>();
   const questionUuid = propUuid ?? paramUuid;
@@ -139,7 +142,9 @@ export default function QuestionDetail({
     }, SSE_TIMEOUT_MS);
 
     const cleanup = generateChoices(questionUuid, {
-      onStatus: (event) => { if (!cancelled) setSseStatus(event.message); },
+      onStatus: (event) => {
+        if (!cancelled) setSseStatus(event.message);
+      },
       onComplete: (response) => {
         clearTimeout(timeoutId);
         if (!cancelled) {
@@ -348,14 +353,18 @@ export default function QuestionDetail({
             key={choice.key}
             choice={choice}
             isSelected={selectedKey === choice.key}
-            cached={executeCache[choice.key]}
-            // 풀이 중 실행 버튼 숨김 — 제출 후 ChoiceReview에서 SQL 실행 비교
-            isExecutable={false}
+            // showExecution=false(재시도 등) 시 이전 실행 결과 노출 방지
+            cached={showExecution ? executeCache[choice.key] : undefined}
+            // 풀이 중 실행 버튼 숨김, 제출 후(showExecution=true) 버튼 표시
+            isExecutable={
+              showExecution && question.executionMode === "EXECUTABLE"
+            }
             isExecuting={
               executeMutation.isPending &&
               executeMutation.variables === choice.body
             }
-            onSelect={handleSelect}
+            // 제출 후 선택 변경 방지 — showExecution이면 no-op
+            onSelect={showExecution ? () => {} : handleSelect}
             onExecute={handleExecute}
             onAskAi={handleAskAi}
           />
