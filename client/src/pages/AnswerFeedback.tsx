@@ -1,11 +1,11 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { Check, X, ChevronRight } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { diffExplain } from "../api/ai";
+import { executeChoice } from "../api/questions";
 import AiExplanationSheet from "../components/AiExplanationSheet";
 import { ResultTable } from "../components/ResultTable";
-import ChoiceReview from "../components/ChoiceReview";
 import { useSimilarQuestions } from "../hooks/useSimilarQuestions";
 import type { ChoiceItem, ExecuteResult, ExecutionMode } from "../types/api";
 
@@ -14,84 +14,14 @@ interface FeedbackState {
   readonly correctKey: string;
   readonly rationale: string;
   readonly selectedKey: string;
-  // BE SubmitResult에서 직접 제공 (CONCEPT_ONLY는 null)
   readonly selectedSql: string | null;
   readonly correctSql: string | null;
   readonly questionUuid: string;
   readonly executionMode?: ExecutionMode;
   readonly selectedResult: ExecuteResult | null;
   readonly correctResult: ExecuteResult | null;
-  // 데일리 챌린지 모드: 버튼 동작 분기용
   readonly isDailyChallenge?: boolean;
-  // EXECUTABLE 문제: 제출 후 오답노트에서 SQL 비교 실행용
   readonly choices?: readonly ChoiceItem[];
-}
-
-function SqlCompareBlock({
-  label,
-  sql,
-  result,
-  isCorrect,
-}: {
-  label: string;
-  sql?: string;
-  result?: ExecuteResult;
-  isCorrect: boolean;
-}) {
-  const borderColor = isCorrect
-    ? "var(--color-sem-success)"
-    : "var(--color-sem-error)";
-  const bgColor = isCorrect
-    ? "var(--color-sem-success-light)"
-    : "var(--color-sem-error-light)";
-  const labelColor = isCorrect
-    ? "var(--color-sem-success-text)"
-    : "var(--color-sem-error-text)";
-
-  return (
-    <div
-      className="rounded-xl p-4 mb-4"
-      style={{ backgroundColor: bgColor, borderLeft: `4px solid ${borderColor}` }}
-    >
-      <p className="text-sm font-semibold mb-2" style={{ color: labelColor }}>{label}</p>
-      {sql && (
-        <pre className="text-sm font-mono leading-relaxed">
-          <code>{sql}</code>
-        </pre>
-      )}
-      {result && <ResultTable result={result} />}
-    </div>
-  );
-}
-
-function TextCompareBlock({
-  label,
-  body,
-  isCorrect,
-}: {
-  label: string;
-  body?: string;
-  isCorrect: boolean;
-}) {
-  const borderColor = isCorrect
-    ? "var(--color-sem-success)"
-    : "var(--color-sem-error)";
-  const bgColor = isCorrect
-    ? "var(--color-sem-success-light)"
-    : "var(--color-sem-error-light)";
-  const labelColor = isCorrect
-    ? "var(--color-sem-success-text)"
-    : "var(--color-sem-error-text)";
-
-  return (
-    <div
-      className="rounded-xl p-4 mb-4"
-      style={{ backgroundColor: bgColor, borderLeft: `4px solid ${borderColor}` }}
-    >
-      <p className="text-sm font-semibold mb-2" style={{ color: labelColor }}>{label}</p>
-      {body && <p className="text-body text-sm">{body}</p>}
-    </div>
-  );
 }
 
 export default function AnswerFeedback() {
@@ -106,6 +36,36 @@ export default function AnswerFeedback() {
     onSuccess: (result) => setAiText(result.text),
   });
   const similarQuery = useSimilarQuestions(state?.questionUuid ?? "");
+
+  // 선택지 SQL 실행 결과 캐시 — 제출 응답(selectedResult/correctResult)으로 초기화
+  const [resultCache, setResultCache] = useState<Record<string, ExecuteResult>>(() => {
+    if (!state) return {};
+    const cache: Record<string, ExecuteResult> = {};
+    if (state.selectedResult && state.selectedKey) {
+      cache[state.selectedKey] = state.selectedResult;
+    }
+    if (state.correctResult && state.correctKey) {
+      cache[state.correctKey] = state.correctResult;
+    }
+    return cache;
+  });
+  const [executing, setExecuting] = useState<string | null>(null);
+  const [execErrors, setExecErrors] = useState<Record<string, string>>({});
+
+  const handleExecute = useCallback(async (choice: ChoiceItem) => {
+    if (!state || resultCache[choice.key] || executing === choice.key) return;
+    setExecErrors((prev) => { const next = { ...prev }; delete next[choice.key]; return next; });
+    setExecuting(choice.key);
+    try {
+      const result = await executeChoice(state.questionUuid, choice.body);
+      setResultCache((prev) => ({ ...prev, [choice.key]: result }));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "실행에 실패했습니다";
+      setExecErrors((prev) => ({ ...prev, [choice.key]: message }));
+    } finally {
+      setExecuting(null);
+    }
+  }, [state, resultCache, executing]);
 
   const handleAskAi = () => {
     if (!state) return;
@@ -128,15 +88,18 @@ export default function AnswerFeedback() {
     selectedSql,
     correctSql,
     executionMode,
-    selectedResult,
-    correctResult,
     isDailyChallenge,
     choices,
     selectedKey,
+    correctKey,
   } = state;
 
   const isExecutable = executionMode === "EXECUTABLE";
+  const sqlChoices = isExecutable
+    ? (choices ?? []).filter((c) => c.kind === "SQL")
+    : [];
 
+  // ── 정답/오답 헤더 ──────────────────────────────────────
   const headerSection = (
     <div className="text-center pt-12 pb-8">
       <div
@@ -167,70 +130,153 @@ export default function AnswerFeedback() {
     </div>
   );
 
-  const comparisonSection = isExecutable ? (
+  // ── CONCEPT_ONLY: 기존 텍스트 비교 카드 (변경 없음) ────
+  const conceptSection = !isExecutable ? (
     <div className="card-base">
       {!isCorrect && (
-        <SqlCompareBlock
-          label="내가 선택한 SQL"
-          sql={selectedSql ?? undefined}
-          result={selectedResult ?? undefined}
-          isCorrect={false}
-        />
+        <div
+          className="rounded-xl p-4 mb-4"
+          style={{
+            backgroundColor: "var(--color-sem-error-light)",
+            borderLeft: "4px solid var(--color-sem-error)",
+          }}
+        >
+          <p className="text-sm font-semibold mb-2" style={{ color: "var(--color-sem-error-text)" }}>
+            내가 선택한 답
+          </p>
+          {selectedSql && <p className="text-body text-sm">{selectedSql}</p>}
+        </div>
       )}
-      <SqlCompareBlock
-        label="정답 SQL"
-        sql={correctSql ?? undefined}
-        result={correctResult ?? undefined}
-        isCorrect={true}
-      />
-      <div className="mt-4">
-        <p className="text-secondary text-sm mb-2">해설</p>
-        <p className="text-body leading-relaxed" style={{ color: "#374151" }}>
-          {rationale}
+      <div
+        className="rounded-xl p-4"
+        style={{
+          backgroundColor: "var(--color-sem-success-light)",
+          borderLeft: "4px solid var(--color-sem-success)",
+        }}
+      >
+        <p className="text-sm font-semibold mb-2" style={{ color: "var(--color-sem-success-text)" }}>
+          정답
         </p>
+        {correctSql && <p className="text-body text-sm">{correctSql}</p>}
       </div>
+    </div>
+  ) : null;
+
+  // ── 해설 카드 ────────────────────────────────────────────
+  const rationaleSection = (
+    <div className="card-base mt-4">
+      <p className="text-secondary text-sm mb-2">해설</p>
+      <p className="text-body leading-relaxed" style={{ color: "#374151" }}>
+        {rationale}
+      </p>
       {!isCorrect && (
         <button className="btn-primary w-full mt-4" type="button" onClick={handleAskAi}>
           AI에게 자세히 물어보기
         </button>
       )}
     </div>
-  ) : (
-    <div className="card-base">
-      {!isCorrect && (
-        <TextCompareBlock
-          label="내가 선택한 답"
-          body={selectedSql ?? undefined}
-          isCorrect={false}
-        />
-      )}
-      <TextCompareBlock
-        label="정답"
-        body={correctSql ?? undefined}
-        isCorrect={true}
-      />
-      <div className="mt-4">
-        <p className="text-secondary text-sm mb-2">해설</p>
-        <p className="text-body leading-relaxed" style={{ color: "#374151" }}>
-          {rationale}
-        </p>
-      </div>
-    </div>
   );
+
+  // ── EXECUTABLE: 선택지 카드 목록 ─────────────────────────
+  const choiceListSection = isExecutable && sqlChoices.length > 0 ? (
+    <section className="mt-6 space-y-3">
+      <p className="text-secondary text-sm">SQL 실행 비교</p>
+      {sqlChoices.map((choice) => {
+        const isAnswer = choice.key === correctKey;
+        const isMyChoice = choice.key === selectedKey;
+        const cached = resultCache[choice.key];
+        const isRunning = executing === choice.key;
+        const error = execErrors[choice.key];
+
+        // 카드 스타일 결정 — 정답/내선택/기타 3가지 상태
+        let borderColor = "var(--color-border)";
+        let bgColor = "var(--color-surface-card)";
+        let badgeText: string | null = null;
+        let badgeStyle: React.CSSProperties = {};
+
+        if (isAnswer && isMyChoice) {
+          borderColor = "var(--color-sem-success)";
+          bgColor = "var(--color-sem-success-light)";
+          badgeText = "정답 · 내 선택";
+          badgeStyle = { backgroundColor: "var(--color-sem-success-light)", color: "var(--color-sem-success-text)" };
+        } else if (isAnswer) {
+          borderColor = "var(--color-sem-success)";
+          bgColor = "var(--color-sem-success-light)";
+          badgeText = "정답";
+          badgeStyle = { backgroundColor: "var(--color-sem-success-light)", color: "var(--color-sem-success-text)" };
+        } else if (isMyChoice) {
+          borderColor = "var(--color-brand)";
+          bgColor = "var(--color-brand-light)";
+          badgeText = "내 선택";
+          badgeStyle = { backgroundColor: "var(--color-brand-light)", color: "var(--color-brand)" };
+        }
+
+        return (
+          <div
+            key={choice.key}
+            className="rounded-xl p-4"
+            style={{
+              backgroundColor: bgColor,
+              border: `1px solid ${borderColor}`,
+              borderLeft: `4px solid ${borderColor}`,
+            }}
+          >
+            {/* 선택지 키 + 상태 뱃지 */}
+            <div className="flex items-center gap-2 mb-2">
+              <span className="text-sm font-bold" style={{ color: "var(--color-text-secondary)" }}>
+                {choice.key}
+              </span>
+              {badgeText && (
+                <span className="text-xs font-medium px-2 py-0.5 rounded-full" style={badgeStyle}>
+                  {badgeText}
+                </span>
+              )}
+            </div>
+
+            {/* SQL 본문 */}
+            <pre
+              className="text-sm leading-relaxed whitespace-pre-wrap wrap-break-word mb-3"
+              style={{ fontFamily: "var(--font-mono)", color: "var(--color-text-primary)" }}
+            >
+              {choice.body}
+            </pre>
+
+            {/* 실행 버튼 또는 에러 */}
+            {error ? (
+              <div className="flex items-center justify-between mt-1">
+                <p className="text-sm" style={{ color: "var(--color-sem-error)" }}>{error}</p>
+                <button type="button" className="btn-compact" onClick={() => handleExecute(choice)}>
+                  재시도
+                </button>
+              </div>
+            ) : !cached ? (
+              <div className="flex justify-end">
+                <button
+                  type="button"
+                  className="btn-compact"
+                  onClick={() => handleExecute(choice)}
+                  disabled={isRunning}
+                >
+                  {isRunning ? "실행 중..." : "실행"}
+                </button>
+              </div>
+            ) : null}
+
+            {/* 실행 결과 */}
+            {cached && <ResultTable result={cached} />}
+          </div>
+        );
+      })}
+    </section>
+  ) : null;
 
   return (
     <div className="min-h-screen bg-surface flex flex-col">
       <div className="flex-1 mx-auto max-w-180 w-full px-4 pb-24">
         {headerSection}
-        {comparisonSection}
-        {/* EXECUTABLE 문제: 오답노트 SQL 실행 비교 */}
-        {choices && choices.length > 0 && (
-          <ChoiceReview
-            choices={choices}
-            questionUuid={state.questionUuid}
-            selectedKey={selectedKey}
-          />
-        )}
+        {conceptSection}
+        {rationaleSection}
+        {choiceListSection}
 
         {similarQuery.data && similarQuery.data.length > 0 && (
           <section className="mt-6">
@@ -259,7 +305,7 @@ export default function AnswerFeedback() {
         onClose={() => setAiSheetOpen(false)}
       />
 
-      {/* fixed bottom 액션 버튼 — QuestionDetail과 동일한 컨테이너 구조 */}
+      {/* fixed bottom 액션 버튼 */}
       <div className="fixed bottom-0 inset-x-0 z-20 bg-surface-page">
         <div className="mx-auto max-w-180 px-4 py-4">
           <button
