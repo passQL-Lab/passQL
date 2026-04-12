@@ -65,8 +65,8 @@ function BottomTabNav() {
           to={item.to}
           end={item.to === "/"}
           className={({ isActive }) =>
-            // dock-active 클래스: daisyUI dock 활성 상태 (하단 인디케이터 + primary 색상 적용)
-            isActive ? "dock-active text-primary" : "text-base-content/40"
+            // dock-active 없이 색상만으로 활성 상태 표현 (인디케이터 바 제거)
+            isActive ? "text-primary" : "text-base-content/40"
           }
         >
           <item.icon size={20} />
