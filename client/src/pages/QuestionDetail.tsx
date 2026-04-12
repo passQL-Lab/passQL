@@ -31,12 +31,25 @@ interface QuestionDetailProps {
   readonly practiceMode?: boolean;
   readonly practiceSubmitLabel?: string;
   readonly questionUuid?: string;
-  readonly onPracticeSubmit?: (selectedChoiceKey: string, choiceSetId: string, choices: readonly ChoiceItem[]) => void;
+  readonly onPracticeSubmit?: (
+    selectedChoiceKey: string,
+    choiceSetId: string,
+    choices: readonly ChoiceItem[],
+  ) => void;
   // 데일리 챌린지 모드: 제출 성공 시 호출자가 직접 네비게이션 제어
-  readonly onSubmitSuccess?: (result: SubmitResult, questionUuid: string) => void;
+  readonly onSubmitSuccess?: (
+    result: SubmitResult,
+    questionUuid: string,
+  ) => void;
 }
 
-export default function QuestionDetail({ practiceMode, practiceSubmitLabel, questionUuid: propUuid, onPracticeSubmit, onSubmitSuccess }: QuestionDetailProps = {}) {
+export default function QuestionDetail({
+  practiceMode,
+  practiceSubmitLabel,
+  questionUuid: propUuid,
+  onPracticeSubmit,
+  onSubmitSuccess,
+}: QuestionDetailProps = {}) {
   const { questionUuid: paramUuid } = useParams<{ questionUuid: string }>();
   const questionUuid = propUuid ?? paramUuid;
   const navigate = useNavigate();
@@ -49,17 +62,24 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
   // 제출 완료 여부 — true가 되면 이탈 차단 해제
   const [submitted, setSubmitted] = useState(false);
   const [stemOpen, setStemOpen] = useState(true);
-  const [executeCache, setExecuteCache] = useState<Record<string, ExecuteResult>>({});
+  const [executeCache, setExecuteCache] = useState<
+    Record<string, ExecuteResult>
+  >({});
   const executeCacheRef = useRef(executeCache);
   executeCacheRef.current = executeCache;
   const [aiSheetOpen, setAiSheetOpen] = useState(false);
   const [aiText, setAiText] = useState("");
 
   // SSE로 생성된 선택지 (choiceSets[]가 비어있을 때 채워짐)
-  const [sseChoices, setSseChoices] = useState<readonly ChoiceItem[] | null>(null);
+  const [sseChoices, setSseChoices] = useState<readonly ChoiceItem[] | null>(
+    null,
+  );
   const [sseChoiceSetId, setSseChoiceSetId] = useState<string | null>(null);
   const [sseStatus, setSseStatus] = useState<string | null>(null);
-  const [sseError, setSseError] = useState<{ code: string; retryable: boolean } | null>(null);
+  const [sseError, setSseError] = useState<{
+    code: string;
+    retryable: boolean;
+  } | null>(null);
   // 재시도 트리거용 카운터
   const [sseRetryCount, setSseRetryCount] = useState(0);
 
@@ -72,14 +92,16 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
     setSseStatus(null);
     setSseError(null);
     setSseRetryCount(0);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [questionUuid]);
 
   // 단독 풀이 모드에서 제출 완료 전까지 이탈 차단 — practiceMode는 부모가 이미 차단하므로 제외
   // practiceMode !== true로 명시해 undefined(단독 모드 기본값)도 정확히 처리
   const blocker = useBlocker(practiceMode !== true && !submitted);
 
-  const activeChoiceSet = question?.choiceSets?.find((cs) => cs.status === "OK");
+  const activeChoiceSet = question?.choiceSets?.find(
+    (cs) => cs.status === "OK",
+  );
   // SSE로 받은 선택지가 있으면 우선 사용, 없으면 GET 응답의 choiceSets 사용
   const choices = sseChoices ?? activeChoiceSet?.items ?? [];
   const choiceSetId = sseChoiceSetId ?? activeChoiceSet?.choiceSetUuid ?? "";
@@ -134,12 +156,12 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
       clearTimeout(timeoutId);
       cleanup();
     };
-  // needsSseGeneration을 deps에 넣되, sseChoices/sseError의 변화는
-  // onComplete/onError 콜백 내부에서만 일어나므로 실질적으로 effect가 재실행되는 시점은:
-  //   1. question 첫 로드 완료 (null → 객체)
-  //   2. sseRetryCount 증가 (재시도 버튼)
-  //   3. questionUuid 변경 (다른 문제로 이동)
-  // background refetch는 staleTime: 60_000 설정으로 SSE 진행 중 발생하지 않음
+    // needsSseGeneration을 deps에 넣되, sseChoices/sseError의 변화는
+    // onComplete/onError 콜백 내부에서만 일어나므로 실질적으로 effect가 재실행되는 시점은:
+    //   1. question 첫 로드 완료 (null → 객체)
+    //   2. sseRetryCount 증가 (재시도 버튼)
+    //   3. questionUuid 변경 (다른 문제로 이동)
+    // background refetch는 staleTime: 60_000 설정으로 SSE 진행 중 발생하지 않음
   }, [needsSseGeneration, questionUuid, sseRetryCount]);
 
   const explainMutation = useMutation({
@@ -159,13 +181,10 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
     [executeMutation],
   );
 
-  const handleSelect = useCallback(
-    (choiceKey: string, _sql: string) => {
-      // 풀이 중 SQL 자동 실행 없음 — 제출 후 ChoiceReview에서 직접 실행
-      setSelectedKey(choiceKey);
-    },
-    [],
-  );
+  const handleSelect = useCallback((choiceKey: string, _sql: string) => {
+    // 풀이 중 SQL 자동 실행 없음 — 제출 후 ChoiceReview에서 직접 실행
+    setSelectedKey(choiceKey);
+  }, []);
 
   const handleSubmit = useCallback(() => {
     if (!selectedKey || !question || !choiceSetId) return;
@@ -173,30 +192,48 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
       onPracticeSubmit(selectedKey, choiceSetId, choices);
       return;
     }
-    submitMutation.mutate({ choiceSetId, selectedChoiceKey: selectedKey }, {
-      onSuccess: (result) => {
-        // 제출 완료 — 이탈 차단 해제 후 네비게이션
-        setSubmitted(true);
-        const fullResult = {
-          ...result,
-          selectedKey,
-          questionUuid,
-          // executionMode는 QuestionDetail에서 전달 (SubmitResult에서 제거됨)
-          executionMode: question.executionMode,
-          // EXECUTABLE 문제: 제출 후 오답노트에서 선택지 SQL 실행 비교용
-          choices: question.executionMode === "EXECUTABLE" ? choices : undefined,
-        };
-        // 제출 완료 시 추천 문제 캐시 무효화 — 홈 복귀 시 목록 즉시 갱신
-        queryClient.invalidateQueries({ queryKey: ["recommendations"] });
-        if (onSubmitSuccess) {
-          // 데일리 챌린지 등 호출자가 네비게이션 제어
-          onSubmitSuccess(fullResult as SubmitResult, questionUuid!);
-        } else {
-          navigate(`/questions/${questionUuid}/result`, { state: fullResult });
-        }
+    submitMutation.mutate(
+      { choiceSetId, selectedChoiceKey: selectedKey },
+      {
+        onSuccess: (result) => {
+          // 제출 완료 — 이탈 차단 해제 후 네비게이션
+          setSubmitted(true);
+          const fullResult = {
+            ...result,
+            selectedKey,
+            questionUuid,
+            // executionMode는 QuestionDetail에서 전달 (SubmitResult에서 제거됨)
+            executionMode: question.executionMode,
+            // EXECUTABLE 문제: 제출 후 오답노트에서 선택지 SQL 실행 비교용
+            choices:
+              question.executionMode === "EXECUTABLE" ? choices : undefined,
+          };
+          // 제출 완료 시 추천 문제 캐시 무효화 — 홈 복귀 시 목록 즉시 갱신
+          queryClient.invalidateQueries({ queryKey: ["recommendations"] });
+          if (onSubmitSuccess) {
+            // 데일리 챌린지 등 호출자가 네비게이션 제어
+            onSubmitSuccess(fullResult as SubmitResult, questionUuid!);
+          } else {
+            navigate(`/questions/${questionUuid}/result`, {
+              state: fullResult,
+            });
+          }
+        },
       },
-    });
-  }, [selectedKey, choiceSetId, choices, submitMutation, question, questionUuid, navigate, practiceMode, onPracticeSubmit, onSubmitSuccess, queryClient]);
+    );
+  }, [
+    selectedKey,
+    choiceSetId,
+    choices,
+    submitMutation,
+    question,
+    questionUuid,
+    navigate,
+    practiceMode,
+    onPracticeSubmit,
+    onSubmitSuccess,
+    queryClient,
+  ]);
 
   const handleAskAi = useCallback(
     (choiceKey: string, _errorCode: string, errorMessage: string) => {
@@ -257,56 +294,63 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
         : "선택지 생성에 실패했어요"
     : null;
 
-  const choicesSection = choices.length === 0 ? (
-    <div className="mt-4 card-base text-center py-8 space-y-2">
-      {/* SSE 에러 → 재시도 UI (EXECUTABLE, CONCEPT_ONLY 공통) */}
-      {sseError ? (
-        <>
-          <p className="text-text-caption text-sm">{sseErrorMessage}</p>
-          {sseError.retryable && (
-            <button
-              type="button"
-              className="flex items-center gap-1.5 mx-auto text-brand text-sm font-medium"
-              onClick={() => {
-                setSseChoices(null);
-                setSseChoiceSetId(null);
-                setSseError(null);
-                setSseRetryCount((c) => c + 1);
-              }}
-            >
-              <RefreshCw size={14} />
-              다시 시도
-            </button>
-          )}
-        </>
-      ) : (
-        <>
-          <div role="status" aria-label="선택지 생성 중" className="w-6 h-6 border-2 border-accent-light border-t-brand rounded-full animate-spin mx-auto" />
-          <p className="text-text-caption text-sm">{sseStatus ?? "선택지 준비 중..."}</p>
-        </>
-      )}
-    </div>
-  ) : (
-    <section className="mt-4 space-y-3">
-      {choices.map((choice) => (
-        <ChoiceCard
-          key={choice.key}
-          choice={choice}
-          isSelected={selectedKey === choice.key}
-          cached={executeCache[choice.key]}
-          // 풀이 중 실행 버튼 숨김 — 제출 후 ChoiceReview에서 SQL 실행 비교
-          isExecutable={false}
-          isExecuting={
-            executeMutation.isPending &&
-            executeMutation.variables === choice.body
-          }
-          onSelect={handleSelect}
-          onExecute={handleExecute}
-          onAskAi={handleAskAi}
-        />
-      ))}
-    </section>
-  );
+  const choicesSection =
+    choices.length === 0 ? (
+      <div className="mt-4 card-base text-center py-8 space-y-2">
+        {/* SSE 에러 → 재시도 UI (EXECUTABLE, CONCEPT_ONLY 공통) */}
+        {sseError ? (
+          <>
+            <p className="text-text-caption text-sm">{sseErrorMessage}</p>
+            {sseError.retryable && (
+              <button
+                type="button"
+                className="flex items-center gap-1.5 mx-auto text-brand text-sm font-medium"
+                onClick={() => {
+                  setSseChoices(null);
+                  setSseChoiceSetId(null);
+                  setSseError(null);
+                  setSseRetryCount((c) => c + 1);
+                }}
+              >
+                <RefreshCw size={14} />
+                다시 시도
+              </button>
+            )}
+          </>
+        ) : (
+          <>
+            <div
+              role="status"
+              aria-label="선택지 생성 중"
+              className="w-6 h-6 border-2 border-accent-light border-t-brand rounded-full animate-spin mx-auto"
+            />
+            <p className="text-text-caption text-sm">
+              {sseStatus ?? "선택지 준비 중..."}
+            </p>
+          </>
+        )}
+      </div>
+    ) : (
+      <section className="mt-4 space-y-3">
+        {choices.map((choice) => (
+          <ChoiceCard
+            key={choice.key}
+            choice={choice}
+            isSelected={selectedKey === choice.key}
+            cached={executeCache[choice.key]}
+            // 풀이 중 실행 버튼 숨김 — 제출 후 ChoiceReview에서 SQL 실행 비교
+            isExecutable={false}
+            isExecuting={
+              executeMutation.isPending &&
+              executeMutation.variables === choice.body
+            }
+            onSelect={handleSelect}
+            onExecute={handleExecute}
+            onAskAi={handleAskAi}
+          />
+        ))}
+      </section>
+    );
 
   const submitButton = (
     <button
@@ -315,7 +359,9 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
       disabled={!isSubmitReady}
       onClick={handleSubmit}
     >
-      {submitMutation.isPending ? "제출 중..." : (practiceSubmitLabel ?? "답안 제출하기")}
+      {submitMutation.isPending
+        ? "제출 중..."
+        : (practiceSubmitLabel ?? "답안 제출하기")}
     </button>
   );
 
@@ -351,7 +397,9 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
         className="card-base shadow-sm w-full text-left flex items-start gap-2 mt-2"
         onClick={() => setStemOpen((prev) => !prev)}
       >
-        {!stemOpen && <BookOpen size={16} className="text-brand mt-0.5 shrink-0" />}
+        {!stemOpen && (
+          <BookOpen size={16} className="text-brand mt-0.5 shrink-0" />
+        )}
         {stemOpen ? (
           // 펼친 상태: react-markdown으로 코드 블록 포함 마크다운 렌더링
           <div className="text-sm text-body min-w-0 w-full">
@@ -361,11 +409,13 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
                   // 코드 블록은 디자인 시스템 code-block 스타일 적용
                   const isBlock = className?.includes("language-");
                   return isBlock ? (
-                    <pre className="bg-[#F3F4F6] rounded-lg px-4 py-3 text-xs leading-relaxed whitespace-pre-wrap break-words font-mono">
+                    <pre className="bg-surface-code rounded-lg px-4 py-3 text-xs leading-relaxed whitespace-pre-wrap wrap-break-word font-mono">
                       <code>{children}</code>
                     </pre>
                   ) : (
-                    <code className="bg-[#F3F4F6] px-1 rounded text-xs font-mono">{children}</code>
+                    <code className="bg-surface-code px-1 rounded text-xs font-mono">
+                      {children}
+                    </code>
                   );
                 },
               }}
@@ -375,7 +425,9 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
           </div>
         ) : (
           // 접힌 상태: 마크다운 문법 제거 후 한 줄 truncate
-          <p className="text-body text-sm truncate">{stemPreview(question.stem)}</p>
+          <p className="text-body text-sm truncate">
+            {stemPreview(question.stem)}
+          </p>
         )}
       </button>
 
@@ -393,9 +445,7 @@ export default function QuestionDetail({ practiceMode, practiceSubmitLabel, ques
 
       {/* fixed bottom 제출 버튼 — PracticeFeedbackBar(z-30)가 제출 후 자연스럽게 덮음 */}
       <div className="fixed bottom-0 inset-x-0 z-20 bg-surface-page">
-        <div className="mx-auto max-w-120 px-4 py-4">
-          {submitButton}
-        </div>
+        <div className="mx-auto max-w-120 px-4 py-4">{submitButton}</div>
       </div>
 
       <AiExplanationSheet

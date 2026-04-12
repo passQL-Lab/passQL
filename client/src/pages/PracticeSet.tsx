@@ -1,6 +1,6 @@
 import { useState, useCallback, useEffect } from "react";
 import { useParams, useNavigate, Navigate, useBlocker } from "react-router-dom";
-import { Home } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { usePracticeStore } from "../stores/practiceStore";
 import { submitAnswer } from "../api/questions";
 import { getRandomMessage } from "../constants/microcopy";
@@ -129,7 +129,7 @@ export default function PracticeSet() {
               className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-border transition-colors"
               onClick={() => setExitModalOpen(true)}
             >
-              <Home size={18} className="text-text-secondary" />
+              <ArrowLeft size={18} className="text-text-secondary" />
             </button>
           </div>
           <span className="text-sm font-semibold text-text-secondary text-center">
