@@ -1,7 +1,7 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { useParams, useNavigate, Navigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Check, RotateCcw, Target, Clock, Timer } from "lucide-react";
+import { Check, RotateCcw, Target, Clock, Timer, Sparkles } from "lucide-react";
 import { usePracticeStore } from "../stores/practiceStore";
 import { fetchAiComment } from "../api/progress";
 import ScoreCountUp from "../components/ScoreCountUp";
@@ -121,17 +121,26 @@ export default function PracticeResult() {
 
   const step2 = (
     <div className="text-left w-full max-w-90 px-2 sm:px-0">
+      {/* AI 브랜딩 뱃지 — AI 교육 프로젝트임을 명시 */}
+      <div className="flex justify-center mb-4">
+        <span className="inline-flex items-center gap-1.5 bg-accent-light text-brand text-xs font-semibold px-3 py-1 rounded-full">
+          <Sparkles size={13} />
+          AI 분석
+        </span>
+      </div>
       <p className="text-2xl font-bold text-center mb-5">{analysis.greeting}</p>
-      {/* AI 코멘트: null=로딩, ""=에러, 문자열=내용 */}
-      {aiComment === null ? (
-        <div className="space-y-2 animate-pulse">
-          <div className="h-4 bg-border rounded w-full" />
-          <div className="h-4 bg-border rounded w-5/6" />
-          <div className="h-4 bg-border rounded w-4/6" />
-        </div>
-      ) : aiComment ? (
-        <p className="text-body leading-relaxed">{aiComment}</p>
-      ) : null}
+      {/* AI 코멘트: null=로딩, ""=에러, 문자열=내용 — 인디고 border 카드로 감싸기 */}
+      <div className="border-l-4 border-brand rounded-xl px-4 py-3 bg-accent-light/30">
+        {aiComment === null ? (
+          <div className="space-y-2 animate-pulse">
+            <div className="h-4 bg-border rounded w-full" />
+            <div className="h-4 bg-border rounded w-5/6" />
+            <div className="h-4 bg-border rounded w-4/6" />
+          </div>
+        ) : aiComment ? (
+          <p className="text-body leading-relaxed">{aiComment}</p>
+        ) : null}
+      </div>
     </div>
   );
 
