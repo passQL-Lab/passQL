@@ -46,18 +46,21 @@ function SidebarNav() {
 
 function BottomTabNav() {
   return (
-    <nav className="lg:hidden fixed bottom-0 inset-x-0 h-14 bg-surface-card border-t border-border flex items-center justify-around z-30">
+    // dock: daisyUI 하단 탭 컴포넌트 (fixed bottom-0, flex, items-center 내장)
+    <nav className="dock lg:hidden h-14 bg-base-100 border-t border-base-300 z-30">
       {NAV_ITEMS.map((item) => (
         <NavLink
           key={item.to}
           to={item.to}
           end={item.to === "/"}
           className={({ isActive }) =>
-            `nav-tab ${isActive ? "nav-tab--active" : "nav-tab--inactive"}`
+            // active 클래스: daisyUI dock 활성 상태 (primary 색상 적용)
+            isActive ? "active text-primary" : "text-base-content/40"
           }
         >
           <item.icon size={20} />
-          <span>{item.label}</span>
+          {/* dock-label: 아이콘 아래 텍스트 레이블 */}
+          <span className="dock-label">{item.label}</span>
         </NavLink>
       ))}
     </nav>
