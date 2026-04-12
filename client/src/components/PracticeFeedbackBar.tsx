@@ -5,12 +5,17 @@ interface PracticeFeedbackBarProps {
   readonly result: SubmitResult;
   readonly onNext: () => void;
   readonly nextLabel: string;
+  // 오답 시 보조 버튼 (예: "다시 풀기") — 미전달 시 버튼 미표시
+  readonly onSecondary?: () => void;
+  readonly secondaryLabel?: string;
 }
 
 export default function PracticeFeedbackBar({
   result,
   onNext,
   nextLabel,
+  onSecondary,
+  secondaryLabel,
 }: PracticeFeedbackBarProps) {
   const isCorrect = result.isCorrect;
 
@@ -63,19 +68,36 @@ export default function PracticeFeedbackBar({
             </p>
           )}
 
-          {/* 액션 버튼 */}
-          <button
-            type="button"
-            className="w-full h-12 rounded-xl font-bold text-base text-white"
-            style={{
-              backgroundColor: isCorrect
-                ? "var(--color-sem-success)"
-                : "var(--color-sem-error)",
-            }}
-            onClick={onNext}
-          >
-            {nextLabel}
-          </button>
+          {/* 액션 버튼 — 오답 + 보조 버튼 있으면 나란히, 아니면 전체 너비 */}
+          <div className={`flex gap-3 ${onSecondary ? "" : ""}`}>
+            {onSecondary && secondaryLabel && (
+              // 보조 버튼: outline 스타일 (다시 풀기 등)
+              <button
+                type="button"
+                className="flex-1 h-12 rounded-xl font-bold text-base border-2"
+                style={{
+                  borderColor: "var(--color-sem-error)",
+                  color: "var(--color-sem-error)",
+                  backgroundColor: "transparent",
+                }}
+                onClick={onSecondary}
+              >
+                {secondaryLabel}
+              </button>
+            )}
+            <button
+              type="button"
+              className={`h-12 rounded-xl font-bold text-base text-white ${onSecondary ? "flex-1" : "w-full"}`}
+              style={{
+                backgroundColor: isCorrect
+                  ? "var(--color-sem-success)"
+                  : "var(--color-sem-error)",
+              }}
+              onClick={onNext}
+            >
+              {nextLabel}
+            </button>
+          </div>
         </div>
       </div>
     </>
