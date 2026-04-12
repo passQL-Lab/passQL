@@ -1,11 +1,49 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-12T07:47:02Z",
-    "currentVersion": "0.0.90",
+    "lastUpdated": "2026-04-12T09:02:08Z",
+    "currentVersion": "0.0.91",
     "projectType": "basic",
-    "totalReleases": 35
+    "totalReleases": 36
   },
   "releases": [
+    {
+      "version": "0.0.91",
+      "project_type": "basic",
+      "date": "2026-04-12",
+      "pr_number": 153,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **New Features**\n  * 실행형 문제의 피드백 화면 UI 재설계 — 선택지별 SQL 실행 결과를 카드 형식으로 통합 표시\n  * 스키마 뷰어가 기본적으로 확장된 상태로 표시\n  * 피드백 바 스타일 및 테이블 시각화 개선\n\n* **Bug Fixes**\n  * 사용하지 않는 코드 제거로 빌드 안정성 개선\n\n* **Documentation**\n  * UI/UX 재설계 계획 및 사양 문서 추가\n  * 일일 챌린지 및 배포 이슈 보고서 추가\n\n* **Chores**\n  * 버전 0.0.91로 업데이트\n  * 배포 워크플로우 재구성으로 배포 프로세스 강화",
+      "parsed_changes": {
+        "new_features": {
+          "title": "New Features",
+          "items": [
+            "실행형 문제의 피드백 화면 UI 재설계 — 선택지별 SQL 실행 결과를 카드 형식으로 통합 표시",
+            "스키마 뷰어가 기본적으로 확장된 상태로 표시",
+            "피드백 바 스타일 및 테이블 시각화 개선"
+          ]
+        },
+        "bug_fixes": {
+          "title": "Bug Fixes",
+          "items": [
+            "사용하지 않는 코드 제거로 빌드 안정성 개선"
+          ]
+        },
+        "documentation": {
+          "title": "Documentation",
+          "items": [
+            "UI/UX 재설계 계획 및 사양 문서 추가",
+            "일일 챌린지 및 배포 이슈 보고서 추가"
+          ]
+        },
+        "chores": {
+          "title": "Chores",
+          "items": [
+            "버전 0.0.91로 업데이트",
+            "배포 워크플로우 재구성으로 배포 프로세스 강화"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.90",
       "project_type": "basic",
