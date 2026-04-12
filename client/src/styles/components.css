@@ -435,6 +435,40 @@ body {
   background-color: transparent;
 }
 
+/* ── 추천 문제 새로고침 버튼 1회전 애니메이션 ── */
+/* spin과 달리 무한 반복 없이 클릭 1회에 360도 돌고 멈춤 */
+@keyframes refresh-once {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.animate-refresh-once {
+  animation: refresh-once 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* ── 추천 문제 카드 순차 페이드인 ── */
+/* 새로고침 후 새 카드들이 위에서 아래로 순서대로 나타남 — nth-child로 인덱스별 딜레이 */
+@keyframes card-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-card-in {
+  animation: card-fade-in 0.22s ease-out both;
+}
+/* 추천 카드 최대 5개 — 인덱스별 딜레이 클래스 */
+.animate-card-in:nth-child(1) { animation-delay: 0ms; }
+.animate-card-in:nth-child(2) { animation-delay: 60ms; }
+.animate-card-in:nth-child(3) { animation-delay: 120ms; }
+.animate-card-in:nth-child(4) { animation-delay: 180ms; }
+.animate-card-in:nth-child(5) { animation-delay: 240ms; }
+
 /* StepNavigator 슬라이드 애니메이션 — 동적 offset을 CSS 변수로 처리 (인라인 style 규칙 예외) */
 .step-slider {
   display: flex;

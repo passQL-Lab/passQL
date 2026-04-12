@@ -1,6 +1,7 @@
 import { Flame, ChevronRight, Check, RefreshCw, Sparkles } from "lucide-react";
 import { getReadinessCopy } from "../constants/readinessCopy";
 import { Link } from "react-router-dom";
+import { useState, useCallback } from "react";
 import { useProgress } from "../hooks/useProgress";
 import { useMember } from "../hooks/useMember";
 import { useMemberStore } from "../stores/memberStore";
@@ -55,7 +56,12 @@ export default function Home() {
   useMember();
   const { data: greeting } = useGreeting();
   const { data: today } = useTodayQuestion();
-  const { data: recommendations, isError: recommendationsError } = useRecommendations();
+  const {
+    data: recommendations,
+    isError: recommendationsError,
+    refetch: refetchRecommendations,
+    isFetching: recommendationsFetching,
+  } = useRecommendations();
   const { data: schedule } = useSelectedSchedule();
   const {
     data: heatmap,
@@ -63,6 +69,19 @@ export default function Home() {
     isError: heatmapError,
     refetch: refetchHeatmap,
   } = useHeatmap();
+
+  // 버튼 1회전 트리거 — 애니메이션 클래스를 뗐다 붙이기 위해 별도 state 사용
+  const [spinning, setSpinning] = useState(false);
+  // 카드 페이드인 재트리거 — key가 바뀌면 카드 목록이 재마운트되어 애니메이션 재실행
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const handleRefresh = useCallback(() => {
+    if (recommendationsFetching || spinning) return;
+    setSpinning(true);
+    refetchRecommendations().then(() => {
+      setRefreshKey((k) => k + 1);
+    });
+  }, [recommendationsFetching, spinning, refetchRecommendations]);
 
   const uuid = useMemberStore((s) => s.uuid);
   const nickname = useMemberStore((s) => s.nickname);
@@ -284,14 +303,31 @@ export default function Home() {
       {!recommendationsError && recommendations && recommendations.questions.length > 0 && (
         <section className={`mt-6 ${s5.className}`}>
           {/* Sparkles 아이콘으로 AI 추천 기능임을 명시 */}
-          <h2 className="text-secondary text-sm mb-3 flex items-center gap-1">
+          <h2 className="text-secondary text-sm mb-3 flex items-center gap-2">
             <Sparkles size={14} fill="currentColor" />
             AI 추천문제
+            {/* 다른 추천 문제 세트를 원할 때 재요청 — staleTime 내에도 강제 refetch */}
+            <button
+              onClick={handleRefresh}
+              disabled={recommendationsFetching || spinning}
+              onAnimationEnd={() => setSpinning(false)}
+              className="p-1 rounded hover:bg-gray-100 transition-colors disabled:opacity-40"
+              aria-label="추천 문제 새로고침"
+            >
+              <RefreshCw
+                size={13}
+                className={spinning ? "animate-refresh-once" : ""}
+              />
+            </button>
           </h2>
-          <div className="space-y-3">
+          <div key={refreshKey} className="space-y-3">
             {recommendations.questions.map((q) => (
-              <Link key={q.questionUuid} to={`/recommendation/${q.questionUuid}`} className="block">
-                <div className="card bg-white p-4 sm:p-6 shadow-sm flex flex-row items-center gap-3 cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:border-brand transition-all duration-200">
+              <Link
+                key={q.questionUuid}
+                to={`/questions/${q.questionUuid}`}
+                className="block animate-card-in"
+              >
+                <div className="card-base shadow-sm flex items-center gap-3 cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:border-brand transition-all duration-200">
                   <div className="flex-1 min-w-0">
                     <p className="text-body truncate">{q.stemPreview}</p>
                     <div className="flex items-center gap-2 mt-1">
