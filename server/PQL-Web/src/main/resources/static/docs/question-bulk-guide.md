@@ -57,11 +57,25 @@ stem에 선택지를 포함하는 것은 **절대 금지**다.
 "stem": "엔터티(Entity)의 특성에 대한 설명 중 옳지 않은 것은?"
 "stem": "TRUNCATE TABLE과 DELETE의 차이에 대한 설명 중 옳은 것은?"
 
-// EXECUTABLE AI_ONLY 올바른 예시 — SQL을 stem에 포함
-"stem": "다음 SQL의 실행 결과로 올바른 것은?\n\nSELECT e.name, d.dept_name\nFROM emp e\nINNER JOIN dept d ON e.dept_id = d.dept_id\nWHERE d.location = 'SEOUL';"
+// EXECUTABLE AI_ONLY 올바른 예시 — SQL을 마크다운 코드 블록으로 감싸서 포함
+"stem": "다음 SQL의 실행 결과로 올바른 것은?\n\n```sql\nSELECT e.name, d.dept_name\nFROM emp e\nINNER JOIN dept d ON e.dept_id = d.dept_id\nWHERE d.location = 'SEOUL';\n```"
 
 // EXECUTABLE ODD_ONE_OUT 올바른 예시 — SQL 없이 테이블·조건만
 "stem": "다음 중 SQL 실행 결과가 나머지와 다른 것은?\n\n테이블: PLAYER (PLAYER_ID INT, TEAM VARCHAR(1), WEIGHT INT)"
+```
+
+### SQL 마크다운 코드 블록 규칙 ★
+
+stem에 SQL이 포함되는 경우(EXECUTABLE 문제) 반드시 ` ```sql ``` ` 코드 블록으로 감싸야 한다.
+
+**화면에서 코드 블록으로 렌더링되어 가독성이 크게 향상된다.**
+
+```
+// ❌ 잘못된 방식 — SQL을 일반 텍스트로 삽입
+"stem": "다음 SQL의 실행 결과로 올바른 것은?\n\nSELECT A.NAME FROM EMP;"
+
+// ✅ 올바른 방식 — SQL을 코드 블록으로 감싸기
+"stem": "다음 SQL의 실행 결과로 올바른 것은?\n\n```sql\nSELECT A.NAME FROM EMP;\n```"
 ```
 
 ### stem 작성 체크리스트
@@ -70,6 +84,7 @@ stem에 선택지를 포함하는 것은 **절대 금지**다.
 - [ ] 질문이 어떤 개념/SQL을 다루는지 문장에서 드러나는가?
 - [ ] EXECUTABLE + AI_ONLY이면 사용하는 SQL이 stem 안에 포함되어 있는가?
 - [ ] EXECUTABLE + ODD_ONE_OUT이면 stem에 SQL이 없고 테이블·조건만 있는가?
+- [ ] stem에 SQL이 있으면 ` ```sql ``` ` 코드 블록으로 감쌌는가?
 - [ ] 줄바꿈은 `\n`으로 처리했는가?
 
 ---

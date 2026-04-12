@@ -286,3 +286,12 @@ class XxxServiceTest {
 - [ ] 멀티모듈 테스트에 `testImplementation project(':PQL-Web')`를 추가했는가?
 - [ ] 도메인별 `XxxException` 클래스를 만들지 않았는가? (반드시 `CustomException(ErrorCode.XXX)` 사용)
 - [ ] 새 에러 타입이 필요하면 `ErrorCode` enum에 추가했는가?
+
+## 문제(Question) 관련 작업 시 추가 체크리스트
+
+- [ ] stem에 SQL이 포함된 EXECUTABLE 문제는 ` ```sql ``` ` 코드 블록으로 SQL을 감쌌는가?
+- [ ] stem/문제 형식 관련 규칙이 변경됐을 경우 아래 파일들도 함께 수정했는가?
+  - `PQL-Web/src/main/resources/static/docs/question-single-guide.md` (단건 등록 가이드 MD)
+  - `PQL-Web/src/main/resources/static/docs/question-bulk-guide.md` (대량 등록 가이드 MD)
+  - `PQL-Web/src/main/resources/templates/admin/question-register.html` (단건 등록 가이드 모달)
+  - `PQL-Web/src/main/resources/templates/admin/questions.html` (대량 등록 가이드 모달)
