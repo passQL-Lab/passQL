@@ -48,11 +48,13 @@ export const usePracticeStore = create<PracticeState & PracticeActions>()((set, 
   startTimer: () => set({ startedAt: Date.now() }),
 
   submitAndAdvance: (questionUuid, isCorrect, selectedChoiceKey, selectedChoiceBody) => {
-    const { startedAt, results } = get();
+    // startedAt은 타이머 기록용 — set 콜백 밖에서 읽어도 안전
+    const { startedAt } = get();
     const durationMs = startedAt ? Date.now() - startedAt : 0;
     const newResult: PracticeQuestionResult = { questionUuid, isCorrect, selectedChoiceKey, selectedChoiceBody, durationMs };
+    // results는 set 콜백 내부의 최신 상태(s.results)로 추가 — 연속 클릭 시 race condition 방지
     set((s) => ({
-      results: [...results, newResult],
+      results: [...s.results, newResult],
       currentIndex: s.currentIndex + 1,
       startedAt: Date.now(),
     }));
