@@ -32,14 +32,15 @@ export const ResultTable = memo(function ResultTable({ result, onAskAi }: Result
   }
 
   return (
-    <div className="success-card mt-3">
-      <p className="text-sm font-medium mb-2" style={{ color: "var(--color-sem-success-text)" }}>
-        <Check size={14} className="inline mr-1" />
+    <div className="mt-2">
+      {/* 실행 결과 요약 — 행 수·소요 시간 compact 표시 */}
+      <p className="text-xs font-medium mb-1" style={{ color: "var(--color-sem-success-text)" }}>
+        <Check size={12} className="inline mr-0.5" />
         {result.rowCount}행 · {result.elapsedMs}ms
       </p>
       {result.columns.length > 0 && (
         <div
-          className="overflow-x-auto rounded-xl border mt-2"
+          className="overflow-hidden rounded-xl border"
           style={{ borderColor: "var(--color-border)" }}
         >
           <table className="data-table w-full">
