@@ -1,11 +1,36 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-12T11:56:45Z",
-    "currentVersion": "0.0.95",
+    "lastUpdated": "2026-04-12T12:45:26Z",
+    "currentVersion": "0.0.96",
     "projectType": "basic",
-    "totalReleases": 41
+    "totalReleases": 42
   },
   "releases": [
+    {
+      "version": "0.0.96",
+      "project_type": "basic",
+      "date": "2026-04-12",
+      "pr_number": 172,
+      "raw_summary": "## Summary by CodeRabbit\n\n## v0.0.96 릴리스 노트\n\n* **새로운 기능**\n  * 관리자용 토픽 편집 기능 추가 (토픽 이름, 정렬 순서, 활성화 상태 변경 가능)\n\n* **개선 사항**\n  * 카테고리 로딩 상태 시각화 개선 (스켈레톤 기반 플레이스홀더)\n  * 카테고리 카드 스타일 업데이트\n  * 연습 결과 페이지 안정성 향상 (타임아웃 처리 및 문제 조회 개선)\n  * 토픽 표시 이름 단축",
+      "parsed_changes": {
+        "새로운_기능": {
+          "title": "새로운 기능",
+          "items": [
+            "관리자용 토픽 편집 기능 추가 (토픽 이름, 정렬 순서, 활성화 상태 변경 가능)"
+          ]
+        },
+        "개선_사항": {
+          "title": "개선 사항",
+          "items": [
+            "카테고리 로딩 상태 시각화 개선 (스켈레톤 기반 플레이스홀더)",
+            "카테고리 카드 스타일 업데이트",
+            "연습 결과 페이지 안정성 향상 (타임아웃 처리 및 문제 조회 개선)",
+            "토픽 표시 이름 단축"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.95",
       "project_type": "basic",

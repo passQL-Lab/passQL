@@ -53,8 +53,12 @@ export default function CategoryCards() {
       {/* ② 카드 그리드 */}
       {isLoading ? (
         <section className={`grid grid-cols-2 lg:grid-cols-3 gap-3 ${s1.className}`} style={s1.style}>
-          {Array.from({ length: 5 }, (_, i) => (
-            <div key={i} className="card-base h-28 animate-pulse bg-border" />
+          {Array.from({ length: 6 }, (_, i) => (
+            <div key={i} className="card-topic pointer-events-none">
+              {/* daisyUI skeleton — animate-pulse 대신 shimmer 효과 */}
+              <div className="skeleton w-[52px] h-[52px] rounded-[14px] mb-3" />
+              <div className="skeleton h-4 w-3/4 rounded" />
+            </div>
           ))}
         </section>
       ) : (
@@ -65,11 +69,11 @@ export default function CategoryCards() {
               <button
                 key={t.code}
                 type="button"
-                className="card-base flex flex-col items-center text-center cursor-pointer shadow-sm hover:shadow-md hover:-translate-y-0.5 hover:border-brand"
+                className="card-topic"
                 onClick={() => handleSelect(t.code, t.displayName)}
               >
-                <div className="w-11 h-11 bg-accent-light rounded-[10px] flex items-center justify-center mb-3">
-                  <Icon size={22} className="text-brand" />
+                <div className="card-topic-icon">
+                  <Icon size={26} className="text-brand" />
                 </div>
                 <span className="text-body font-bold">{t.displayName}</span>
               </button>

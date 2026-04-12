@@ -1,6 +1,9 @@
 package com.passql.meta.service;
 
+import com.passql.common.exception.CustomException;
+import com.passql.common.exception.constant.ErrorCode;
 import com.passql.meta.dto.TopicTree;
+import com.passql.meta.dto.TopicUpdateRequest;
 import com.passql.meta.entity.ConceptDoc;
 import com.passql.meta.entity.ConceptTag;
 import com.passql.meta.entity.Subtopic;
@@ -28,7 +31,8 @@ public class MetaService {
     private final ConceptDocRepository conceptDocRepository;
 
     public List<TopicTree> getTopicTree() {
-        List<Topic> topics = topicRepository.findByIsActiveTrueOrderBySortOrderAsc();
+        // 관리자 화면에서는 비활성 토픽도 포함해 전체 목록을 표시 (비활성화 후 되돌릴 수 없는 문제 방지)
+        List<Topic> topics = topicRepository.findAllByOrderBySortOrderAsc();
         return topics.stream()
                 .map(topic -> {
                     List<TopicTree.SubtopicItem> subs = subtopicRepository
@@ -69,6 +73,16 @@ public class MetaService {
                 .isActive(true)
                 .build();
         return conceptDocRepository.save(doc);
+    }
+
+    /** 토픽 편집 — displayName, sortOrder, isActive 수정 */
+    @Transactional
+    public void updateTopic(String code, TopicUpdateRequest request) {
+        Topic topic = topicRepository.findByCode(code)
+                .orElseThrow(() -> new CustomException(ErrorCode.TOPIC_NOT_FOUND));
+        topic.setDisplayName(request.displayName());
+        topic.setSortOrder(request.sortOrder());
+        topic.setIsActive(request.isActive());
     }
 
     @Transactional

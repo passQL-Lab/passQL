@@ -87,7 +87,10 @@ export default function PracticeResult() {
       : "0초";
 
   // 카운트업 완료 후 150ms 간격으로 순차 등장 — 타이머 ID 보관하여 언마운트 시 클린업
+  // 이전 타이머를 먼저 클린업하여 중복 호출(StrictMode 등) 방어
   const handleScoreComplete = useCallback(() => {
+    timerIdsRef.current.forEach(clearTimeout);
+    timerIdsRef.current = [];
     [0, 1, 2].forEach((i) => {
       const id = setTimeout(() => {
         setVisibleStats((prev) => {
@@ -184,7 +187,8 @@ export default function PracticeResult() {
       </div>
       <div className="flex flex-col gap-2">
         {store.results.map((r, i) => {
-          const q = store.questions[i];
+          // 인덱스 대신 uuid로 매핑 — questions 순서와 results 순서가 어긋날 경우 방어
+          const q = store.questions.find((q) => q.questionUuid === r.questionUuid);
           const isOpen = openIndex === i;
           return (
             <div
