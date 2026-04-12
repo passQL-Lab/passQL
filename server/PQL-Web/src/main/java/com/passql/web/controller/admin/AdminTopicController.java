@@ -1,12 +1,13 @@
 package com.passql.web.controller.admin;
 
+import com.passql.meta.dto.TopicUpdateRequest;
 import com.passql.meta.service.MetaService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/admin/topics")
@@ -25,5 +26,15 @@ public class AdminTopicController {
         model.addAttribute("currentMenu", "topics");
         model.addAttribute("pageTitle", "토픽/태그 관리");
         return "admin/topics";
+    }
+
+    /** 토픽 편집 — displayName, sortOrder, isActive 수정 */
+    @PutMapping("/{code}")
+    @ResponseBody
+    public ResponseEntity<Void> updateTopic(
+            @PathVariable String code,
+            @Valid @RequestBody TopicUpdateRequest request) {
+        metaService.updateTopic(code, request);
+        return ResponseEntity.ok().build();
     }
 }
