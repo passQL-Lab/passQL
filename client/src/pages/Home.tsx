@@ -27,15 +27,7 @@ function parseGreetingLines(message: string, nickname: string): React.ReactNode[
     return (
       <span key={lineIdx}>
         {parts[0]}
-        <span
-          style={{
-            color: "var(--color-brand)",
-            fontSize: "1.15em",
-            fontWeight: 700,
-          }}
-        >
-          {nickname}
-        </span>
+        <span className="greeting-nickname">{nickname}</span>
         {parts[1]}
       </span>
     );
