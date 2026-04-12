@@ -1,11 +1,33 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-12T22:54:13Z",
-    "currentVersion": "0.0.114",
+    "lastUpdated": "2026-04-12T23:09:03Z",
+    "currentVersion": "0.0.115",
     "projectType": "basic",
-    "totalReleases": 46
+    "totalReleases": 47
   },
   "releases": [
+    {
+      "version": "0.0.115",
+      "project_type": "basic",
+      "date": "2026-04-12",
+      "pr_number": 204,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **스타일**\n  * 하단 네비게이션 탭의 활성 상태 표시 스타일을 개선했습니다. 탭 선택 시 더 명확한 시각적 피드백을 제공합니다.\n\n* **기타**\n  * 애플리케이션 버전을 v0.0.115로 업데이트했습니다.",
+      "parsed_changes": {
+        "스타일": {
+          "title": "스타일",
+          "items": [
+            "하단 네비게이션 탭의 활성 상태 표시 스타일을 개선했습니다. 탭 선택 시 더 명확한 시각적 피드백을 제공합니다."
+          ]
+        },
+        "기타": {
+          "title": "기타",
+          "items": [
+            "애플리케이션 버전을 v0.0.115로 업데이트했습니다."
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.114",
       "project_type": "basic",
