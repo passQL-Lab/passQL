@@ -76,7 +76,7 @@ export const ChoiceCard = memo(function ChoiceCard({
               onClick={(e) => e.stopPropagation()}
             >
               <button
-                className={`btn btn-xs btn-outline btn-primary${isSelected ? " text-white border-white" : ""}`}
+                className={`btn btn-xs${isSelected ? " bg-white text-primary border-white" : " btn-outline btn-primary"}`}
                 type="button"
                 onClick={() => onExecute(choice.key, choice.body)}
                 disabled={!!cached || isExecuting}
