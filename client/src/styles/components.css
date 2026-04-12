@@ -166,6 +166,10 @@
   border-collapse: collapse;
 }
 
+.data-table thead tr {
+  background-color: var(--color-surface-page);
+}
+
 .data-table th {
   text-align: left;
   padding: 8px 12px;
@@ -181,6 +185,14 @@
   font-family: var(--font-mono);
   font-size: 13px;
   font-variant-numeric: tabular-nums;
+}
+
+.data-table tr {
+  border-bottom: 1px solid var(--color-border);
+}
+
+.data-table tr:last-child {
+  border-bottom: none;
 }
 
 .data-table tr:nth-child(even) {

@@ -7,7 +7,7 @@ import { getRandomMessage } from "../constants/microcopy";
 import QuestionDetail from "./QuestionDetail";
 import PracticeFeedbackBar from "../components/PracticeFeedbackBar";
 import ConfirmModal from "../components/ConfirmModal";
-import ChoiceReview from "../components/ChoiceReview";
+import LoadingOverlay from "../components/LoadingOverlay";
 import type { ChoiceItem, SubmitResult } from "../types/api";
 
 function WaitingForQuestion({ topicName }: { readonly topicName: string }) {
@@ -31,22 +31,16 @@ export default function PracticeSet() {
   const submitAndAdvance = usePracticeStore((s) => s.submitAndAdvance);
 
   const [feedback, setFeedback] = useState<SubmitResult | null>(null);
+  // 답안 제출 API 호출 중 화면 조작 차단
+  const [submitting, setSubmitting] = useState(false);
   // Home 버튼 클릭 시 이탈 확인 모달 — blocker와 독립적으로 제어
   const [exitModalOpen, setExitModalOpen] = useState(false);
   // exitConfirmed=true 시 blocker를 우회하여 홈으로 이동 — 이중 확인 방지
   const [exitConfirmed, setExitConfirmed] = useState(false);
-  // EXECUTABLE 문제 오답노트용 상태
-  const [reviewChoices, setReviewChoices] = useState<
-    readonly ChoiceItem[] | null
-  >(null);
-  const [reviewSelectedKey, setReviewSelectedKey] = useState<string | null>(
-    null,
-  );
 
   const totalQuestions = questions.length;
   const displayIndex = feedback ? currentIndex - 1 : currentIndex;
   const displayQuestion = questions[displayIndex];
-  const isLast = displayIndex >= totalQuestions - 1;
 
   // 마지막 문제 완료 여부 — 결과 페이지 이동 조건이자 이탈 차단 해제 기준
   const shouldNavigateToResult = !feedback && currentIndex >= totalQuestions;
@@ -54,20 +48,18 @@ export default function PracticeSet() {
   // 마지막 문제 완료 전까지 이탈 차단 — 중간 이탈 시 세션 기록 유실 방지
   // exitConfirmed=true이면 차단 해제 → useEffect에서 navigate("/") 호출
   // useBlocker는 훅이므로 조건부 return 이전에 호출해야 함
-  const blocker = useBlocker(!shouldNavigateToResult && !exitConfirmed);
+  // submitting 중에는 이탈 차단 해제 — 채점 API 진행 중 모달 충돌 방지
+  const blocker = useBlocker(!shouldNavigateToResult && !exitConfirmed && !submitting);
 
   const handleSelect = useCallback(
     async (
       selectedChoiceKey: string,
       choiceSetId: string,
-      choices: readonly ChoiceItem[],
+      _choices: readonly ChoiceItem[],
     ) => {
       if (!displayQuestion) return;
-      // EXECUTABLE 문제면 오답노트 데이터 저장
-      if (choices[0]?.kind === "SQL") {
-        setReviewChoices(choices);
-        setReviewSelectedKey(selectedChoiceKey);
-      }
+      // 제출 중 중복 호출 및 화면 조작 방지
+      setSubmitting(true);
       try {
         const result = await submitAnswer(
           displayQuestion.questionUuid,
@@ -96,6 +88,8 @@ export default function PracticeSet() {
           false,
           selectedChoiceKey,
         );
+      } finally {
+        setSubmitting(false);
       }
     },
     [displayQuestion, submitAndAdvance],
@@ -103,8 +97,6 @@ export default function PracticeSet() {
 
   const handleNext = useCallback(() => {
     setFeedback(null);
-    setReviewChoices(null);
-    setReviewSelectedKey(null);
   }, []);
 
   // useEffect는 훅 규칙상 조건부 return 이전에 위치해야 함
@@ -159,25 +151,17 @@ export default function PracticeSet() {
       </div>
 
       {displayQuestion ? (
-        <div className="flex-1 overflow-y-auto px-4">
-          {/* 풀이 중: 선택 가능 / 피드백 후: 흐리게 비활성화 */}
-          <div className={feedback ? "pointer-events-none opacity-60" : ""}>
-            <QuestionDetail
-              key={displayQuestion.questionUuid}
-              questionUuid={displayQuestion.questionUuid}
-              practiceMode
-              practiceSubmitLabel={isLast ? "결과 보기" : "확인하기"}
-              onPracticeSubmit={handleSelect}
-            />
-          </div>
-          {/* EXECUTABLE 문제: 피드백 후 오답노트 SQL 실행 비교 */}
-          {feedback && reviewChoices && (
-            <ChoiceReview
-              choices={reviewChoices}
-              questionUuid={displayQuestion.questionUuid}
-              selectedKey={reviewSelectedKey ?? undefined}
-            />
-          )}
+        /* 피드백바 높이(~200px)만큼 bottom padding — 마지막 초이스카드가 가려지지 않게 */
+        <div className={`flex-1 overflow-y-auto px-4 transition-[padding] duration-300 ${feedback ? "pb-52" : "pb-4"}`}>
+          {/* 제출 후 showExecution=true — ChoiceCard 안에 SQL 실행 버튼 표시 */}
+          <QuestionDetail
+            key={displayQuestion.questionUuid}
+            questionUuid={displayQuestion.questionUuid}
+            practiceMode
+            practiceSubmitLabel="확인"
+            onPracticeSubmit={handleSelect}
+            showExecution={!!feedback}
+          />
         </div>
       ) : (
         <WaitingForQuestion topicName={topicName ?? ""} />
@@ -187,7 +171,16 @@ export default function PracticeSet() {
         <PracticeFeedbackBar
           result={feedback}
           onNext={handleNext}
-          nextLabel={currentIndex >= totalQuestions ? "결과 보기" : "다음 문제"}
+          nextLabel={feedback?.isCorrect ? "계속하기" : "확인"}
+        />
+      )}
+
+      {/* 채점 중 오버레이 — 제출 API 응답 전 화면 조작 차단 */}
+      {submitting && (
+        <LoadingOverlay
+          topicName={topicName ?? ""}
+          staticMessage="채점 중이에요"
+          subMessage="잠시만 기다려주세요"
         />
       )}
 
