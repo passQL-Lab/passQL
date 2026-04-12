@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { HelpCircle } from "lucide-react";
 import type { TopicStat } from "../types/api";
@@ -146,8 +146,8 @@ export default function StatsTopicList({ topicStats }: StatsTopicListProps) {
               <div className="w-full h-2 bg-surface-code rounded-full overflow-hidden">
                 {!unsolved && (
                   <div
-                    className={`h-full rounded-full transition-all duration-500 ${colors!.bar}`}
-                    style={{ width: `${barWidth}%` }}
+                    className={`h-full rounded-full transition-all duration-500 [width:var(--bar-w)] ${colors!.bar}`}
+                    style={{ "--bar-w": `${barWidth}%` } as CSSProperties}
                   />
                 )}
               </div>

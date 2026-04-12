@@ -41,14 +41,7 @@ export const SqlPlayground = memo(function SqlPlayground({
       {isOpen && (
         <div className="mt-3">
           <textarea
-            className="w-full rounded-xl p-3 text-sm resize-none focus:outline-none focus:ring-1"
-            style={{
-              fontFamily: "'JetBrains Mono', monospace",
-              backgroundColor: "var(--color-code-bg)",
-              border: "1px solid var(--color-border)",
-              minHeight: "120px",
-              color: "var(--color-text-body)",
-            }}
+            className="w-full rounded-xl p-3 text-sm resize-none focus:outline-none focus:ring-1 font-mono bg-surface-code border border-border min-h-[120px] text-text-body"
             placeholder="SELECT * FROM 테이블명;"
             value={sql}
             onChange={(e) => setSql(e.target.value)}

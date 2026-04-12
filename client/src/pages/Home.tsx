@@ -1,7 +1,7 @@
 import { Flame, ChevronRight, Check, RefreshCw, Sparkles } from "lucide-react";
 import { getReadinessCopy } from "../constants/readinessCopy";
 import { Link } from "react-router-dom";
-import { useState, useCallback } from "react";
+import { useState, useCallback, type CSSProperties } from "react";
 import { useProgress } from "../hooks/useProgress";
 import { useMember } from "../hooks/useMember";
 import { useMemberStore } from "../stores/memberStore";
@@ -279,8 +279,8 @@ export default function Home() {
           </div>
           <div className="w-full h-2 rounded-full bg-border mb-3">
             <div
-              className="h-full rounded-full bg-brand transition-all"
-              style={{ width: `${progress.readiness.score * 100}%` }}
+              className="h-full rounded-full bg-brand transition-all [width:var(--bar-w)]"
+              style={{ "--bar-w": `${progress.readiness.score * 100}%` } as CSSProperties}
             />
           </div>
           <p className="text-sm text-text-secondary">
@@ -311,8 +311,8 @@ export default function Home() {
             <span className="text-sm text-text-secondary mt-1">정답률</span>
             <div className="w-full mt-2 h-1 rounded-full bg-border">
               <div
-                className="h-full rounded-full bg-brand"
-                style={{ width: `${correctRate * 100}%` }}
+                className="h-full rounded-full bg-brand [width:var(--bar-w)]"
+                style={{ "--bar-w": `${correctRate * 100}%` } as CSSProperties}
               />
             </div>
           </div>
