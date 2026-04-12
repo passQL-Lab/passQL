@@ -113,7 +113,7 @@ export default function Home() {
       <section className={`grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4 ${s2.className}`}>
         {today?.question ? (
           today.alreadySolvedToday ? (
-            {/* 완료 상태: 회색 dimmed 카드 — 이미 끝난 항목임을 시각적으로 표현 */}
+            // 완료 상태: 회색 dimmed 카드 — 이미 끝난 항목임을 시각적으로 표현
             <div className="h-full flex flex-col gap-2 rounded-xl p-5 cursor-default bg-[#F3F4F6] border border-border">
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium text-text-caption">
