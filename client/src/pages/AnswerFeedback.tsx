@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { Check, X, ChevronRight } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
@@ -24,6 +24,47 @@ interface FeedbackState {
   readonly choices?: readonly ChoiceItem[];
 }
 
+interface ChoiceCardStyle {
+  readonly borderColor: string;
+  readonly bgColor: string;
+  readonly badgeText: string | null;
+  readonly badgeStyle: React.CSSProperties;
+}
+
+/** 선택지 카드 상태(정답/내 선택/기타)에 따른 스타일 반환 */
+function getChoiceCardStyle(isAnswer: boolean, isMyChoice: boolean): ChoiceCardStyle {
+  if (isAnswer && isMyChoice) {
+    return {
+      borderColor: "var(--color-sem-success)",
+      bgColor: "var(--color-sem-success-light)",
+      badgeText: "정답 · 내 선택",
+      badgeStyle: { backgroundColor: "var(--color-sem-success-light)", color: "var(--color-sem-success-text)" },
+    };
+  }
+  if (isAnswer) {
+    return {
+      borderColor: "var(--color-sem-success)",
+      bgColor: "var(--color-sem-success-light)",
+      badgeText: "정답",
+      badgeStyle: { backgroundColor: "var(--color-sem-success-light)", color: "var(--color-sem-success-text)" },
+    };
+  }
+  if (isMyChoice) {
+    return {
+      borderColor: "var(--color-brand)",
+      bgColor: "var(--color-brand-light)",
+      badgeText: "내 선택",
+      badgeStyle: { backgroundColor: "var(--color-brand-light)", color: "var(--color-brand)" },
+    };
+  }
+  return {
+    borderColor: "var(--color-border)",
+    bgColor: "var(--color-surface-card)",
+    badgeText: null,
+    badgeStyle: {},
+  };
+}
+
 export default function AnswerFeedback() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -37,15 +78,22 @@ export default function AnswerFeedback() {
   });
   const similarQuery = useSimilarQuestions(state?.questionUuid ?? "");
 
+  // 실행 중인 선택지 키 — useCallback deps에서 제거하기 위해 ref로 추적
+  const executingKeyRef = useRef<string | null>(null);
+  // 캐시 guard 조회용 ref — resultCache state와 동기화
+  const resultCacheRef = useRef<Record<string, ExecuteResult>>({});
+
   // 선택지 SQL 실행 결과 캐시 — 제출 응답(selectedResult/correctResult)으로 초기화
   const [resultCache, setResultCache] = useState<Record<string, ExecuteResult>>(() => {
     if (!state) return {};
     const cache: Record<string, ExecuteResult> = {};
     if (state.selectedResult && state.selectedKey) {
       cache[state.selectedKey] = state.selectedResult;
+      resultCacheRef.current[state.selectedKey] = state.selectedResult;
     }
     if (state.correctResult && state.correctKey) {
       cache[state.correctKey] = state.correctResult;
+      resultCacheRef.current[state.correctKey] = state.correctResult;
     }
     return cache;
   });
@@ -53,21 +101,25 @@ export default function AnswerFeedback() {
   const [execErrors, setExecErrors] = useState<Record<string, string>>({});
 
   const handleExecute = useCallback(async (choice: ChoiceItem) => {
-    if (!state || resultCache[choice.key] || executing === choice.key) return;
+    // ref로 중복 실행 방지 — state 캡처 없이 최신 값 조회
+    if (!state || resultCacheRef.current[choice.key] || executingKeyRef.current === choice.key) return;
     setExecErrors((prev) => { const next = { ...prev }; delete next[choice.key]; return next; });
+    executingKeyRef.current = choice.key;
     setExecuting(choice.key);
     try {
       const result = await executeChoice(state.questionUuid, choice.body);
+      resultCacheRef.current = { ...resultCacheRef.current, [choice.key]: result };
       setResultCache((prev) => ({ ...prev, [choice.key]: result }));
     } catch (err) {
       const message = err instanceof Error ? err.message : "실행에 실패했습니다";
       setExecErrors((prev) => ({ ...prev, [choice.key]: message }));
     } finally {
+      executingKeyRef.current = null;
       setExecuting(null);
     }
-  }, [state, resultCache, executing]);
+  }, [state]); // resultCache, executing deps 제거됨 — ref로 대체
 
-  const handleAskAi = () => {
+  const handleAskAi = useCallback(() => {
     if (!state) return;
     setAiSheetOpen(true);
     setAiText("");
@@ -75,7 +127,7 @@ export default function AnswerFeedback() {
       questionUuid: state.questionUuid,
       selectedChoiceKey: state.selectedKey,
     });
-  };
+  }, [state, diffMutation]);
 
   if (!state) {
     navigate("/questions", { replace: true });
@@ -189,27 +241,7 @@ export default function AnswerFeedback() {
         const error = execErrors[choice.key];
 
         // 카드 스타일 결정 — 정답/내선택/기타 3가지 상태
-        let borderColor = "var(--color-border)";
-        let bgColor = "var(--color-surface-card)";
-        let badgeText: string | null = null;
-        let badgeStyle: React.CSSProperties = {};
-
-        if (isAnswer && isMyChoice) {
-          borderColor = "var(--color-sem-success)";
-          bgColor = "var(--color-sem-success-light)";
-          badgeText = "정답 · 내 선택";
-          badgeStyle = { backgroundColor: "var(--color-sem-success-light)", color: "var(--color-sem-success-text)" };
-        } else if (isAnswer) {
-          borderColor = "var(--color-sem-success)";
-          bgColor = "var(--color-sem-success-light)";
-          badgeText = "정답";
-          badgeStyle = { backgroundColor: "var(--color-sem-success-light)", color: "var(--color-sem-success-text)" };
-        } else if (isMyChoice) {
-          borderColor = "var(--color-brand)";
-          bgColor = "var(--color-brand-light)";
-          badgeText = "내 선택";
-          badgeStyle = { backgroundColor: "var(--color-brand-light)", color: "var(--color-brand)" };
-        }
+        const { borderColor, bgColor, badgeText, badgeStyle } = getChoiceCardStyle(isAnswer, isMyChoice);
 
         return (
           <div
