@@ -37,7 +37,7 @@ export default function PracticeFeedbackBar({
           {/* 정답/오답 헤더 */}
           <div className="flex items-center gap-2 mb-3">
             <div
-              className={`w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 ${isCorrect ? "feedback-bar-icon--correct" : "feedback-bar-icon--error"}`}
+              className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${isCorrect ? "feedback-bar-icon--correct" : "feedback-bar-icon--error"}`}
             >
               {isCorrect ? (
                 <Check size={15} className="feedback-bar-check" />

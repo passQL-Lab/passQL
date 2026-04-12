@@ -18,7 +18,7 @@ export default function StatsRadarChart({ topicStats }: StatsRadarChartProps) {
   }));
 
   return (
-    <div className="card-base">
+    <div className="bg-surface-card border border-border rounded-2xl p-4 sm:p-6">
       <h2 className="text-base font-bold text-text-primary mb-4">토픽별 분석</h2>
       <div className="w-full h-64">
         <ResponsiveContainer width="100%" height="100%">
