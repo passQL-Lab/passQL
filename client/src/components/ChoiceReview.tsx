@@ -62,7 +62,7 @@ export default function ChoiceReview({ choices, questionUuid, selectedKey }: Cho
             >
               {/* SQL 본문 */}
               <pre
-                className="text-sm leading-relaxed whitespace-pre-wrap break-words mb-3"
+                className="text-sm leading-relaxed whitespace-pre-wrap wrap-break-word mb-3"
                 style={{ fontFamily: "var(--font-mono)", color: "var(--color-text-primary)" }}
               >
                 {choice.body}

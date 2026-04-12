@@ -21,14 +21,20 @@ export default function ConfirmModal({
   onConfirm,
   onCancel,
 }: ConfirmModalProps) {
-  // ESC 키로 모달 닫기 (이탈 취소)
+  // ESC 키로 모달 닫기 + 배경 스크롤 잠금
   useEffect(() => {
     if (!isOpen) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") onCancel();
     };
     window.addEventListener("keydown", handleKeyDown);
-    return () => window.removeEventListener("keydown", handleKeyDown);
+    // 이전 overflow 값 저장 후 복원 — 중첩 모달 대응
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      document.body.style.overflow = prevOverflow;
+    };
   }, [isOpen, onCancel]);
 
   if (!isOpen) return null;
@@ -36,17 +42,17 @@ export default function ConfirmModal({
   return (
     // 오버레이 — 클릭 시 이탈 취소
     <div
-      className="fixed inset-0 z-50 flex items-end md:items-center justify-center"
+      className="fixed inset-0 z-50 flex items-end justify-center"
       style={{ backgroundColor: "rgba(17, 24, 39, 0.5)" }}
       onClick={onCancel}
     >
       {/* 모달 카드 — 클릭 이벤트 버블링 방지 */}
       <div
-        className="w-full md:max-w-sm bg-white border border-border rounded-t-2xl md:rounded-xl px-5 pt-5 pb-8 md:pb-6 space-y-4"
+        className="w-full bg-white border border-border rounded-t-2xl px-5 pt-5 pb-8 space-y-4"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* 모바일 상단 인디케이터 */}
-        <div className="w-10 h-1 bg-border rounded-full mx-auto md:hidden" />
+        {/* 상단 인디케이터 */}
+        <div className="w-10 h-1 bg-border rounded-full mx-auto" />
 
         <div className="space-y-1.5 text-center">
           <h2 className="text-lg font-bold text-text-primary">{title}</h2>
