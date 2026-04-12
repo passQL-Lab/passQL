@@ -1,4 +1,4 @@
-import { useState, useRef, type ReactNode } from "react";
+import React, { useState, useRef, type ReactNode } from "react";
 
 interface StepNavigatorProps {
   readonly steps: readonly ReactNode[];
@@ -12,6 +12,7 @@ export default function StepNavigator({ steps, lastButtonLabel = "카테고리 �
   const total = steps.length;
   const isLast = current === total - 1;
 
+  // 범위 가드 내장 — 첫/마지막 단계에서 경계 초과 호출 안전
   const goTo = (idx: number) => {
     if (idx >= 0 && idx < total) setCurrent(idx);
   };
@@ -20,6 +21,7 @@ export default function StepNavigator({ steps, lastButtonLabel = "카테고리 �
     if (current < total - 1) goTo(current + 1);
     else onLastStep?.();
   };
+  // 이전 단계 이동은 스와이프(좌)만 지원 — 결과 화면은 단방향 흐름이 의도적
 
   return (
     <div
@@ -32,11 +34,14 @@ export default function StepNavigator({ steps, lastButtonLabel = "카테고리 �
         else if (diff < -50) goTo(current - 1);
       }}
     >
-      {/* 상단 인디케이터 — 헤더 대신 단계 수만 표시 */}
-      <div className="flex justify-center gap-1.5 pt-4 pb-2">
+      {/* 단계 인디케이터 — 스크린리더에 현재 단계 정보 전달 */}
+      <div role="tablist" aria-label="단계 표시" className="flex justify-center gap-1.5 pt-4 pb-2">
         {Array.from({ length: total }, (_, i) => (
           <div
             key={i}
+            role="tab"
+            aria-selected={i === current}
+            aria-label={`${i + 1}단계 / 전체 ${total}단계`}
             className={`h-2 rounded-full transition-all duration-300 ${
               i === current ? "w-6 bg-brand" : "w-2 bg-border"
             }`}
@@ -47,8 +52,8 @@ export default function StepNavigator({ steps, lastButtonLabel = "카테고리 �
       {/* 콘텐츠 영역 */}
       <div className="flex-1 overflow-hidden">
         <div
-          className="flex h-full transition-transform duration-400 ease-out"
-          style={{ transform: `translateX(-${current * 100}%)` }}
+          className="step-slider"
+          style={{ "--step-offset": `-${current * 100}%` } as React.CSSProperties}
         >
           {steps.map((step, i) => (
             <div key={i} className="min-w-full h-full flex flex-col items-center justify-center px-6 text-center">
