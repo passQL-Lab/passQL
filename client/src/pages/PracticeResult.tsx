@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { useParams, useNavigate, Navigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { Check, RotateCcw } from "lucide-react";
+import { Check, RotateCcw, Target, Clock, Timer } from "lucide-react";
 import { usePracticeStore } from "../stores/practiceStore";
 import { fetchAiComment } from "../api/progress";
 import ScoreCountUp from "../components/ScoreCountUp";
@@ -20,7 +20,8 @@ export default function PracticeResult() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
   const store = usePracticeStore();
-  const [statsVisible, setStatsVisible] = useState(false);
+  // 각 통계 항목의 등장 여부를 인덱스별로 관리 (0: 정답률, 1: 총시간, 2: 문제당 평균)
+  const [visibleStats, setVisibleStats] = useState<boolean[]>([false, false, false]);
 
   // AI 코멘트: useQuery로 캐싱 및 StrictMode 이중 호출 방지
   const { data: aiCommentData, isLoading: aiCommentLoading } = useQuery({
@@ -54,6 +55,19 @@ export default function PracticeResult() {
     ? formatDuration(Math.round(analysis.totalDurationMs / analysis.totalCount))
     : "0초";
 
+  // 카운트업 완료 후 150ms 간격으로 순차 등장
+  const handleScoreComplete = () => {
+    [0, 1, 2].forEach((i) => {
+      setTimeout(() => {
+        setVisibleStats((prev) => {
+          const next = [...prev];
+          next[i] = true;
+          return next;
+        });
+      }, i * 150);
+    });
+  };
+
   const step1 = (
     <>
       <span className="inline-block bg-accent-light text-brand text-sm font-medium px-3.5 py-1 rounded-full mb-8">
@@ -62,29 +76,35 @@ export default function PracticeResult() {
       <ScoreCountUp
         target={analysis.correctCount}
         total={analysis.totalCount}
-        onComplete={() => setStatsVisible(true)}
+        onComplete={handleScoreComplete}
       />
-      <p
-        className="text-body text-text-secondary mt-2 transition-opacity duration-300"
-        style={{ opacity: statsVisible ? 1 : 0 }}
-      >
+      <p className="text-body text-text-secondary mt-2">
         정답
       </p>
-      <div
-        className="flex gap-8 mt-8 transition-all duration-400"
-        style={{ opacity: statsVisible ? 1 : 0, transform: statsVisible ? "translateY(0)" : "translateY(12px)" }}
-      >
-        <div className="text-center">
+      <div className="flex gap-8 mt-8">
+        {/* 정답률 */}
+        <div className={`text-center transition-all duration-300 ease-out ${visibleStats[0] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}>
           <div className="text-lg font-bold">{analysis.totalCount > 0 ? Math.round((analysis.correctCount / analysis.totalCount) * 100) : 0}%</div>
-          <div className="text-xs text-text-caption mt-0.5">정답률</div>
+          <div className="flex items-center gap-1 text-xs text-text-caption mt-0.5 justify-center">
+            <Target size={11} className="text-text-caption" />
+            정답률
+          </div>
         </div>
-        <div className="text-center">
+        {/* 총 시간 */}
+        <div className={`text-center transition-all duration-300 ease-out ${visibleStats[1] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}>
           <div className="text-lg font-bold">{totalDuration}</div>
-          <div className="text-xs text-text-caption mt-0.5">총 시간</div>
+          <div className="flex items-center gap-1 text-xs text-text-caption mt-0.5 justify-center">
+            <Clock size={11} className="text-text-caption" />
+            총 시간
+          </div>
         </div>
-        <div className="text-center">
+        {/* 문제당 평균 */}
+        <div className={`text-center transition-all duration-300 ease-out ${visibleStats[2] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}>
           <div className="text-lg font-bold">{avgDuration}</div>
-          <div className="text-xs text-text-caption mt-0.5">평균</div>
+          <div className="flex items-center gap-1 text-xs text-text-caption mt-0.5 justify-center">
+            <Timer size={11} className="text-text-caption" />
+            문제당 평균
+          </div>
         </div>
       </div>
     </>
