@@ -15,7 +15,7 @@ export default function RecommendationPractice() {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
-  const { markCorrect } = usePracticeStore();
+  const { markCorrect, setReturnStep } = usePracticeStore();
 
   // PracticeResult 등 이전 화면으로 복귀할 경로 — 없으면 홈으로
   const locationState = location.state as { returnPath?: string; initialStep?: number } | null;
@@ -51,7 +51,7 @@ export default function RecommendationPractice() {
         setSubmitting(false);
       }
     },
-    [questionUuid, navigate, queryClient, isPracticeReview, markCorrect],
+    [questionUuid, navigate, queryClient, isPracticeReview, markCorrect, setReturnStep],
   );
 
   if (!questionUuid) {
@@ -104,7 +104,11 @@ export default function RecommendationPractice() {
         <PracticeFeedbackBar
           result={feedback}
           nextLabel={isPracticeReview ? "돌아가기" : "홈으로 가기"}
-          onNext={() => navigate(returnPath, { replace: true, state: isPracticeReview ? { initialStep: returnInitialStep } : undefined })}
+          onNext={() => {
+            // location.state 대신 store를 통해 returnStep 전달 — React Router v7 state 전달 불안정 이슈 우회
+            if (isPracticeReview) setReturnStep(returnInitialStep);
+            navigate(returnPath, { replace: true });
+          }}
           {...(!feedback.isCorrect && {
             secondaryLabel: "다시 풀기",
             onSecondary: () => setFeedback(null),

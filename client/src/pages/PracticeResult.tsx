@@ -1,11 +1,5 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
-import {
-  useParams,
-  useNavigate,
-  Navigate,
-  Link,
-  useLocation,
-} from "react-router-dom";
+import { useParams, useNavigate, Navigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { Check, RotateCcw, Target, Clock, Timer, Sparkles } from "lucide-react";
 import { usePracticeStore } from "../stores/practiceStore";
@@ -25,11 +19,10 @@ function formatDuration(ms: number): string {
 export default function PracticeResult() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
-  const location = useLocation();
-  // 다시 풀기 후 복귀 시 step3(문제별 결과)으로 바로 진입
-  const initialStep =
-    (location.state as { initialStep?: number } | null)?.initialStep ?? 0;
   const store = usePracticeStore();
+  // 다시 풀기 후 복귀 시 step3으로 바로 진입 — store에서 한 번만 읽고 즉시 클리어
+  const initialStepRef = useRef(store.returnStep ?? 0);
+  const initialStep = initialStepRef.current;
   // 각 통계 항목의 등장 여부를 인덱스별로 관리 (0: 정답률, 1: 총시간, 2: 문제당 평균)
   const [visibleStats, setVisibleStats] = useState<boolean[]>([
     false,
@@ -42,9 +35,13 @@ export default function PracticeResult() {
   // 순차 등장 타이머 ID 보관 — 언마운트 시 클린업
   const timerIdsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   useEffect(() => {
+    // 읽은 returnStep 즉시 클리어 — 다음 일반 진입 시 step1로 시작하도록
+    store.clearReturnStep();
     return () => {
       timerIdsRef.current.forEach(clearTimeout);
     };
+  // store 인스턴스는 변하지 않으므로 의존성 배열에서 제외
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // AI 코멘트: useQuery로 캐싱 및 StrictMode 이중 호출 방지
@@ -241,10 +238,7 @@ export default function PracticeResult() {
                     {/* 정답/오답 모두 다시 풀기 제공 — 복습 목적 */}
                     <Link
                       to={`/recommendation/${r.questionUuid}`}
-                      state={{
-                        returnPath: `/practice/${sessionId}`,
-                        initialStep: 2,
-                      }}
+                      state={{ returnPath: `/practice/${sessionId}`, initialStep: 2 }}
                       className="inline-flex items-center gap-1.5 text-xs font-medium text-brand bg-accent-light rounded-md px-3 py-1.5"
                     >
                       <RotateCcw size={12} /> 다시 풀기
