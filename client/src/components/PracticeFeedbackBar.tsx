@@ -30,9 +30,7 @@ export default function PracticeFeedbackBar({
             : "var(--color-sem-error-light)",
         }}
       >
-        <div className="mx-auto max-w-120 px-5 pt-3 pb-6">
-          {/* 드래그 핸들 */}
-          <div className="w-10 h-1 rounded-full mx-auto mb-4" style={{ backgroundColor: "#D1D5DB" }} />
+        <div className="mx-auto max-w-120 px-5 pt-5 pb-6">
           {/* 정답/오답 헤더 */}
           <div className="flex items-center gap-2 mb-3">
             <div
