@@ -23,8 +23,9 @@ class AiCommentServiceTest {
     @Autowired AiCommentService aiCommentService;
     @Autowired TopicAnalysisService topicAnalysisService;
 
-    // 테스트 시 실제 존재하는 memberUuid로 교체
+    // 테스트 시 실제 존재하는 memberUuid/sessionUuid로 교체
     private static final UUID TEST_MEMBER_UUID = UUID.fromString("00000000-0000-0000-0000-000000000001");
+    private static final UUID TEST_SESSION_UUID = UUID.fromString("00000000-0000-0000-0000-000000000002");
 
     @Test
     @Transactional
@@ -48,8 +49,8 @@ class AiCommentServiceTest {
 
     public void AI_코멘트_조회_테스트() {
         lineLog("AI 코멘트 조회 (캐시 miss → Gemini 호출)");
-        aiCommentService.evictCache(TEST_MEMBER_UUID); // 캐시 초기화
-        AiCommentResponse response = aiCommentService.getAiComment(TEST_MEMBER_UUID);
+        aiCommentService.evictCache(TEST_MEMBER_UUID, TEST_SESSION_UUID); // 캐시 초기화
+        AiCommentResponse response = aiCommentService.getAiComment(TEST_MEMBER_UUID, TEST_SESSION_UUID);
         superLog(response);
     }
 }

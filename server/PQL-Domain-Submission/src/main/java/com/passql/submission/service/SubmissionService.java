@@ -124,8 +124,8 @@ public class SubmissionService {
             }
         }
 
-        // 7. AI 코멘트 캐시 무효화 (새 Submission 발생 시 즉시 evict)
-        redisTemplate.delete("ai-comment:" + memberUuid);
+        // 7. AI 코멘트 캐시: 세션 단위(ai-comment:{memberUuid}:{sessionUuid})로 전환됨.
+        //    새 세션 시작 시 새 sessionUuid로 요청이 오므로 별도 evict 불필요.
 
         return new SubmitResult(
                 isCorrect,

@@ -131,4 +131,22 @@ public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
         """, nativeQuery = true)
     List<Object[]> findTopicStatsAfter(@Param("memberUuid") String memberUuid,
                                        @Param("since") LocalDateTime since);
+
+    /**
+     * 세션 내 제출 목록을 토픽명과 함께 조회 (AI 코멘트 세션 컨텍스트용).
+     *
+     * 네이티브 쿼리 사용 이유: Submission↔Question↔Topic 간 @ManyToOne 연관관계가 없어
+     * JPQL theta-join 시 데카르트 조인 발생 우려.
+     *
+     * @return Object[] = { String topicDisplayName, Boolean isCorrect }
+     */
+    @Query(value =
+        "SELECT t.display_name AS topic_name, s.is_correct " +
+        "FROM submission s " +
+        "JOIN question q ON s.question_uuid = q.question_uuid " +
+        "JOIN topic t ON q.topic_uuid = t.topic_uuid " +
+        "WHERE s.session_uuid = CAST(:sessionUuid AS uuid) " +
+        "ORDER BY s.submitted_at ASC",
+        nativeQuery = true)
+    List<Object[]> findTopicResultsBySessionUuid(@Param("sessionUuid") String sessionUuid);
 }
