@@ -113,7 +113,8 @@ export default function DailyChallenge() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4">
+      {/* 피드백바 높이만큼 bottom padding — 마지막 초이스카드가 가려지지 않게 */}
+      <div className={`flex-1 overflow-y-auto px-4 transition-[padding] duration-300 ${feedback ? "pb-52" : "pb-4"}`}>
         {/* 제출 후 showExecution=true — ChoiceCard 안에 SQL 실행 버튼 표시 */}
         <QuestionDetail
           key={today?.question?.questionUuid}
