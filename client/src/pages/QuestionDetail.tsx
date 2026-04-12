@@ -204,7 +204,7 @@ export default function QuestionDetail({
   );
 
   const handleSelect = useCallback((choiceKey: string, _sql: string) => {
-    // 풀이 중 SQL 자동 실행 없음 — 제출 후 ChoiceReview에서 직접 실행
+    // 풀이 중 SQL 자동 실행 없음 — 제출 후 결과 화면에서 실행
     setSelectedKey(choiceKey);
   }, []);
 
@@ -366,12 +366,10 @@ export default function QuestionDetail({
             key={choice.key}
             choice={choice}
             isSelected={selectedKey === choice.key}
-            // showExecution=false(재시도 등) 시 이전 실행 결과 노출 방지
+            // showExecution=true(제출 후)일 때만 실행 결과 표시
             cached={showExecution ? executeCache[choice.key] : undefined}
-            // 풀이 중 실행 버튼 숨김, 제출 후(showExecution=true) 버튼 표시
-            isExecutable={
-              showExecution && question.executionMode === "EXECUTABLE"
-            }
+            // 제출 후(showExecution=true)에만 실행 버튼 표시
+            isExecutable={showExecution && question.executionMode === "EXECUTABLE"}
             isExecuting={
               executeMutation.isPending &&
               executeMutation.variables === choice.body
@@ -471,7 +469,6 @@ export default function QuestionDetail({
       {choicesSection}
       {question.executionMode === "EXECUTABLE" && (
         <SqlPlayground
-          questionUuid={questionUuid!}
           onExecute={(sql) => executeChoice(questionUuid!, sql)}
         />
       )}

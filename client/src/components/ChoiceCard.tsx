@@ -76,55 +76,42 @@ export const ChoiceCard = memo(function ChoiceCard({
           >
             {choice.body}
           </p>
-          {isExecutable && (
+          {isExecutable && !cached && (
             <div
               className="flex justify-end mt-2"
               onClick={(e) => e.stopPropagation()}
             >
               <button
-                className={`btn btn-xs btn-outline${isSelected ? " bg-white text-primary border-white" : " text-primary border-primary"}`}
+                className={`btn-run-all${isSelected ? " btn-run-all--inverted" : ""}`}
                 type="button"
                 onClick={() => onExecute(choice.key, choice.body)}
-                disabled={!!cached || isExecuting}
+                disabled={isExecuting}
               >
-                {isExecuting ? "실행 중..." : "실행하기"}
+                {!isExecuting && (
+                  <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                    <polygon points="5 3 19 12 5 21 5 3" />
+                  </svg>
+                )}
+                {isExecuting ? "실행 중…" : "쿼리 실행"}
               </button>
             </div>
           )}
           {cached && (
             <div onClick={(e) => e.stopPropagation()}>
-              {/* 선택된 카드(brand 배경)에서는 흰색 카드로 감싸 가독성 확보 */}
-              {isSelected ? (
-                <div className="bg-white rounded-xl mt-2 px-2 pb-2">
-                  <ResultTable
-                    result={cached}
-                    onAskAi={
-                      cached.errorCode
-                        ? () =>
-                            onAskAi?.(
-                              choice.key,
-                              cached.errorCode ?? "",
-                              cached.errorMessage ?? "",
-                            )
-                        : undefined
-                    }
-                  />
-                </div>
-              ) : (
-                <ResultTable
-                  result={cached}
-                  onAskAi={
-                    cached.errorCode
-                      ? () =>
-                          onAskAi?.(
-                            choice.key,
-                            cached.errorCode ?? "",
-                            cached.errorMessage ?? "",
-                          )
-                      : undefined
-                  }
-                />
-              )}
+              <ResultTable
+                result={cached}
+                inverted={isSelected}
+                onAskAi={
+                  cached.errorCode
+                    ? () =>
+                        onAskAi?.(
+                          choice.key,
+                          cached.errorCode ?? "",
+                          cached.errorMessage ?? "",
+                        )
+                    : undefined
+                }
+              />
             </div>
           )}
         </>
