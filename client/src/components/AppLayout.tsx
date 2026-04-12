@@ -23,8 +23,8 @@ function SidebarNav() {
       <div className="px-4 mb-8">
         <img src={logo} alt="passQL" className="h-6 w-auto" />
       </div>
-      {/* menu: daisyUI 메뉴 컴포넌트 래퍼 */}
-      <ul className="menu p-0 gap-1">
+      {/* 명시적인 flex 컨테이너로 daisyUI menu 스타일 간섭 제거 */}
+      <ul className="flex flex-col gap-1">
         {NAV_ITEMS.map((item) => (
           <li key={item.to}>
             <NavLink
