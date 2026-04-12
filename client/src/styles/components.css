@@ -435,10 +435,100 @@ body {
   background-color: transparent;
 }
 
+/* ── 추천 문제 새로고침 버튼 1회전 애니메이션 ── */
+/* spin과 달리 무한 반복 없이 클릭 1회에 360도 돌고 멈춤 */
+@keyframes refresh-once {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+.animate-refresh-once {
+  animation: refresh-once 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* ── 추천 문제 카드 순차 페이드인 ── */
+/* 새로고침 후 새 카드들이 위에서 아래로 순서대로 나타남 — nth-child로 인덱스별 딜레이 */
+@keyframes card-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-card-in {
+  animation: card-fade-in 0.22s ease-out both;
+}
+/* 추천 카드 최대 5개 — 인덱스별 딜레이 클래스 */
+.animate-card-in:nth-child(1) { animation-delay: 0ms; }
+.animate-card-in:nth-child(2) { animation-delay: 60ms; }
+.animate-card-in:nth-child(3) { animation-delay: 120ms; }
+.animate-card-in:nth-child(4) { animation-delay: 180ms; }
+.animate-card-in:nth-child(5) { animation-delay: 240ms; }
+
 /* StepNavigator 슬라이드 애니메이션 — 동적 offset을 CSS 변수로 처리 (인라인 style 규칙 예외) */
 .step-slider {
   display: flex;
   height: 100%;
   transition: transform 300ms ease-out;
   transform: translateX(var(--step-offset, 0%));
+}
+
+/* ── AI 분석 카드 단어 fade-in ── */
+/* 단어별 blur→clear 전환 — JS에서 .ai-word 생성 후 .ai-word-visible 토글 */
+@keyframes ai-word-in {
+  from {
+    opacity: 0;
+    filter: blur(4px);
+    transform: translateY(2px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+.ai-word {
+  display: inline;
+  opacity: 0;
+  filter: blur(4px);
+}
+
+.ai-word-visible {
+  animation: ai-word-in 0.25s ease-out both;
+}
+
+/* ── AI 카드 헤더 슬라이드 ── */
+@keyframes ai-header-slide {
+  from { opacity: 0; transform: translateX(-6px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+.animate-ai-header {
+  animation: ai-header-slide 0.3s ease-out both;
+}
+
+/* ── Sparkles 팝 ── */
+@keyframes sparkle-pop {
+  0%   { transform: scale(0.7) rotate(-10deg); opacity: 0; }
+  60%  { transform: scale(1.15) rotate(4deg);  opacity: 1; }
+  100% { transform: scale(1)   rotate(0deg);   opacity: 1; }
+}
+
+.animate-sparkle-pop {
+  animation: sparkle-pop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* ── 팝오버 진입 ── */
+@keyframes popover-in {
+  from { opacity: 0; transform: translateY(4px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.animate-popover-in {
+  animation: popover-in 0.18s ease-out both;
 }

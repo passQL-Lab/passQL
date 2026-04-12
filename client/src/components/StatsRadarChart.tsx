@@ -19,7 +19,7 @@ export default function StatsRadarChart({ topicStats }: StatsRadarChartProps) {
 
   return (
     <div className="card-base">
-      <h2 className="text-lg font-bold mb-4">영역별 분석</h2>
+      <h2 className="text-base font-bold text-text-primary mb-4">토픽별 분석</h2>
       <div className="w-full h-64">
         <ResponsiveContainer width="100%" height="100%">
           <RadarChart data={data} cx="50%" cy="50%" outerRadius="70%">

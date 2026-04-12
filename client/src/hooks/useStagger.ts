@@ -13,14 +13,10 @@
 export function useStagger() {
   return function (index: number): {
     className: string;
-    style: React.CSSProperties;
   } {
     return {
-      className: "animate-stagger",
-      // CSS 클래스가 --stagger-delay 변수를 animation-delay로 소비한다.
-      // CLAUDE.md의 "인라인 style 속성 절대 금지" 규칙의 예외:
-      // CSS variable 주입은 Tailwind로 표현 불가능하므로 허용 (step-slider 선례 동일)
-      style: { "--stagger-delay": `${index * 50}ms` } as React.CSSProperties,
+      // Tailwind CSS 4 임의 CSS 변수 구문으로 --stagger-delay 주입 — style prop 불필요
+      className: `animate-stagger [--stagger-delay:${index * 50}ms]`,
     };
   };
 }
