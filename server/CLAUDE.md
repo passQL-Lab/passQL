@@ -291,7 +291,7 @@ class XxxServiceTest {
 
 - [ ] stem에 SQL이 포함된 EXECUTABLE 문제는 ` ```sql ``` ` 코드 블록으로 SQL을 감쌌는가?
 - [ ] stem/문제 형식 관련 규칙이 변경됐을 경우 아래 파일들도 함께 수정했는가?
-  - `PQL-Web/src/main/resources/static/docs/question-register-guide.md` (단건 등록 가이드 MD)
+  - `PQL-Web/src/main/resources/static/docs/question-single-guide.md` (단건 등록 가이드 MD)
   - `PQL-Web/src/main/resources/static/docs/question-bulk-guide.md` (대량 등록 가이드 MD)
   - `PQL-Web/src/main/resources/templates/admin/question-register.html` (단건 등록 가이드 모달)
   - `PQL-Web/src/main/resources/templates/admin/questions.html` (대량 등록 가이드 모달)
