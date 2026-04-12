@@ -31,6 +31,8 @@ export default function PracticeSet() {
   const submitAndAdvance = usePracticeStore((s) => s.submitAndAdvance);
 
   const [feedback, setFeedback] = useState<SubmitResult | null>(null);
+  // Home 버튼 클릭 시 이탈 확인 모달 — blocker와 독립적으로 제어
+  const [exitModalOpen, setExitModalOpen] = useState(false);
   // EXECUTABLE 문제 오답노트용 상태
   const [reviewChoices, setReviewChoices] = useState<
     readonly ChoiceItem[] | null
@@ -125,7 +127,7 @@ export default function PracticeSet() {
             <button
               type="button"
               className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-border transition-colors"
-              onClick={() => navigate("/")}
+              onClick={() => setExitModalOpen(true)}
             >
               <Home size={18} className="text-text-secondary" />
             </button>
@@ -178,15 +180,27 @@ export default function PracticeSet() {
         />
       )}
 
-      {/* 이탈 방지 확인 모달 */}
+      {/* 이탈 방지 확인 모달 — Home 버튼(exitModalOpen) 또는 브라우저 뒤로가기(blocker) 대응 */}
       <ConfirmModal
-        isOpen={blocker.state === "blocked"}
+        isOpen={blocker.state === "blocked" || exitModalOpen}
         title="풀이를 그만할까요?"
         description="지금 나가면 현재 풀이 기록이 저장되지 않아요."
         cancelLabel="계속 풀기"
         confirmLabel="나가기"
-        onCancel={() => blocker.reset?.()}
-        onConfirm={() => blocker.proceed?.()}
+        onCancel={() => {
+          blocker.reset?.();
+          setExitModalOpen(false);
+        }}
+        onConfirm={() => {
+          // blocker가 활성화된 경우(브라우저 뒤로가기 등) → proceed로 원래 이동 허용
+          // exitModalOpen인 경우(Home 버튼) → 직접 홈으로 이동
+          if (blocker.state === "blocked") {
+            blocker.proceed?.();
+          } else {
+            navigate("/");
+          }
+          setExitModalOpen(false);
+        }}
       />
     </div>
   );
