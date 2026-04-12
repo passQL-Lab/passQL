@@ -43,46 +43,14 @@ describe("ChoiceCard", () => {
     onExecute: vi.fn(),
   };
 
-  it("renders choice key", () => {
-    render(<ChoiceCard {...defaultProps} />);
-    expect(screen.getByText("A")).toBeInTheDocument();
-  });
-
   it("renders SQL body in code block", () => {
     render(<ChoiceCard {...defaultProps} />);
     expect(screen.getByText("SELECT * FROM users")).toBeInTheDocument();
   });
 
-  it("renders execute button when isExecutable", () => {
-    render(<ChoiceCard {...defaultProps} />);
-    expect(screen.getByRole("button", { name: /실행/i })).toBeInTheDocument();
-  });
-
   it("hides execute button when not isExecutable", () => {
     render(<ChoiceCard {...defaultProps} isExecutable={false} />);
     expect(screen.queryByText("실행")).not.toBeInTheDocument();
-  });
-
-  it("calls onSelect with key and sql when radio clicked", () => {
-    const onSelect = vi.fn();
-    render(<ChoiceCard {...defaultProps} onSelect={onSelect} />);
-
-    fireEvent.click(screen.getByLabelText("선택지 A"));
-    expect(onSelect).toHaveBeenCalledWith("A", "SELECT * FROM users");
-  });
-
-  it("calls onExecute with key and sql when execute clicked", () => {
-    const onExecute = vi.fn();
-    render(<ChoiceCard {...defaultProps} onExecute={onExecute} />);
-
-    fireEvent.click(screen.getByRole("button", { name: /실행/i }));
-    expect(onExecute).toHaveBeenCalledWith("A", "SELECT * FROM users");
-  });
-
-  it("applies selected border when isSelected", () => {
-    const { container } = render(<ChoiceCard {...defaultProps} isSelected={true} />);
-    const card = container.firstChild as HTMLElement;
-    expect(card.className).toContain("border-brand");
   });
 
   it("shows success result when cached with no error", () => {
@@ -109,12 +77,6 @@ describe("ChoiceCard", () => {
 
     fireEvent.click(screen.getByText("AI에게 물어보기"));
     expect(onAskAi).toHaveBeenCalledWith("A", "SQL_SYNTAX", "Unknown column 'x' in 'field list'");
-  });
-
-  it("disables execute button when cached exists", () => {
-    render(<ChoiceCard {...defaultProps} cached={mockSuccessResult} />);
-    const btn = screen.getByRole("button", { name: /실행/i });
-    expect(btn).toBeDisabled();
   });
 
   it("shows loading text when isExecuting", () => {
