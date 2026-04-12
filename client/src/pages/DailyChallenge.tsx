@@ -8,7 +8,6 @@ import { submitAnswer } from "../api/questions";
 import QuestionDetail from "./QuestionDetail";
 import PracticeFeedbackBar from "../components/PracticeFeedbackBar";
 import ConfirmModal from "../components/ConfirmModal";
-import ChoiceReview from "../components/ChoiceReview";
 import type { ChoiceItem, SubmitResult } from "../types/api";
 
 export default function DailyChallenge() {
@@ -17,9 +16,6 @@ export default function DailyChallenge() {
   const uuid = useMemberStore((s) => s.uuid);
   const { data: today, isLoading } = useTodayQuestion();
   const [feedback, setFeedback] = useState<SubmitResult | null>(null);
-  // EXECUTABLE 문제 오답노트용 상태
-  const [reviewChoices, setReviewChoices] = useState<readonly ChoiceItem[] | null>(null);
-  const [reviewSelectedKey, setReviewSelectedKey] = useState<string | null>(null);
 
   // 제출 완료 전까지 이탈 차단 — 로딩 중이나 제출 완료 후에는 차단 해제
   // useBlocker는 훅이므로 조건부 return 이전에 호출해야 함
@@ -29,12 +25,6 @@ export default function DailyChallenge() {
   const handlePracticeSubmit = useCallback(
     async (selectedChoiceKey: string, choiceSetId: string, choices: readonly ChoiceItem[]) => {
       if (!today?.question) return;
-
-      // EXECUTABLE 문제면 오답노트 데이터 저장
-      if (choices[0]?.kind === "SQL") {
-        setReviewChoices(choices);
-        setReviewSelectedKey(selectedChoiceKey);
-      }
 
       const selectedChoice = choices.find((c) => c.key === selectedChoiceKey);
       const correctChoice = choices.find((c) => c.isCorrect);
@@ -117,24 +107,15 @@ export default function DailyChallenge() {
       </div>
 
       <div className="flex-1 overflow-y-auto px-4">
-        {/* 피드백 표시 중 선택 불가 */}
-        <div className={feedback ? "pointer-events-none opacity-60" : ""}>
-          <QuestionDetail
-            key={today?.question?.questionUuid}
-            questionUuid={today?.question?.questionUuid}
-            practiceMode
-            practiceSubmitLabel="제출하기"
-            onPracticeSubmit={handlePracticeSubmit}
-          />
-        </div>
-        {/* EXECUTABLE 문제: 피드백 후 오답노트 SQL 실행 비교 */}
-        {feedback && reviewChoices && today?.question && (
-          <ChoiceReview
-            choices={reviewChoices}
-            questionUuid={today.question.questionUuid}
-            selectedKey={reviewSelectedKey ?? undefined}
-          />
-        )}
+        {/* 제출 후 showExecution=true — ChoiceCard 안에 SQL 실행 버튼 표시 */}
+        <QuestionDetail
+          key={today?.question?.questionUuid}
+          questionUuid={today?.question?.questionUuid}
+          practiceMode
+          practiceSubmitLabel="제출하기"
+          onPracticeSubmit={handlePracticeSubmit}
+          showExecution={!!feedback}
+        />
       </div>
 
       {/* 제출 후 인라인 피드백 — 정답: 홈으로, 오답: 다시 풀기 */}

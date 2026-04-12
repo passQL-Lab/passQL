@@ -7,7 +7,6 @@ import { getRandomMessage } from "../constants/microcopy";
 import QuestionDetail from "./QuestionDetail";
 import PracticeFeedbackBar from "../components/PracticeFeedbackBar";
 import ConfirmModal from "../components/ConfirmModal";
-import ChoiceReview from "../components/ChoiceReview";
 import type { ChoiceItem, SubmitResult } from "../types/api";
 
 function WaitingForQuestion({ topicName }: { readonly topicName: string }) {
@@ -35,13 +34,6 @@ export default function PracticeSet() {
   const [exitModalOpen, setExitModalOpen] = useState(false);
   // exitConfirmed=true 시 blocker를 우회하여 홈으로 이동 — 이중 확인 방지
   const [exitConfirmed, setExitConfirmed] = useState(false);
-  // EXECUTABLE 문제 오답노트용 상태
-  const [reviewChoices, setReviewChoices] = useState<
-    readonly ChoiceItem[] | null
-  >(null);
-  const [reviewSelectedKey, setReviewSelectedKey] = useState<string | null>(
-    null,
-  );
 
   const totalQuestions = questions.length;
   const displayIndex = feedback ? currentIndex - 1 : currentIndex;
@@ -60,14 +52,9 @@ export default function PracticeSet() {
     async (
       selectedChoiceKey: string,
       choiceSetId: string,
-      choices: readonly ChoiceItem[],
+      _choices: readonly ChoiceItem[],
     ) => {
       if (!displayQuestion) return;
-      // EXECUTABLE 문제면 오답노트 데이터 저장
-      if (choices[0]?.kind === "SQL") {
-        setReviewChoices(choices);
-        setReviewSelectedKey(selectedChoiceKey);
-      }
       try {
         const result = await submitAnswer(
           displayQuestion.questionUuid,
@@ -103,8 +90,6 @@ export default function PracticeSet() {
 
   const handleNext = useCallback(() => {
     setFeedback(null);
-    setReviewChoices(null);
-    setReviewSelectedKey(null);
   }, []);
 
   // useEffect는 훅 규칙상 조건부 return 이전에 위치해야 함
@@ -160,24 +145,15 @@ export default function PracticeSet() {
 
       {displayQuestion ? (
         <div className="flex-1 overflow-y-auto px-4">
-          {/* 풀이 중: 선택 가능 / 피드백 후: 흐리게 비활성화 */}
-          <div className={feedback ? "pointer-events-none opacity-60" : ""}>
-            <QuestionDetail
-              key={displayQuestion.questionUuid}
-              questionUuid={displayQuestion.questionUuid}
-              practiceMode
-              practiceSubmitLabel={isLast ? "결과 보기" : "확인하기"}
-              onPracticeSubmit={handleSelect}
-            />
-          </div>
-          {/* EXECUTABLE 문제: 피드백 후 오답노트 SQL 실행 비교 */}
-          {feedback && reviewChoices && (
-            <ChoiceReview
-              choices={reviewChoices}
-              questionUuid={displayQuestion.questionUuid}
-              selectedKey={reviewSelectedKey ?? undefined}
-            />
-          )}
+          {/* 제출 후 showExecution=true — ChoiceCard 안에 SQL 실행 버튼 표시 */}
+          <QuestionDetail
+            key={displayQuestion.questionUuid}
+            questionUuid={displayQuestion.questionUuid}
+            practiceMode
+            practiceSubmitLabel={isLast ? "결과 보기" : "확인하기"}
+            onPracticeSubmit={handleSelect}
+            showExecution={!!feedback}
+          />
         </div>
       ) : (
         <WaitingForQuestion topicName={topicName ?? ""} />
