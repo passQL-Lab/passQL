@@ -15,32 +15,35 @@ export default function PracticeFeedbackBar({
   const isCorrect = result.isCorrect;
 
   return (
-    <div
-      className="fixed bottom-0 inset-x-0 z-30 animate-slide-up"
-      style={{
-        backgroundColor: isCorrect
-          ? "var(--color-sem-success-light)"
-          : "var(--color-sem-error-light)",
-      }}
-    >
-      <div className="mx-auto max-w-120 px-4 py-4">
-        <div className="flex items-center gap-3 mb-3">
-          {isCorrect ? (
+    <>
+      {/* 딤 오버레이 — 해설 패널에 시선 집중 */}
+      <div className="fixed inset-0 z-20" style={{ backgroundColor: "rgba(17, 24, 39, 0.25)" }} />
+
+      {/* 해설 패널 — 하단에서 슬라이드업 */}
+      <div
+        className="fixed bottom-0 inset-x-0 z-30 animate-slide-up rounded-t-2xl"
+        style={{
+          backgroundColor: isCorrect
+            ? "var(--color-sem-success-light)"
+            : "var(--color-sem-error-light)",
+          borderTop: `3px solid ${isCorrect ? "var(--color-sem-success)" : "var(--color-sem-error)"}`,
+        }}
+      >
+        <div className="mx-auto max-w-120 px-5 pt-5 pb-6">
+          {/* 정답/오답 헤더 */}
+          <div className="flex items-center gap-2 mb-3">
             <div
-              className="w-8 h-8 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: "#DCFCE7" }}
+              className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
+              style={{
+                backgroundColor: isCorrect ? "#DCFCE7" : "#FEE2E2",
+              }}
             >
-              <Check size={18} style={{ color: "var(--color-sem-success-text)" }} />
+              {isCorrect ? (
+                <Check size={15} style={{ color: "var(--color-sem-success-text)" }} />
+              ) : (
+                <X size={15} style={{ color: "var(--color-sem-error-text)" }} />
+              )}
             </div>
-          ) : (
-            <div
-              className="w-8 h-8 rounded-full flex items-center justify-center"
-              style={{ backgroundColor: "#FEE2E2" }}
-            >
-              <X size={18} style={{ color: "var(--color-sem-error-text)" }} />
-            </div>
-          )}
-          <div>
             <p
               className="text-base font-bold"
               style={{
@@ -52,27 +55,32 @@ export default function PracticeFeedbackBar({
               {isCorrect ? "정답이에요!" : "오답이에요"}
             </p>
           </div>
+
+          {/* 해설 텍스트 */}
+          {result.rationale && (
+            <p
+              className="text-sm leading-relaxed mb-5"
+              style={{ color: "var(--color-text-body)" }}
+            >
+              {result.rationale}
+            </p>
+          )}
+
+          {/* 액션 버튼 */}
+          <button
+            type="button"
+            className="w-full h-12 rounded-xl font-bold text-base text-white"
+            style={{
+              backgroundColor: isCorrect
+                ? "var(--color-sem-success)"
+                : "var(--color-sem-error)",
+            }}
+            onClick={onNext}
+          >
+            {nextLabel}
+          </button>
         </div>
-
-        {result.rationale && (
-          <p className="text-sm text-text-secondary leading-relaxed mb-4">
-            {result.rationale}
-          </p>
-        )}
-
-        <button
-          type="button"
-          className="w-full h-12 rounded-xl text-white font-bold text-base"
-          style={{
-            backgroundColor: isCorrect
-              ? "var(--color-sem-success)"
-              : "var(--color-sem-error)",
-          }}
-          onClick={onNext}
-        >
-          {nextLabel}
-        </button>
       </div>
-    </div>
+    </>
   );
 }

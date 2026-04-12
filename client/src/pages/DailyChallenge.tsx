@@ -112,7 +112,7 @@ export default function DailyChallenge() {
           key={today?.question?.questionUuid}
           questionUuid={today?.question?.questionUuid}
           practiceMode
-          practiceSubmitLabel="제출하기"
+          practiceSubmitLabel="확인"
           onPracticeSubmit={handlePracticeSubmit}
           showExecution={!!feedback}
         />

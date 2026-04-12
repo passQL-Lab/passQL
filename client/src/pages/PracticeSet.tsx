@@ -38,7 +38,6 @@ export default function PracticeSet() {
   const totalQuestions = questions.length;
   const displayIndex = feedback ? currentIndex - 1 : currentIndex;
   const displayQuestion = questions[displayIndex];
-  const isLast = displayIndex >= totalQuestions - 1;
 
   // 마지막 문제 완료 여부 — 결과 페이지 이동 조건이자 이탈 차단 해제 기준
   const shouldNavigateToResult = !feedback && currentIndex >= totalQuestions;
@@ -150,7 +149,7 @@ export default function PracticeSet() {
             key={displayQuestion.questionUuid}
             questionUuid={displayQuestion.questionUuid}
             practiceMode
-            practiceSubmitLabel={isLast ? "결과 보기" : "확인하기"}
+            practiceSubmitLabel="확인"
             onPracticeSubmit={handleSelect}
             showExecution={!!feedback}
           />
@@ -163,7 +162,7 @@ export default function PracticeSet() {
         <PracticeFeedbackBar
           result={feedback}
           onNext={handleNext}
-          nextLabel={currentIndex >= totalQuestions ? "결과 보기" : "다음 문제"}
+          nextLabel={feedback?.isCorrect ? "계속하기" : "확인"}
         />
       )}
 
