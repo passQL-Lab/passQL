@@ -166,6 +166,10 @@
   border-collapse: collapse;
 }
 
+.data-table thead tr {
+  background-color: var(--color-surface-page);
+}
+
 .data-table th {
   text-align: left;
   padding: 8px 12px;

@@ -101,7 +101,7 @@ export const SchemaViewer = memo(function SchemaViewer({
   schemaDdl,
   schemaSampleData,
 }: SchemaViewerProps) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(true);
 
   const tables =
     schemaDisplay && schemaDisplay.trim()
