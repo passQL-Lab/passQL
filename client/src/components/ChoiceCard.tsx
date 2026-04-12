@@ -94,14 +94,28 @@ export const ChoiceCard = memo(function ChoiceCard({
           )}
           {cached && (
             <div onClick={(e) => e.stopPropagation()}>
-              <ResultTable
-                result={cached}
-                onAskAi={
-                  cached.errorCode
-                    ? () => onAskAi?.(choice.key, cached.errorCode ?? "", cached.errorMessage ?? "")
-                    : undefined
-                }
-              />
+              {/* 선택된 카드(brand 배경)에서는 흰색 카드로 감싸 가독성 확보 */}
+              {isSelected ? (
+                <div className="bg-white rounded-xl mt-2 px-2 pb-2">
+                  <ResultTable
+                    result={cached}
+                    onAskAi={
+                      cached.errorCode
+                        ? () => onAskAi?.(choice.key, cached.errorCode ?? "", cached.errorMessage ?? "")
+                        : undefined
+                    }
+                  />
+                </div>
+              ) : (
+                <ResultTable
+                  result={cached}
+                  onAskAi={
+                    cached.errorCode
+                      ? () => onAskAi?.(choice.key, cached.errorCode ?? "", cached.errorMessage ?? "")
+                      : undefined
+                  }
+                />
+              )}
             </div>
           )}
         </>
