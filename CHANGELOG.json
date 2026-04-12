@@ -1,11 +1,40 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-11T19:30:37Z",
-    "currentVersion": "0.0.82",
+    "lastUpdated": "2026-04-11T19:44:33Z",
+    "currentVersion": "0.0.84",
     "projectType": "basic",
-    "totalReleases": 31
+    "totalReleases": 32
   },
   "releases": [
+    {
+      "version": "0.0.84",
+      "project_type": "basic",
+      "date": "2026-04-11",
+      "pr_number": 139,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **Refactor**\n  * 질문 상세 페이지의 렌더링 로직을 간소화하여 UI 복잡도를 감소했습니다.\n  * 질문 변경 시 상태 관리 개선으로 안정성을 향상했습니다.\n\n* **Performance**\n  * 질문 데이터 캐싱 정책을 최적화하여 60초 동안 불필요한 갱신을 줄였습니다.\n\n* **Chores**\n  * 버전이 v0.0.84로 업데이트되었습니다.",
+      "parsed_changes": {
+        "refactor": {
+          "title": "Refactor",
+          "items": [
+            "질문 상세 페이지의 렌더링 로직을 간소화하여 UI 복잡도를 감소했습니다.",
+            "질문 변경 시 상태 관리 개선으로 안정성을 향상했습니다."
+          ]
+        },
+        "performance": {
+          "title": "Performance",
+          "items": [
+            "질문 데이터 캐싱 정책을 최적화하여 60초 동안 불필요한 갱신을 줄였습니다."
+          ]
+        },
+        "chores": {
+          "title": "Chores",
+          "items": [
+            "버전이 v0.0.84로 업데이트되었습니다."
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.82",
       "project_type": "basic",
