@@ -89,7 +89,7 @@ export default function PracticeResult() {
         total={analysis.totalCount}
         onComplete={handleScoreComplete}
       />
-      <p className="text-sm text-text-caption mt-2">문제</p>
+
       <div className="flex gap-8 mt-8">
         {/* 정답률 */}
         <div className={`text-center transition-all duration-300 ease-out ${visibleStats[0] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}>
