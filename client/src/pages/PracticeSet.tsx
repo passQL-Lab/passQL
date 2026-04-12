@@ -33,6 +33,8 @@ export default function PracticeSet() {
   const [feedback, setFeedback] = useState<SubmitResult | null>(null);
   // Home 버튼 클릭 시 이탈 확인 모달 — blocker와 독립적으로 제어
   const [exitModalOpen, setExitModalOpen] = useState(false);
+  // exitConfirmed=true 시 blocker를 우회하여 홈으로 이동 — 이중 확인 방지
+  const [exitConfirmed, setExitConfirmed] = useState(false);
   // EXECUTABLE 문제 오답노트용 상태
   const [reviewChoices, setReviewChoices] = useState<
     readonly ChoiceItem[] | null
@@ -50,8 +52,9 @@ export default function PracticeSet() {
   const shouldNavigateToResult = !feedback && currentIndex >= totalQuestions;
 
   // 마지막 문제 완료 전까지 이탈 차단 — 중간 이탈 시 세션 기록 유실 방지
+  // exitConfirmed=true이면 차단 해제 → useEffect에서 navigate("/") 호출
   // useBlocker는 훅이므로 조건부 return 이전에 호출해야 함
-  const blocker = useBlocker(!shouldNavigateToResult);
+  const blocker = useBlocker(!shouldNavigateToResult && !exitConfirmed);
 
   const handleSelect = useCallback(
     async (
@@ -111,6 +114,13 @@ export default function PracticeSet() {
     }
   }, [shouldNavigateToResult, navigate, sessionId]);
 
+  // exitConfirmed 시 blocker가 비활성화된 후 홈으로 이동 — 이중 차단 방지
+  useEffect(() => {
+    if (exitConfirmed) {
+      navigate("/");
+    }
+  }, [exitConfirmed, navigate]);
+
   if (!storeSessionId || storeSessionId !== sessionId) {
     return <Navigate to="/questions" replace />;
   }
@@ -126,6 +136,7 @@ export default function PracticeSet() {
           <div className="justify-self-start">
             <button
               type="button"
+              aria-label="풀이 나가기"
               className="w-8 h-8 flex items-center justify-center rounded-xl hover:bg-border transition-colors"
               onClick={() => setExitModalOpen(true)}
             >
@@ -193,11 +204,11 @@ export default function PracticeSet() {
         }}
         onConfirm={() => {
           // blocker가 활성화된 경우(브라우저 뒤로가기 등) → proceed로 원래 이동 허용
-          // exitModalOpen인 경우(Home 버튼) → 직접 홈으로 이동
+          // exitModalOpen인 경우(Home 버튼) → exitConfirmed=true로 blocker 먼저 해제 후 navigate
           if (blocker.state === "blocked") {
             blocker.proceed?.();
           } else {
-            navigate("/");
+            setExitConfirmed(true);
           }
           setExitModalOpen(false);
         }}
