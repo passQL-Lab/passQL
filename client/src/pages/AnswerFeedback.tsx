@@ -183,7 +183,7 @@ export default function AnswerFeedback() {
     <div className="bg-base-100 border-b border-base-200 feedback-header-anim">
       {/* 상단 3px 컬러 바 — 좌→우 슬라이드인 */}
       <div
-        className={`h-[3px] w-full feedback-bar-anim ${
+        className={`h-0.75 w-full feedback-bar-anim ${
           isCorrect ? "bg-success" : "bg-error"
         }`}
       />
@@ -191,7 +191,7 @@ export default function AnswerFeedback() {
         {/* 도트 + 상태 eyebrow */}
         <div className="flex items-center gap-1.5 mb-1.5">
           <span
-            className={`inline-block w-[7px] h-[7px] rounded-full shrink-0 ${
+            className={`inline-block w-1.75 h-1.75 rounded-full shrink-0 ${
               isCorrect ? "bg-success" : "bg-error"
             }`}
           />
@@ -251,11 +251,11 @@ export default function AnswerFeedback() {
               code({ children, className }) {
                 const isBlock = className?.includes("language-");
                 return isBlock ? (
-                  <pre className="bg-[#F3F4F6] rounded-lg px-4 py-3 text-xs leading-relaxed whitespace-pre-wrap font-mono">
+                  <pre className="bg-surface-code rounded-lg px-4 py-3 text-xs leading-relaxed whitespace-pre-wrap font-mono">
                     <code>{children}</code>
                   </pre>
                 ) : (
-                  <code className="bg-[#F3F4F6] px-1 rounded text-xs font-mono">
+                  <code className="bg-surface-code px-1 rounded text-xs font-mono">
                     {children}
                   </code>
                 );
@@ -270,14 +270,14 @@ export default function AnswerFeedback() {
               },
               th({ children }) {
                 return (
-                  <th className="border border-[#E5E7EB] px-2 py-1 bg-[#F3F4F6] text-left font-semibold text-[#6B7280]">
+                  <th className="border border-border px-2 py-1 bg-surface-code text-left font-semibold text-text-secondary">
                     {children}
                   </th>
                 );
               },
               td({ children }) {
                 return (
-                  <td className="border border-[#E5E7EB] px-2 py-1 font-mono text-[#111827]">
+                  <td className="border border-border px-2 py-1 font-mono text-text-primary">
                     {children}
                   </td>
                 );
@@ -403,7 +403,7 @@ export default function AnswerFeedback() {
             {isOpen && (
               <div className="acc-sql-body">
                 {/* SQL 본문 코드 블록 */}
-                <pre className="text-xs font-mono leading-relaxed whitespace-pre-wrap break-words mb-3 text-base-content bg-base-200 rounded-lg p-3">
+                <pre className="text-xs font-mono leading-relaxed whitespace-pre-wrap wrap-break-word mb-3 text-base-content bg-base-200 rounded-lg p-3">
                   {choice.body}
                 </pre>
 
@@ -412,7 +412,7 @@ export default function AnswerFeedback() {
                   <div className="error-card mt-2 flex items-start justify-between gap-3">
                     <div className="flex items-start gap-2 min-w-0">
                       <AlertCircle size={15} className="text-error shrink-0 mt-0.5" />
-                      <p className="text-sm text-error leading-snug break-words">{error}</p>
+                      <p className="text-sm text-error leading-snug wrap-break-word">{error}</p>
                     </div>
                     <button
                       type="button"
@@ -476,7 +476,7 @@ export default function AnswerFeedback() {
                       <p className="text-body truncate">{q.stem}</p>
                       <span className="badge-topic">{q.topicName}</span>
                     </div>
-                    <ChevronRight size={16} className="text-text-caption flex-shrink-0" />
+                    <ChevronRight size={16} className="text-text-caption shrink-0" />
                   </div>
                 </Link>
               ))}

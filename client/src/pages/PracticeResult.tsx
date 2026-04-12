@@ -1,7 +1,15 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { useParams, useNavigate, Navigate, Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
-import { RotateCcw, Target, Clock, Timer, Sparkles, ChevronDown, ChevronUp } from "lucide-react";
+import {
+  RotateCcw,
+  Target,
+  Clock,
+  Timer,
+  Sparkles,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import { usePracticeStore } from "../stores/practiceStore";
 import { fetchAiComment } from "../api/progress";
 import { useAiText } from "../hooks/useAiText";
@@ -30,10 +38,16 @@ export default function PracticeResult() {
   const store = usePracticeStore();
 
   // 다시 풀기 후 복귀 시 step2로 바로 진입 (기존 step3 → 통합 후 step2)
-  const initialStepRef = useRef(store.returnStep != null ? Math.min(store.returnStep, 1) : 0);
+  const initialStepRef = useRef(
+    store.returnStep != null ? Math.min(store.returnStep, 1) : 0,
+  );
   const initialStep = initialStepRef.current;
 
-  const [visibleStats, setVisibleStats] = useState<boolean[]>([false, false, false]);
+  const [visibleStats, setVisibleStats] = useState<boolean[]>([
+    false,
+    false,
+    false,
+  ]);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
   // 문제 카드 순차 등장 상태 — 인덱스별 visible 여부
@@ -55,7 +69,11 @@ export default function PracticeResult() {
   }, []);
 
   // AI 코멘트: sessionId 단위 캐시 — 세션마다 새 피드백
-  const { data: aiCommentData, isLoading: aiCommentLoading, isError: aiCommentError } = useQuery({
+  const {
+    data: aiCommentData,
+    isLoading: aiCommentLoading,
+    isError: aiCommentError,
+  } = useQuery({
     queryKey: ["aiComment", sessionId],
     queryFn: () => fetchAiComment(sessionId!),
     staleTime: 1000 * 60 * 60 * 2, // 2시간 — 백엔드 Redis TTL과 맞춤
@@ -70,7 +88,10 @@ export default function PracticeResult() {
       : (aiCommentData?.comment ?? "");
 
   // AI 텍스트 단어 fade-in 훅 — 실패 시 undefined로 훅 비활성
-  const aiTextRef = useAiText(typeof aiComment === "string" ? aiComment : undefined, { startDelay: 200 });
+  const aiTextRef = useAiText(
+    typeof aiComment === "string" ? aiComment : undefined,
+    { startDelay: 200 },
+  );
 
   // AI 애니메이션 완료 or 실패 시 문제 카드 순차 등장
   useEffect(() => {
@@ -80,9 +101,10 @@ export default function PracticeResult() {
     cardTimerIdsRef.current = [];
 
     // AI 실패 시 즉시 등장, 성공 시 애니메이션 완료 후 등장
-    const animDuration = typeof aiComment === "string" && aiComment
-      ? calcAiAnimDuration(aiComment)
-      : 0;
+    const animDuration =
+      typeof aiComment === "string" && aiComment
+        ? calcAiAnimDuration(aiComment)
+        : 0;
     const cardCount = store.results.length;
 
     // 문제 리스트 섹션 먼저 등장
@@ -94,13 +116,16 @@ export default function PracticeResult() {
 
     // 카드 80ms 간격 순차 등장
     store.results.forEach((_, i) => {
-      const id = setTimeout(() => {
-        setVisibleCards((prev) => {
-          const next = [...prev];
-          next[i] = true;
-          return next;
-        });
-      }, animDuration + 100 + i * 80);
+      const id = setTimeout(
+        () => {
+          setVisibleCards((prev) => {
+            const next = [...prev];
+            next[i] = true;
+            return next;
+          });
+        },
+        animDuration + 100 + i * 80,
+      );
       cardTimerIdsRef.current.push(id);
     });
   }, [aiComment, store.results]);
@@ -120,7 +145,9 @@ export default function PracticeResult() {
   const totalDuration = formatDuration(analysis.totalDurationMs);
   const avgDuration =
     analysis.totalCount > 0
-      ? formatDuration(Math.round(analysis.totalDurationMs / analysis.totalCount))
+      ? formatDuration(
+          Math.round(analysis.totalDurationMs / analysis.totalCount),
+        )
       : "0초";
 
   const handleScoreComplete = useCallback(() => {
@@ -149,24 +176,35 @@ export default function PracticeResult() {
         onComplete={handleScoreComplete}
       />
       <div className="flex gap-8 mt-8">
-        <div className={`text-center transition-all duration-300 ease-out ${visibleStats[0] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}>
+        <div
+          className={`text-center transition-all duration-300 ease-out ${visibleStats[0] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}
+        >
           <div className="text-lg font-bold">
-            {analysis.totalCount > 0 ? Math.round((analysis.correctCount / analysis.totalCount) * 100) : 0}%
+            {analysis.totalCount > 0
+              ? Math.round((analysis.correctCount / analysis.totalCount) * 100)
+              : 0}
+            %
           </div>
           <div className="flex items-center gap-1 text-xs text-text-caption mt-0.5 justify-center">
-            <Target size={11} className="text-text-caption" />정답률
+            <Target size={11} className="text-text-caption" />
+            정답률
           </div>
         </div>
-        <div className={`text-center transition-all duration-300 ease-out ${visibleStats[1] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}>
+        <div
+          className={`text-center transition-all duration-300 ease-out ${visibleStats[1] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}
+        >
           <div className="text-lg font-bold">{totalDuration}</div>
           <div className="flex items-center gap-1 text-xs text-text-caption mt-0.5 justify-center">
             <Clock size={11} className="text-text-caption" />총 시간
           </div>
         </div>
-        <div className={`text-center transition-all duration-300 ease-out ${visibleStats[2] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}>
+        <div
+          className={`text-center transition-all duration-300 ease-out ${visibleStats[2] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}
+        >
           <div className="text-lg font-bold">{avgDuration}</div>
           <div className="flex items-center gap-1 text-xs text-text-caption mt-0.5 justify-center">
-            <Timer size={11} className="text-text-caption" />문제당 평균
+            <Timer size={11} className="text-text-caption" />
+            문제당 평균
           </div>
         </div>
       </div>
@@ -203,18 +241,24 @@ export default function PracticeResult() {
       {/* 문제별 결과 — AI 애니메이션 완료 후 등장 */}
       <div
         className={`transition-all duration-400 ease-out ${
-          resultVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"
+          resultVisible
+            ? "opacity-100 translate-y-0"
+            : "opacity-0 translate-y-3"
         }`}
       >
         {resultVisible && (
           <>
             <div className="w-full h-px bg-border mb-3" />
             <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-medium text-text-caption">문제별 결과</p>
+              <p className="text-sm font-medium text-text-caption">
+                문제별 결과
+              </p>
             </div>
             <div className="flex flex-col gap-2">
               {store.results.map((r, i) => {
-                const q = store.questions.find((q) => q.questionUuid === r.questionUuid);
+                const q = store.questions.find(
+                  (q) => q.questionUuid === r.questionUuid,
+                );
                 const isOpen = openIndex === i;
                 return (
                   <div
@@ -228,33 +272,52 @@ export default function PracticeResult() {
                       className="w-full flex items-center gap-3 p-3 text-left"
                       onClick={() => setOpenIndex(isOpen ? null : i)}
                     >
-                      <span className={`text-sm font-bold w-5 text-center shrink-0 ${r.isCorrect ? "text-green-600" : "text-red-600"}`}>
+                      <span
+                        className={`text-sm font-bold w-5 text-center shrink-0 ${r.isCorrect ? "text-green-600" : "text-red-600"}`}
+                      >
                         {i + 1}
                       </span>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm truncate">{q?.stemPreview}</p>
-                        <p className="text-xs text-text-caption mt-0.5">{formatDuration(r.durationMs)}</p>
+                        <p className="text-xs text-text-caption mt-0.5">
+                          {formatDuration(r.durationMs)}
+                        </p>
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0">
                         {!r.isCorrect && (
-                          <span className="text-xs font-medium text-red-400">오답</span>
+                          <span className="text-xs font-medium text-red-400">
+                            오답
+                          </span>
                         )}
-                        {isOpen
-                          ? <ChevronUp size={14} className="text-text-caption" />
-                          : <ChevronDown size={14} className="text-text-caption" />
-                        }
+                        {isOpen ? (
+                          <ChevronUp size={14} className="text-text-caption" />
+                        ) : (
+                          <ChevronDown
+                            size={14}
+                            className="text-text-caption"
+                          />
+                        )}
                       </div>
                     </button>
-                    <div className={`grid transition-all duration-300 ease-out ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
+                    <div
+                      className={`grid transition-all duration-300 ease-out ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}
+                    >
                       <div className="overflow-hidden">
                         <div className="px-3 pb-3 pt-2 border-t border-border space-y-2">
-                          <p className="text-sm text-text-secondary leading-relaxed">{q?.stemPreview}</p>
-                          <p className={`text-xs font-medium ${r.isCorrect ? "text-green-600" : "text-red-500"}`}>
+                          <p className="text-sm text-text-secondary leading-relaxed">
+                            {q?.stemPreview}
+                          </p>
+                          <p
+                            className={`text-xs font-medium ${r.isCorrect ? "text-green-600" : "text-red-500"}`}
+                          >
                             내 답: {r.selectedChoiceBody}
                           </p>
                           <Link
                             to={`/recommendation/${r.questionUuid}`}
-                            state={{ returnPath: `/practice/${sessionId}`, initialStep: 1 }}
+                            state={{
+                              returnPath: `/practice/${sessionId}`,
+                              initialStep: 1,
+                            }}
                             className="inline-flex items-center gap-1.5 text-xs font-medium text-brand bg-accent-light rounded-md px-3 py-1.5"
                           >
                             <RotateCcw size={12} /> 다시 풀기
