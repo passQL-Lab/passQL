@@ -45,13 +45,7 @@ export const ChoiceCard = memo(function ChoiceCard({
       role="button"
       tabIndex={0}
       aria-pressed={isSelected}
-      className="w-full text-left rounded-xl p-4 shadow-sm transition-all duration-200 cursor-pointer"
-      style={{
-        backgroundColor: isSelected
-          ? "var(--color-brand)"
-          : "var(--color-surface-card)",
-        border: `1px solid ${isSelected ? "var(--color-brand)" : "var(--color-border)"}`,
-      }}
+      className={`w-full text-left rounded-xl p-4 shadow-sm transition-all duration-200 cursor-pointer border ${isSelected ? "choice-card-selected" : "choice-card-unselected"}`}
       onClick={() => onSelect(choice.key, choice.body)}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
@@ -67,13 +61,12 @@ export const ChoiceCard = memo(function ChoiceCard({
         </div>
       ) : isConceptText ? (
         // CONCEPT_ONLY: 일반 텍스트 렌더링 — 선택 시 흰색으로 반전
-        <p className="text-body text-sm" style={{ color: isSelected ? "#fff" : undefined }}>{choice.body}</p>
+        <p className={`text-body ${isSelected ? "choice-text-inverted" : ""}`}>{choice.body}</p>
       ) : (
         // EXECUTABLE SQL: 모노 폰트 + 실행 버튼 (풀이 중 isExecutable=false로 숨김)
         <>
           <p
-            className="text-sm leading-relaxed whitespace-pre-wrap wrap-break-word"
-            style={{ fontFamily: "var(--font-mono)", color: isSelected ? "#fff" : "var(--color-text-primary)" }}
+            className={`text-mono text-sm leading-relaxed whitespace-pre-wrap wrap-break-word ${isSelected ? "choice-text-inverted" : ""}`}
           >
             {choice.body}
           </p>

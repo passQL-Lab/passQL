@@ -399,6 +399,80 @@ body {
   font-weight: 700;
 }
 
+/* ── 13. ChoiceCard (선택 상태별 배경·보더) ── */
+.choice-card-unselected {
+  background-color: var(--color-surface-card);
+  border-color: var(--color-border);
+}
+
+.choice-card-selected {
+  background-color: var(--color-brand);
+  border-color: var(--color-brand);
+}
+
+/* SQL 텍스트용 모노 폰트 유틸리티 — code-block 레이아웃 없이 폰트만 적용 */
+.text-mono {
+  font-family: var(--font-mono);
+}
+
+/* ChoiceCard 선택 시 텍스트 흰색 반전 — text-body/text-secondary 색상 오버라이드용 (unlayered CSS라 우선순위 보장) */
+.choice-text-inverted {
+  color: #fff;
+}
+
+/* ── 14. FeedbackBar (정답/오답 상태별 스타일) ── */
+.feedback-bar--correct {
+  background-color: var(--color-sem-success-light);
+}
+
+.feedback-bar--error {
+  background-color: var(--color-sem-error-light);
+}
+
+.feedback-bar-icon--correct {
+  background-color: #DCFCE7;
+}
+
+.feedback-bar-icon--error {
+  background-color: #FEE2E2;
+}
+
+.feedback-bar-check {
+  color: var(--color-sem-success-text);
+}
+
+.feedback-bar-x {
+  color: var(--color-sem-error-text);
+}
+
+.feedback-bar-heading--correct {
+  color: var(--color-sem-success-text);
+}
+
+.feedback-bar-heading--error {
+  color: var(--color-sem-error-text);
+}
+
+.feedback-bar-rationale {
+  color: var(--color-text-body);
+}
+
+/* next 버튼 단독 (보조 버튼 없을 때) */
+.feedback-bar-next--correct {
+  background-color: var(--color-sem-success);
+}
+
+.feedback-bar-next--error {
+  background-color: var(--color-sem-error);
+}
+
+/* next 버튼 outline (보조 버튼 있을 때 — 탈출 경로 약화) */
+.feedback-bar-next-outline {
+  border: 2px solid var(--color-sem-error);
+  color: var(--color-sem-error);
+  background-color: transparent;
+}
+
 /* StepNavigator 슬라이드 애니메이션 — 동적 offset을 CSS 변수로 처리 (인라인 style 규칙 예외) */
 .step-slider {
   display: flex;

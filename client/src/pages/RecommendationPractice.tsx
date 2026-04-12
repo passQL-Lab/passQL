@@ -59,7 +59,7 @@ export default function RecommendationPractice() {
         setSubmitting(false);
       }
     },
-    [questionUuid, navigate, queryClient, isPracticeReview, markCorrect, setReturnStep],
+    [questionUuid, navigate, queryClient, isPracticeReview, markCorrect],
   );
 
   if (!questionUuid) {
@@ -88,8 +88,7 @@ export default function RecommendationPractice() {
         {/* 제출 전: 비어있음 / 제출 후: 완료 표시 */}
         <div className="w-full h-1.5 bg-border rounded-full overflow-hidden">
           <div
-            className="h-full bg-brand rounded-full transition-all duration-300"
-            style={{ width: feedback ? "100%" : "0%" }}
+            className={`h-full bg-brand rounded-full transition-all duration-300 ${feedback ? "w-full" : "w-0"}`}
           />
         </div>
       </div>
