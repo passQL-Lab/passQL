@@ -94,3 +94,6 @@ out/
 /server/github-issues/github-issues-hash.json
 .vercel
 coverage/
+
+# superpowers
+.superpowers/brainstorm

@@ -40,12 +40,12 @@ export default function Settings() {
     <div className="py-6">
       {/* CSS variable(--stagger-delay) 주입 — Tailwind로 표현 불가하여 style prop 예외 허용 */}
       {/* ① 제목 */}
-      <section className={s0.className} style={s0.style}>
+      <section className={s0.className}>
         <h1 className="text-h1 mb-6">설정</h1>
       </section>
 
       {/* ② 설정 카드 */}
-      <section className={`card-base p-0 ${s1.className}`} style={s1.style}>
+      <section className={`card-base p-0 ${s1.className}`}>
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <div>
             <p className="text-secondary text-sm">디바이스 ID</p>
@@ -88,7 +88,7 @@ export default function Settings() {
       </section>
 
       {/* ③ 하단 로고 + 카피라이트 */}
-      <section className={`text-center mt-8 space-y-2 ${s2.className}`} style={s2.style}>
+      <section className={`text-center mt-8 space-y-2 ${s2.className}`}>
         <img src={logo} alt="passQL" className="h-5 w-auto mx-auto" />
         <p className="text-xs text-text-caption">© 2026 passQL. All rights reserved.</p>
       </section>
