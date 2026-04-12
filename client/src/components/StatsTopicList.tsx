@@ -103,7 +103,7 @@ export default function StatsTopicList({ topicStats }: StatsTopicListProps) {
   const maxSolved = Math.max(...topicStats.map((s) => s.solvedCount), 1);
 
   return (
-    <div className="card-base">
+    <div className="bg-surface-card border border-border rounded-2xl p-4 sm:p-6">
       {/* 헤더 + ? 버튼 */}
       <div className="flex items-center gap-1.5 mb-4">
         <h2 className="text-base font-bold text-text-primary">토픽별 학습 현황</h2>
