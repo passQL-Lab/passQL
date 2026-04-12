@@ -288,7 +288,7 @@ export default function Home() {
           </h2>
           <div className="space-y-3">
             {recommendations.questions.map((q) => (
-              <Link key={q.questionUuid} to={`/questions/${q.questionUuid}`} className="block">
+              <Link key={q.questionUuid} to={`/recommendation/${q.questionUuid}`} className="block">
                 <div className="card-base shadow-sm flex items-center gap-3 cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:border-brand transition-all duration-200">
                   <div className="flex-1 min-w-0">
                     <p className="text-body truncate">{q.stemPreview}</p>

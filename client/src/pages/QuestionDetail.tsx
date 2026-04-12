@@ -70,6 +70,8 @@ export default function QuestionDetail({
   >({});
   const executeCacheRef = useRef(executeCache);
   executeCacheRef.current = executeCache;
+  // 연타 방지 — key 변경(문제 교체) 시 컴포넌트 리마운트로 자동 초기화
+  const isSubmittingRef = useRef(false);
   const [aiSheetOpen, setAiSheetOpen] = useState(false);
   const [aiText, setAiText] = useState("");
 
@@ -100,7 +102,8 @@ export default function QuestionDetail({
 
   // 단독 풀이 모드에서 제출 완료 전까지 이탈 차단 — practiceMode는 부모가 이미 차단하므로 제외
   // practiceMode !== true로 명시해 undefined(단독 모드 기본값)도 정확히 처리
-  const blocker = useBlocker(practiceMode !== true && !submitted);
+  // submitMutation.isPending 중에도 해제: onSuccess의 navigate가 blocker에 걸리지 않게 (#146 동일 패턴)
+  const blocker = useBlocker(practiceMode !== true && !submitted && !submitMutation.isPending);
 
   const activeChoiceSet = question?.choiceSets?.find(
     (cs) => cs.status === "OK",
@@ -204,6 +207,8 @@ export default function QuestionDetail({
 
   const handleSubmit = useCallback(() => {
     if (!selectedKey || !question || !choiceSetId) return;
+    if (isSubmittingRef.current) return;
+    isSubmittingRef.current = true;
     if (practiceMode && onPracticeSubmit) {
       onPracticeSubmit(selectedKey, choiceSetId, choices);
       return;

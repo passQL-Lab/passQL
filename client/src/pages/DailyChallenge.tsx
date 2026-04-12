@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useNavigate, Navigate, useBlocker } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { Home } from "lucide-react";
@@ -19,15 +19,23 @@ export default function DailyChallenge() {
   const [feedback, setFeedback] = useState<SubmitResult | null>(null);
   // 답안 제출 API 호출 중 화면 조작 차단
   const [submitting, setSubmitting] = useState(false);
+  // 연타 방지 — React state는 async 클로저에서 stale하므로 ref로 동기 플래그 관리
+  const isProcessingRef = useRef(false);
+  // 다시 풀기 시 QuestionDetail 강제 리마운트 — isSubmittingRef 초기화 목적
+  const [retryCount, setRetryCount] = useState(0);
 
-  // 제출 완료 전까지 이탈 차단 — 로딩 중이나 제출 완료 후에는 차단 해제
+  // 제출 완료 전까지 이탈 차단 — 로딩 중·제출 완료·제출 API 호출 중에는 차단 해제
+  // submitting 중에도 해제: catch 블록의 navigate("/")가 모달 없이 통과되어야 함
   // useBlocker는 훅이므로 조건부 return 이전에 호출해야 함
-  const blocker = useBlocker(!isLoading && feedback === null);
+  const blocker = useBlocker(!isLoading && feedback === null && !submitting);
 
   // 정답 시에만 submitAnswer 호출 — 오답은 로컬 피드백만 표시해 alreadySolvedToday 유지
   const handlePracticeSubmit = useCallback(
     async (selectedChoiceKey: string, choiceSetId: string, choices: readonly ChoiceItem[]) => {
       if (!today?.question) return;
+      // 연타로 인한 중복 제출 방지
+      if (isProcessingRef.current) return;
+      isProcessingRef.current = true;
 
       const selectedChoice = choices.find((c) => c.key === selectedChoiceKey);
       const correctChoice = choices.find((c) => c.isCorrect);
@@ -44,6 +52,7 @@ export default function DailyChallenge() {
         } catch {
           navigate("/", { replace: true });
         } finally {
+          isProcessingRef.current = false;
           setSubmitting(false);
         }
       } else {
@@ -58,6 +67,7 @@ export default function DailyChallenge() {
           correctSql: null,
         };
         setFeedback(localResult);
+        isProcessingRef.current = false;
         setSubmitting(false);
       }
     },
@@ -107,8 +117,7 @@ export default function DailyChallenge() {
         {/* 제출 전: 비어있음 / 제출 후: 완료 표시 */}
         <div className="w-full h-1.5 bg-border rounded-full overflow-hidden">
           <div
-            className="h-full bg-brand rounded-full transition-all duration-300"
-            style={{ width: feedback ? "100%" : "0%" }}
+            className={`h-full bg-brand rounded-full transition-all duration-300 ${feedback ? "w-full" : "w-0"}`}
           />
         </div>
       </div>
@@ -117,7 +126,7 @@ export default function DailyChallenge() {
       <div className={`flex-1 overflow-y-auto px-4 transition-[padding] duration-300 ${feedback ? "pb-52" : "pb-4"}`}>
         {/* 제출 후 showExecution=true — ChoiceCard 안에 SQL 실행 버튼 표시 */}
         <QuestionDetail
-          key={today?.question?.questionUuid}
+          key={`${today?.question?.questionUuid}-${retryCount}`}
           questionUuid={today?.question?.questionUuid}
           practiceMode
           practiceSubmitLabel="확인"
@@ -126,16 +135,17 @@ export default function DailyChallenge() {
         />
       </div>
 
-      {/* 제출 후 인라인 피드백 — 정답: 홈으로, 오답: 다시 풀기 */}
+      {/* 제출 후 인라인 피드백 — 정답: 홈으로 / 오답: 홈으로 가기 + 다시 풀기 */}
       {feedback && (
         <PracticeFeedbackBar
           result={feedback}
-          nextLabel={feedback.isCorrect ? "홈으로 가기" : "다시 풀기"}
-          onNext={
-            feedback.isCorrect
-              ? () => navigate("/", { replace: true })
-              : () => setFeedback(null)
-          }
+          nextLabel="홈으로 가기"
+          onNext={() => navigate("/", { replace: true })}
+          {...(!feedback.isCorrect && {
+            secondaryLabel: "다시 풀기",
+            // retryCount 변경 → QuestionDetail 리마운트 → isSubmittingRef 초기화
+            onSecondary: () => { setFeedback(null); setRetryCount((c) => c + 1); },
+          })}
         />
       )}
 
