@@ -14,6 +14,34 @@ import {
   useHeatmap,
 } from "../hooks/useHome";
 
+/**
+ * greeting 메시지의 {nickname}을 강조 span으로 치환하고
+ * \n 기준으로 줄을 분리한 ReactNode 배열을 반환한다.
+ * 닉네임 강조는 백엔드 플레이스홀더 위치를 그대로 사용 — 프론트 비즈니스 로직 최소화.
+ */
+function parseGreetingLines(message: string, nickname: string): React.ReactNode[] {
+  const lines = message.split("\n");
+  return lines.map((line, lineIdx) => {
+    const parts = line.split("{nickname}");
+    if (parts.length === 1) return <span key={lineIdx}>{line}</span>;
+    return (
+      <span key={lineIdx}>
+        {parts[0]}
+        <span
+          style={{
+            color: "var(--color-brand)",
+            fontSize: "1.15em",
+            fontWeight: 700,
+          }}
+        >
+          {nickname}
+        </span>
+        {parts[1]}
+      </span>
+    );
+  });
+}
+
 export default function Home() {
   // 각 훅의 상태를 개별 구조분해 — 섹션별 독립 에러/로딩 처리를 위해
   const {
@@ -45,16 +73,20 @@ export default function Home() {
 
   return (
     <div className="py-6 space-y-0">
-      {/* 인사 섹션: greeting 없으면 displayName으로 자연 fallback */}
-      <section className="mb-6">
-        <h1 className="text-h2">
-          {greeting
-            ? greeting.message.replace("{nickname}", greeting.nickname)
-            : `안녕하세요, ${displayName}`}
+      {/* 인사 섹션: 페이드인+슬라이드업 애니메이션, \n 두 줄 렌더링, 닉네임 인디고 강조 */}
+      <section className="mb-6 animate-greeting">
+        <h1 className="text-h2 leading-snug">
+          {greeting ? (
+            parseGreetingLines(greeting.message, greeting.nickname).map((line, i) => (
+              <span key={i} className="block">{line}</span>
+            ))
+          ) : (
+            <span>안녕하세요, {displayName}</span>
+          )}
         </h1>
         {greeting?.messageType === "EXAM_DAY" && (
           <p
-            className="text-sm font-medium mt-1"
+            className="text-sm font-medium mt-1 animate-greeting-delayed"
             style={{ color: "var(--color-sem-error-text)" }}
           >
             오늘 시험이에요!
@@ -62,7 +94,7 @@ export default function Home() {
         )}
         {greeting?.messageType === "URGENT" && (
           <p
-            className="text-sm font-medium mt-1"
+            className="text-sm font-medium mt-1 animate-greeting-delayed"
             style={{ color: "var(--color-sem-warning-text)" }}
           >
             시험이 얼마 남지 않았어요

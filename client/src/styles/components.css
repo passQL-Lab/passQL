@@ -337,3 +337,24 @@ body {
 .animate-slide-up {
   animation: slide-up 0.25s ease-out;
 }
+
+/* ── Greeting fade-in + slide-up animation ── */
+@keyframes greetingIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-greeting {
+  animation: greetingIn 0.4s ease-out both;
+}
+
+/* 서브 메시지(EXAM_DAY/URGENT)용 딜레이 변형 */
+.animate-greeting-delayed {
+  animation: greetingIn 0.4s ease-out 80ms both;
+}
