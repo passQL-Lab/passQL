@@ -25,7 +25,7 @@ jobs:
         id: deploy
         run: |
           URL=$(vercel deploy --prod --yes --token=${{ secrets.VERCEL_TOKEN }} 2>&1 | grep -oE "https://[^[:space:]]*\.vercel\.app" | tail -1)
-          echo "deployment_url=${URL:-https://pass-ql.vercel.app}" >> $GITHUB_OUTPUT
+          echo "deployment_url=${URL:-https://passql.vercel.app}" >> $GITHUB_OUTPUT
 
       - name: 📋 Deployment Summary
         if: always()
