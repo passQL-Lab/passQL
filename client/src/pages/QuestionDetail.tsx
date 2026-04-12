@@ -142,7 +142,9 @@ export default function QuestionDetail({
     }, SSE_TIMEOUT_MS);
 
     const cleanup = generateChoices(questionUuid, {
-      onStatus: (event) => { if (!cancelled) setSseStatus(event.message); },
+      onStatus: (event) => {
+        if (!cancelled) setSseStatus(event.message);
+      },
       onComplete: (response) => {
         clearTimeout(timeoutId);
         if (!cancelled) {
@@ -353,7 +355,9 @@ export default function QuestionDetail({
             isSelected={selectedKey === choice.key}
             cached={executeCache[choice.key]}
             // 풀이 중 실행 버튼 숨김, 제출 후(showExecution=true) 버튼 표시
-            isExecutable={showExecution && question.executionMode === "EXECUTABLE"}
+            isExecutable={
+              showExecution && question.executionMode === "EXECUTABLE"
+            }
             isExecuting={
               executeMutation.isPending &&
               executeMutation.variables === choice.body
