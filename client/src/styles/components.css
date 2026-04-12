@@ -363,8 +363,9 @@ body {
   animation: slide-up 0.25s ease-out;
 }
 
-/* ── Greeting fade-in + slide-up animation ── */
-@keyframes greetingIn {
+/* ── Stagger fade-up animation ── */
+/* 네비게이션 탭 진입 시 섹션별 순차 페이드인. --stagger-delay는 useStagger 훅이 주입. */
+@keyframes staggerIn {
   from {
     opacity: 0;
     transform: translateY(8px);
@@ -375,13 +376,8 @@ body {
   }
 }
 
-.animate-greeting {
-  animation: greetingIn 0.4s ease-out both;
-}
-
-/* 서브 메시지(EXAM_DAY/URGENT)용 딜레이 변형 */
-.animate-greeting-delayed {
-  animation: greetingIn 0.4s ease-out 80ms both;
+.animate-stagger {
+  animation: staggerIn 0.3s ease-out var(--stagger-delay, 0ms) both;
 }
 
 /* ── Greeting nickname highlight ── */

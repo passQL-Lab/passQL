@@ -3,6 +3,7 @@ import { Copy, Check, RefreshCw } from "lucide-react";
 import { useMemberStore } from "../stores/memberStore";
 import logo from "../assets/logo/logo.png";
 import { useRegenerateNickname } from "../hooks/useMember";
+import { useStagger } from "../hooks/useStagger";
 
 export default function Settings() {
   const uuid = useMemberStore((s) => s.uuid);
@@ -11,6 +12,12 @@ export default function Settings() {
   const regenerateMutation = useRegenerateNickname();
   const [copied, setCopied] = useState(false);
   const copyTimerRef = useRef<ReturnType<typeof setTimeout>>(null);
+
+  // 섹션별 순차 페이드인 딜레이 생성
+  const stagger = useStagger();
+  const s0 = stagger(0); // 제목
+  const s1 = stagger(1); // 설정 카드
+  const s2 = stagger(2); // 하단 로고 + 카피라이트
 
   useEffect(() => {
     return () => {
@@ -31,8 +38,14 @@ export default function Settings() {
 
   return (
     <div className="py-6">
-      <h1 className="text-h1 mb-6">설정</h1>
-      <div className="card-base p-0">
+      {/* CSS variable(--stagger-delay) 주입 — Tailwind로 표현 불가하여 style prop 예외 허용 */}
+      {/* ① 제목 */}
+      <section className={s0.className} style={s0.style}>
+        <h1 className="text-h1 mb-6">설정</h1>
+      </section>
+
+      {/* ② 설정 카드 */}
+      <section className={`card-base p-0 ${s1.className}`} style={s1.style}>
         <div className="flex items-center justify-between px-5 py-4 border-b border-border">
           <div>
             <p className="text-secondary text-sm">디바이스 ID</p>
@@ -72,12 +85,13 @@ export default function Settings() {
           <p className="text-secondary text-sm">버전</p>
           <p className="text-caption text-sm mt-1">{__APP_VERSION__}</p>
         </div>
-      </div>
+      </section>
 
-      <div className="text-center mt-8 space-y-2">
+      {/* ③ 하단 로고 + 카피라이트 */}
+      <section className={`text-center mt-8 space-y-2 ${s2.className}`} style={s2.style}>
         <img src={logo} alt="passQL" className="h-5 w-auto mx-auto" />
         <p className="text-xs text-text-caption">© 2026 passQL. All rights reserved.</p>
-      </div>
+      </section>
     </div>
   );
 }

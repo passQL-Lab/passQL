@@ -89,9 +89,7 @@ export default function PracticeResult() {
         total={analysis.totalCount}
         onComplete={handleScoreComplete}
       />
-      <p className="text-body text-text-secondary mt-2">
-        정답
-      </p>
+      <p className="text-sm text-text-caption mt-2">문제</p>
       <div className="flex gap-8 mt-8">
         {/* 정답률 */}
         <div className={`text-center transition-all duration-300 ease-out ${visibleStats[0] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-3"}`}>
@@ -148,7 +146,11 @@ export default function PracticeResult() {
 
   const step3 = (
     <div className="w-full text-left overflow-y-auto">
-      <p className="text-sm font-medium text-text-caption mb-3">문제별 결과</p>
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-sm font-medium text-text-caption">문제별 결과</p>
+        {/* 탭으로 펼쳐서 복습 가능함을 안내 */}
+        <p className="text-xs text-text-caption">눌러서 내 답 확인</p>
+      </div>
       <div className="flex flex-col gap-2">
         {store.results.map((r, i) => {
           const q = store.questions[i];
@@ -173,28 +175,29 @@ export default function PracticeResult() {
                   <p className="text-sm truncate">{q?.stemPreview}</p>
                   <p className="text-xs text-text-caption mt-0.5">{formatDuration(r.durationMs)}</p>
                 </div>
-                {r.isCorrect && <Check size={16} className="text-green-500 shrink-0" />}
+                {r.isCorrect
+                  ? <Check size={16} className="text-green-500 shrink-0" />
+                  : <span className="text-xs font-medium text-red-400 shrink-0">오답</span>
+                }
               </button>
 
               {/* 아코디언 본문 — grid-rows 전환으로 300ms ease-out 높이 애니메이션 */}
               <div className={`grid transition-all duration-300 ease-out ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}>
                 <div className="overflow-hidden">
-                  <div className="px-3 pb-3 pt-1 border-t border-border">
-                    {/* 문제 전체 지문 */}
-                    <p className="text-sm text-text-secondary leading-relaxed mb-2">{q?.stemPreview}</p>
-                    {/* 선택한 답 및 정답 여부 */}
+                  <div className="px-3 pb-3 pt-2 border-t border-border space-y-2">
+                    {/* stemPreview가 현재 접근 가능한 최대 지문 */}
+                    <p className="text-sm text-text-secondary leading-relaxed">{q?.stemPreview}</p>
+                    {/* 실제 선택지 텍스트 표시 — selectedChoiceBody로 키(A/B/C/D) 대신 본문 노출 */}
                     <p className={`text-xs font-medium ${r.isCorrect ? "text-green-600" : "text-red-500"}`}>
-                      선택: {r.selectedChoiceKey} — {r.isCorrect ? "정답" : "오답"}
+                      내 답: {r.selectedChoiceBody}
                     </p>
-                    {/* 오답일 때만 다시 풀기 버튼 */}
-                    {!r.isCorrect && (
-                      <Link
-                        to={`/questions/${r.questionUuid}`}
-                        className="inline-flex items-center gap-1 text-xs font-medium text-brand bg-accent-light rounded-md px-2.5 py-1.5 mt-2"
-                      >
-                        <RotateCcw size={13} /> 다시 풀기
-                      </Link>
-                    )}
+                    {/* 정답/오답 모두 다시 풀기 제공 — 복습 목적 */}
+                    <Link
+                      to={`/questions/${r.questionUuid}`}
+                      className="inline-flex items-center gap-1.5 text-xs font-medium text-brand bg-accent-light rounded-md px-3 py-1.5"
+                    >
+                      <RotateCcw size={12} /> 다시 풀기
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -209,7 +212,7 @@ export default function PracticeResult() {
     <div className="h-screen max-w-120 mx-auto px-4 sm:px-0">
       <StepNavigator
         steps={[step1, step2, step3]}
-        lastButtonLabel="다른 카테고리"
+        lastButtonLabel="카테고리 목록으로"
         onLastStep={() => {
           store.reset();
           navigate("/questions", { replace: true });

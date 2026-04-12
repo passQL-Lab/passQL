@@ -55,9 +55,11 @@ export default function PracticeSet() {
     async (
       selectedChoiceKey: string,
       choiceSetId: string,
-      _choices: readonly ChoiceItem[],
+      choices: readonly ChoiceItem[],
     ) => {
       if (!displayQuestion) return;
+      // 결과 화면에서 선택지 키(A/B/C/D) 대신 실제 선택지 텍스트를 보여주기 위해 body 추출
+      const selectedChoiceBody = choices.find((c) => c.key === selectedChoiceKey)?.body ?? selectedChoiceKey;
       // 제출 중 중복 호출 및 화면 조작 방지
       setSubmitting(true);
       try {
@@ -71,6 +73,7 @@ export default function PracticeSet() {
           displayQuestion.questionUuid,
           result.isCorrect,
           selectedChoiceKey,
+          selectedChoiceBody,
         );
       } catch {
         const fallback: SubmitResult = {
@@ -87,6 +90,7 @@ export default function PracticeSet() {
           displayQuestion.questionUuid,
           false,
           selectedChoiceKey,
+          selectedChoiceBody,
         );
       } finally {
         setSubmitting(false);

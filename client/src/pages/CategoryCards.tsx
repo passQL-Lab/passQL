@@ -7,6 +7,7 @@ import { generatePractice } from "../api/practice";
 import { usePracticeStore } from "../stores/practiceStore";
 import LoadingOverlay from "../components/LoadingOverlay";
 import ErrorFallback from "../components/ErrorFallback";
+import { useStagger } from "../hooks/useStagger";
 
 export default function CategoryCards() {
   const { data: topics, isLoading, isError, refetch } = useTopics();
@@ -14,6 +15,11 @@ export default function CategoryCards() {
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
   const startSession = usePracticeStore((s) => s.startSession);
+
+  // 섹션별 순차 페이드인 딜레이 생성
+  const stagger = useStagger();
+  const s0 = stagger(0); // 제목 + 서브텍스트
+  const s1 = stagger(1); // 카드 그리드
 
   const handleSelect = async (code: string, displayName: string) => {
     setGenerating(displayName);
@@ -32,22 +38,27 @@ export default function CategoryCards() {
 
   return (
     <div className="py-6">
-      <h1 className="text-h1 mb-1 flex items-center gap-2">
-        <Sparkles size={24} fill="currentColor" />
-        AI문제 풀기
-      </h1>
-      <p className="text-secondary mb-6">
-        골라보세요, AI가 딱 맞는 문제를 만들어드릴게요
-      </p>
+      {/* CSS variable(--stagger-delay) 주입 — Tailwind로 표현 불가하여 style prop 예외 허용 */}
+      {/* ① 제목 + 서브텍스트 */}
+      <section className={s0.className} style={s0.style}>
+        <h1 className="text-h1 mb-1 flex items-center gap-2">
+          <Sparkles size={24} fill="currentColor" />
+          AI문제 풀기
+        </h1>
+        <p className="text-secondary mb-6">
+          골라보세요, AI가 딱 맞는 문제를 만들어드릴게요
+        </p>
+      </section>
 
+      {/* ② 카드 그리드 */}
       {isLoading ? (
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+        <section className={`grid grid-cols-2 lg:grid-cols-3 gap-3 ${s1.className}`} style={s1.style}>
           {Array.from({ length: 5 }, (_, i) => (
             <div key={i} className="card-base h-28 animate-pulse bg-border" />
           ))}
-        </div>
+        </section>
       ) : (
-        <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
+        <section className={`grid grid-cols-2 lg:grid-cols-3 gap-3 ${s1.className}`} style={s1.style}>
           {topics?.map((t) => {
             const Icon = getTopicIcon(t.code);
             return (
@@ -64,7 +75,7 @@ export default function CategoryCards() {
               </button>
             );
           })}
-        </div>
+        </section>
       )}
 
       {error && (
