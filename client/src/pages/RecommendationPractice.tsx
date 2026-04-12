@@ -85,12 +85,16 @@ export default function RecommendationPractice() {
         />
       </div>
 
-      {/* 제출 후 인라인 피드백 — 정답/오답 모두 홈으로 가기 */}
+      {/* 제출 후 인라인 피드백 — 정답: 홈으로 / 오답: 홈으로 가기 + 다시 풀기 */}
       {feedback && (
         <PracticeFeedbackBar
           result={feedback}
           nextLabel="홈으로 가기"
           onNext={() => navigate("/", { replace: true })}
+          {...(!feedback.isCorrect && {
+            secondaryLabel: "다시 풀기",
+            onSecondary: () => setFeedback(null),
+          })}
         />
       )}
 
