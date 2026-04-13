@@ -106,7 +106,8 @@
                     <tbody>
                     <tr th:each="m : ${members}"
                         class="cursor-pointer hover:bg-base-200"
-                        th:onclick="|location.href='/admin/members/' + '${m.memberUuid}'|">
+                        th:data-href="@{/admin/members/{uuid}(uuid=${m.memberUuid})}"
+                        onclick="location.href=this.dataset.href">
                         <td class="text-sm font-medium truncate" th:text="${m.nickname}">닉네임</td>
                         <td>
                             <span class="badge badge-xs"
