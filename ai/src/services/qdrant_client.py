@@ -193,6 +193,130 @@ class QdrantSearchClient:
             logger.error(f"Qdrant search 예기치 않은 오류: {e}")
             raise CustomError(f"Qdrant search 예기치 않은 오류: {e}")
 
+    async def get_collection_info(self, collection: str) -> dict:
+        """
+        Qdrant 컬렉션 기본 정보 조회 (포인트 수, 벡터 차원, 상태).
+
+        Args:
+            collection: 조회할 컬렉션 이름
+
+        Returns:
+            dict: {"points_count": int, "vector_size": int, "status": str}
+                  컬렉션 미존재 시 {"points_count": 0, "vector_size": 0, "status": "not_found"}
+
+        Raises:
+            CustomError: API 호출 실패 시
+        """
+        url = f"{self.base_url}/collections/{collection}"
+        logger.debug(f"[qdrant] get_collection_info 요청: url={url}")
+        try:
+            async with httpx.AsyncClient(timeout=self.timeout) as client:
+                resp = await client.get(url, headers=self._headers())
+                if resp.status_code == 404:
+                    logger.info(f"[qdrant] 컬렉션 없음: {collection}")
+                    return {"points_count": 0, "vector_size": 0, "status": "not_found"}
+                resp.raise_for_status()
+                data = resp.json()
+
+            result = data.get("result", {})
+            config = result.get("config", {}).get("params", {})
+            vectors_config = config.get("vectors", {})
+            # bge-m3 단일 벡터 컬렉션 — vectors 키 없이 바로 size/distance
+            vector_size = vectors_config.get("size", 0) if isinstance(vectors_config, dict) else 0
+            points_count = result.get("points_count", 0)
+            status = result.get("status", "unknown")
+
+            logger.debug(
+                f"[qdrant] get_collection_info 응답: collection={collection}, "
+                f"points_count={points_count}, vector_size={vector_size}, status={status}"
+            )
+            return {"points_count": points_count, "vector_size": vector_size, "status": status}
+
+        except httpx.HTTPStatusError as e:
+            logger.error(f"[qdrant] get_collection_info HTTP 오류: {e.response.status_code}")
+            raise CustomError(f"Qdrant get_collection_info HTTP 오류: {e.response.status_code}")
+        except httpx.RequestError as e:
+            logger.error(f"[qdrant] get_collection_info 요청 오류: {e}")
+            raise CustomError(f"Qdrant get_collection_info 요청 오류: {e}")
+        except CustomError:
+            raise
+        except Exception as e:
+            logger.error(f"[qdrant] get_collection_info 예기치 않은 오류: {e}")
+            raise CustomError(f"Qdrant get_collection_info 예기치 않은 오류: {e}")
+
+    async def scroll_all_ids(self, collection: str) -> list[str]:
+        """
+        Qdrant 컬렉션의 모든 포인트 ID(UUID 문자열)를 페이지네이션으로 수집.
+
+        scroll API: limit=1000씩, next_page_offset이 None이 될 때까지 반복.
+        with_payload=false, with_vector=false — ID만 수집하여 응답 최소화.
+
+        Args:
+            collection: 조회할 컬렉션 이름
+
+        Returns:
+            list[str]: 전체 포인트 UUID 문자열 목록
+
+        Raises:
+            CustomError: API 호출 실패 시
+        """
+        url = f"{self.base_url}/collections/{collection}/points/scroll"
+        all_ids: list[str] = []
+        offset = None
+        page = 0
+
+        logger.info(f"[qdrant] scroll_all_ids 시작: collection={collection}")
+
+        try:
+            async with httpx.AsyncClient(timeout=60) as client:  # scroll은 대용량 가능 — timeout 60s
+                while True:
+                    body: dict = {
+                        "limit": 1000,
+                        "with_payload": False,
+                        "with_vector": False,
+                    }
+                    if offset is not None:
+                        body["offset"] = offset
+
+                    resp = await client.post(url, json=body, headers=self._headers())
+                    if resp.status_code == 404:
+                        logger.info(f"[qdrant] scroll_all_ids: 컬렉션 없음 — 빈 목록 반환")
+                        return []
+                    resp.raise_for_status()
+                    data = resp.json()
+
+                    result = data.get("result", {})
+                    points = result.get("points", [])
+                    next_offset = result.get("next_page_offset")
+
+                    page_ids = [str(p["id"]) for p in points if "id" in p]
+                    all_ids.extend(page_ids)
+
+                    logger.debug(
+                        f"[qdrant] scroll_all_ids page {page}: "
+                        f"offset={offset}, collected={len(page_ids)}, total_so_far={len(all_ids)}"
+                    )
+                    page += 1
+
+                    if not next_offset:
+                        break
+                    offset = next_offset
+
+            logger.info(f"[qdrant] scroll_all_ids 완료: collection={collection}, total={len(all_ids)}")
+            return all_ids
+
+        except httpx.HTTPStatusError as e:
+            logger.error(f"[qdrant] scroll_all_ids HTTP 오류: {e.response.status_code}")
+            raise CustomError(f"Qdrant scroll_all_ids HTTP 오류: {e.response.status_code}")
+        except httpx.RequestError as e:
+            logger.error(f"[qdrant] scroll_all_ids 요청 오류: {e}")
+            raise CustomError(f"Qdrant scroll_all_ids 요청 오류: {e}")
+        except CustomError:
+            raise
+        except Exception as e:
+            logger.error(f"[qdrant] scroll_all_ids 예기치 않은 오류: {e}")
+            raise CustomError(f"Qdrant scroll_all_ids 예기치 않은 오류: {e}")
+
     async def upsert(
         self,
         collection: str,
