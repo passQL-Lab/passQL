@@ -56,14 +56,6 @@ public class QuestionReport extends BaseEntity {
     @Enumerated(EnumType.STRING)
     private CorrectionScope correctionScope;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "question_uuid", insertable = false, updatable = false)
-    private Question question;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "choice_set_uuid", insertable = false, updatable = false)
-    private QuestionChoiceSet choiceSet;
-
     @Builder
     public QuestionReport(UUID questionUuid, UUID choiceSetUuid, UUID memberUuid,
                           UUID submissionUuid, List<ReportCategory> categories, String detail) {
