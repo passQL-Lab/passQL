@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect, useMemo } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { ChevronRight, AlertCircle, RefreshCw, BookOpen, ChevronDown, FileText, GitCompare } from "lucide-react";
 import ReactMarkdown from "react-markdown";
+import MarkdownText from "../components/MarkdownText";
 import { executeChoice } from "../api/questions";
 import { ResultTable } from "../components/ResultTable";
 import { SchemaViewer } from "../components/SchemaViewer";
@@ -335,7 +336,7 @@ export default function AnswerFeedback() {
         <FileText size={13} className="text-base-content/60 shrink-0" />
         <p className="text-xs text-base-content/60 uppercase tracking-widest font-semibold">해설</p>
       </div>
-      <p className="text-sm text-base-content leading-relaxed">{rationale}</p>
+      <MarkdownText text={rationale} className="text-sm text-base-content leading-relaxed" />
     </div>
   );
 
