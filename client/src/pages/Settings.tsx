@@ -98,7 +98,7 @@ export default function Settings() {
             <SettingsRow
               label="닉네임"
               value={
-                <p className="text-body font-bold">
+                <p className="text-sm font-bold text-text-primary">
                   {nickname || uuid.slice(0, 8)}
                 </p>
               }
@@ -121,7 +121,7 @@ export default function Settings() {
             <SettingsRow
               label="디바이스 ID"
               value={
-                <p className="font-mono text-[13px] text-text-primary">
+                <p className="font-mono text-xs text-text-secondary">
                   {truncatedUuid}
                 </p>
               }
@@ -150,7 +150,7 @@ export default function Settings() {
           <div className="bg-surface-card border-y border-border divide-y divide-border">
             <SettingsRow
               label="건의사항"
-              value={<p className="text-body font-medium">의견 남기기</p>}
+              value={<p className="text-sm text-text-secondary">의견 남기기</p>}
               action={<ChevronRight size={16} className="text-text-caption" />}
               onClick={() => navigate("/settings/feedback")}
             />
@@ -164,7 +164,7 @@ export default function Settings() {
           <div className="bg-surface-card border-y border-border divide-y divide-border">
             <SettingsRow
               label="버전"
-              value={<p className="text-caption">{__APP_VERSION__}</p>}
+              value={<p className="text-sm text-text-caption">{__APP_VERSION__}</p>}
               onClick={devUnlocked ? undefined : handleVersionClick}
             />
             {/* 개발자 모드 row — Easter Egg 잠금 해제 시 노출 */}
@@ -172,7 +172,7 @@ export default function Settings() {
               <SettingsRow
                 label="개발자 모드"
                 value={
-                  <p className="text-caption text-text-secondary">
+                  <p className="text-sm text-text-caption">
                     개발자 전용 도구
                   </p>
                 }
