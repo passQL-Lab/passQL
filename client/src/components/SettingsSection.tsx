@@ -24,7 +24,7 @@ export default function SettingsSection({
   return (
     <div className={[isFirst ? "" : "mt-6", className ?? ""].filter(Boolean).join(" ")}>
       {/* 소문자 회색 라벨 — iOS 설정 앱 스타일 */}
-      <p className="text-xs text-text-caption px-1 mb-1">{label}</p>
+      <p className="text-sm text-text-caption px-1 mb-1">{label}</p>
       {children}
     </div>
   );
