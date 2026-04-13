@@ -1,6 +1,8 @@
 import { useRef } from "react";
-import { Check, X } from "lucide-react";
+import { Check, X, Flag } from "lucide-react";
 import type { SubmitResult } from "../types/api";
+import { getRandomExecutableGradingMessage } from "../constants/microcopy";
+import MarkdownText from "./MarkdownText";
 
 interface PracticeFeedbackBarProps {
   readonly result: SubmitResult;
@@ -9,6 +11,9 @@ interface PracticeFeedbackBarProps {
   // 오답 시 보조 버튼 (예: "다시 풀기") — 미전달 시 버튼 미표시
   readonly onSecondary?: () => void;
   readonly secondaryLabel?: string;
+  // 신고 기능 — submissionUuid 없으면 버튼 미표시
+  readonly onReport?: () => void;
+  readonly isReported?: Boolean;
 }
 
 export default function PracticeFeedbackBar({
@@ -17,10 +22,14 @@ export default function PracticeFeedbackBar({
   nextLabel,
   onSecondary,
   secondaryLabel,
+  onReport,
+  isReported,
 }: PracticeFeedbackBarProps) {
   const isCorrect = result.isCorrect;
   // 버튼 언마운트 전 이중 클릭 방지 — 한 번 눌리면 플래그 세팅, 부모 언마운트 시 자동 초기화
   const hasActedRef = useRef(false);
+  // EXECUTABLE 문제: 마운트 시 한 번만 뽑아 리렌더 때 바뀌지 않도록 ref에 고정
+  const executableMessageRef = useRef(getRandomExecutableGradingMessage());
   const guard = (fn: () => void) => () => {
     if (hasActedRef.current) return;
     hasActedRef.current = true;
@@ -46,18 +55,39 @@ export default function PracticeFeedbackBar({
               )}
             </div>
             <p
-              className={`text-base font-bold ${isCorrect ? "feedback-bar-heading--correct" : "feedback-bar-heading--error"}`}
+              className={`text-base font-bold flex-1 ${isCorrect ? "feedback-bar-heading--correct" : "feedback-bar-heading--error"}`}
             >
               {isCorrect ? "정답이에요!" : "오답이에요"}
             </p>
+            {/* 신고 버튼 — onReport 전달 시(submissionUuid 있을 때)만 표시 */}
+            {onReport && (
+              <button
+                type="button"
+                aria-label="문제 신고"
+                className={`w-7 h-7 flex items-center justify-center rounded-full transition-opacity ${
+                  Boolean(isReported)
+                    ? "opacity-40 cursor-not-allowed"
+                    : "opacity-60 hover:opacity-100"
+                }`}
+                onClick={Boolean(isReported) ? undefined : guard(onReport)}
+                disabled={Boolean(isReported)}
+              >
+                <Flag size={14} className={isCorrect ? "feedback-bar-heading--correct" : "feedback-bar-heading--error"} />
+              </button>
+            )}
           </div>
 
           {/* 해설 텍스트 */}
           {result.rationale && (
-            <p
-              className="text-sm leading-relaxed mb-5 feedback-bar-rationale"
-            >
-              {result.rationale}
+            <MarkdownText
+              text={result.rationale}
+              className="text-sm leading-relaxed mb-3 feedback-bar-rationale"
+            />
+          )}
+          {/* EXECUTABLE 문제: 실제 DB에서 검증됐음을 어필 */}
+          {result.correctResult != null && (
+            <p className="text-xs text-text-secondary mb-5">
+              {executableMessageRef.current}
             </p>
           )}
 

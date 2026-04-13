@@ -3,10 +3,12 @@ import { useParams, useNavigate, Navigate, useBlocker } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
 import { usePracticeStore } from "../stores/practiceStore";
+import { useMemberStore } from "../stores/memberStore";
 import { submitAnswer } from "../api/questions";
 import { getRandomMessage } from "../constants/microcopy";
 import QuestionDetail from "./QuestionDetail";
 import PracticeFeedbackBar from "../components/PracticeFeedbackBar";
+import ReportModal from "../components/ReportModal";
 import ConfirmModal from "../components/ConfirmModal";
 import LoadingOverlay from "../components/LoadingOverlay";
 import type { ChoiceItem, SubmitResult } from "../types/api";
@@ -32,7 +34,18 @@ export default function PracticeSet() {
   const topicName = usePracticeStore((s) => s.topicName);
   const submitAndAdvance = usePracticeStore((s) => s.submitAndAdvance);
 
+  const memberUuid = useMemberStore((s) => s.uuid);
+
   const [feedback, setFeedback] = useState<SubmitResult | null>(null);
+  // 제출 시점의 choiceSetUuid — SubmitResult에 없으므로 별도 보관 (신고 API에 필요)
+  const [feedbackChoiceSetUuid, setFeedbackChoiceSetUuid] = useState<string | undefined>(undefined);
+  // 신고 모달 표시 여부
+  const [reportModalOpen, setReportModalOpen] = useState(false);
+  // 신고 완료된 submissionUuid 목록 — 중복 신고 방지
+  const [reportedSubmissions, setReportedSubmissions] = useState<Set<string>>(new Set());
+  // 신고 완료 토스트 표시 여부
+  const [showReportToast, setShowReportToast] = useState(false);
+  const toastTimerIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // 답안 제출 API 호출 중 화면 조작 차단
   const [submitting, setSubmitting] = useState(false);
   // Home 버튼 클릭 시 이탈 확인 모달 — blocker와 독립적으로 제어
@@ -77,6 +90,7 @@ export default function PracticeSet() {
           storeSessionId ?? crypto.randomUUID(),
         );
         setFeedback(result);
+        setFeedbackChoiceSetUuid(choiceSetId);
         // submissionUuid: 백엔드가 응답에 포함하면 전달, 없으면 undefined → 결과 화면에서 신고 버튼 미표시
         submitAndAdvance(
           displayQuestion.questionUuid,
@@ -124,6 +138,8 @@ export default function PracticeSet() {
     // isProcessingRef를 잠근 뒤 렌더 완료 시점(~300ms)까지 새 제출 차단
     isProcessingRef.current = true;
     setFeedback(null);
+    setFeedbackChoiceSetUuid(undefined);
+    setReportModalOpen(false);
     setTimeout(() => {
       isProcessingRef.current = false;
     }, 300);
@@ -135,6 +151,13 @@ export default function PracticeSet() {
       navigate(`/practice/${sessionId}/result`, { replace: true });
     }
   }, [shouldNavigateToResult, navigate, sessionId]);
+
+  // 토스트 타이머 언마운트 클린업
+  useEffect(() => {
+    return () => {
+      if (toastTimerIdRef.current !== null) clearTimeout(toastTimerIdRef.current);
+    };
+  }, []);
 
   // exitConfirmed 시 blocker가 비활성화된 후 홈으로 이동 — 이중 차단 방지
   useEffect(() => {
@@ -202,7 +225,49 @@ export default function PracticeSet() {
           result={feedback}
           onNext={handleNext}
           nextLabel={feedback?.isCorrect ? "계속하기" : "확인"}
+          // submissionUuid가 있고 memberUuid가 있을 때만 신고 버튼 표시
+          onReport={
+            feedback.submissionUuid && memberUuid
+              ? () => setReportModalOpen(true)
+              : undefined
+          }
+          isReported={
+            feedback.submissionUuid
+              ? reportedSubmissions.has(feedback.submissionUuid)
+              : false
+          }
         />
+      )}
+
+      {/* 신고 모달 — submissionUuid를 지역 변수로 추출하여 non-null assertion 없이 타입 안전하게 렌더 */}
+      {(() => {
+        const submissionUuid = feedback?.submissionUuid;
+        if (!submissionUuid || !reportModalOpen || !displayQuestion) return null;
+        return (
+          <ReportModal
+            questionUuid={displayQuestion.questionUuid}
+            submissionUuid={submissionUuid}
+            choiceSetUuid={feedbackChoiceSetUuid}
+            onClose={() => setReportModalOpen(false)}
+            onSuccess={() => {
+              setReportedSubmissions((prev) => new Set([...prev, submissionUuid]));
+              setReportModalOpen(false);
+              // 신고 완료 토스트 (2.5초 후 자동 숨김) — ref로 클린업
+              setShowReportToast(true);
+              if (toastTimerIdRef.current !== null) clearTimeout(toastTimerIdRef.current);
+              toastTimerIdRef.current = setTimeout(() => setShowReportToast(false), 2500);
+            }}
+          />
+        );
+      })()}
+
+      {/* 신고 접수 토스트 */}
+      {showReportToast && (
+        <div className="toast toast-top toast-end z-50">
+          <div className="alert alert-success text-sm">
+            <span>신고를 접수했어요.</span>
+          </div>
+        </div>
       )}
 
       {/* 채점 중 오버레이 — 제출 API 응답 전 화면 조작 차단 */}
@@ -211,6 +276,7 @@ export default function PracticeSet() {
           topicName={topicName ?? ""}
           staticMessage="채점 중이에요"
           subMessage="잠시만 기다려주세요"
+          isExecutable={displayQuestion?.executionMode === "EXECUTABLE"}
         />
       )}
 

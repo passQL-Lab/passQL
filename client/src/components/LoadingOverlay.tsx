@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { getRandomMessage } from "../constants/microcopy";
+import { getRandomMessage, getRandomExecutableGradingMessage } from "../constants/microcopy";
 
 interface LoadingOverlayProps {
   readonly topicName: string;
@@ -7,10 +7,14 @@ interface LoadingOverlayProps {
   readonly staticMessage?: string;
   /** staticMessage와 함께 표시할 보조 텍스트 */
   readonly subMessage?: string;
+  /** true면 채점 중 메시지에 "실제 DB에서 실행 중" 뱃지 표시 */
+  readonly isExecutable?: boolean;
 }
 
-export default function LoadingOverlay({ topicName, staticMessage, subMessage }: LoadingOverlayProps) {
+export default function LoadingOverlay({ topicName, staticMessage, subMessage, isExecutable }: LoadingOverlayProps) {
   const [message, setMessage] = useState(() => getRandomMessage(topicName));
+  // 마운트 시 1회 고정 — JSX 인라인 호출 시 리렌더마다 문구가 바뀌는 문제 방지
+  const [executableMsg] = useState(getRandomExecutableGradingMessage);
 
   useEffect(() => {
     if (staticMessage) return;
@@ -33,6 +37,12 @@ export default function LoadingOverlay({ topicName, staticMessage, subMessage }:
         <p className="text-xs text-text-caption mt-2">
           {subMessage ?? "잠시만 기다려주세요"}
         </p>
+        {/* EXECUTABLE 문제: 실제 DB 실행 중임을 사용자에게 어필 — 매번 랜덤 문구 */}
+        {isExecutable && staticMessage && (
+          <p className="text-xs text-brand mt-3 font-medium">
+            {executableMsg}
+          </p>
+        )}
       </div>
     </div>
   );

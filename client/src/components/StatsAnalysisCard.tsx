@@ -1,5 +1,5 @@
 import { Sparkles } from "lucide-react";
-import { useAiText } from "../hooks/useAiText";
+import MarkdownText from "./MarkdownText";
 
 interface StatsAnalysisCardProps {
   readonly comment: string | null;
@@ -7,8 +7,6 @@ interface StatsAnalysisCardProps {
 }
 
 export default function StatsAnalysisCard({ comment, isLoading }: StatsAnalysisCardProps) {
-  const textRef = useAiText(comment);
-
   if (isLoading) {
     return (
       <div className="bg-surface-card border border-border rounded-2xl p-4 sm:p-6 flex gap-3">
@@ -33,9 +31,10 @@ export default function StatsAnalysisCard({ comment, isLoading }: StatsAnalysisC
         </div>
         <h3 className="text-base font-bold text-text-primary">AI 한마디</h3>
       </div>
-      {/* 단어 단위 fade-in — useAiText 훅이 ref를 통해 DOM 직접 조작 */}
-      <p
-        ref={textRef}
+      {/* 단어 단위 fade-in — MarkdownText animated로 Markdown 렌더링 + 순차 등장 */}
+      <MarkdownText
+        text={comment}
+        animated
         className="text-sm text-text-secondary leading-relaxed"
       />
     </div>

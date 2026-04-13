@@ -86,8 +86,6 @@ out/
 .vscode/
 *.code-workspace
 .history/
-/.report/
-/.issue/
 /github-issues/github-issues-hash.json
 /github-issues/github-issues.json
 /server/github-issues/github-issues.json
