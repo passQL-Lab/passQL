@@ -1,11 +1,41 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-13T04:25:01Z",
-    "currentVersion": "0.0.122",
+    "lastUpdated": "2026-04-13T04:44:36Z",
+    "currentVersion": "0.0.123",
     "projectType": "basic",
-    "totalReleases": 50
+    "totalReleases": 51
   },
   "releases": [
+    {
+      "version": "0.0.123",
+      "project_type": "basic",
+      "date": "2026-04-13",
+      "pr_number": 220,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트 (v0.0.123)\n\n* **새로운 기능**\n  * 피드백 관리 대시보드에 상태별 카운트(대기, 검토, 해결) 표시 추가\n  * 피드백 페이지에 새로고침 버튼 추가\n\n* **개선 사항**\n  * 회원 목록 네비게이션 메커니즘 개선\n  * 잘못된 상태 입력에 대한 오류 처리 강화\n\n* **문서**\n  * 내부 템플릿 작성 규칙 문서 업데이트",
+      "parsed_changes": {
+        "새로운_기능": {
+          "title": "새로운 기능",
+          "items": [
+            "피드백 관리 대시보드에 상태별 카운트(대기, 검토, 해결) 표시 추가",
+            "피드백 페이지에 새로고침 버튼 추가"
+          ]
+        },
+        "개선_사항": {
+          "title": "개선 사항",
+          "items": [
+            "회원 목록 네비게이션 메커니즘 개선",
+            "잘못된 상태 입력에 대한 오류 처리 강화"
+          ]
+        },
+        "문서": {
+          "title": "문서",
+          "items": [
+            "내부 템플릿 작성 규칙 문서 업데이트"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.122",
       "project_type": "basic",
