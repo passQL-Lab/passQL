@@ -1,11 +1,34 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-13T06:31:25Z",
-    "currentVersion": "0.0.129",
+    "lastUpdated": "2026-04-13T07:31:13Z",
+    "currentVersion": "0.0.134",
     "projectType": "basic",
-    "totalReleases": 55
+    "totalReleases": 56
   },
   "releases": [
+    {
+      "version": "0.0.134",
+      "project_type": "basic",
+      "date": "2026-04-13",
+      "pr_number": 239,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **Bug Fixes**\n  * 로딩 화면의 메시지 표시 방식을 개선하여 사용자 인터페이스 일관성을 향상시켰습니다.\n\n* **Chores**\n  * 애플리케이션 버전을 v0.0.134로 업데이트했습니다.\n  * README를 업데이트했습니다.",
+      "parsed_changes": {
+        "bug_fixes": {
+          "title": "Bug Fixes",
+          "items": [
+            "로딩 화면의 메시지 표시 방식을 개선하여 사용자 인터페이스 일관성을 향상시켰습니다."
+          ]
+        },
+        "chores": {
+          "title": "Chores",
+          "items": [
+            "애플리케이션 버전을 v0.0.134로 업데이트했습니다.",
+            "README를 업데이트했습니다."
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.129",
       "project_type": "basic",

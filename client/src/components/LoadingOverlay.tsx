@@ -34,15 +34,10 @@ export default function LoadingOverlay({ topicName, staticMessage, subMessage, i
           </span>
         )}
         <p className="text-body">{staticMessage ?? message}</p>
-        <p className="text-xs text-text-caption mt-2">
-          {subMessage ?? "잠시만 기다려주세요"}
+        {/* EXECUTABLE 채점 중: subMessage 대신 랜덤 문구로 대체 */}
+        <p className="text-xs text-brand mt-2 font-medium">
+          {isExecutable && staticMessage ? executableMsg : (subMessage ?? "잠시만 기다려주세요")}
         </p>
-        {/* EXECUTABLE 문제: 실제 DB 실행 중임을 사용자에게 어필 — 매번 랜덤 문구 */}
-        {isExecutable && staticMessage && (
-          <p className="text-xs text-brand mt-3 font-medium">
-            {executableMsg}
-          </p>
-        )}
       </div>
     </div>
   );
