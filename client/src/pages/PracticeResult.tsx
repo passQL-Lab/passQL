@@ -74,12 +74,15 @@ export default function PracticeResult() {
   // 타이머를 역할별로 분리 — scoreComplete 타이머와 AI/카드 타이머가 서로 취소하지 않도록
   const scoreTimerIdsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const cardTimerIdsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  // 신고 토스트 타이머 — 컴포넌트 언마운트 시 클린업
+  const toastTimerIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     store.clearReturnStep();
     return () => {
       scoreTimerIdsRef.current.forEach(clearTimeout);
       cardTimerIdsRef.current.forEach(clearTimeout);
+      if (toastTimerIdRef.current !== null) clearTimeout(toastTimerIdRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -409,9 +412,10 @@ export default function PracticeResult() {
               setReportedSubmissions((prev) => new Set([...prev, reportModalTarget.submissionUuid]));
             }
             setReportModalTarget(null);
-            // 신고 접수 토스트 표시 (2.5초 후 자동 숨김)
+            // 신고 접수 토스트 표시 (2.5초 후 자동 숨김) — ref로 관리하여 언마운트 시 클린업
             setShowReportToast(true);
-            setTimeout(() => setShowReportToast(false), 2500);
+            if (toastTimerIdRef.current !== null) clearTimeout(toastTimerIdRef.current);
+            toastTimerIdRef.current = setTimeout(() => setShowReportToast(false), 2500);
           }}
         />
       )}

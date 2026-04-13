@@ -31,6 +31,7 @@ export default function ReportModal({
   const [selected, setSelected] = useState<Set<ReportCategory>>(new Set());
   const [detail, setDetail] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // ESC 키로 모달 닫기 + 배경 스크롤 잠금
   useEffect(() => {
@@ -63,6 +64,7 @@ export default function ReportModal({
   const handleSubmit = async () => {
     if (!memberUuid || !canSubmit) return;
     setLoading(true);
+    setError(null);
     try {
       await submitReport(questionUuid, memberUuid, {
         submissionUuid,
@@ -72,6 +74,8 @@ export default function ReportModal({
         detail: selected.has("ETC") ? detail.trim() : undefined,
       });
       onSuccess();
+    } catch {
+      setError("신고 제출에 실패했습니다. 잠시 후 다시 시도해주세요.");
     } finally {
       setLoading(false);
     }
@@ -113,6 +117,11 @@ export default function ReportModal({
             />
           )}
         </div>
+
+        {/* 에러 메시지 — API 호출 실패 시 표시 */}
+        {error && (
+          <p className="text-sm text-error mb-2">{error}</p>
+        )}
 
         <div className="modal-action">
           {/* 취소 버튼 — 제출 중에는 비활성화 */}
