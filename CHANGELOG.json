@@ -1,11 +1,35 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-13T07:50:53Z",
-    "currentVersion": "0.0.136",
+    "lastUpdated": "2026-04-13T08:25:47Z",
+    "currentVersion": "0.0.137",
     "projectType": "basic",
-    "totalReleases": 58
+    "totalReleases": 59
   },
   "releases": [
+    {
+      "version": "0.0.137",
+      "project_type": "basic",
+      "date": "2026-04-13",
+      "pr_number": 244,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 질문 유형 정책의 혼동 문제를 해결하여 실행 결과 기반 선택지와 SQL 쿼리 기반 선택지를 명확히 구분\n\n* **문서**\n  * 마크다운 문법 활용 규칙 가이드 추가 (SQL 코드 블록, 인라인 코드, 굵은글씨 등)\n  * 질문 작성 및 등록 가이드 확대 및 업데이트\n  * 앱 버전 업데이트 (v0.0.136 → v0.0.137)",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "질문 유형 정책의 혼동 문제를 해결하여 실행 결과 기반 선택지와 SQL 쿼리 기반 선택지를 명확히 구분"
+          ]
+        },
+        "문서": {
+          "title": "문서",
+          "items": [
+            "마크다운 문법 활용 규칙 가이드 추가 (SQL 코드 블록, 인라인 코드, 굵은글씨 등)",
+            "질문 작성 및 등록 가이드 확대 및 업데이트",
+            "앱 버전 업데이트 (v0.0.136 → v0.0.137)"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.136",
       "project_type": "basic",
