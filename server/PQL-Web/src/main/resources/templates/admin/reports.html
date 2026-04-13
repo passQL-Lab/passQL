@@ -86,7 +86,7 @@
                 tableBody.innerHTML = `
                     <tr>
                         <td colspan="4" class="text-center py-12 text-error">
-                            데이터를 불러오는 데 실패했습니다: ${e.message}
+                            데이터를 불러오는 데 실패했습니다: ${escapeHtml(String(e.message || ''))}
                         </td>
                     </tr>`;
             }

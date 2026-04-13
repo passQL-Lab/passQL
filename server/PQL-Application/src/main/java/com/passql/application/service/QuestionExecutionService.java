@@ -125,11 +125,12 @@ public class QuestionExecutionService {
                 }
             }
 
-            // SubmitResult 필드 순서: isCorrect, correctKey, rationale, selectedResult, correctResult, correctSql, selectedSql
-            return new SubmitResult(isCorrect, correctKey, rationale, selectedResult, correctResult, correctSql, selectedSql);
+            // SubmitResult 필드 순서: isCorrect, correctKey, rationale, selectedResult, correctResult, correctSql, selectedSql, submissionUuid
+            // 레거시 경로(구 QuestionChoice 기반) — submissionUuid 없음
+            return new SubmitResult(isCorrect, correctKey, rationale, selectedResult, correctResult, correctSql, selectedSql, null);
         }
 
         // CONCEPT_ONLY: SQL 실행 없이 반환
-        return new SubmitResult(isCorrect, correctKey, rationale, null, null, null, null);
+        return new SubmitResult(isCorrect, correctKey, rationale, null, null, null, null, null);
     }
 }

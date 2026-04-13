@@ -12,6 +12,8 @@ public interface QuestionReportRepository extends JpaRepository<QuestionReport, 
 
     boolean existsByMemberUuidAndSubmissionUuid(UUID memberUuid, UUID submissionUuid);
 
+    boolean existsByQuestionUuidAndMemberUuidAndSubmissionUuid(UUID questionUuid, UUID memberUuid, UUID submissionUuid);
+
     List<QuestionReport> findByQuestionUuidOrderByCreatedAtDesc(UUID questionUuid);
 
     @Query(value = """
@@ -25,6 +27,12 @@ public interface QuestionReportRepository extends JpaRepository<QuestionReport, 
             """, nativeQuery = true)
     List<Object[]> findReportSummaryGroupByQuestion();
 
+    /**
+     * status 필터 적용 시 집계.
+     *
+     * pendingCount는 필터된 범위 내 PENDING 수를 의미 (전체 PENDING 수가 아님).
+     * status='RESOLVED' 필터 시 pendingCount는 항상 0 — 의도된 동작.
+     */
     @Query(value = """
             SELECT question_uuid,
                    COUNT(*) AS totalCount,

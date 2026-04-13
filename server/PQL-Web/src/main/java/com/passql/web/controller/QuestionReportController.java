@@ -39,7 +39,7 @@ public class QuestionReportController implements QuestionReportControllerDocs {
             @RequestHeader("X-Member-UUID") UUID memberUuid,
             @RequestParam UUID submissionUuid) {
 
-        boolean reported = questionReportService.isReported(memberUuid, submissionUuid);
+        boolean reported = questionReportService.isReported(questionUuid, memberUuid, submissionUuid);
         return new ReportStatusResponse(reported);
     }
 }

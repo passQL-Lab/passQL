@@ -112,11 +112,13 @@ public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
 
     // 문제 전체 기준 오답 제출 보정
     @Modifying
+    @Transactional
     @Query("UPDATE Submission s SET s.isCorrect = true WHERE s.questionUuid = :questionUuid AND s.isCorrect = false")
     int correctAllByQuestionUuid(@Param("questionUuid") UUID questionUuid);
 
     // 선택지 세트 기준 오답 제출 보정
     @Modifying
+    @Transactional
     @Query("UPDATE Submission s SET s.isCorrect = true WHERE s.choiceSetUuid = :choiceSetUuid AND s.isCorrect = false")
     int correctAllByChoiceSetUuid(@Param("choiceSetUuid") UUID choiceSetUuid);
 

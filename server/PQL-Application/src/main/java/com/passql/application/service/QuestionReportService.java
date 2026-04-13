@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 @Transactional(readOnly = true)
 public class QuestionReportService {
 
+    /** Controller가 DTO로 변환하는 데 사용하는 집계 행 — Web 모듈 DTO 의존 없이 Application 레이어에서 반환 */
     public record ReportSummaryRow(
             UUID questionUuid,
             String stem,
@@ -67,13 +68,23 @@ public class QuestionReportService {
         questionReportRepository.save(report);
     }
 
-    /** 신고 여부 조회 */
-    public boolean isReported(UUID memberUuid, UUID submissionUuid) {
-        return questionReportRepository.existsByMemberUuidAndSubmissionUuid(memberUuid, submissionUuid);
+    /** 신고 여부 조회 — questionUuid + memberUuid + submissionUuid 3중 조건으로 정합성 보장 */
+    public boolean isReported(UUID questionUuid, UUID memberUuid, UUID submissionUuid) {
+        return questionReportRepository
+                .existsByQuestionUuidAndMemberUuidAndSubmissionUuid(questionUuid, memberUuid, submissionUuid);
     }
 
-    /** 관리자: 문제별 집계 목록 — questionUuid 목록을 한 번에 조회해 N+1 방지 */
+    /** 관리자: 문제별 집계 목록 — questionUuid 배치 조회로 N+1 방지, status 유효성 검증 포함 */
     public List<ReportSummaryRow> getReportSummaries(String status) {
+        // status가 주어진 경우 enum 유효성 검증 — 잘못된 값은 400 반환
+        if (status != null && !status.isBlank()) {
+            try {
+                ReportStatus.valueOf(status);
+            } catch (IllegalArgumentException e) {
+                throw new CustomException(ErrorCode.INVALID_REQUEST);
+            }
+        }
+
         List<Object[]> rows = (status != null && !status.isBlank())
                 ? questionReportRepository.findReportSummaryGroupByQuestionAndStatus(status)
                 : questionReportRepository.findReportSummaryGroupByQuestion();
@@ -110,7 +121,7 @@ public class QuestionReportService {
         return questionReportRepository.findByQuestionUuidOrderByCreatedAtDesc(questionUuid);
     }
 
-    /** 관리자: 문제 단건 조회 */
+    /** 관리자: 문제 단건 조회 — Controller에서 NotFound 처리에 사용 */
     public Optional<Question> getQuestion(UUID questionUuid) {
         return questionRepository.findById(questionUuid);
     }
@@ -119,6 +130,11 @@ public class QuestionReportService {
     @Transactional
     public void resolveReport(UUID reportUuid, UUID adminMemberUuid,
                               CorrectionScope correctionScope, Boolean deactivateQuestion) {
+        // correctionScope null 입력 방어 — null이면 DB에 null이 저장되어 데이터 정합성 오염
+        if (correctionScope == null) {
+            throw new CustomException(ErrorCode.INVALID_REQUEST);
+        }
+
         QuestionReport report = questionReportRepository.findById(reportUuid)
                 .orElseThrow(() -> new CustomException(ErrorCode.REPORT_NOT_FOUND));
 

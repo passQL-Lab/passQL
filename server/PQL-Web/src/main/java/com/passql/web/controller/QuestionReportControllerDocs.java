@@ -35,7 +35,7 @@ public interface QuestionReportControllerDocs {
             - **`submissionUuid`**: 제출 UUID (필수)
             - **`choiceSetUuid`**: 선택지 세트 UUID (선택, 선택지 오류 신고 시 권장)
             - **`categories`**: 신고 카테고리 목록 (필수, 1개 이상)
-              - WRONG_ANSWER / QUESTION_ERROR / CHOICE_ERROR / SQL_RESULT_ERROR / ETC
+              - WRONG_ANSWER / WEIRD_QUESTION / WEIRD_CHOICES / WEIRD_EXECUTION / ETC
             - **`detail`**: 상세 설명 (ETC 카테고리 선택 시 필수)
 
             ## 에러
