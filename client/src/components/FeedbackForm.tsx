@@ -42,7 +42,7 @@ export default function FeedbackForm({ disabled = false }: FeedbackFormProps) {
         }`}
       >
         <textarea
-          className="w-full min-h-[52px] resize-none border-none outline-none bg-transparent text-[11.5px] text-text-primary leading-relaxed placeholder:text-text-caption disabled:cursor-not-allowed"
+          className="w-full min-h-[60px] resize-none border-none outline-none bg-transparent text-sm text-text-primary leading-relaxed placeholder:text-text-caption disabled:cursor-not-allowed"
           placeholder="앱에 바라는 점을 자유롭게 적어주세요"
           value={content}
           onChange={(e) => {
@@ -53,7 +53,7 @@ export default function FeedbackForm({ disabled = false }: FeedbackFormProps) {
         />
         {/* 하단 푸터: 글자수 + 보내기 버튼 */}
         <div className="flex items-center justify-between border-t border-surface-code pt-2 mt-1">
-          <span className="text-[9.5px] text-text-caption tabular-nums">
+          <span className="text-xs text-text-caption tabular-nums">
             <span className={content.length > 0 ? "text-brand font-semibold" : ""}>
               {content.length}
             </span>
@@ -61,7 +61,7 @@ export default function FeedbackForm({ disabled = false }: FeedbackFormProps) {
           </span>
           <button
             type="button"
-            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold transition-colors ${
+            className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold transition-colors ${
               isDisabled
                 ? "bg-border text-text-caption cursor-not-allowed"
                 : "bg-brand text-white"
@@ -78,11 +78,11 @@ export default function FeedbackForm({ disabled = false }: FeedbackFormProps) {
       {/* 전송 실패 인라인 에러 */}
       {mutation.isError && (
         <div className="flex items-center gap-2 mt-2 px-3 py-2 bg-sem-error-light border border-[#FCA5A5] rounded-lg text-[10px] text-sem-error-text">
-          <AlertTriangle size={12} className="shrink-0" />
+          <AlertTriangle size={13} className="shrink-0" />
           <span className="flex-1">전송에 실패했어요</span>
           <button
             type="button"
-            className="bg-white border border-[#FCA5A5] text-sem-error-text px-2 py-1 rounded-md text-[9.5px] font-bold"
+            className="bg-white border border-[#FCA5A5] text-sem-error-text px-2 py-1 rounded-md text-[11px] font-bold"
             onClick={handleRetry}
           >
             재시도

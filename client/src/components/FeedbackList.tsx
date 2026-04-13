@@ -26,7 +26,7 @@ function DateDivider({ date }: { readonly date: string }) {
   return (
     <div className="flex items-center gap-2 my-1">
       <div className="flex-1 h-px bg-border" />
-      <span className="text-[9.5px] text-text-caption whitespace-nowrap">
+      <span className="text-[11px] text-text-caption whitespace-nowrap">
         {getDateLabel(date)}
       </span>
       <div className="flex-1 h-px bg-border" />
@@ -85,10 +85,10 @@ export default function FeedbackList({ disabled = false }: FeedbackListProps) {
         <div className="w-11 h-11 rounded-xl bg-surface-code flex items-center justify-center mb-1">
           <MessageSquare size={20} className="text-text-caption" />
         </div>
-        <p className="text-[12px] font-semibold text-text-secondary">
+        <p className="text-sm font-semibold text-text-secondary">
           아직 보낸 건의가 없어요
         </p>
-        <p className="text-[11px] text-text-caption leading-relaxed">
+        <p className="text-xs text-text-caption leading-relaxed">
           궁금한 점이나 원하는 기능을
           <br />
           자유롭게 남겨주세요

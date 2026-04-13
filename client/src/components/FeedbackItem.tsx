@@ -70,17 +70,17 @@ export default function FeedbackItem({ item, className }: FeedbackItemProps) {
   return (
     <div className={`flex justify-end${className ? ` ${className}` : ""}`}>
       <div
-        className={`max-w-[82%] px-3 py-2.5 rounded-[16px_16px_3px_16px] text-[11.5px] leading-snug ${bubbleClass}`}
+        className={`max-w-[82%] px-3.5 py-3 rounded-[16px_16px_3px_16px] text-sm leading-relaxed ${bubbleClass}`}
       >
         {/* 본문 */}
-        <p className="mb-1.5 break-words">{item.content}</p>
+        <p className="mb-2 break-words">{item.content}</p>
         {/* 메타: 시간 + 상태 pill */}
         <div className="flex items-center justify-end gap-1.5">
-          <span className={`text-[8.5px] ${timeClass}`}>
+          <span className={`text-[10px] ${timeClass}`}>
             {formatBubbleTime(item.createdAt)}
           </span>
           <span
-            className={`text-[8px] font-semibold px-1.5 py-px rounded-full ${pillClass}`}
+            className={`text-[10px] font-semibold px-2 py-px rounded-full ${pillClass}`}
           >
             {STATUS_LABEL[status]}
           </span>
