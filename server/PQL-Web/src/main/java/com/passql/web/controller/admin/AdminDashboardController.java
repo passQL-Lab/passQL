@@ -1,5 +1,7 @@
 package com.passql.web.controller.admin;
 
+import com.passql.ai.client.GeminiClient;
+import com.passql.application.dto.DashboardStats;
 import com.passql.application.service.AdminDashboardService;
 import com.passql.submission.service.SubmissionService;
 import lombok.RequiredArgsConstructor;
@@ -21,15 +23,26 @@ public class AdminDashboardController {
 
     private final AdminDashboardService adminDashboardService;
     private final SubmissionService submissionService;
+    private final GeminiClient geminiClient;
 
     @GetMapping({"", "/"})
     public String dashboard(Model model) {
-        // 통계 집계 (여러 도메인 조합)
-        model.addAttribute("stats", adminDashboardService.collect());
+        DashboardStats raw = adminDashboardService.collect();
 
-        // 최근 실행 로그 20건 (dashboard.html의 recentLogs 변수)
+        // aiCallCount에 실제 Gemini 누적 호출 횟수 반영
+        DashboardStats stats = new DashboardStats(
+                raw.totalQuestions(),
+                raw.questionsByTopic(),
+                raw.totalMembers(),
+                raw.activeMembers(),
+                raw.suspendedMembers(),
+                raw.todaySubmissions(),
+                geminiClient.getCallCount(),
+                raw.errorRate()
+        );
+
+        model.addAttribute("stats", stats);
         model.addAttribute("recentLogs", submissionService.getRecentLogs());
-
         model.addAttribute("currentMenu", "dashboard");
         model.addAttribute("pageTitle", "대시보드");
         return "admin/dashboard";

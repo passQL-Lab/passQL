@@ -10,12 +10,17 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 @Slf4j
 @Component
 public class GeminiClient {
 
     private final Client client;
     private final String defaultModel;
+
+    /** 서버 기동 이후 Gemini API 호출 횟수 (인메모리 누적) */
+    private final AtomicLong callCount = new AtomicLong(0);
 
     public GeminiClient(
             @Value("${gemini.api-key}") String apiKey,
@@ -32,11 +37,17 @@ public class GeminiClient {
         return chat(defaultModel, systemPrompt, userPrompt, temperature, maxTokens);
     }
 
+    /** 서버 기동 이후 누적 호출 횟수 반환 */
+    public long getCallCount() {
+        return callCount.get();
+    }
+
     /**
      * 일반 텍스트 응답 (모델 명시)
      */
     public String chat(String model, String systemPrompt, String userPrompt, float temperature, int maxTokens) {
         log.debug("Gemini chat: model={}, maxTokens={}", model, maxTokens);
+        callCount.incrementAndGet();
 
         GenerateContentConfig config = GenerateContentConfig.builder()
                 .systemInstruction(Content.fromParts(Part.fromText(systemPrompt)))
@@ -60,6 +71,7 @@ public class GeminiClient {
      */
     public String chatStructured(String model, String systemPrompt, String userPrompt, float temperature, int maxTokens, Schema responseSchema) {
         log.debug("Gemini chatStructured: model={}, maxTokens={}", model, maxTokens);
+        callCount.incrementAndGet();
 
         GenerateContentConfig config = GenerateContentConfig.builder()
                 .systemInstruction(Content.fromParts(Part.fromText(systemPrompt)))

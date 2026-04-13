@@ -165,53 +165,67 @@
                 </h3>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <!-- explain_error -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <!-- Gemini 직접 호출 (서버 기동 후 누적) -->
                 <div class="border border-base-300 rounded-lg p-4">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i data-lucide="sparkles" class="size-4 text-primary"></i>
+                        <span class="font-medium text-sm">Gemini</span>
+                        <span class="badge badge-primary badge-xs">실측</span>
+                    </div>
+                    <p class="text-2xl font-bold" th:text="${aiStats?.geminiCallCount ?: 0}">0</p>
+                    <p class="text-xs text-base-content/50 mt-1">기동 후 누적 호출</p>
+                </div>
+
+                <!-- explain_error (미구현) -->
+                <div class="border border-base-300 rounded-lg p-4 opacity-50">
                     <div class="flex items-center gap-2 mb-2">
                         <i data-lucide="alert-circle" class="size-4 text-error"></i>
                         <span class="font-medium text-sm">explain_error</span>
+                        <span class="badge badge-ghost badge-xs">미구현</span>
                     </div>
-                    <p class="text-2xl font-bold" th:text="${aiStats?.explainErrorCount ?: 0}">0</p>
+                    <p class="text-2xl font-bold text-base-content/40">-</p>
                     <p class="text-xs text-base-content/50 mt-1">오늘 호출 수</p>
                     <div class="mt-3 flex items-center gap-2">
-                        <span class="text-xs text-base-content/60">성공률:</span>
-                        <span class="badge badge-success badge-sm" th:text="${aiStats?.explainSuccessRate != null ? aiStats.explainSuccessRate + '%' : 'N/A'}">N/A</span>
+                        <span class="text-xs text-base-content/40">성공률:</span>
+                        <span class="badge badge-ghost badge-sm">N/A</span>
                     </div>
                 </div>
 
-                <!-- diff_explain -->
-                <div class="border border-base-300 rounded-lg p-4">
+                <!-- diff_explain (미구현) -->
+                <div class="border border-base-300 rounded-lg p-4 opacity-50">
                     <div class="flex items-center gap-2 mb-2">
                         <i data-lucide="git-compare" class="size-4 text-warning"></i>
                         <span class="font-medium text-sm">diff_explain</span>
+                        <span class="badge badge-ghost badge-xs">미구현</span>
                     </div>
-                    <p class="text-2xl font-bold" th:text="${aiStats?.diffExplainCount ?: 0}">0</p>
+                    <p class="text-2xl font-bold text-base-content/40">-</p>
                     <p class="text-xs text-base-content/50 mt-1">오늘 호출 수</p>
                     <div class="mt-3 flex items-center gap-2">
-                        <span class="text-xs text-base-content/60">성공률:</span>
-                        <span class="badge badge-success badge-sm" th:text="${aiStats?.diffSuccessRate != null ? aiStats.diffSuccessRate + '%' : 'N/A'}">N/A</span>
+                        <span class="text-xs text-base-content/40">성공률:</span>
+                        <span class="badge badge-ghost badge-sm">N/A</span>
                     </div>
                 </div>
 
-                <!-- similar (Qdrant) -->
-                <div class="border border-base-300 rounded-lg p-4">
+                <!-- similar / Qdrant (미구현) -->
+                <div class="border border-base-300 rounded-lg p-4 opacity-50">
                     <div class="flex items-center gap-2 mb-2">
                         <i data-lucide="search" class="size-4 text-info"></i>
                         <span class="font-medium text-sm">similar (Qdrant)</span>
+                        <span class="badge badge-ghost badge-xs">미구현</span>
                     </div>
-                    <p class="text-2xl font-bold" th:text="${aiStats?.similarCount ?: 0}">0</p>
+                    <p class="text-2xl font-bold text-base-content/40">-</p>
                     <p class="text-xs text-base-content/50 mt-1">오늘 호출 수</p>
                     <div class="mt-3 flex items-center gap-2">
-                        <span class="text-xs text-base-content/60">평균 k:</span>
-                        <span class="badge badge-info badge-sm" th:text="${aiStats?.avgTopK != null ? aiStats.avgTopK : 'N/A'}">N/A</span>
+                        <span class="text-xs text-base-content/40">평균 k:</span>
+                        <span class="badge badge-ghost badge-sm">N/A</span>
                     </div>
                 </div>
             </div>
 
             <div class="mt-4 p-3 bg-base-200 rounded-lg text-sm text-base-content/60">
                 <i data-lucide="info" class="size-4 inline mr-1"></i>
-                AI 상세 메트릭은 추후 구현 예정입니다. (Resilience4j CircuitBreaker 상태, 평균 응답시간 등)
+                Gemini 호출 수는 서버 기동 후 인메모리 누적값입니다. explain_error · diff_explain · Qdrant similar 통계는 AiService 구현 후 연결 예정입니다.
             </div>
         </div>
     </div>
