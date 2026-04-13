@@ -247,10 +247,10 @@ export default function PracticeResult() {
             </div>
           ) : (
             <MarkdownText
-                text={aiComment}
-                animated
-                className="text-body leading-relaxed mb-6"
-              />
+              text={aiComment as string}
+              animated
+              className="text-body leading-relaxed mb-6"
+            />
           )}
         </>
       )}
