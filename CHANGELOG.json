@@ -1,11 +1,34 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-13T14:08:39Z",
-    "currentVersion": "0.0.152",
+    "lastUpdated": "2026-04-13T14:26:51Z",
+    "currentVersion": "0.0.153",
     "projectType": "basic",
-    "totalReleases": 70
+    "totalReleases": 71
   },
   "releases": [
+    {
+      "version": "0.0.153",
+      "project_type": "basic",
+      "date": "2026-04-13",
+      "pr_number": 269,
+      "raw_summary": "## Summary by CodeRabbit\n\n* **Style**\n  * 신고 모달의 사용자 인터페이스가 재설계되었습니다. 카테고리 선택 방식이 더 직관적으로 개선되었으며, 전체적인 디자인이 업데이트되었습니다.\n  * Flag 버튼의 스타일링이 개선되어 상태 변화에 따른 시각적 피드백이 더욱 명확해졌습니다.\n\n* **Bug Fixes**\n  * API의 빈 응답 처리 로직이 개선되어 안정성이 향상되었습니다.",
+      "parsed_changes": {
+        "style": {
+          "title": "Style",
+          "items": [
+            "신고 모달의 사용자 인터페이스가 재설계되었습니다. 카테고리 선택 방식이 더 직관적으로 개선되었으며, 전체적인 디자인이 업데이트되었습니다.",
+            "Flag 버튼의 스타일링이 개선되어 상태 변화에 따른 시각적 피드백이 더욱 명확해졌습니다."
+          ]
+        },
+        "bug_fixes": {
+          "title": "Bug Fixes",
+          "items": [
+            "API의 빈 응답 처리 로직이 개선되어 안정성이 향상되었습니다."
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.152",
       "project_type": "basic",
