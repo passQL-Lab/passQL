@@ -18,14 +18,15 @@ interface SettingsRowProps {
  * - 구분선은 부모의 divide-y로 처리 (isLast 불필요)
  */
 export default function SettingsRow({ label, value, action, onClick }: SettingsRowProps) {
-  const baseClass = `flex items-center justify-between px-5 py-4 w-full text-left${
+  const baseClass = `flex items-center justify-between px-4 py-3.5 w-full text-left${
     onClick ? " cursor-pointer hover:bg-surface active:bg-surface transition-colors" : ""
   }`;
 
   const content = (
     <>
       <div className="min-w-0 flex-1">
-        <p className="text-text-secondary text-sm">{label}</p>
+        {/* label: xs + caption 색상 — value의 보조 설명자 역할 */}
+        <p className="text-xs text-text-caption">{label}</p>
         <div className="mt-0.5">{value}</div>
       </div>
       {action && <div className="ml-3 shrink-0">{action}</div>}
