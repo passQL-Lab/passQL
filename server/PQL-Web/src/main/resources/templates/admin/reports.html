@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+
+<th:block layout:fragment="title">신고 관리</th:block>
+
+<th:block layout:fragment="content">
+
+    <!-- 헤더 바 -->
+    <div class="flex items-center gap-3 mb-4">
+        <!-- 미처리만 보기 토글 -->
+        <label class="flex items-center gap-2 cursor-pointer select-none">
+            <input type="checkbox" id="pendingOnly" class="toggle toggle-sm toggle-warning" checked/>
+            <span class="text-sm font-medium">미처리만 보기</span>
+        </label>
+
+        <!-- 요약 배지 (JS로 채움) -->
+        <div id="summaryBadges" class="flex gap-2"></div>
+
+        <button class="btn btn-sm btn-ghost ml-auto" onclick="loadReports()">
+            <i data-lucide="refresh-cw" class="size-4"></i>새로고침
+        </button>
+    </div>
+
+    <!-- 신고 목록 테이블 -->
+    <div class="card bg-base-100 shadow">
+        <div class="card-body p-0">
+            <div class="overflow-x-auto">
+                <table class="table table-sm table-fixed w-full">
+                    <thead>
+                    <tr>
+                        <th class="w-20">신고 수</th>
+                        <th class="w-auto">문제 줄기</th>
+                        <th class="w-24">미처리 수</th>
+                        <th class="w-32">최근 신고일</th>
+                    </tr>
+                    </thead>
+                    <tbody id="reportTableBody">
+                    <!-- JS로 렌더링 -->
+                    <tr id="loadingRow">
+                        <td colspan="4" class="text-center py-12 text-base-content/50">
+                            <span class="loading loading-spinner loading-sm"></span>
+                            <span class="ml-2">로딩 중...</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+</th:block>
+
+<th:block layout:fragment="js">
+    <script>
+        lucide.createIcons();
+
+        const pendingOnlyToggle = document.getElementById('pendingOnly');
+        const tableBody = document.getElementById('reportTableBody');
+        const summaryBadges = document.getElementById('summaryBadges');
+
+        pendingOnlyToggle.addEventListener('change', loadReports);
+
+        async function loadReports() {
+            const pendingOnly = pendingOnlyToggle.checked;
+            const url = pendingOnly
+                ? '/admin/api/reports?status=PENDING'
+                : '/admin/api/reports';
+
+            tableBody.innerHTML = `
+                <tr id="loadingRow">
+                    <td colspan="4" class="text-center py-12 text-base-content/50">
+                        <span class="loading loading-spinner loading-sm"></span>
+                        <span class="ml-2">로딩 중...</span>
+                    </td>
+                </tr>`;
+
+            try {
+                const res = await fetch(url);
+                if (!res.ok) throw new Error('API 오류: ' + res.status);
+                const data = await res.json();
+                renderTable(data);
+                renderSummary(data);
+            } catch (e) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center py-12 text-error">
+                            데이터를 불러오는 데 실패했습니다: ${e.message}
+                        </td>
+                    </tr>`;
+            }
+        }
+
+        function renderSummary(data) {
+            const total = data.reduce((s, r) => s + r.totalCount, 0);
+            const pending = data.reduce((s, r) => s + r.pendingCount, 0);
+            summaryBadges.innerHTML = `
+                <div class="badge badge-neutral badge-lg">
+                    전체 신고 <span class="ml-1 font-bold">${total}</span>
+                </div>
+                <div class="badge badge-warning badge-lg">
+                    미처리 <span class="ml-1 font-bold">${pending}</span>
+                </div>
+                <div class="badge badge-info badge-lg">
+                    신고된 문제 <span class="ml-1 font-bold">${data.length}</span>
+                </div>`;
+        }
+
+        function renderTable(data) {
+            if (!data || data.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="4" class="text-center text-base-content/50 py-12">
+                            <i data-lucide="flag" class="size-10 mx-auto mb-2 opacity-40"></i>
+                            <p>신고가 없습니다.</p>
+                        </td>
+                    </tr>`;
+                lucide.createIcons();
+                return;
+            }
+
+            tableBody.innerHTML = data.map(r => {
+                const stem = r.questionStem || '(삭제된 문제)';
+                const truncated = stem.length > 60 ? stem.slice(0, 60) + '…' : stem;
+                const latestDate = r.latestReportedAt
+                    ? r.latestReportedAt.substring(0, 10)
+                    : '-';
+                const pendingBadge = r.pendingCount > 0
+                    ? `<span class="badge badge-warning badge-sm">${r.pendingCount}</span>`
+                    : `<span class="text-base-content/40">0</span>`;
+
+                return `<tr class="cursor-pointer hover:bg-base-200" data-uuid="${r.questionUuid}">
+                    <td class="font-bold text-center">${r.totalCount}</td>
+                    <td class="text-sm truncate max-w-xs" title="${escapeHtml(stem)}">${escapeHtml(truncated)}</td>
+                    <td>${pendingBadge}</td>
+                    <td class="text-xs">${latestDate}</td>
+                </tr>`;
+            }).join('');
+
+            // 행 클릭 이벤트 — JS로 직접 할당 (Thymeleaf onclick 규칙 준수)
+            tableBody.querySelectorAll('tr[data-uuid]').forEach(tr => {
+                const uuid = tr.dataset.uuid;
+                tr.onclick = () => location.href = `/admin/reports/${uuid}`;
+            });
+
+            lucide.createIcons();
+        }
+
+        function escapeHtml(str) {
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        // 초기 로드
+        loadReports();
+    </script>
+</th:block>
+</html>
