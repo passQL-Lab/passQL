@@ -1,0 +1,300 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+
+<th:block layout:fragment="title">신고 상세</th:block>
+
+<th:block layout:fragment="content">
+
+    <!-- 뒤로가기 -->
+    <div class="mb-4">
+        <a href="/admin/reports" class="btn btn-sm btn-ghost gap-1">
+            <i data-lucide="arrow-left" class="size-4"></i>
+            신고 목록으로
+        </a>
+    </div>
+
+    <!-- 문제 정보 카드 -->
+    <div id="questionCard" class="card bg-base-100 shadow mb-4">
+        <div class="card-body">
+            <div class="flex items-start gap-3">
+                <span class="loading loading-spinner loading-sm mt-1"></span>
+                <span class="text-base-content/50">문제 정보 로딩 중...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 일괄 처리 패널 -->
+    <div id="resolvePanel" class="card bg-base-100 shadow mb-4 hidden">
+        <div class="card-body">
+            <h3 class="card-title text-base mb-3">
+                <i data-lucide="check-circle-2" class="size-5 text-success"></i>
+                미처리 신고 일괄 처리
+            </h3>
+
+            <!-- 보정 범위 라디오 -->
+            <div class="form-control mb-3">
+                <label class="label">
+                    <span class="label-text font-medium">보정 범위</span>
+                </label>
+                <div class="flex flex-wrap gap-4">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="correctionScope" value="NONE"
+                               class="radio radio-sm" checked/>
+                        <span class="text-sm">없음 (NONE)</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="correctionScope" value="QUESTION_WIDE"
+                               class="radio radio-sm radio-warning"/>
+                        <span class="text-sm">문제 전체 (QUESTION_WIDE)</span>
+                    </label>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="radio" name="correctionScope" value="CHOICE_SET_ONLY"
+                               class="radio radio-sm radio-info"/>
+                        <span class="text-sm">선택지 세트 기준 (CHOICE_SET_ONLY)</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- 문제 비활성화 체크박스 -->
+            <div class="form-control mb-4">
+                <label class="flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" id="deactivateQuestion" class="checkbox checkbox-sm checkbox-error"/>
+                    <span class="text-sm">문제 비활성화 (isActive = false)</span>
+                </label>
+            </div>
+
+            <!-- 일괄 처리 버튼 -->
+            <div class="card-actions">
+                <button id="resolveAllBtn" class="btn btn-success btn-sm gap-1">
+                    <i data-lucide="check-check" class="size-4"></i>
+                    미처리 전체 처리완료
+                </button>
+                <span id="resolveResult" class="text-sm ml-2"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 신고 목록 -->
+    <div class="card bg-base-100 shadow">
+        <div class="card-body p-0">
+            <div class="flex items-center gap-2 px-4 pt-4 pb-2">
+                <h3 class="font-bold text-base">신고 목록</h3>
+                <span id="reportCount" class="badge badge-neutral badge-sm"></span>
+            </div>
+            <div id="reportList" class="divide-y divide-base-200 px-4 pb-4">
+                <div class="py-8 text-center text-base-content/50">
+                    <span class="loading loading-spinner loading-sm"></span>
+                    <span class="ml-2">로딩 중...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</th:block>
+
+<th:block layout:fragment="js">
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        const questionUuid = /*[[${questionUuid}]]*/ null;
+        /*]]>*/
+
+        lucide.createIcons();
+
+        let pendingReportUuids = [];
+
+        async function loadDetail() {
+            if (!questionUuid) {
+                showError('questionUuid가 없습니다.');
+                return;
+            }
+
+            try {
+                const res = await fetch(`/admin/api/reports/${questionUuid}`);
+                if (!res.ok) throw new Error('API 오류: ' + res.status);
+                const data = await res.json();
+                renderQuestionCard(data.question);
+                renderReportList(data.reports);
+                setupResolvePanel(data.reports);
+            } catch (e) {
+                showError('데이터를 불러오는 데 실패했습니다: ' + e.message);
+            }
+        }
+
+        function renderQuestionCard(q) {
+            const activeLabel = q.isActive
+                ? '<span class="badge badge-success badge-sm">활성</span>'
+                : '<span class="badge badge-error badge-sm">비활성</span>';
+            const uuidShort = q.questionUuid ? q.questionUuid.substring(0, 8) : '-';
+
+            document.getElementById('questionCard').innerHTML = `
+                <div class="card-body">
+                    <div class="flex items-start gap-3">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="font-mono text-xs text-base-content/50">${uuidShort}…</span>
+                                ${activeLabel}
+                            </div>
+                            <p class="text-sm whitespace-pre-wrap break-words">${escapeHtml(q.stem || '')}</p>
+                        </div>
+                        <a href="/admin/questions/${q.questionUuid}" class="btn btn-xs btn-outline gap-1" target="_blank">
+                            <i data-lucide="external-link" class="size-3"></i>
+                            문제 상세
+                        </a>
+                    </div>
+                </div>`;
+            lucide.createIcons();
+        }
+
+        function renderReportList(reports) {
+            const reportList = document.getElementById('reportList');
+            const reportCount = document.getElementById('reportCount');
+
+            if (!reports || reports.length === 0) {
+                reportList.innerHTML = `
+                    <div class="py-8 text-center text-base-content/50">
+                        <i data-lucide="flag" class="size-8 mx-auto mb-2 opacity-40"></i>
+                        <p>신고가 없습니다.</p>
+                    </div>`;
+                lucide.createIcons();
+                return;
+            }
+
+            reportCount.textContent = reports.length + '건';
+
+            reportList.innerHTML = reports.map(r => {
+                const statusBadge = r.status === 'PENDING'
+                    ? '<span class="badge badge-warning badge-sm">미처리</span>'
+                    : '<span class="badge badge-success badge-sm">처리완료</span>';
+
+                const categories = (r.categories || []).map(c => {
+                    const labelMap = {
+                        WRONG_ANSWER: '정답 오류',
+                        WEIRD_QUESTION: '문제 이상',
+                        WEIRD_CHOICES: '선택지 이상',
+                        WEIRD_EXECUTION: '실행 오류',
+                        ETC: '기타'
+                    };
+                    return `<span class="badge badge-outline badge-sm">${labelMap[c] || c}</span>`;
+                }).join(' ');
+
+                const detail = r.detail
+                    ? `<p class="text-sm text-base-content/70 mt-1 ml-1">${escapeHtml(r.detail)}</p>`
+                    : '';
+
+                const createdDate = r.createdAt
+                    ? r.createdAt.substring(0, 16).replace('T', ' ')
+                    : '-';
+
+                const memberShort = r.memberUuid
+                    ? r.memberUuid.substring(0, 8) + '…'
+                    : '-';
+
+                return `<div class="py-3">
+                    <div class="flex items-center justify-between gap-2 mb-1">
+                        <div class="flex items-center gap-2 flex-wrap">
+                            ${statusBadge}
+                            ${categories}
+                        </div>
+                        <span class="text-xs text-base-content/40 shrink-0">${createdDate}</span>
+                    </div>
+                    ${detail}
+                    <div class="text-xs text-base-content/40 mt-1">회원: ${memberShort}</div>
+                </div>`;
+            }).join('');
+
+            lucide.createIcons();
+        }
+
+        function setupResolvePanel(reports) {
+            pendingReportUuids = (reports || [])
+                .filter(r => r.status === 'PENDING')
+                .map(r => r.reportUuid);
+
+            const panel = document.getElementById('resolvePanel');
+            if (pendingReportUuids.length > 0) {
+                panel.classList.remove('hidden');
+                document.getElementById('resolveAllBtn').textContent =
+                    `미처리 전체 처리완료 (${pendingReportUuids.length}건)`;
+
+                // 버튼 텍스트에 아이콘 복원
+                document.getElementById('resolveAllBtn').innerHTML =
+                    `<i data-lucide="check-check" class="size-4"></i> 미처리 전체 처리완료 (${pendingReportUuids.length}건)`;
+                lucide.createIcons();
+            }
+        }
+
+        document.getElementById('resolveAllBtn').addEventListener('click', async () => {
+            if (pendingReportUuids.length === 0) return;
+
+            const correctionScope = document.querySelector('input[name="correctionScope"]:checked').value;
+            const deactivateQuestion = document.getElementById('deactivateQuestion').checked;
+            const adminMemberUuid = localStorage.getItem('memberUuid');
+
+            const resultEl = document.getElementById('resolveResult');
+
+            // memberUuid가 없으면 처리 불가 — 유효하지 않은 UUID는 서버에서 400 반환
+            if (!adminMemberUuid) {
+                resultEl.textContent = '관리자 UUID를 찾을 수 없습니다. 다시 로그인하세요.';
+                resultEl.className = 'text-sm ml-2 text-error';
+                return;
+            }
+
+            resultEl.textContent = '처리 중...';
+            resultEl.className = 'text-sm ml-2 text-base-content/60';
+
+            let successCount = 0;
+            let failCount = 0;
+
+            for (const reportUuid of pendingReportUuids) {
+                try {
+                    const res = await fetch(`/admin/api/reports/${reportUuid}/resolve`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Member-UUID': adminMemberUuid
+                        },
+                        body: JSON.stringify({
+                            correctionScope: correctionScope,
+                            deactivateQuestion: deactivateQuestion
+                        })
+                    });
+                    if (res.ok) successCount++;
+                    else failCount++;
+                } catch (e) {
+                    failCount++;
+                }
+            }
+
+            if (failCount === 0) {
+                resultEl.textContent = `${successCount}건 처리완료`;
+                resultEl.className = 'text-sm ml-2 text-success';
+            } else {
+                resultEl.textContent = `성공 ${successCount}건 / 실패 ${failCount}건`;
+                resultEl.className = 'text-sm ml-2 text-warning';
+            }
+
+            // 완료 후 새로고침
+            setTimeout(() => loadDetail(), 800);
+        });
+
+        function showError(msg) {
+            document.getElementById('questionCard').innerHTML = `
+                <div class="card-body text-error">${escapeHtml(msg)}</div>`;
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        // 초기 로드
+        loadDetail();
+    </script>
+</th:block>
+</html>

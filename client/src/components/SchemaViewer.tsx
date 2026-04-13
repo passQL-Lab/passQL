@@ -1,5 +1,5 @@
 import { memo, useState } from "react";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ChevronDown, ChevronUp, Table2 } from "lucide-react";
 
 interface ParsedColumn {
   readonly name: string;
@@ -130,110 +130,93 @@ export const SchemaViewer = memo(function SchemaViewer({
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className="flex items-center gap-1 text-xs font-medium mb-1"
-        style={{ color: "var(--color-text-caption)" }}
+        className="flex items-center gap-1 text-xs font-medium mb-1 text-text-caption"
       >
         {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
         스키마 {open ? "접기" : "보기"}
       </button>
 
       {!open ? null : (
-    <div className="flex gap-2 overflow-x-auto pb-1" style={{ scrollSnapType: "x mandatory" }}>
-      {tables.map((table) => {
-        const rows = sampleRows.get(table.tableName.toUpperCase()) ?? [];
-        const hasSample = rows.length > 0;
+        <div className="space-y-3">
+          {tables.map((table) => {
+            const rows = sampleRows.get(table.tableName.toUpperCase()) ?? [];
+            const hasSample = rows.length > 0;
 
-        return (
-          <div key={table.tableName} className="w-full min-w-0 space-y-2" style={{ scrollSnapAlign: "start" }}>
-            {/* 스키마 구조 카드 */}
-            <div
-              className="overflow-hidden rounded-xl border"
-              style={{ borderColor: "var(--color-border)" }}
-            >
-              <div
-                className="px-2 py-0.5 text-sm font-bold font-mono"
-                style={{
-                  backgroundColor: "var(--color-accent-light)",
-                  color: "var(--color-brand)",
-                  borderBottom: "1px solid var(--color-border)",
-                }}
-              >
-                {table.tableName}
-              </div>
-              <table className="text-sm whitespace-nowrap w-full" style={{ borderCollapse: "collapse" }}>
-                <tbody>
-                  {table.columns.map((col, idx) => (
-                    <tr
-                      key={col.name}
-                      style={{
-                        borderBottom: "1px solid var(--color-border)",
-                        backgroundColor: idx % 2 === 1 ? "var(--color-surface-page)" : undefined,
-                      }}
-                      className="last:border-0"
-                    >
-                      {/* 컬럼명(제약조건) 형태로 표현 — ID(PK), DEPT_ID(FK) */}
-                      <td className="px-2 py-0.5 font-mono font-medium" style={{ color: "var(--color-text-body)" }}>
-                        {col.name}
-                        {col.constraint && (
-                          <span className="ml-0.5 text-xs" style={{ color: "var(--color-brand)", opacity: 0.8 }}>
-                            ({col.constraint})
-                          </span>
-                        )}
-                      </td>
-                      <td className="px-2 py-0.5" style={{ color: "var(--color-text-caption)" }}>
-                        {col.type}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            {/* 샘플 데이터 카드 — 4px(space-y-1) 간격으로 분리 */}
-            {hasSample && (
-              <div
-                className="overflow-hidden rounded-xl border"
-                style={{ borderColor: "var(--color-border)" }}
-              >
-                <table className="text-sm whitespace-nowrap w-full" style={{ borderCollapse: "collapse" }}>
-                  <thead>
-                    <tr style={{ backgroundColor: "var(--color-surface-page)" }}>
-                      {table.columns.map((col) => (
-                        <th
-                          key={col.name}
-                          className="px-2 py-0.5 text-left font-medium font-mono"
-                          style={{ color: "var(--color-text-caption)", borderBottom: "1px solid var(--color-border)" }}
-                        >
-                          {col.name}
-                        </th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rows.map((row, i) => (
-                      <tr
-                        key={i}
-                        className="last:border-0"
-                        style={{
-                          borderBottom: "1px solid var(--color-border)",
-                          backgroundColor: i % 2 === 1 ? "var(--color-surface-page)" : undefined,
-                        }}
-                      >
-                        {row.map((cell, j) => (
-                          <td key={j} className="px-2 py-0.5 font-mono tabular-nums" style={{ color: "var(--color-text-body)" }}>
-                            {cell}
-                          </td>
+            return (
+              <div key={table.tableName} className="space-y-2">
+                {/* 스키마 구조 카드 */}
+                <div className="rounded-xl border border-border bg-surface-card overflow-hidden">
+                  {/* 테이블 헤더 — 아이콘 + 테이블명 */}
+                  <div className="px-3 py-1.5 flex items-center gap-1.5 text-sm font-semibold font-mono bg-accent-light text-brand border-b border-border">
+                    <Table2 size={14} />
+                    {table.tableName}
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="text-sm whitespace-nowrap w-full border-collapse">
+                      <tbody>
+                        {table.columns.map((col, idx) => (
+                          <tr
+                            key={col.name}
+                            className={`border-b border-border last:border-0 ${idx % 2 === 1 ? "bg-surface-page" : ""}`}
+                          >
+                            {/* 컬럼명(제약조건) 형태로 표현 — ID(PK), DEPT_ID(FK) */}
+                            <td className="px-2 py-0.5 font-mono font-medium text-body">
+                              {col.name}
+                              {col.constraint && (
+                                <span className="ml-0.5 text-xs text-brand opacity-80">
+                                  ({col.constraint})
+                                </span>
+                              )}
+                            </td>
+                            <td className="px-2 py-0.5 text-text-caption">
+                              {col.type}
+                            </td>
+                          </tr>
                         ))}
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* 샘플 데이터 카드 — space-y-2 간격으로 분리 */}
+                {hasSample && (
+                  <div className="rounded-xl border border-border bg-surface-card overflow-hidden">
+                    <div className="overflow-x-auto">
+                      <table className="text-sm whitespace-nowrap w-full border-collapse">
+                        <thead>
+                          <tr className="bg-surface-page">
+                            {table.columns.map((col) => (
+                              <th
+                                key={col.name}
+                                className="px-2 py-0.5 text-left font-medium font-mono text-text-caption border-b border-border"
+                              >
+                                {col.name}
+                              </th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {rows.map((row, i) => (
+                            <tr
+                              key={i}
+                              className={`border-b border-border last:border-0 ${i % 2 === 1 ? "bg-surface-page" : ""}`}
+                            >
+                              {row.map((cell, j) => (
+                                <td key={j} className="px-2 py-0.5 font-mono tabular-nums text-body">
+                                  {cell}
+                                </td>
+                              ))}
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
+            );
+          })}
+        </div>
       )}
     </div>
   );
