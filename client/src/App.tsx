@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
 import AppLayout from "./components/AppLayout";
 import Home from "./pages/Home";
 import CategoryCards from "./pages/CategoryCards";
@@ -11,7 +11,13 @@ import AnswerFeedback from "./pages/AnswerFeedback";
 import RecommendationPractice from "./pages/RecommendationPractice";
 import Stats from "./pages/Stats";
 import Settings from "./pages/Settings";
+import DevPage from "./pages/DevPage";
 import { ensureRegistered } from "./stores/memberStore";
+
+/** /dev route guard — sessionStorage에 잠금 해제 플래그가 없으면 설정 화면으로 redirect */
+function DevGuard() {
+  return sessionStorage.getItem("devUnlocked") ? <DevPage /> : <Navigate to="/settings" replace />;
+}
 
 const router = createBrowserRouter([
   {
@@ -48,6 +54,11 @@ const router = createBrowserRouter([
   {
     path: "recommendation/:questionUuid",
     element: <RecommendationPractice />,
+  },
+  // 개발자 전용 도구 — sessionStorage 잠금 해제 확인 후에만 접근 허용
+  {
+    path: "dev",
+    element: <DevGuard />,
   },
 ]);
 
