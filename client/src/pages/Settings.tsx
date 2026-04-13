@@ -91,7 +91,8 @@ export default function Settings() {
       {/* ② 계정 섹션 */}
       <section className={s1.className}>
         <SettingsSection label="계정" isFirst>
-          <div className="bg-surface-card border border-border rounded-2xl">
+          {/* flat 스타일: 카드 래퍼 없음, divide-y로 row 간 구분선 처리 */}
+          <div className="divide-y divide-border">
             <SettingsRow
               label="닉네임"
               value={
@@ -132,7 +133,6 @@ export default function Settings() {
                   )}
                 </button>
               }
-              isLast
             />
           </div>
         </SettingsSection>
@@ -141,13 +141,12 @@ export default function Settings() {
       {/* ③ 건의사항 섹션 — 서브페이지 진입 row */}
       <section className={`mt-6 ${s2.className}`}>
         <SettingsSection label="건의사항">
-          <div className="bg-surface-card border border-border rounded-2xl">
+          <div className="divide-y divide-border">
             <SettingsRow
               label="건의사항"
               value={<p className="text-body font-medium">의견 남기기</p>}
               action={<ChevronRight size={16} className="text-text-caption" />}
               onClick={() => navigate("/settings/feedback")}
-              isLast
             />
           </div>
         </SettingsSection>
@@ -156,12 +155,11 @@ export default function Settings() {
       {/* ④ 앱 정보 섹션 */}
       <section className={`mt-6 ${s3.className}`}>
         <SettingsSection label="앱 정보">
-          <div className="bg-surface-card border border-border rounded-2xl">
+          <div className="divide-y divide-border">
             <SettingsRow
               label="버전"
               value={<p className="text-caption">{__APP_VERSION__}</p>}
               onClick={devUnlocked ? undefined : handleVersionClick}
-              isLast={!devUnlocked}
             />
             {/* 개발자 모드 row — Easter Egg 잠금 해제 시 노출 */}
             {devUnlocked && (
@@ -170,7 +168,6 @@ export default function Settings() {
                 value={<p className="text-caption text-text-secondary">개발자 전용 도구</p>}
                 action={<ChevronRight size={16} className="text-text-caption" />}
                 onClick={() => navigate("/dev")}
-                isLast
               />
             )}
           </div>

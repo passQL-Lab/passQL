@@ -32,7 +32,7 @@ export default function DevPage() {
   return (
     <SubpageLayout title="개발자 모드">
       <SettingsSection label="개발자 도구" isFirst>
-        <div className="bg-surface-card border border-border rounded-2xl">
+        <div className="divide-y divide-border">
           <SettingsRow
             label="localStorage 초기화"
             value={
@@ -53,7 +53,6 @@ export default function DevPage() {
                 {confirmClear ? "진짜요?" : "초기화"}
               </button>
             }
-            isLast
           />
         </div>
         {/* 2차 확인 시 인라인 경고 — 되돌릴 수 없음을 명시 */}
