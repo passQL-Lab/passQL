@@ -202,7 +202,7 @@ export default function Settings() {
       {/* Toast 알림 — 하단 중앙 고정 */}
       {toastMsg && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
-          <div className="bg-toast-bg text-white text-sm px-4 py-3 rounded-lg shadow-lg whitespace-nowrap">
+          <div className="bg-gray-900 text-white text-sm font-medium px-4 py-2.5 rounded-lg shadow-md ring-1 ring-white/10 whitespace-nowrap">
             {toastMsg}
           </div>
         </div>
