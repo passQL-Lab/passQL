@@ -132,7 +132,9 @@ public class AiCommentService {
      */
     private String buildRecentActivitySummary(UUID memberUuid) {
         LocalDateTime since = LocalDateTime.now().minusDays(RECENT_ACTIVITY_DAYS);
-        Object[] row = submissionRepository.findRecentActivityStats(memberUuid.toString(), since);
+        List<Object[]> rows = submissionRepository.findRecentActivityStats(memberUuid.toString(), since);
+        // native query는 단일 집계행도 List<Object[]>로 반환되므로 첫 행을 꺼냄
+        Object[] row = rows.isEmpty() ? new Object[]{null, null} : rows.get(0);
 
         long recentCount = row[0] != null ? ((Number) row[0]).longValue() : 0L;
         String lastActiveDate = row[1] != null

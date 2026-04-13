@@ -1,15 +1,16 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="AI-FASTAPI-SERVER" type="Python.FastAPI">
     <option name="file" value="$PROJECT_DIR$/ai/src/main.py" />
+    <module name="passQL" />
     <option name="ENV_FILES" value="" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
-    <option name="SDK_HOME" value="" />
+    <option name="SDK_HOME" value="/Users/suhsaechan/Desktop/Programming/project/passQL-AI-venv/bin/python" />
+    <option name="SDK_NAME" value="Python 3.13 (passQL-AI-venv)" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/ai" />
     <option name="IS_MODULE_SDK" value="false" />
     <option name="ADD_CONTENT_ROOTS" value="true" />
     <option name="ADD_SOURCE_ROOTS" value="true" />
-    <module name="" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
     <option name="launchJavascriptDebuger" value="false" />
     <method v="2" />
