@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
-import { Copy, Check, RefreshCw, WifiOff } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { Copy, Check, RefreshCw, WifiOff, ChevronRight } from "lucide-react";
 import { useMemberStore } from "../stores/memberStore";
 import logo from "../assets/logo/logo.png";
 import { useRegenerateNickname } from "../hooks/useMember";
@@ -12,6 +13,7 @@ import FeedbackForm from "../components/FeedbackForm";
 import FeedbackList from "../components/FeedbackList";
 
 export default function Settings() {
+  const navigate = useNavigate();
   const uuid = useMemberStore((s) => s.uuid);
   const nickname = useMemberStore((s) => s.nickname);
   const truncatedUuid = `${uuid.slice(0, 20)}...`;
@@ -27,9 +29,13 @@ export default function Settings() {
       ? feedbackData.items.length
       : undefined;
 
-  // localStorage 초기화 2단계 확인 상태 (실수 방지)
-  const [confirmClear, setConfirmClear] = useState(false);
-  const confirmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // 개발자 모드 Easter Egg — 세션 한정 (새로고침 시 리셋)
+  const [devUnlocked, setDevUnlocked] = useState(false);
+  const clickCountRef = useRef(0);
+
+  // toast 메시지 — null이면 미표시
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // 섹션별 순차 페이드인 (50ms 간격)
   const stagger = useStagger();
@@ -38,15 +44,20 @@ export default function Settings() {
   const s2 = stagger(2); // 건의사항 입력 카드
   const s3 = stagger(3); // 건의사항 목록 카드
   const s4 = stagger(4); // 앱 정보 섹션
-  const s5 = stagger(5); // 개발자 도구 섹션
-  const s6 = stagger(6); // 로고 + 카피라이트
+  const s5 = stagger(5); // 로고 + 카피라이트
 
   useEffect(() => {
     return () => {
       if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
-      if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current);
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
     };
   }, []);
+
+  const showToast = (msg: string) => {
+    setToastMsg(msg);
+    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    toastTimerRef.current = setTimeout(() => setToastMsg(null), 2000);
+  };
 
   const handleCopy = () => {
     navigator.clipboard.writeText(uuid);
@@ -55,18 +66,18 @@ export default function Settings() {
     copyTimerRef.current = setTimeout(() => setCopied(false), 2000);
   };
 
-  // 1차 클릭: 확인 상태로 전환 (3초 후 자동 복원)
-  // 2차 클릭: localStorage 전체 삭제 + 페이지 reload
-  const handleClearStorage = () => {
-    if (!confirmClear) {
-      setConfirmClear(true);
-      if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current);
-      confirmTimerRef.current = setTimeout(() => setConfirmClear(false), 3000);
-      return;
+  // 버전 row 클릭 — 5번 연속 클릭 시 개발자 모드 잠금 해제
+  const handleVersionClick = () => {
+    if (devUnlocked) return;
+    clickCountRef.current += 1;
+    const count = clickCountRef.current;
+
+    if (count === 3) showToast("개발자 모드까지 2번 남았습니다");
+    else if (count === 4) showToast("개발자 모드까지 1번 남았습니다");
+    else if (count >= 5) {
+      setDevUnlocked(true);
+      showToast("개발자 모드가 활성화되었습니다");
     }
-    clearTimeout(confirmTimerRef.current!);
-    localStorage.clear();
-    window.location.reload();
   };
 
   return (
@@ -153,48 +164,38 @@ export default function Settings() {
           <div className="bg-surface-card border border-border rounded-2xl">
             <SettingsRow
               label="버전"
-              value={
-                <p className="text-caption">{__APP_VERSION__}</p>
-              }
-              isLast
+              value={<p className="text-caption">{__APP_VERSION__}</p>}
+              onClick={devUnlocked ? undefined : handleVersionClick}
+              isLast={!devUnlocked}
             />
+            {/* 개발자 모드 row — Easter Egg 잠금 해제 시 노출 */}
+            {devUnlocked && (
+              <SettingsRow
+                label="개발자 모드"
+                value={<p className="text-caption text-text-secondary">개발자 전용 도구</p>}
+                action={<ChevronRight size={16} className="text-text-caption" />}
+                onClick={() => navigate("/dev")}
+                isLast
+              />
+            )}
           </div>
         </SettingsSection>
       </section>
 
-      {/* ⑥ 개발자 도구 섹션 */}
-      <section className={`mt-6 ${s5.className}`}>
-        <SettingsSection label="개발자">
-          <div className="bg-surface-card border border-border rounded-2xl">
-            <SettingsRow
-              label="localStorage 초기화"
-              value={
-                <p className="text-sm text-text-secondary">앱 데이터 전체 삭제 후 재시작</p>
-              }
-              action={
-                <button
-                  type="button"
-                  className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors ${
-                    confirmClear
-                      ? "bg-sem-error-light border-[#FCA5A5] text-sem-error-text"
-                      : "bg-white border-[#FCA5A5] text-sem-error-text hover:bg-sem-error-light"
-                  }`}
-                  onClick={handleClearStorage}
-                >
-                  {confirmClear ? "진짜요?" : "초기화"}
-                </button>
-              }
-              isLast
-            />
-          </div>
-        </SettingsSection>
-      </section>
-
-      {/* ⑦ 로고 + 카피라이트 */}
-      <section className={`text-center mt-8 space-y-2 ${s6.className}`}>
+      {/* ⑥ 로고 + 카피라이트 */}
+      <section className={`text-center mt-8 space-y-2 ${s5.className}`}>
         <img src={logo} alt="passQL" className="h-5 w-auto mx-auto" />
         <p className="text-xs text-text-caption">© 2026 passQL. All rights reserved.</p>
       </section>
+
+      {/* Toast 알림 — 하단 중앙 고정 */}
+      {toastMsg && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+          <div className="bg-toast-bg text-white text-sm px-4 py-3 rounded-lg shadow-lg whitespace-nowrap">
+            {toastMsg}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
