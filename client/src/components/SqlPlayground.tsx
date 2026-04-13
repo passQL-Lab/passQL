@@ -34,10 +34,11 @@ export const SqlPlayground = memo(function SqlPlayground({
   };
 
   return (
-    <div className="bg-surface-card border border-border rounded-2xl p-4 sm:p-6 mt-3">
+    <div className="bg-surface-card border border-border rounded-2xl mt-3 overflow-hidden">
+      {/* 헤더 — 전체 영역이 클릭 가능하도록 패딩을 버튼 안으로 이동 */}
       <button
         type="button"
-        className="flex items-center justify-between w-full"
+        className="flex items-center justify-between w-full px-4 sm:px-6 py-4 hover:bg-surface transition-colors cursor-pointer"
         onClick={() => setIsOpen((prev) => !prev)}
       >
         <div className="flex items-center gap-2">
@@ -52,7 +53,7 @@ export const SqlPlayground = memo(function SqlPlayground({
       </button>
 
       {isOpen && (
-        <div className="mt-3">
+        <div className="px-4 sm:px-6 pb-4 sm:pb-6">
           <textarea
             className="sql-playground-textarea"
             placeholder="SELECT * FROM 테이블명;"
