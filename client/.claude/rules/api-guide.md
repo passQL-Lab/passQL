@@ -14,7 +14,7 @@ Frontend ──(/api)──> Backend(Spring) ──(x-api-key)──> AI Server(
 - 인증: 사용자 식별이 필요한 엔드포인트는 `X-Member-UUID` 헤더 필수
 - **프론트 비즈니스 로직 제로 원칙**: 날짜 계산(D-day), 정답 판정, 닉네임 생성, 정답률 집계 등 모든 비즈니스 로직은 백엔드 책임. 프론트는 응답을 그대로 렌더링.
 
-## 엔드포인트 전체 목록 (22개)
+## 엔드포인트 전체 목록 (24개)
 
 > 구현 상태: [O] = be-api-docs.json에 정의됨, [미구현] = 화면 명세에 필요하나 백엔드 미구현
 
@@ -109,6 +109,17 @@ Frontend ──(/api)──> Backend(Spring) ──(x-api-key)──> AI Server(
 | `fetchGreeting(memberUuid)` | GET    | `/home/greeting?memberUuid` | O (query param) | `GreetingResponse` |  O   |
 
 - `fetchGreeting`: 홈 화면 인사 메시지 반환(#53). `GreetingResponse { nickname, message, messageType }`. `message`에 `{nickname}` 플레이스홀더 포함 -- 프론트에서 치환. `messageType`: GENERAL/COUNTDOWN/URGENT/EXAM_DAY. D-day 구간에 따라 일반 메시지와 가중치 혼합. 회원 조회 실패 시 nickname="회원" + GENERAL 폴백.
+
+### Feedback (`src/api/feedback.ts`)
+
+| 함수                      | 메서드 | 경로            |    인증    | 응답 타입               | 상태 |
+| ------------------------- | ------ | --------------- | :--------: | ----------------------- | :--: |
+| `submitFeedback(content)` | POST   | `/feedback`     | O (header) | `FeedbackSubmitResponse` |  O   |
+| `fetchMyFeedback()`       | GET    | `/feedback/me`  | O (header) | `FeedbackListResponse`  |  O   |
+
+- `submitFeedback`: body `{ content }` (1~500자). 응답 `{ feedbackUuid, status: "PENDING", createdAt }`.
+- `fetchMyFeedback`: 빈 목록이면 404가 아닌 200 + `{ items: [] }` 반환 (API 스펙 보장).
+- `FeedbackStatus`: `PENDING`(대기) / `REVIEWED`(확인됨) / `APPLIED`(반영됨) — 상태 변경은 관리자 전용, 프론트는 읽기 전용.
 
 ### ExamSchedule (`src/api/examSchedules.ts`)
 

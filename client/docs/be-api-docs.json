@@ -33,6 +33,10 @@
       "description": "AI 해설 / 유사 문제 조회"
     },
     {
+      "name": "Feedback",
+      "description": "건의사항 제출 / 내 건의사항 목록 조회"
+    },
+    {
       "name": "Progress",
       "description": "학습 진도 조회"
     },
@@ -224,6 +228,47 @@
               "*/*": {
                 "schema": {
                   "$ref": "#/components/schemas/NicknameRegenerateResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/feedback": {
+      "post": {
+        "tags": ["Feedback"],
+        "summary": "건의사항 제출",
+        "description": "## 인증(JWT): **불필요**\n\n## 요청 헤더\n- **`X-Member-UUID`**: 회원 UUID\n\n## 요청 바디 (FeedbackSubmitRequest)\n- **`content`**: 건의사항 내용 (1자 이상 500자 이하, 필수)\n\n## 반환값 (FeedbackSubmitResponse)\n- **`feedbackUuid`**: 생성된 건의사항 UUID\n- **`status`**: 초기 상태 (항상 PENDING)\n- **`createdAt`**: 생성 시각\n\n## 에러\n- 400: content가 비어 있거나 500자 초과\n\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.13\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/200\" target=\"_blank\"\u003E#200\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003E건의사항 API 구현 요청\u003C/td\u003E\u003Ctd\u003E건의사항 제출 API 추가\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
+        "operationId": "submit_1",
+        "parameters": [
+          {
+            "name": "X-Member-UUID",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/FeedbackSubmitRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackSubmitResponse"
                 }
               }
             }
@@ -600,13 +645,22 @@
       "get": {
         "tags": ["Progress"],
         "summary": "AI 영역 분석 코멘트 조회",
-        "description": "## 인증(JWT): **불필요** (추후 헤더 전환 예정)\n\n## 요청 파라미터\n- memberUuid (UUID, required): 회원 식별자\n\n## 반환값 (AiCommentResponse)\n- comment: AI 생성 한국어 코멘트 (2~3문장, 약점 영역 파악 + 집중 학습 추천)\n- generatedAt: 코멘트 생성(캐시 저장) 시각\n\n## 캐싱\n- Redis key: ai-comment:{memberUuid}, TTL 24시간\n- 새 Submission 저장 시 즉시 캐시 무효화 → 다음 호출 시 재생성\n- AI 호출 latency를 고려해 프론트엔드에서 비동기 로딩 권장\n\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.10\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/71\" target=\"_blank\"\u003E#71\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003E토픽별 분석 및 AI 코멘트 API 구현 필요\u003C/td\u003E\u003Ctd\u003EAI 영역 분석 코멘트 API 추가 (Redis 캐시 24h TTL, Submission 저장 시 evict)\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
+        "description": "## 인증(JWT): **불필요** (추후 헤더 전환 예정)\n\n## 요청 파라미터\n- memberUuid (UUID, required): 회원 식별자\n- sessionUuid (UUID, required): 퀴즈 세션 식별자\n\n## 반환값 (AiCommentResponse)\n- comment: AI 생성 한국어 코멘트 (2~3문장, 약점 영역 파악 + 집중 학습 추천)\n- generatedAt: 코멘트 생성(캐시 저장) 시각\n\n## 캐싱\n- Redis key: ai-comment:{memberUuid}:{sessionUuid}, TTL 2시간\n- 같은 세션 재진입 시 동일 텍스트 반환 (불필요한 AI 호출 방지)\n- 새 세션 시작 시 새 sessionUuid로 자동 새 AI 호출\n- AI 호출 latency를 고려해 프론트엔드에서 비동기 로딩 권장\n\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.10\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/71\" target=\"_blank\"\u003E#71\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003E토픽별 분석 및 AI 코멘트 API 구현 필요\u003C/td\u003E\u003Ctd\u003EAI 영역 분석 코멘트 API 추가 (Redis 캐시 24h TTL, Submission 저장 시 evict)\u003C/td\u003E\u003C/tr\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.12\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/176\" target=\"_blank\"\u003E#176\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003E통계 페이지 UI 전면 개선 필요\u003C/td\u003E\u003Ctd\u003EsessionUuid 파라미터 추가. 캐시 키 세션 단위 변경(ai-comment:{memberUuid}:{sessionUuid}, TTL 2h). 프롬프트 DB 이관(ai_comment 키). 이번 세션 결과 + 누적 통계 통합 피드백.\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
         "operationId": "getAiComment",
         "parameters": [
           {
             "name": "memberUuid",
             "in": "query",
             "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "name": "sessionUuid",
+            "in": "query",
+            "required": false,
             "schema": {
               "type": "string",
               "format": "uuid"
@@ -735,6 +789,37 @@
         }
       }
     },
+    "/api/feedback/me": {
+      "get": {
+        "tags": ["Feedback"],
+        "summary": "내 건의사항 목록 조회",
+        "description": "## 인증(JWT): **불필요**\n\n## 요청 헤더\n- **`X-Member-UUID`**: 회원 UUID\n\n## 반환값 (FeedbackListResponse)\n- **`items`**: 건의사항 목록 (createdAt 내림차순)\n  - **`feedbackUuid`**: 건의사항 UUID\n  - **`content`**: 내용\n  - **`status`**: PENDING / REVIEWED / APPLIED\n  - **`createdAt`**: 생성 시각\n\n## 에러\n- 건의사항이 없으면 200 + { \"items\": [] } 반환 (404 금지)\n\n\n**API 변경 이력:**\n\u003Ctable\u003E\u003Cthead\u003E\u003Ctr\u003E\u003Cth\u003E날짜\u003C/th\u003E\u003Cth\u003E작성자\u003C/th\u003E\u003Cth\u003E이슈번호\u003C/th\u003E\u003Cth\u003E이슈 제목\u003C/th\u003E\u003Cth\u003E변경 내용\u003C/th\u003E\u003C/tr\u003E\u003C/thead\u003E\u003Ctbody\u003E\u003Ctr\u003E\u003Ctd\u003E2026.04.13\u003C/td\u003E\u003Ctd\u003E서새찬\u003C/td\u003E\u003Ctd\u003E\u003Ca href=\"https://github.com/passQL-Lab/passQL/issues/200\" target=\"_blank\"\u003E#200\u003C/a\u003E\u003C/td\u003E\u003Ctd\u003E건의사항 API 구현 요청\u003C/td\u003E\u003Ctd\u003E내 건의사항 목록 조회 API 추가\u003C/td\u003E\u003C/tr\u003E\u003C/tbody\u003E\u003C/table\u003E",
+        "operationId": "getMyFeedbacks",
+        "parameters": [
+          {
+            "name": "X-Member-UUID",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "*/*": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackListResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/exam-schedules": {
       "get": {
         "tags": ["ExamSchedule"],
@@ -849,6 +934,12 @@
             "type": "string",
             "description": "선택한 선택지 키",
             "example": "A"
+          },
+          "sessionUuid": {
+            "type": "string",
+            "format": "uuid",
+            "description": "퀴즈 세션 UUID — AI 코멘트 세션 집계에 사용",
+            "example": "550e8400-e29b-41d4-a716-446655440001"
           }
         }
       },
@@ -944,6 +1035,30 @@
           }
         }
       },
+      "FeedbackSubmitRequest": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string"
+          }
+        }
+      },
+      "FeedbackSubmitResponse": {
+        "type": "object",
+        "properties": {
+          "feedbackUuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "status": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "AiResult": {
         "type": "object",
         "properties": {
@@ -1026,17 +1141,17 @@
       "PageableObject": {
         "type": "object",
         "properties": {
-          "paged": {
-            "type": "boolean"
-          },
-          "pageSize": {
-            "type": "integer",
-            "format": "int32"
-          },
           "unpaged": {
             "type": "boolean"
           },
           "pageNumber": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "paged": {
+            "type": "boolean"
+          },
+          "pageSize": {
             "type": "integer",
             "format": "int32"
           },
@@ -1082,10 +1197,10 @@
       "SortObject": {
         "type": "object",
         "properties": {
-          "sorted": {
+          "unsorted": {
             "type": "boolean"
           },
-          "unsorted": {
+          "sorted": {
             "type": "boolean"
           },
           "empty": {
@@ -1514,6 +1629,36 @@
           "messageType": {
             "type": "string",
             "enum": ["GENERAL", "COUNTDOWN", "URGENT", "EXAM_DAY"]
+          }
+        }
+      },
+      "FeedbackItem": {
+        "type": "object",
+        "properties": {
+          "feedbackUuid": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "content": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "FeedbackListResponse": {
+        "type": "object",
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FeedbackItem"
+            }
           }
         }
       },
