@@ -436,7 +436,7 @@ export default function QuestionDetail({
       {/* 문제 지문 (토글) */}
       <button
         type="button"
-        className="bg-surface-card border border-border rounded-2xl p-4 sm:p-6 shadow-sm w-full text-left mt-2"
+        className="bg-brand-light border border-brand-medium rounded-2xl p-4 sm:p-6 shadow-sm w-full text-left mt-2"
         onClick={() => setStemOpen((prev) => !prev)}
       >
         {/* 접힘/펼침 무관하게 항상 표시되는 지문 라벨 */}
