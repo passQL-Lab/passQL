@@ -1,11 +1,33 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-13T07:47:02Z",
-    "currentVersion": "0.0.135",
+    "lastUpdated": "2026-04-13T07:50:53Z",
+    "currentVersion": "0.0.136",
     "projectType": "basic",
-    "totalReleases": 57
+    "totalReleases": 58
   },
   "releases": [
+    {
+      "version": "0.0.136",
+      "project_type": "basic",
+      "date": "2026-04-13",
+      "pr_number": 241,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리즈 노트\n\n* **새로운 기능**\n  * 신고 상세 페이지에서 선택지 세트 정보를 조회할 수 있는 기능이 추가되었습니다. 토글 버튼으로 관련 선택지 정보를 표시 및 숨길 수 있으며, 처음 열람할 때 자동으로 정보가 로드됩니다.\n\n* **개선사항**\n  * 신고 카테고리의 표시 레이블이 개선되었습니다.",
+      "parsed_changes": {
+        "새로운_기능": {
+          "title": "새로운 기능",
+          "items": [
+            "신고 상세 페이지에서 선택지 세트 정보를 조회할 수 있는 기능이 추가되었습니다. 토글 버튼으로 관련 선택지 정보를 표시 및 숨길 수 있으며, 처음 열람할 때 자동으로 정보가 로드됩니다."
+          ]
+        },
+        "개선사항": {
+          "title": "개선사항",
+          "items": [
+            "신고 카테고리의 표시 레이블이 개선되었습니다."
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.135",
       "project_type": "basic",

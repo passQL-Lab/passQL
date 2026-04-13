@@ -60,6 +60,17 @@ public class AdminChoiceSetController {
     }
 
     /**
+     * 선택지 세트 아이템 JSON 조회 — 신고 상세 화면에서 인라인 렌더에 사용.
+     */
+    @GetMapping("/{uuid}/items")
+    @ResponseBody
+    public ResponseEntity<List<QuestionChoiceSetItem>> getItems(@PathVariable UUID uuid) {
+        List<QuestionChoiceSetItem> items = choiceSetItemRepository
+                .findByChoiceSetUuidOrderBySortOrderAsc(uuid);
+        return ResponseEntity.ok(items);
+    }
+
+    /**
      * 비활성화.
      */
     @PutMapping("/{uuid}/disable")

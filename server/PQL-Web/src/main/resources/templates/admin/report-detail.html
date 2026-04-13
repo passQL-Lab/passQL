@@ -191,6 +191,20 @@
                     ? r.memberUuid.substring(0, 8) + '…'
                     : '-';
 
+                const choiceSetShort = r.choiceSetUuid
+                    ? r.choiceSetUuid.substring(0, 8) + '…'
+                    : null;
+                const choiceSetSection = r.choiceSetUuid
+                    ? `<div class="mt-2">
+                           <button
+                               class="text-xs text-primary underline underline-offset-2"
+                               onclick="toggleChoiceSet(this, '${r.choiceSetUuid}')">
+                               선택지 세트 보기 (${choiceSetShort})
+                           </button>
+                           <div class="choice-set-panel hidden mt-2"></div>
+                       </div>`
+                    : '';
+
                 return `<div class="py-3">
                     <div class="flex items-center justify-between gap-2 mb-1">
                         <div class="flex items-center gap-2 flex-wrap">
@@ -201,6 +215,7 @@
                     </div>
                     ${detail}
                     <div class="text-xs text-base-content/40 mt-1">회원: ${memberShort}</div>
+                    ${choiceSetSection}
                 </div>`;
             }).join('');
 
@@ -278,6 +293,59 @@
             // 완료 후 새로고침
             setTimeout(() => loadDetail(), 800);
         });
+
+        // 선택지 세트 토글 — 처음 열 때 API 호출 후 캐시, 이후 토글만
+        async function toggleChoiceSet(btn, choiceSetUuid) {
+            const panel = btn.nextElementSibling;
+            const isHidden = panel.classList.contains('hidden');
+
+            if (!isHidden) {
+                panel.classList.add('hidden');
+                btn.textContent = `선택지 세트 보기 (${choiceSetUuid.substring(0, 8)}…)`;
+                return;
+            }
+
+            // 이미 로드된 경우 바로 표시
+            if (panel.dataset.loaded) {
+                panel.classList.remove('hidden');
+                btn.textContent = `선택지 세트 접기`;
+                return;
+            }
+
+            // 최초 로드
+            btn.textContent = '불러오는 중...';
+            try {
+                const res = await fetch(`/admin/choice-sets/${choiceSetUuid}/items`);
+                if (!res.ok) throw new Error('API 오류');
+                const items = await res.json();
+                panel.innerHTML = renderChoiceItems(items);
+                panel.dataset.loaded = '1';
+                panel.classList.remove('hidden');
+                btn.textContent = '선택지 세트 접기';
+                lucide.createIcons();
+            } catch (e) {
+                btn.textContent = `선택지 세트 보기 (${choiceSetUuid.substring(0, 8)}…)`;
+                panel.innerHTML = `<p class="text-xs text-error">불러오기 실패</p>`;
+                panel.classList.remove('hidden');
+            }
+        }
+
+        function renderChoiceItems(items) {
+            if (!items || items.length === 0) return '<p class="text-xs text-base-content/40">선택지 없음</p>';
+            return `<div class="border border-base-200 rounded-lg overflow-hidden text-sm">
+                ${items.map(item => {
+                    const correctBadge = item.isCorrect
+                        ? '<span class="badge badge-success badge-xs ml-1">정답</span>'
+                        : '';
+                    return `<div class="px-3 py-2 ${item.isCorrect ? 'bg-success/10' : 'bg-base-100'} border-b border-base-200 last:border-b-0">
+                        <div class="flex items-center gap-1 font-mono font-bold text-xs mb-1">
+                            ${escapeHtml(item.choiceKey)}${correctBadge}
+                        </div>
+                        <p class="text-xs text-base-content/80 whitespace-pre-wrap break-words">${escapeHtml(item.body || '')}</p>
+                    </div>`;
+                }).join('')}
+            </div>`;
+        }
 
         function showError(msg) {
             document.getElementById('questionCard').innerHTML = `

@@ -14,10 +14,10 @@ interface ReportModalProps {
 
 // 신고 카테고리 목록 — 표시 레이블 포함
 const CATEGORIES: { value: ReportCategory; label: string }[] = [
-  { value: "WRONG_ANSWER", label: "정답이 틀렸다" },
-  { value: "WEIRD_QUESTION", label: "문제 자체가 이상하다" },
-  { value: "WEIRD_CHOICES", label: "선택지가 이상하다" },
-  { value: "WEIRD_EXECUTION", label: "SQL 실행 결과가 이상하다" },
+  { value: "WRONG_ANSWER", label: "정답이 잘못된 것 같아요" },
+  { value: "WEIRD_QUESTION", label: "문제 내용이 이상해요" },
+  { value: "WEIRD_CHOICES", label: "선택지가 이상해요" },
+  { value: "WEIRD_EXECUTION", label: "SQL 실행 결과가 이상해요" },
   { value: "ETC", label: "기타" },
 ];
 
