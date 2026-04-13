@@ -140,7 +140,10 @@ export default function Settings() {
                   {copied ? (
                     <Check size={16} className="text-sem-success" />
                   ) : (
-                    <Copy size={16} className="text-text-caption hover:text-brand" />
+                    <Copy
+                      size={16}
+                      className="text-text-caption hover:text-brand"
+                    />
                   )}
                 </button>
               }
@@ -169,7 +172,9 @@ export default function Settings() {
           <div className="bg-surface-card border-y border-border divide-y divide-border">
             <SettingsRow
               label="버전"
-              value={<p className="text-sm text-text-caption">{__APP_VERSION__}</p>}
+              value={
+                <p className="text-sm text-text-caption">{__APP_VERSION__}</p>
+              }
               onClick={devUnlocked ? undefined : handleVersionClick}
             />
             {/* 개발자 모드 row — Easter Egg 잠금 해제 시 노출 */}
@@ -177,9 +182,7 @@ export default function Settings() {
               <SettingsRow
                 label="개발자 모드"
                 value={
-                  <p className="text-sm text-text-caption">
-                    개발자 전용 도구
-                  </p>
+                  <p className="text-sm text-text-caption">개발자 전용 도구</p>
                 }
                 action={
                   <ChevronRight size={16} className="text-text-caption" />
@@ -202,7 +205,7 @@ export default function Settings() {
       {/* Toast 알림 — 하단 중앙 고정 */}
       {toastMsg && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
-          <div className="bg-gray-900 text-white text-sm font-medium px-4 py-2.5 rounded-lg shadow-md ring-1 ring-white/10 whitespace-nowrap">
+          <div className="bg-brand text-white text-sm font-medium px-4 py-2.5 rounded-lg shadow-md whitespace-nowrap">
             {toastMsg}
           </div>
         </div>
