@@ -59,7 +59,7 @@ jobs:
 
       - name: .env.prod 파일 생성
         run: |
-          cat > ai/.env.prod << 'EOF'
+          cat > ai/.env.prod <<EOF
           ${{ secrets.AI_ENV_FILE }}
           EOF
           echo "✅ .env.prod 파일이 생성되었습니다"
