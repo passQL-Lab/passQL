@@ -58,12 +58,11 @@ jobs:
           df -h
 
       - name: .env.prod 파일 생성
-        env:
-          AI_ENV_FILE: ${{ secrets.AI_ENV_FILE }}
         run: |
-          echo "$AI_ENV_FILE" > ai/.env.prod
+          cat > ai/.env.prod <<EOF
+          ${{ secrets.AI_ENV_FILE }}
+          EOF
           echo "✅ .env.prod 파일이 생성되었습니다"
-          cat ai/.env.prod
 
       - name: Docker 빌드환경 설정
         uses: docker/setup-buildx-action@v3
