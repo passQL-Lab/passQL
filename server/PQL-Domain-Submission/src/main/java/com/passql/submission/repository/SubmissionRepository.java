@@ -279,4 +279,26 @@ public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
         "ORDER BY s.submitted_at ASC",
         nativeQuery = true)
     List<Object[]> findTopicResultsBySessionUuid(@Param("sessionUuid") String sessionUuid);
+
+    /**
+     * 통계 화면 AI 코멘트용 최근 N일 학습 현황 조회.
+     *
+     * Object[] = { Long recentCount, LocalDateTime lastActiveAt }
+     * recentCount  : since 이후 제출 건수
+     * lastActiveAt : 가장 최근 제출 시각 (제출 없으면 null)
+     *
+     * 네이티브 쿼리 이유: CAST(:memberUuid AS uuid) 패턴이 필요하며
+     * 기존 쿼리들과 컨벤션을 통일함.
+     */
+    @Query(value =
+        "SELECT COUNT(*) AS recent_count, " +
+        "       MAX(s.submitted_at) AS last_active_at " +
+        "FROM submission s " +
+        "WHERE s.member_uuid = CAST(:memberUuid AS uuid) " +
+        "  AND s.submitted_at >= :since",
+        nativeQuery = true)
+    Object[] findRecentActivityStats(
+        @Param("memberUuid") String memberUuid,
+        @Param("since") LocalDateTime since
+    );
 }
