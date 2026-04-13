@@ -32,7 +32,7 @@ export default function DevPage() {
   return (
     <SubpageLayout title="개발자 모드">
       <SettingsSection label="개발자 도구" isFirst>
-        <div className="divide-y divide-border">
+        <div className="bg-surface-card border-y border-border divide-y divide-border">
           <SettingsRow
             label="localStorage 초기화"
             value={

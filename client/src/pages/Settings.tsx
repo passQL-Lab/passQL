@@ -18,7 +18,9 @@ export default function Settings() {
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // 개발자 모드 Easter Egg — sessionStorage 복원으로 페이지 재진입 시에도 row 유지
-  const [devUnlocked, setDevUnlocked] = useState(() => sessionStorage.getItem("devUnlocked") === "1");
+  const [devUnlocked, setDevUnlocked] = useState(
+    () => sessionStorage.getItem("devUnlocked") === "1",
+  );
   const clickCountRef = useRef(0);
   // 2초 안에 5번 클릭하지 않으면 카운터 리셋
   const clickResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -92,11 +94,13 @@ export default function Settings() {
       <section className={s1.className}>
         <SettingsSection label="계정" isFirst>
           {/* flat 스타일: 카드 래퍼 없음, divide-y로 row 간 구분선 처리 */}
-          <div className="divide-y divide-border">
+          <div className="bg-surface-card border-y border-border divide-y divide-border">
             <SettingsRow
               label="닉네임"
               value={
-                <p className="text-body font-bold">{nickname || uuid.slice(0, 8)}</p>
+                <p className="text-body font-bold">
+                  {nickname || uuid.slice(0, 8)}
+                </p>
               }
               action={
                 <button
@@ -117,7 +121,9 @@ export default function Settings() {
             <SettingsRow
               label="디바이스 ID"
               value={
-                <p className="font-mono text-[13px] text-text-primary">{truncatedUuid}</p>
+                <p className="font-mono text-[13px] text-text-primary">
+                  {truncatedUuid}
+                </p>
               }
               action={
                 <button
@@ -138,10 +144,10 @@ export default function Settings() {
         </SettingsSection>
       </section>
 
-      {/* ③ 건의사항 섹션 — 서브페이지 진입 row */}
+      {/* ③ 이용안내 섹션 — 서브페이지 진입 row */}
       <section className={`mt-6 ${s2.className}`}>
-        <SettingsSection label="건의사항">
-          <div className="divide-y divide-border">
+        <SettingsSection label="이용안내">
+          <div className="bg-surface-card border-y border-border divide-y divide-border">
             <SettingsRow
               label="건의사항"
               value={<p className="text-body font-medium">의견 남기기</p>}
@@ -155,7 +161,7 @@ export default function Settings() {
       {/* ④ 앱 정보 섹션 */}
       <section className={`mt-6 ${s3.className}`}>
         <SettingsSection label="앱 정보">
-          <div className="divide-y divide-border">
+          <div className="bg-surface-card border-y border-border divide-y divide-border">
             <SettingsRow
               label="버전"
               value={<p className="text-caption">{__APP_VERSION__}</p>}
@@ -165,8 +171,14 @@ export default function Settings() {
             {devUnlocked && (
               <SettingsRow
                 label="개발자 모드"
-                value={<p className="text-caption text-text-secondary">개발자 전용 도구</p>}
-                action={<ChevronRight size={16} className="text-text-caption" />}
+                value={
+                  <p className="text-caption text-text-secondary">
+                    개발자 전용 도구
+                  </p>
+                }
+                action={
+                  <ChevronRight size={16} className="text-text-caption" />
+                }
                 onClick={() => navigate("/dev")}
               />
             )}
@@ -177,7 +189,9 @@ export default function Settings() {
       {/* ⑤ 로고 + 카피라이트 */}
       <section className={`text-center mt-8 space-y-2 ${s4.className}`}>
         <img src={logo} alt="passQL" className="h-5 w-auto mx-auto" />
-        <p className="text-xs text-text-caption">© 2026 passQL. All rights reserved.</p>
+        <p className="text-xs text-text-caption">
+          © 2026 passQL. All rights reserved.
+        </p>
       </section>
 
       {/* Toast 알림 — 하단 중앙 고정 */}
