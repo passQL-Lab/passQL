@@ -60,9 +60,9 @@
 #### AI 트랙
 
 - [ ] OllamaClient `chat()` 동작 검증 (qwen2.5:7b)
-- [ ] OllamaClient `embed()` 동작 검증 (bge-m3, 1024dim 확인)
+- [ ] OllamaClient `embed()` 동작 검증 (qwen3-embedding:4b, 2560dim 확인)
 - [ ] Ollama 응답 시간 측정 (25초 이내 가능 여부 — Vercel 30초 제한 대비)
-- [ ] Qdrant 컬렉션 생성: `concept_doc` (1024dim), `question` (1024dim)
+- [ ] Qdrant 컬렉션 생성: `concept_doc` (2560dim), `question` (2560dim)
 - [ ] QdrantSearchClient 호출 검증 (빈 컬렉션 검색 200 응답)
 
 #### FE 트랙
@@ -255,7 +255,7 @@
 ### 🚧 리스크 및 대응
 
 - [ ] **Ollama 응답 25초 초과**: prompt 단축, max_tokens 축소, 더 작은 모델 검토
-- [ ] **bge-m3 차원 미스매치**: 컬렉션 생성 전 차원 확인
+- [ ] **qwen3-embedding:4b 차원 미스매치**: 컬렉션 생성 전 차원 확인 (2560dim)
 - [ ] **샌드박스 오염**: sqld_runner SELECT-only, DDL 전용 계정 분리
 - [ ] **D4 작업량 과다**: similar API를 D5로 미룸
 - [ ] **콘텐츠 입력 부족**: 최소 10문제로도 데모 성립

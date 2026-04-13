@@ -26,45 +26,46 @@
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6" th:if="${status != null}">
 
         <div class="card bg-base-100 shadow">
-            <div class="card-body p-4">
-                <div class="flex items-center gap-3">
-                    <div class="bg-primary/10 p-3 rounded-lg">
+            <div class="card-body">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-base-content/60">DB 활성 문제</p>
+                        <p class="text-3xl font-bold text-primary mt-1" th:text="${status.dbQuestionCount}">0</p>
+                    </div>
+                    <div class="p-3 bg-primary/10 rounded-full">
                         <i data-lucide="database" class="size-6 text-primary"></i>
                     </div>
-                    <div>
-                        <p class="text-xs text-base-content/60">DB 활성 문제</p>
-                        <p class="text-2xl font-bold" th:text="${status.dbQuestionCount}">0</p>
-                    </div>
                 </div>
             </div>
         </div>
 
         <div class="card bg-base-100 shadow">
-            <div class="card-body p-4">
-                <div class="flex items-center gap-3">
-                    <div class="bg-success/10 p-3 rounded-lg">
+            <div class="card-body">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-base-content/60">Qdrant 색인 수</p>
+                        <p class="text-3xl font-bold text-success mt-1" th:text="${status.collectionPointsCount}">0</p>
+                    </div>
+                    <div class="p-3 bg-success/10 rounded-full">
                         <i data-lucide="layers" class="size-6 text-success"></i>
                     </div>
-                    <div>
-                        <p class="text-xs text-base-content/60">Qdrant 색인 수</p>
-                        <p class="text-2xl font-bold" th:text="${status.collectionPointsCount}">0</p>
-                    </div>
                 </div>
             </div>
         </div>
 
         <div class="card bg-base-100 shadow">
-            <div class="card-body p-4">
-                <div class="flex items-center gap-3">
-                    <div th:class="${status.unindexedCount > 0} ? 'bg-error/10 p-3 rounded-lg' : 'bg-base-200 p-3 rounded-lg'">
+            <div class="card-body">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm text-base-content/60">미색인 문제</p>
+                        <!-- 미색인 있을 때만 text-error 추가, font-bold/text-3xl은 항상 유지 -->
+                        <p class="text-3xl font-bold mt-1"
+                           th:classappend="${status.unindexedCount > 0} ? 'text-error' : ''"
+                           th:text="${status.unindexedCount}">0</p>
+                    </div>
+                    <div th:class="${status.unindexedCount > 0} ? 'p-3 bg-error/10 rounded-full' : 'p-3 bg-base-200 rounded-full'">
                         <i data-lucide="alert-triangle"
                            th:class="${status.unindexedCount > 0} ? 'size-6 text-error' : 'size-6 text-base-content/40'"></i>
-                    </div>
-                    <div>
-                        <p class="text-xs text-base-content/60">미색인 문제</p>
-                        <p class="text-2xl font-bold"
-                           th:class="${status.unindexedCount > 0} ? 'text-error' : ''"
-                           th:text="${status.unindexedCount}">0</p>
                     </div>
                 </div>
             </div>
@@ -92,7 +93,7 @@
                 </div>
             </div>
             <p class="text-xs text-base-content/60 mt-1">
-                전체 색인은 DB의 모든 활성 문제를 bge-m3 임베딩 후 Qdrant에 적재합니다.
+                전체 색인은 DB의 모든 활성 문제를 qwen3-embedding:4b 임베딩 후 Qdrant에 적재합니다.
                 문제 수에 따라 수 분이 소요될 수 있습니다.
             </p>
         </div>

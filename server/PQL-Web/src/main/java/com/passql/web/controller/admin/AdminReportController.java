@@ -66,7 +66,7 @@ public class AdminReportController implements AdminReportControllerDocs {
     @PostMapping("/{reportUuid}/resolve")
     public ResponseEntity<Void> resolveReport(
             @PathVariable UUID reportUuid,
-            @RequestHeader("X-Member-UUID") UUID adminMemberUuid,
+            @RequestHeader(value = "X-Member-UUID", required = false) UUID adminMemberUuid,
             @RequestBody ResolveRequest request) {
 
         questionReportService.resolveReport(

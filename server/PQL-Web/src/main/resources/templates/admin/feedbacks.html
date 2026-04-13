@@ -13,13 +13,13 @@
             전체 <span class="ml-1 font-bold" th:text="${feedbacks.totalElements}">0</span>
         </div>
         <div class="badge badge-warning badge-lg">
-            PENDING <span class="ml-1 font-bold" th:text="${pendingCount}">0</span>
+            대기중 <span class="ml-1 font-bold" th:text="${pendingCount}">0</span>
         </div>
         <div class="badge badge-info badge-lg">
-            REVIEWED <span class="ml-1 font-bold" th:text="${reviewedCount}">0</span>
+            검토완료 <span class="ml-1 font-bold" th:text="${reviewedCount}">0</span>
         </div>
         <div class="badge badge-success badge-lg">
-            APPLIED <span class="ml-1 font-bold" th:text="${appliedCount}">0</span>
+            적용됨 <span class="ml-1 font-bold" th:text="${appliedCount}">0</span>
         </div>
         <button class="btn btn-sm btn-ghost ml-auto" onclick="location.reload()">
             <i data-lucide="refresh-cw" class="size-4"></i>새로고침
