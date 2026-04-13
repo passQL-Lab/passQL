@@ -126,6 +126,12 @@
                     </a>
                 </li>
                 <li>
+                    <a th:href="@{/admin/feedbacks}" th:classappend="${currentMenu == 'feedbacks'} ? 'active'">
+                        <i data-lucide="message-circle" class="size-5"></i>
+                        건의사항
+                    </a>
+                </li>
+                <li>
                     <a th:href="@{/admin/settings}" th:classappend="${currentMenu == 'settings'} ? 'active'">
                         <i data-lucide="settings" class="size-5"></i>
                         앱 설정

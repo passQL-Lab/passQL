@@ -101,11 +101,12 @@
                         <th class="w-28">인증</th>
                         <th class="w-28">가입일</th>
                         <th class="w-28">마지막 접속</th>
-                        <th class="w-12">상세</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="m : ${members}">
+                    <tr th:each="m : ${members}"
+                        class="cursor-pointer hover:bg-base-200"
+                        th:onclick="|location.href='/admin/members/' + ${m.memberUuid}|">
                         <td class="text-sm font-medium truncate" th:text="${m.nickname}">닉네임</td>
                         <td>
                             <span class="badge badge-xs"
@@ -118,17 +119,11 @@
                         <td class="text-xs truncate" th:text="${m.authProvider.name()}">ANONYMOUS</td>
                         <td class="text-xs" th:text="${m.createdAt != null ? #temporals.format(m.createdAt, 'yyyy-MM-dd') : '-'}">2026-01-01</td>
                         <td class="text-xs" th:text="${m.lastSeenAt != null ? #temporals.format(m.lastSeenAt, 'yyyy-MM-dd') : '-'}">2026-04-01</td>
-                        <td>
-                            <a th:href="@{/admin/members/{uuid}(uuid=${m.memberUuid})}"
-                               class="btn btn-xs btn-ghost" title="상세">
-                                <i data-lucide="eye" class="size-3"></i>
-                            </a>
-                        </td>
                     </tr>
 
                     <!-- Empty state -->
                     <tr th:if="${members == null or members.isEmpty()}">
-                        <td colspan="7" class="text-center text-base-content/50 py-12">
+                        <td colspan="6" class="text-center text-base-content/50 py-12">
                             <i data-lucide="users" class="size-10 mx-auto mb-2 opacity-40"></i>
                             <p>회원이 없습니다.</p>
                         </td>
