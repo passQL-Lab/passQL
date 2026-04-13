@@ -40,7 +40,7 @@ class QdrantSearchClient:
 
         Args:
             collection: 생성할 컬렉션 이름
-            vector_size: 벡터 차원 수 (bge-m3 기본값 1024)
+            vector_size: 벡터 차원 수 (qwen3-embedding:4b 기본값 2560)
 
         Returns:
             bool: True=신규 생성, False=이미 존재
@@ -223,7 +223,7 @@ class QdrantSearchClient:
             result = data.get("result", {})
             config = result.get("config", {}).get("params", {})
             vectors_config = config.get("vectors", {})
-            # bge-m3 단일 벡터 컬렉션 — vectors 키 없이 바로 size/distance
+            # 단일 벡터 컬렉션 — vectors 키 없이 바로 size/distance
             vector_size = vectors_config.get("size", 0) if isinstance(vectors_config, dict) else 0
             points_count = result.get("points_count", 0)
             status = result.get("status", "unknown")

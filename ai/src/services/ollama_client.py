@@ -15,7 +15,7 @@ class OllamaClient:
 
     ai.suhsaechan.kr 서버의 Ollama API를 호출합니다.
     - chat: qwen2.5:7b 모델로 텍스트 생성
-    - embed: bge-m3 모델로 벡터 임베딩 생성
+    - embed: qwen3-embedding:4b 모델로 벡터 임베딩 생성
     """
 
     def __init__(self):
@@ -97,7 +97,7 @@ class OllamaClient:
         Ollama /api/embed 호출
 
         Args:
-            model: 임베딩 모델명 (예: "bge-m3")
+            model: 임베딩 모델명 (예: "qwen3-embedding:4b")
             text: 임베딩할 텍스트
 
         Returns:

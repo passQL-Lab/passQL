@@ -111,7 +111,7 @@ async def similar(
     유사 문제 검색 (Qdrant 벡터 검색)
 
     question_id에 해당하는 문제와 가장 유사한 k개의 문제를 반환합니다.
-    Qdrant에 저장된 bge-m3 임베딩 벡터를 기반으로 검색합니다.
+    Qdrant에 저장된 qwen3-embedding:4b 임베딩 벡터를 기반으로 검색합니다.
 
     - GET /api/ai/similar/{question_id}?k=3
     - Header: X-API-Key: {AI_SERVER_API_KEY}
@@ -224,7 +224,7 @@ async def index_question(
     _: None = Depends(verify_api_key),
 ):
     """
-    문제 1개를 bge-m3으로 임베딩하여 Qdrant에 적재.
+    문제 1개를 qwen3-embedding:4b으로 임베딩하여 Qdrant에 적재.
 
     문제 등록/수정 시 Java 서버에서 호출한다.
     컬렉션이 없으면 자동 생성된다.

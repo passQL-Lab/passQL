@@ -309,7 +309,7 @@ class AiService:
 
     async def index_question(self, req: IndexQuestionRequest) -> IndexQuestionResponse:
         """
-        문제 1개를 bge-m3으로 임베딩하여 Qdrant passql_questions 컬렉션에 적재.
+        문제 1개를 qwen3-embedding:4b으로 임베딩하여 Qdrant passql_questions 컬렉션에 적재.
 
         컬렉션이 없으면 자동 생성한다.
 
@@ -333,7 +333,7 @@ class AiService:
         existing = await qdrant_search_client.get_vector(self.QUESTION_COLLECTION, req.question_uuid)
         created = existing is None
 
-        # 임베딩 텍스트 생성 → bge-m3으로 임베딩
+        # 임베딩 텍스트 생성 → qwen3-embedding:4b으로 임베딩
         embed_text = self._build_embed_text(req)
         vector = await ollama_client.embed(model=settings.OLLAMA_EMBED_MODEL, text=embed_text)
 

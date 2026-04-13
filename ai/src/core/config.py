@@ -38,7 +38,7 @@ class Settings(BaseSettings):
     OLLAMA_API_URL: str = "https://ai.suhsaechan.kr"
     OLLAMA_API_KEY: str = ""
     OLLAMA_CHAT_MODEL: str = "qwen2.5:7b"
-    OLLAMA_EMBED_MODEL: str = "bge-m3"
+    OLLAMA_EMBED_MODEL: str = "qwen3-embedding:4b"
     OLLAMA_TIMEOUT_SEC: int = 60
 
     # Qdrant 설정 (API 키는 pydantic 우회 — _read_raw로 직접 읽음)
