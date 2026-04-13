@@ -297,7 +297,7 @@ public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
         "WHERE s.member_uuid = CAST(:memberUuid AS uuid) " +
         "  AND s.submitted_at >= :since",
         nativeQuery = true)
-    Object[] findRecentActivityStats(
+    List<Object[]> findRecentActivityStats(
         @Param("memberUuid") String memberUuid,
         @Param("since") LocalDateTime since
     );
