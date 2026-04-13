@@ -1,16 +1,12 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Copy, Check, RefreshCw, WifiOff, ChevronRight } from "lucide-react";
+import { Copy, Check, RefreshCw, ChevronRight } from "lucide-react";
 import { useMemberStore } from "../stores/memberStore";
 import logo from "../assets/logo/logo.png";
 import { useRegenerateNickname } from "../hooks/useMember";
 import { useStagger } from "../hooks/useStagger";
-import { useOnline } from "../hooks/useOnline";
-import { useMyFeedback } from "../hooks/useFeedback";
 import SettingsSection from "../components/SettingsSection";
 import SettingsRow from "../components/SettingsRow";
-import FeedbackForm from "../components/FeedbackForm";
-import FeedbackList from "../components/FeedbackList";
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -20,14 +16,6 @@ export default function Settings() {
   const regenerateMutation = useRegenerateNickname();
   const [copied, setCopied] = useState(false);
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const isOnline = useOnline();
-  // 건의사항 섹션 헤더 카운트 pill용 — FeedbackList 내부와 캐시 공유 (dedup)
-  const { data: feedbackData } = useMyFeedback();
-  const feedbackCount =
-    feedbackData && feedbackData.items.length > 0
-      ? feedbackData.items.length
-      : undefined;
 
   // 개발자 모드 Easter Egg — sessionStorage 복원으로 페이지 재진입 시에도 row 유지
   const [devUnlocked, setDevUnlocked] = useState(() => sessionStorage.getItem("devUnlocked") === "1");
@@ -43,10 +31,9 @@ export default function Settings() {
   const stagger = useStagger();
   const s0 = stagger(0); // h1 "설정"
   const s1 = stagger(1); // 계정 섹션
-  const s2 = stagger(2); // 건의사항 입력 카드
-  const s3 = stagger(3); // 건의사항 목록 카드
-  const s4 = stagger(4); // 앱 정보 섹션
-  const s5 = stagger(5); // 로고 + 카피라이트
+  const s2 = stagger(2); // 건의사항 row
+  const s3 = stagger(3); // 앱 정보 섹션
+  const s4 = stagger(4); // 로고 + 카피라이트
 
   useEffect(() => {
     return () => {
@@ -151,29 +138,23 @@ export default function Settings() {
         </SettingsSection>
       </section>
 
-      {/* ③ 건의사항 섹션 헤더 + 입력 카드 */}
+      {/* ③ 건의사항 섹션 — 서브페이지 진입 row */}
       <section className={`mt-6 ${s2.className}`}>
-        <SettingsSection label="건의사항" count={feedbackCount}>
-          {/* 오프라인 배너 */}
-          {/* border-[#FDE68A]: 토큰 없음 — sem-warning-light(#FEF3C7)의 border 버전 없음 */}
-          {/* text-[#92400E]: 토큰 없음 — sem-warning-text(#D97706)와 다른 딥 앰버 색상 */}
-          {!isOnline && (
-            <div className="flex items-center gap-2.5 px-3.5 py-2.5 bg-sem-warning-light border border-[#FDE68A] rounded-xl text-xs text-[#92400E] mb-2.5">
-              <WifiOff size={14} className="text-sem-warning-text shrink-0" />
-              오프라인 상태예요. 연결되면 다시 시도할 수 있어요.
-            </div>
-          )}
-          <FeedbackForm disabled={!isOnline} />
+        <SettingsSection label="건의사항">
+          <div className="bg-surface-card border border-border rounded-2xl">
+            <SettingsRow
+              label="건의사항"
+              value={<p className="text-body font-medium">의견 남기기</p>}
+              action={<ChevronRight size={16} className="text-text-caption" />}
+              onClick={() => navigate("/settings/feedback")}
+              isLast
+            />
+          </div>
         </SettingsSection>
       </section>
 
-      {/* ④ 건의사항 목록 카드 */}
-      <section className={`mt-3 ${s3.className}`}>
-        <FeedbackList disabled={!isOnline} />
-      </section>
-
-      {/* ⑤ 앱 정보 섹션 */}
-      <section className={`mt-6 ${s4.className}`}>
+      {/* ④ 앱 정보 섹션 */}
+      <section className={`mt-6 ${s3.className}`}>
         <SettingsSection label="앱 정보">
           <div className="bg-surface-card border border-border rounded-2xl">
             <SettingsRow
@@ -196,8 +177,8 @@ export default function Settings() {
         </SettingsSection>
       </section>
 
-      {/* ⑥ 로고 + 카피라이트 */}
-      <section className={`text-center mt-8 space-y-2 ${s5.className}`}>
+      {/* ⑤ 로고 + 카피라이트 */}
+      <section className={`text-center mt-8 space-y-2 ${s4.className}`}>
         <img src={logo} alt="passQL" className="h-5 w-auto mx-auto" />
         <p className="text-xs text-text-caption">© 2026 passQL. All rights reserved.</p>
       </section>
