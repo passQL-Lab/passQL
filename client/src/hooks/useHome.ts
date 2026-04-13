@@ -28,9 +28,11 @@ export function useTodayQuestion() {
 }
 
 export function useRecommendations() {
+  const uuid = useMemberStore((s) => s.uuid);
   return useQuery({
-    queryKey: ["recommendations"],
-    queryFn: () => fetchRecommendations(3),
+    // uuid를 queryKey에 포함 — 로그인 상태 변경 시 자동 재조회
+    queryKey: ["recommendations", uuid],
+    queryFn: () => fetchRecommendations(3, undefined, uuid ?? undefined),
     staleTime: 1000 * 60 * 5,
     retry: false,
   });

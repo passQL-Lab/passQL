@@ -51,10 +51,13 @@ export function fetchTodayQuestion(memberUuid?: string): Promise<TodayQuestionRe
 export function fetchRecommendations(
   size?: number,
   excludeQuestionUuid?: string,
+  memberUuid?: string,
 ): Promise<RecommendationsResponse> {
   const query = new URLSearchParams();
   if (size != null) query.set("size", String(size));
   if (excludeQuestionUuid) query.set("excludeQuestionUuid", excludeQuestionUuid);
+  // AI 개인화 추천을 위해 memberUuid 전달 — 없으면 백엔드가 RANDOM fallback
+  if (memberUuid) query.set("memberUuid", memberUuid);
   const qs = query.toString();
   return apiFetch(`/questions/recommendations${qs ? `?${qs}` : ""}`);
 }
