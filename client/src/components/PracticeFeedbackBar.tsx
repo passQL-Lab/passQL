@@ -84,10 +84,12 @@ export default function PracticeFeedbackBar({
           {/* 액션 버튼 — 두 버튼 있을 때: 다시 풀기(주요 CTA) / 돌아가기(보조) 순서 */}
           <div className="flex gap-3">
             {onSecondary && secondaryLabel && (
-              // 다시 풀기: brand 인디고 solid — 권장 행동임을 강조
+              // 오답 컨텍스트에서 다시 풀기 — 에러 색상으로 구분, 정답이면 인디고 유지
               <button
                 type="button"
-                className="btn-primary flex-1"
+                className={`flex-1 h-11 rounded-lg font-bold text-base text-white transition-opacity hover:opacity-90 ${
+                  isCorrect ? "feedback-bar-next--correct" : "feedback-bar-next--error"
+                }`}
                 onClick={guard(onSecondary)}
               >
                 {secondaryLabel}

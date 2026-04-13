@@ -11,12 +11,10 @@ import {
   ChevronUp,
 } from "lucide-react";
 import { usePracticeStore } from "../stores/practiceStore";
-import { useMemberStore } from "../stores/memberStore";
 import { fetchAiComment } from "../api/progress";
 import MarkdownText from "../components/MarkdownText";
 import ScoreCountUp from "../components/ScoreCountUp";
 import StepNavigator from "../components/StepNavigator";
-import ReportModal from "../components/ReportModal";
 
 function formatDuration(ms: number): string {
   if (!Number.isFinite(ms) || ms <= 0) return "0초";
@@ -45,26 +43,12 @@ export default function PracticeResult() {
   );
   const initialStep = initialStepRef.current;
 
-  // memberStore에서 UUID 읽기 — ReportModal API 인증에 사용
-  const memberUuid = useMemberStore((s) => s.uuid);
-
   const [visibleStats, setVisibleStats] = useState<boolean[]>([
     false,
     false,
     false,
   ]);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
-
-  // 신고 모달 대상 — null이면 모달 닫힘
-  const [reportModalTarget, setReportModalTarget] = useState<{
-    questionUuid: string;
-    submissionUuid: string;
-    choiceSetUuid?: string;
-  } | null>(null);
-  // 신고 완료된 submissionUuid 목록 — 중복 신고 방지
-  const [reportedSubmissions, setReportedSubmissions] = useState<Set<string>>(new Set());
-  // 신고 접수 토스트 표시 여부 — DOM 조작 대신 React 상태로 관리
-  const [showReportToast, setShowReportToast] = useState(false);
 
   // 문제 카드 순차 등장 상태 — 인덱스별 visible 여부
   const [visibleCards, setVisibleCards] = useState<boolean[]>([]);
@@ -74,15 +58,12 @@ export default function PracticeResult() {
   // 타이머를 역할별로 분리 — scoreComplete 타이머와 AI/카드 타이머가 서로 취소하지 않도록
   const scoreTimerIdsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const cardTimerIdsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
-  // 신고 토스트 타이머 — 컴포넌트 언마운트 시 클린업
-  const toastTimerIdRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     store.clearReturnStep();
     return () => {
       scoreTimerIdsRef.current.forEach(clearTimeout);
       cardTimerIdsRef.current.forEach(clearTimeout);
-      if (toastTimerIdRef.current !== null) clearTimeout(toastTimerIdRef.current);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -227,7 +208,7 @@ export default function PracticeResult() {
   // Step2: AI 분석 + 문제별 결과 통합
   // AI 실패 시 뱃지/텍스트 영역 전체 숨김 — 문제 결과만 바로 표시
   const step2 = (
-    <div className="text-left w-full">
+    <div className="text-left w-full px-4">
       {/* AI 성공 시에만 뱃지 + 텍스트 표시 */}
       {aiComment !== false && (
         <>
@@ -280,8 +261,10 @@ export default function PracticeResult() {
                 return (
                   <div
                     key={r.questionUuid}
-                    className={`bg-surface-card border rounded-[10px] overflow-hidden transition-all duration-350 ease-out ${
-                      r.isCorrect ? "border-border" : "border-red-300"
+                    className={`border rounded-[10px] overflow-hidden transition-all duration-350 ease-out ${
+                      r.isCorrect
+                        ? "bg-green-50 border-green-200"
+                        : "bg-red-50 border-red-200"
                     } ${visibleCards[i] ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2"}`}
                   >
                     <button
@@ -290,7 +273,7 @@ export default function PracticeResult() {
                       onClick={() => setOpenIndex(isOpen ? null : i)}
                     >
                       <span
-                        className={`text-sm font-bold w-5 text-center shrink-0 ${r.isCorrect ? "text-green-600" : "text-red-600"}`}
+                        className={`text-sm font-bold w-5 text-center shrink-0 ${r.isCorrect ? "text-green-600" : "text-red-500"}`}
                       >
                         {i + 1}
                       </span>
@@ -301,11 +284,9 @@ export default function PracticeResult() {
                         </p>
                       </div>
                       <div className="flex items-center gap-1.5 shrink-0">
-                        {!r.isCorrect && (
-                          <span className="text-xs font-medium text-red-400">
-                            오답
-                          </span>
-                        )}
+                        <span className={`text-xs font-medium ${r.isCorrect ? "text-green-600" : "text-red-400"}`}>
+                          {r.isCorrect ? "정답" : "오답"}
+                        </span>
                         {isOpen ? (
                           <ChevronUp size={14} className="text-text-caption" />
                         ) : (
@@ -320,7 +301,7 @@ export default function PracticeResult() {
                       className={`grid transition-all duration-300 ease-out ${isOpen ? "grid-rows-[1fr]" : "grid-rows-[0fr]"}`}
                     >
                       <div className="overflow-hidden">
-                        <div className="px-3 pb-3 pt-2 border-t border-border space-y-2">
+                        <div className={`px-3 pb-3 pt-2 border-t space-y-2 ${r.isCorrect ? "border-green-200" : "border-red-200"}`}>
                           <p className="text-sm text-text-secondary leading-relaxed">
                             {q?.stemPreview}
                           </p>
@@ -329,39 +310,19 @@ export default function PracticeResult() {
                           >
                             내 답: {r.selectedChoiceBody}
                           </p>
-                          <div className="flex items-center gap-2">
-                            <Link
-                              to={`/recommendation/${r.questionUuid}`}
-                              state={{
-                                returnPath: `/practice/${sessionId}`,
-                                initialStep: 1,
-                              }}
-                              className="inline-flex items-center gap-1.5 text-xs font-medium text-brand bg-accent-light rounded-md px-3 py-1.5"
-                            >
-                              <RotateCcw size={12} /> 다시 풀기
-                            </Link>
-                            {/* submissionUuid가 있을 때만 신고 버튼 표시 — 제출 실패 건 제외 */}
-                            {r.submissionUuid && memberUuid && (
-                              <button
-                                type="button"
-                                className={`btn btn-ghost btn-xs text-error ${
-                                  reportedSubmissions.has(r.submissionUuid) ? 'opacity-50 cursor-not-allowed' : ''
-                                }`}
-                                disabled={reportedSubmissions.has(r.submissionUuid)}
-                                onClick={() => {
-                                  if (!reportedSubmissions.has(r.submissionUuid!)) {
-                                    setReportModalTarget({
-                                      questionUuid: r.questionUuid,
-                                      submissionUuid: r.submissionUuid!,
-                                      choiceSetUuid: r.choiceSetUuid,
-                                    });
-                                  }
-                                }}
-                              >
-                                {reportedSubmissions.has(r.submissionUuid) ? '신고 완료' : '신고'}
-                              </button>
-                            )}
-                          </div>
+                          {/* 다시 풀기 — 정답/오답 모두 재도전 가능, 색상으로 구분 */}
+                          <Link
+                            to={`/recommendation/${r.questionUuid}`}
+                            state={{
+                              returnPath: `/practice/${sessionId}`,
+                              initialStep: 1,
+                            }}
+                            className={`inline-flex items-center justify-center gap-1.5 w-full text-sm font-bold text-white rounded-lg h-9 mt-1 transition-opacity hover:opacity-90 ${
+                              r.isCorrect ? "bg-green-500" : "bg-red-500"
+                            }`}
+                          >
+                            <RotateCcw size={14} /> 다시 풀기
+                          </Link>
                         </div>
                       </div>
                     </div>
@@ -381,42 +342,13 @@ export default function PracticeResult() {
         key={initialStep}
         steps={[step1, step2]}
         initialStep={initialStep}
-        lastButtonLabel="카테고리 목록으로"
+        lastButtonLabel="태그 목록으로"
         onLastStep={() => {
           store.reset();
           navigate("/questions", { replace: true });
         }}
       />
 
-      {/* 신고 접수 토스트 — React 상태로 마운트/언마운트 */}
-      {showReportToast && (
-        <div className="toast toast-top toast-end z-50">
-          <div className="alert alert-success text-sm">
-            <span>신고를 접수했어요.</span>
-          </div>
-        </div>
-      )}
-
-      {/* 신고 모달 — reportModalTarget이 있을 때만 렌더 */}
-      {reportModalTarget && (
-        <ReportModal
-          questionUuid={reportModalTarget.questionUuid}
-          submissionUuid={reportModalTarget.submissionUuid}
-          choiceSetUuid={reportModalTarget.choiceSetUuid}
-          onClose={() => setReportModalTarget(null)}
-          onSuccess={() => {
-            // 신고 완료 처리 — 해당 submissionUuid를 완료 목록에 추가
-            if (reportModalTarget) {
-              setReportedSubmissions((prev) => new Set([...prev, reportModalTarget.submissionUuid]));
-            }
-            setReportModalTarget(null);
-            // 신고 접수 토스트 표시 (2.5초 후 자동 숨김) — ref로 관리하여 언마운트 시 클린업
-            setShowReportToast(true);
-            if (toastTimerIdRef.current !== null) clearTimeout(toastTimerIdRef.current);
-            toastTimerIdRef.current = setTimeout(() => setShowReportToast(false), 2500);
-          }}
-        />
-      )}
     </div>
   );
 }
