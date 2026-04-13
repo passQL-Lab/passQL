@@ -24,6 +24,7 @@ import com.passql.question.repository.QuestionChoiceSetItemRepository;
 import com.passql.question.repository.QuestionChoiceSetRepository;
 import com.passql.question.repository.QuestionRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
@@ -129,6 +131,10 @@ public class QuestionService {
         return new TodayQuestionResponse(toSummary(question), alreadySolved);
     }
 
+    /**
+     * RANDOM 기반 추천.
+     * memberUuid 없거나 AI 추천 실패 시 호출되는 fallback.
+     */
     public RecommendationsResponse getRecommendations(int size, UUID excludeQuestionUuid) {
         int clamped = Math.max(1, Math.min(size, 5));
         UUID exclude = excludeQuestionUuid;
@@ -142,6 +148,24 @@ public class QuestionService {
                 ? questionRepository.findRandomActiveExcluding(clamped, exclude.toString())
                 : questionRepository.findRandomActive(clamped);
         return new RecommendationsResponse(list.stream().map(this::toSummary).toList());
+    }
+
+    /**
+     * AI 추천 결과(questionUuid 목록)를 받아 QuestionSummary 목록으로 변환.
+     * Application 레이어의 RecommendationService에서 호출한다.
+     */
+    public RecommendationsResponse getRecommendationsByUuids(List<String> questionUuids) {
+        List<Question> questions = questionUuids.stream()
+                .map(uuidStr -> {
+                    try {
+                        return questionRepository.findById(UUID.fromString(uuidStr)).orElse(null);
+                    } catch (IllegalArgumentException e) {
+                        return null;
+                    }
+                })
+                .filter(q -> q != null && Boolean.TRUE.equals(q.getIsActive()))
+                .toList();
+        return new RecommendationsResponse(questions.stream().map(this::toSummary).toList());
     }
 
     public QuestionSummary toSummary(Question q) {

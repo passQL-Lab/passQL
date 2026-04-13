@@ -61,3 +61,34 @@ class GenerateChoiceSetResponse(BaseModel):
 class TestPromptResponse(BaseModel):
     result: str
     elapsed_ms: int
+
+
+# === RAG 기반 개인화 추천 ===
+
+
+class IndexQuestionResponse(BaseModel):
+    """문제 임베딩 적재 결과"""
+    question_uuid: str
+    # 신규 적재이면 True, 기존 덮어쓰기이면 False
+    created: bool
+
+
+class IndexQuestionsBulkResponse(BaseModel):
+    """문제 일괄 적재 결과"""
+    total: int
+    succeeded: int
+    failed: int
+    failed_uuids: list[str] = Field(default_factory=list)
+
+
+class RecommendedQuestion(BaseModel):
+    """추천 문제 단일 항목"""
+    question_uuid: str
+    score: float
+
+
+class RecommendResponse(BaseModel):
+    """개인화 추천 결과"""
+    items: list[RecommendedQuestion]
+    # 쿼리에 사용된 오답 문제 수 (디버깅/로깅용)
+    query_source_count: int

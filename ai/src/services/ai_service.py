@@ -12,6 +12,9 @@ from src.models.ai_request import (
     ExplainErrorRequest,
     GenerateChoiceSetRequest,
     GenerateQuestionFullRequest,
+    IndexQuestionRequest,
+    IndexQuestionsBulkRequest,
+    RecommendRequest,
     TestPromptRequest,
 )
 from src.models.ai_response import (
@@ -20,6 +23,10 @@ from src.models.ai_response import (
     GenerateChoiceSetResponse,
     GenerateQuestionFullResponse,
     GenerationMetadata,
+    IndexQuestionResponse,
+    IndexQuestionsBulkResponse,
+    RecommendedQuestion,
+    RecommendResponse,
     SimilarItem,
     SimilarResponse,
     TestPromptResponse,
@@ -270,6 +277,180 @@ class AiService:
         elapsed_ms = int((time.monotonic() - started) * 1000)
 
         return TestPromptResponse(result=result_text, elapsed_ms=elapsed_ms)
+
+
+    # === RAG 기반 개인화 추천 ===
+
+    # Qdrant 컬렉션명 상수
+    QUESTION_COLLECTION = "passql_questions"
+    # bge-m3 임베딩 차원
+    EMBED_DIM = 1024
+
+    def _build_embed_text(self, req: IndexQuestionRequest) -> str:
+        """
+        문제 임베딩용 텍스트를 조합한다.
+        토픽/서브토픽/난이도/태그/문제 본문 앞 300자를 구조화된 형태로 결합.
+        """
+        topic_path = req.topic_display_name
+        if req.subtopic_display_name:
+            topic_path = f"{req.topic_display_name} > {req.subtopic_display_name}"
+
+        tags_str = ", ".join(req.tag_keys) if req.tag_keys else "없음"
+        stem_preview = req.stem[:300] if len(req.stem) > 300 else req.stem
+
+        return (
+            f"[TOPIC] {topic_path}\n"
+            f"[DIFFICULTY] {req.difficulty}/5\n"
+            f"[TAGS] {tags_str}\n"
+            f"[STEM] {stem_preview}"
+        )
+
+    async def index_question(self, req: IndexQuestionRequest) -> IndexQuestionResponse:
+        """
+        문제 1개를 bge-m3으로 임베딩하여 Qdrant passql_questions 컬렉션에 적재.
+
+        컬렉션이 없으면 자동 생성한다.
+
+        Args:
+            req: IndexQuestionRequest
+
+        Returns:
+            IndexQuestionResponse: 적재 결과 (created 여부)
+
+        Raises:
+            CustomError: 임베딩 생성 또는 Qdrant 저장 실패 시
+        """
+        logger.info(f"[index-question] question_uuid={req.question_uuid}")
+
+        # 컬렉션 없으면 자동 생성
+        await qdrant_search_client.create_collection_if_not_exists(
+            self.QUESTION_COLLECTION, self.EMBED_DIM
+        )
+
+        # 기존 벡터 존재 여부로 created 판단
+        existing = await qdrant_search_client.get_vector(self.QUESTION_COLLECTION, req.question_uuid)
+        created = existing is None
+
+        # 임베딩 텍스트 생성 → bge-m3으로 임베딩
+        embed_text = self._build_embed_text(req)
+        vector = await ollama_client.embed(model=settings.OLLAMA_EMBED_MODEL, text=embed_text)
+
+        # Qdrant upsert (question_uuid를 point_id로 사용)
+        payload = {
+            "question_uuid": req.question_uuid,
+            "topic": req.topic_display_name,
+            "subtopic": req.subtopic_display_name or "",
+            "difficulty": req.difficulty,
+            "tag_keys": req.tag_keys,
+        }
+        await qdrant_search_client.upsert(
+            collection=self.QUESTION_COLLECTION,
+            point_id=req.question_uuid,
+            vector=vector,
+            payload=payload,
+        )
+
+        logger.info(f"[index-question] 적재 완료: question_uuid={req.question_uuid}, created={created}")
+        return IndexQuestionResponse(question_uuid=req.question_uuid, created=created)
+
+    async def index_questions_bulk(self, req: IndexQuestionsBulkRequest) -> IndexQuestionsBulkResponse:
+        """
+        여러 문제를 순차적으로 임베딩 적재 (관리자 전체 재색인용).
+
+        개별 실패는 스킵하고 계속 진행하며 실패 목록을 반환한다.
+
+        Args:
+            req: IndexQuestionsBulkRequest
+
+        Returns:
+            IndexQuestionsBulkResponse: 성공/실패 집계
+
+        Raises:
+            CustomError: 치명적 오류 시
+        """
+        logger.info(f"[index-questions-bulk] 총 {len(req.questions)}개 처리 시작")
+
+        succeeded = 0
+        failed_uuids: list[str] = []
+
+        for q in req.questions:
+            try:
+                await self.index_question(q)
+                succeeded += 1
+            except Exception as e:
+                logger.warning(f"[index-questions-bulk] 개별 실패: question_uuid={q.question_uuid}, err={e}")
+                failed_uuids.append(q.question_uuid)
+
+        logger.info(f"[index-questions-bulk] 완료: succeeded={succeeded}, failed={len(failed_uuids)}")
+        return IndexQuestionsBulkResponse(
+            total=len(req.questions),
+            succeeded=succeeded,
+            failed=len(failed_uuids),
+            failed_uuids=failed_uuids,
+        )
+
+    async def recommend(self, req: RecommendRequest) -> RecommendResponse:
+        """
+        사용자의 최근 오답 문제 벡터를 기반으로 유사 문제를 추천.
+
+        흐름:
+        1. recent_wrong_question_uuids로 Qdrant에서 각 문제의 벡터 조회
+        2. 조회된 벡터들의 평균을 쿼리 벡터로 사용
+        3. solved_question_uuids를 must_not 필터로 Qdrant 검색
+        4. 벡터가 없으면 빈 결과 반환 (Java에서 RANDOM fallback 처리)
+
+        Args:
+            req: RecommendRequest
+
+        Returns:
+            RecommendResponse: 추천 문제 목록
+
+        Raises:
+            CustomError: Qdrant 검색 실패 시
+        """
+        logger.info(
+            f"[recommend] size={req.size}, wrong_count={len(req.recent_wrong_question_uuids)}, "
+            f"solved_count={len(req.solved_question_uuids)}"
+        )
+
+        # 오답 문제 벡터 수집
+        source_vectors: list[list[float]] = []
+        for uuid in req.recent_wrong_question_uuids:
+            vec = await qdrant_search_client.get_vector(self.QUESTION_COLLECTION, uuid)
+            if vec:
+                source_vectors.append(vec)
+
+        # 쿼리에 사용할 오답 벡터가 없으면 빈 결과 — Java에서 RANDOM fallback 적용
+        if not source_vectors:
+            logger.info("[recommend] 쿼리 벡터 없음 — 빈 결과 반환 (Java RANDOM fallback 예정)")
+            return RecommendResponse(items=[], query_source_count=0)
+
+        # 여러 벡터를 단순 평균하여 쿼리 벡터 합성
+        dim = len(source_vectors[0])
+        query_vector = [
+            sum(v[i] for v in source_vectors) / len(source_vectors)
+            for i in range(dim)
+        ]
+
+        # 이미 푼 문제 제외하여 Qdrant 검색
+        results = await qdrant_search_client.search(
+            collection=self.QUESTION_COLLECTION,
+            vector=query_vector,
+            top_k=req.size,
+            must_not_ids=req.solved_question_uuids if req.solved_question_uuids else None,
+        )
+
+        items = [
+            RecommendedQuestion(
+                question_uuid=r["payload"]["question_uuid"],
+                score=r["score"],
+            )
+            for r in results
+            if r.get("payload", {}).get("question_uuid")
+        ]
+
+        logger.info(f"[recommend] 추천 완료: {len(items)}개")
+        return RecommendResponse(items=items, query_source_count=len(source_vectors))
 
 
 # 싱글턴 인스턴스

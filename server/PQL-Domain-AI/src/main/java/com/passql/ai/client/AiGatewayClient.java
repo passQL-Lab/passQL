@@ -103,6 +103,48 @@ public class AiGatewayClient {
     }
 
     // ========================
+    //  indexQuestion
+    // ========================
+
+    /**
+     * 문제 1개를 Qdrant에 임베딩 적재.
+     * 실패해도 문제 등록 흐름에 영향을 주지 않도록 예외를 catch하여 warn 로그만 남긴다.
+     */
+    public IndexQuestionResult indexQuestion(IndexQuestionRequest request) {
+        try {
+            return postToPython("/api/ai/index-question", request, IndexQuestionResult.class);
+        } catch (Exception e) {
+            log.warn("[AiGateway] indexQuestion 실패 (non-critical): questionUuid={}, error={}",
+                    request.questionUuid(), e.getMessage());
+            return null;
+        }
+    }
+
+    /**
+     * 문제 목록을 Qdrant에 일괄 적재 (관리자 전체 재색인용).
+     */
+    public IndexQuestionsBulkResult indexQuestionsBulk(IndexQuestionsBulkRequest request) {
+        return postToPython("/api/ai/index-questions-bulk", request, IndexQuestionsBulkResult.class);
+    }
+
+    // ========================
+    //  recommend
+    // ========================
+
+    /**
+     * 사용자 신호 기반 개인화 문제 추천.
+     * Fallback 없음 — 호출부에서 null 결과 시 RANDOM fallback 처리.
+     */
+    public RecommendResult recommend(RecommendRequest request) {
+        try {
+            return postToPython("/api/ai/recommend", request, RecommendResult.class);
+        } catch (Exception e) {
+            log.warn("[AiGateway] recommend 실패 (RANDOM fallback 예정): error={}", e.getMessage());
+            return null;
+        }
+    }
+
+    // ========================
     //  내부 HTTP 처리
     // ========================
 

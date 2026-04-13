@@ -55,14 +55,16 @@ public interface QuestionControllerDocs {
   @ApiLogs({
       @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 6, description = "추천 문제 조회 API 추가"),
       @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 22, description = "네이티브 쿼리를 exclude 유무 기준 2분기로 분리하여 UUID 바인딩 타입 안전성 확보"),
+      @ApiLog(date = "2026.04.13", author = Author.SUHSAECHAN, issueNumber = 63, description = "memberUuid 파라미터 추가 — RAG 기반 개인화 추천 도입, RecommendationService 위임, 오답 없거나 AI 실패 시 RANDOM fallback"),
   })
-  @Operation(summary = "추천 문제 조회 (랜덤 활성 문제)",
-      description = "활성 문제 풀에서 랜덤 N개 반환. size 기본 3, 최대 5 (초과 시 5로 clamp, 1 미만은 1). " +
-          "excludeQuestionUuid 미지정 시 오늘의 데일리 챌린지 문제를 자동 제외. " +
-          "활성 문제가 size 보다 적으면 가능한 만큼만 반환. 캐싱 없음 (매 호출 새로 섞임).")
+  @Operation(summary = "추천 문제 조회",
+      description = "memberUuid 있으면 RAG 기반 개인화 추천(최근 오답 벡터 평균 → Qdrant 유사도 검색). " +
+          "없거나 오답 기록 없으면 활성 문제 풀에서 RANDOM 추천. " +
+          "size 기본 3, 최대 5. excludeQuestionUuid 미지정 시 오늘의 데일리 챌린지 자동 제외.")
   ResponseEntity<RecommendationsResponse> getRecommendations(
       @RequestParam(defaultValue = "3") int size,
-      @RequestParam(required = false) UUID excludeQuestionUuid
+      @RequestParam(required = false) UUID excludeQuestionUuid,
+      @RequestParam(required = false) UUID memberUuid
   );
 
   @ApiLogs({

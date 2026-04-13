@@ -5,6 +5,10 @@ import com.passql.ai.dto.*;
 import com.passql.common.exception.CustomException;
 import com.passql.common.exception.constant.ErrorCode;
 import com.passql.meta.entity.PromptTemplate;
+import com.passql.meta.entity.Subtopic;
+import com.passql.meta.entity.Topic;
+import com.passql.meta.repository.SubtopicRepository;
+import com.passql.meta.repository.TopicRepository;
 import com.passql.meta.service.PromptService;
 import com.passql.question.constant.ChoiceKind;
 import com.passql.question.constant.ChoiceSetPolicy;
@@ -15,8 +19,10 @@ import com.passql.question.constant.Dialect;
 import com.passql.question.entity.Question;
 import com.passql.question.entity.QuestionChoiceSet;
 import com.passql.question.entity.QuestionChoiceSetItem;
+import com.passql.question.entity.QuestionConceptTag;
 import com.passql.question.repository.QuestionChoiceSetItemRepository;
 import com.passql.question.repository.QuestionChoiceSetRepository;
+import com.passql.question.repository.QuestionConceptTagRepository;
 import com.passql.question.repository.QuestionRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -45,6 +51,9 @@ public class QuestionGenerateService {
     private final QuestionRepository questionRepository;
     private final QuestionChoiceSetRepository choiceSetRepository;
     private final QuestionChoiceSetItemRepository choiceSetItemRepository;
+    private final QuestionConceptTagRepository questionConceptTagRepository;
+    private final TopicRepository topicRepository;
+    private final SubtopicRepository subtopicRepository;
 
     /**
      * AI에게 문제를 생성 요청한다 (저장하지 않음, 관리자 preview 용).
@@ -132,6 +141,10 @@ public class QuestionGenerateService {
                 .build();
         question = questionRepository.saveAndFlush(question);
         log.info("[question-register] saved: questionUuid={}", question.getQuestionUuid());
+
+        // Qdrant 임베딩 적재 (비동기적으로 실패해도 문제 등록 흐름에 영향 없음)
+        indexQuestionAsync(question);
+
         return question;
     }
 
@@ -196,6 +209,53 @@ public class QuestionGenerateService {
 
         log.info("[question-gen] saved: questionUuid={}, seedSetUuid={}",
                 question.getQuestionUuid(), seedSet.getChoiceSetUuid());
+
+        // Qdrant 임베딩 적재 (비동기적으로 실패해도 문제 등록 흐름에 영향 없음)
+        indexQuestionAsync(question);
+
         return question;
+    }
+
+    /**
+     * 문제를 Qdrant에 임베딩 적재한다.
+     * VirtualThread로 실행하여 문제 등록 응답 속도에 영향을 주지 않는다.
+     */
+    private void indexQuestionAsync(Question question) {
+        Thread.startVirtualThread(() -> {
+            try {
+                // 토픽/서브토픽 이름 조회
+                String topicName = topicRepository.findById(question.getTopicUuid())
+                        .map(Topic::getDisplayName)
+                        .orElse("");
+                String subtopicName = question.getSubtopicUuid() != null
+                        ? subtopicRepository.findById(question.getSubtopicUuid())
+                                .map(Subtopic::getDisplayName)
+                                .orElse(null)
+                        : null;
+
+                // 개념 태그 키 목록 조회 — JOIN 쿼리로 N+1 방지
+                List<String> tagKeys = questionConceptTagRepository
+                        .findTagKeysByQuestionUuid(question.getQuestionUuid().toString());
+
+                IndexQuestionRequest req = new IndexQuestionRequest(
+                        question.getQuestionUuid().toString(),
+                        topicName,
+                        subtopicName,
+                        question.getDifficulty(),
+                        tagKeys,
+                        question.getStem() != null ? question.getStem() : ""
+                );
+
+                IndexQuestionResult result = aiGatewayClient.indexQuestion(req);
+                if (result != null) {
+                    log.info("[question-index] Qdrant 적재 완료: questionUuid={}, created={}",
+                            question.getQuestionUuid(), result.created());
+                }
+            } catch (Exception e) {
+                // 인덱싱 실패는 문제 등록 완료에 영향을 주지 않음
+                log.warn("[question-index] Qdrant 적재 실패 (non-critical): questionUuid={}, error={}",
+                        question.getQuestionUuid(), e.getMessage());
+            }
+        });
     }
 }

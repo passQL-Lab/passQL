@@ -1,8 +1,7 @@
-import { createContext, useContext, useRef } from "react";
+import { createContext, isValidElement, useContext, useRef } from "react";
 import ReactMarkdown from "react-markdown";
 
 // 전역 단어 인덱스 카운터 — Context로 커스텀 컴포넌트 간 공유
-// animated=true 시 MarkdownText가 Provider로 감싸고, 각 요소가 ref를 소비
 const WordIndexContext = createContext<{ current: number } | null>(null);
 
 /** 단어를 공백 기준으로 쪼개 <span style="--i: N">단어</span> 배열로 변환 */
@@ -10,9 +9,9 @@ function splitToAnimatedSpans(
   text: string,
   indexRef: { current: number },
 ): React.ReactNode[] {
-  const tokens = text.split(/(\s+)/);
-  return tokens.map((token, i) => {
-    if (/^\s+$/.test(token)) return token;
+  return text.split(/(\s+)/).map((token, i) => {
+    // 공백이거나 빈 문자열은 그대로 — 빈 span 생성 방지
+    if (!token || /^\s+$/.test(token)) return token;
     const idx = indexRef.current++;
     return (
       <span key={i} className="md-word" style={{ "--i": idx } as React.CSSProperties}>
@@ -22,55 +21,69 @@ function splitToAnimatedSpans(
   });
 }
 
-/** children 안의 텍스트 노드를 재귀적으로 추출해 animated span으로 교체 */
-function animateChildren(
+/**
+ * children을 순서대로 순회하며 애니메이션 처리
+ * - string: 단어 단위 span으로 분해
+ * - MdInlineCode element: 코드 전체를 단어 1개로 취급해 md-word span으로 교체
+ *   (MdInlineCode 렌더 시점에 인덱스를 소비하면 순서가 어긋남 — 여기서 미리 처리)
+ * - 그 외 React element: 그대로 반환 (MdStrong 등은 자체적으로 처리)
+ */
+function animateTextNodes(
   children: React.ReactNode,
   indexRef: { current: number },
 ): React.ReactNode {
-  return Array.isArray(children)
-    ? children.map((child) => animateChildren(child, indexRef))
-    : typeof children === "string"
-      ? splitToAnimatedSpans(children, indexRef)
-      : children;
-}
-
-/** animated=true 시 children 텍스트를 단어 단위 fade-in span으로 변환 */
-function useAnimatedChildren(children: React.ReactNode, animated: boolean) {
-  const indexRef = useContext(WordIndexContext);
-  if (!animated || !indexRef) return children;
-  return animateChildren(children, indexRef);
+  if (Array.isArray(children)) {
+    return children.map((child) => animateTextNodes(child, indexRef));
+  }
+  if (typeof children === "string") {
+    return splitToAnimatedSpans(children, indexRef);
+  }
+  if (isValidElement(children)) {
+    const el = children as React.ReactElement<{ children?: React.ReactNode }>;
+    // MdInlineCode: 코드 전체를 단어 1개로 취급
+    // 여기서 인덱스 소비 안 하면 string 처리 후 나중에 렌더되어 순서 역전 발생
+    if (el.type === MdInlineCode) {
+      const idx = indexRef.current++;
+      return (
+        <span key={idx} className="md-word" style={{ "--i": idx } as React.CSSProperties}>
+          {children}
+        </span>
+      );
+    }
+  }
+  return children;
 }
 
 // ── 커스텀 Markdown 요소 컴포넌트 ──────────────────────────────
 
 function MdP({ children }: { children?: React.ReactNode }) {
-  const animated = useContext(WordIndexContext) !== null;
-  const content = useAnimatedChildren(children, animated);
+  const indexRef = useContext(WordIndexContext);
+  const content = indexRef ? animateTextNodes(children, indexRef) : children;
   return <p className="text-body leading-relaxed mb-2 last:mb-0">{content}</p>;
 }
 
 function MdStrong({ children }: { children?: React.ReactNode }) {
-  const animated = useContext(WordIndexContext) !== null;
-  const content = useAnimatedChildren(children, animated);
+  const indexRef = useContext(WordIndexContext);
+  const content = indexRef ? animateTextNodes(children, indexRef) : children;
   return <strong className="font-bold">{content}</strong>;
 }
 
 function MdEm({ children }: { children?: React.ReactNode }) {
-  const animated = useContext(WordIndexContext) !== null;
-  const content = useAnimatedChildren(children, animated);
+  const indexRef = useContext(WordIndexContext);
+  const content = indexRef ? animateTextNodes(children, indexRef) : children;
   return <em className="italic">{content}</em>;
 }
 
 function MdInlineCode({ children }: { children?: React.ReactNode }) {
-  // 인라인 코드는 단어 분해 없이 통째로 — 코드를 쪼개면 의미 손실
+  // 인덱스 소비는 부모(MdP, MdLi 등)의 animateTextNodes에서 처리
+  // 이 컴포넌트는 스타일만 담당
   return (
-    <code className="bg-surface-code px-1 rounded text-xs font-mono">
-      {children}
-    </code>
+    <code className="bg-surface-code px-1 rounded text-xs font-mono">{children}</code>
   );
 }
 
 function MdPre({ children }: { children?: React.ReactNode }) {
+  // 코드 블록은 애니메이션 없이 그대로 — 들여쓰기/포맷 보호
   return (
     <pre className="bg-surface-code rounded-lg px-4 py-3 text-xs leading-relaxed whitespace-pre-wrap wrap-break-word font-mono my-2">
       {children}
@@ -87,8 +100,8 @@ function MdOl({ children }: { children?: React.ReactNode }) {
 }
 
 function MdLi({ children }: { children?: React.ReactNode }) {
-  const animated = useContext(WordIndexContext) !== null;
-  const content = useAnimatedChildren(children, animated);
+  const indexRef = useContext(WordIndexContext);
+  const content = indexRef ? animateTextNodes(children, indexRef) : children;
   return <li className="text-body leading-relaxed">{content}</li>;
 }
 
@@ -119,9 +132,8 @@ export default function MarkdownText({
   animated = false,
   className,
 }: MarkdownTextProps) {
-  // 전역 단어 인덱스 카운터 — ref라서 리렌더 없이 동기 증가
   const indexRef = useRef({ current: 0 });
-  // text가 바뀌면 카운터 초기화 (렌더마다 리셋)
+  // text가 바뀌면 카운터 초기화
   indexRef.current.current = 0;
 
   const content = (
@@ -130,7 +142,6 @@ export default function MarkdownText({
     </div>
   );
 
-  // animated=true 이면 WordIndexContext Provider로 감싸 커스텀 컴포넌트에 카운터 공유
   return animated ? (
     <WordIndexContext.Provider value={indexRef.current}>
       {content}

@@ -11,12 +11,18 @@ from src.models.ai_request import (
     ExplainErrorRequest,
     GenerateChoiceSetRequest,
     GenerateQuestionFullRequest,
+    IndexQuestionRequest,
+    IndexQuestionsBulkRequest,
+    RecommendRequest,
     TestPromptRequest,
 )
 from src.models.ai_response import (
     AiResponse,
     GenerateChoiceSetResponse,
     GenerateQuestionFullResponse,
+    IndexQuestionResponse,
+    IndexQuestionsBulkResponse,
+    RecommendResponse,
     SimilarResponse,
     TestPromptResponse,
 )
@@ -200,4 +206,104 @@ async def test_prompt(
         raise HTTPException(status_code=500, detail=e.message)
     except Exception as e:
         logger.error(f"[test-prompt] 예기치 않은 오류: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="서버 내부 오류가 발생했습니다")
+
+
+# === RAG 기반 개인화 추천 ===
+
+
+@router.post(
+    "/index-question",
+    response_model=IndexQuestionResponse,
+    status_code=200,
+)
+async def index_question(
+    request: IndexQuestionRequest,
+    _: None = Depends(verify_api_key),
+):
+    """
+    문제 1개를 bge-m3으로 임베딩하여 Qdrant에 적재.
+
+    문제 등록/수정 시 Java 서버에서 호출한다.
+    컬렉션이 없으면 자동 생성된다.
+
+    - POST /api/ai/index-question
+    - Header: X-API-Key: {AI_SERVER_API_KEY}
+    - Body: IndexQuestionRequest
+    - 성공: 200 + IndexQuestionResponse
+    """
+    logger.info(f"[index-question] question_uuid={request.question_uuid}")
+    try:
+        return await ai_service.index_question(request)
+    except CustomError as e:
+        logger.error(f"[index-question] 실패: {e.message}")
+        raise HTTPException(status_code=500, detail=e.message)
+    except Exception as e:
+        logger.error(f"[index-question] 예기치 않은 오류: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="서버 내부 오류가 발생했습니다")
+
+
+@router.post(
+    "/index-questions-bulk",
+    response_model=IndexQuestionsBulkResponse,
+    status_code=200,
+)
+async def index_questions_bulk(
+    request: IndexQuestionsBulkRequest,
+    _: None = Depends(verify_api_key),
+):
+    """
+    문제 목록을 일괄 Qdrant 적재 (관리자 전체 재색인용).
+
+    개별 실패는 스킵하고 계속 진행하며 실패 목록을 반환한다.
+
+    - POST /api/ai/index-questions-bulk
+    - Header: X-API-Key: {AI_SERVER_API_KEY}
+    - Body: IndexQuestionsBulkRequest
+    - 성공: 200 + IndexQuestionsBulkResponse
+    """
+    logger.info(f"[index-questions-bulk] 요청 count={len(request.questions)}")
+    try:
+        return await ai_service.index_questions_bulk(request)
+    except CustomError as e:
+        logger.error(f"[index-questions-bulk] 실패: {e.message}")
+        raise HTTPException(status_code=500, detail=e.message)
+    except Exception as e:
+        logger.error(f"[index-questions-bulk] 예기치 않은 오류: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="서버 내부 오류가 발생했습니다")
+
+
+@router.post(
+    "/recommend",
+    response_model=RecommendResponse,
+    status_code=200,
+)
+async def recommend(
+    request: RecommendRequest,
+    _: None = Depends(verify_api_key),
+):
+    """
+    사용자 신호 기반 개인화 문제 추천.
+
+    Java가 Submission DB에서 최근 오답/푼 문제를 집계하여 전달하면
+    Python은 Qdrant 벡터 검색으로 유사 문제를 반환한다.
+    오답 벡터가 없으면 빈 결과 반환 (Java에서 RANDOM fallback 처리).
+
+    - POST /api/ai/recommend
+    - Header: X-API-Key: {AI_SERVER_API_KEY}
+    - Body: RecommendRequest
+    - 성공: 200 + RecommendResponse
+    """
+    logger.info(
+        f"[recommend] size={request.size}, "
+        f"wrong={len(request.recent_wrong_question_uuids)}, "
+        f"solved={len(request.solved_question_uuids)}"
+    )
+    try:
+        return await ai_service.recommend(request)
+    except CustomError as e:
+        logger.error(f"[recommend] 실패: {e.message}")
+        raise HTTPException(status_code=500, detail=e.message)
+    except Exception as e:
+        logger.error(f"[recommend] 예기치 않은 오류: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="서버 내부 오류가 발생했습니다")
