@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Trash2 } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
+import SettingsSection from "../components/SettingsSection";
+import SettingsRow from "../components/SettingsRow";
 
 export default function DevPage() {
   const navigate = useNavigate();
@@ -57,32 +59,31 @@ export default function DevPage() {
       </div>
 
       {/* 콘텐츠 */}
-      <div className="px-4 py-6 max-w-lg mx-auto">
-        <div className="bg-surface-card border border-border rounded-2xl overflow-hidden">
-          {/* localStorage 초기화 row */}
-          <div className="flex items-center justify-between px-5 py-4">
-            <div className="min-w-0 flex-1">
-              <div className="flex items-center gap-2">
-                <Trash2 size={14} className="text-sem-error shrink-0" />
-                <p className="text-sm font-medium text-text-primary">localStorage 초기화</p>
-              </div>
-              <p className="text-xs text-text-secondary mt-0.5">
-                앱 데이터 전체 삭제 후 재시작
-              </p>
-            </div>
-            <button
-              type="button"
-              className={`ml-4 shrink-0 text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors ${
-                confirmClear
-                  ? "bg-sem-error-light border-sem-error text-sem-error-text"
-                  : "bg-surface-card border-sem-error text-sem-error-text hover:bg-sem-error-light"
-              }`}
-              onClick={handleClearStorage}
-            >
-              {confirmClear ? "진짜요?" : "초기화"}
-            </button>
+      <div className="py-6 px-4">
+        <SettingsSection label="개발자 도구" isFirst>
+          <div className="bg-surface-card border border-border rounded-2xl">
+            <SettingsRow
+              label="localStorage 초기화"
+              value={
+                <p className="text-sm text-text-secondary">앱 데이터 전체 삭제 후 재시작</p>
+              }
+              action={
+                <button
+                  type="button"
+                  className={`text-xs font-semibold px-3 py-1.5 rounded-lg border transition-colors ${
+                    confirmClear
+                      ? "bg-sem-error-light border-[#FCA5A5] text-sem-error-text"
+                      : "bg-white border-[#FCA5A5] text-sem-error-text hover:bg-sem-error-light"
+                  }`}
+                  onClick={handleClearStorage}
+                >
+                  {confirmClear ? "진짜요?" : "초기화"}
+                </button>
+              }
+              isLast
+            />
           </div>
-        </div>
+        </SettingsSection>
       </div>
 
       {/* Toast 알림 — 하단 중앙 고정 */}
