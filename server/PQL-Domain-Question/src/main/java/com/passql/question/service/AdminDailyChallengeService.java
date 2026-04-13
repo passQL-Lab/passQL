@@ -84,4 +84,31 @@ public class AdminDailyChallengeService {
         dailyChallengeRepository.findByChallengeDate(date)
                 .ifPresent(dailyChallengeRepository::delete);
     }
+
+    /**
+     * 폴백 결과를 daily_challenge 테이블에 확정 저장한다.
+     * 이미 배정된 날짜는 스킵한다. 활성 문제가 없으면 저장하지 않는다.
+     * 스케줄러와 resolveTodayQuestion() 백업 경로에서 공통으로 사용한다.
+     */
+    @Transactional
+    public void confirmFallback(LocalDate date) {
+        // 이미 배정된 날짜면 스킵
+        if (dailyChallengeRepository.findByChallengeDate(date).isPresent()) {
+            return;
+        }
+
+        List<UUID> active = questionRepository.findActiveUuidsOrderedByCreatedAt();
+        if (active.isEmpty()) {
+            return;
+        }
+
+        long seed = date.toEpochDay();
+        UUID pick = active.get((int) Math.floorMod(seed, active.size()));
+
+        DailyChallenge dc = DailyChallenge.builder()
+                .challengeDate(date)
+                .questionUuid(pick)
+                .build();
+        dailyChallengeRepository.save(dc);
+    }
 }

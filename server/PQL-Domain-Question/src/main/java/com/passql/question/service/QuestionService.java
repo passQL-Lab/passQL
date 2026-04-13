@@ -107,19 +107,31 @@ public class QuestionService {
 
     /**
      * Resolve today's question (from DailyChallenge or deterministic fallback).
+     * 폴백으로 선택된 경우 daily_challenge 테이블에 즉시 저장한다 (스케줄러 실패 백업).
      * Returns null if no active questions exist.
      */
+    @Transactional
     public Question resolveTodayQuestion() {
         DailyChallenge dc = dailyChallengeRepository.findByChallengeDate(LocalDate.now()).orElse(null);
         if (dc != null) {
             return questionRepository.findById(dc.getQuestionUuid()).orElse(null);
         }
+
         List<UUID> active = questionRepository.findActiveUuidsOrderedByCreatedAt();
         if (active.isEmpty()) {
             return null;
         }
+
         long seed = LocalDate.now().toEpochDay();
         UUID pick = active.get((int) Math.floorMod(seed, active.size()));
+
+        // 폴백 결과를 DB에 저장 (스케줄러 실패 시 백업)
+        DailyChallenge fallback = DailyChallenge.builder()
+                .challengeDate(LocalDate.now())
+                .questionUuid(pick)
+                .build();
+        dailyChallengeRepository.save(fallback);
+
         return questionRepository.findById(pick).orElse(null);
     }
 
