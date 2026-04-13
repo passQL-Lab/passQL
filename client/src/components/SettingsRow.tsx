@@ -5,32 +5,31 @@ interface SettingsRowProps {
   readonly value: ReactNode;
   /** 우측 아이콘 버튼 영역 (Copy, RefreshCw 등) */
   readonly action?: ReactNode;
-  /** true이면 하단 border 없음 (카드의 마지막 row) */
-  readonly isLast?: boolean;
   /** 클릭 핸들러 - 제공되면 row 전체가 인터랙티브 */
   readonly onClick?: () => void;
 }
 
 /**
- * 설정 카드 내 단일 row
- * - label: 회색 보조 텍스트
- * - value: 메인 콘텐츠 (ReactNode)
- * - action: 우측 아이콘 버튼 (선택사항)
- * - onClick: 클릭 핸들러 — 제공되면 <button>으로 렌더링 (키보드/스크린리더 접근성)
- *   action에 <button>이 있는 row는 onClick을 사용하지 않아 button-in-button 중첩 방지
+ * 설정 페이지 flat 스타일 row (한 줄 horizontal)
+ * - label: 왼쪽 식별자 (font-medium, primary 색상)
+ * - value: 오른쪽 보조 콘텐츠 (ReactNode — 호출부에서 secondary/caption 색상 지정)
+ * - action: value 우측 아이콘 버튼 (선택사항)
+ * - 구분선은 부모의 divide-y로 처리
  */
-export default function SettingsRow({ label, value, action, isLast, onClick }: SettingsRowProps) {
-  const baseClass = `flex items-center justify-between px-5 py-4 w-full text-left${
-    isLast ? "" : " border-b border-border"
-  }${onClick ? " cursor-pointer hover:bg-surface active:bg-surface transition-colors" : ""}`;
+export default function SettingsRow({ label, value, action, onClick }: SettingsRowProps) {
+  const baseClass = `flex items-center justify-between px-4 py-3.5 w-full text-left${
+    onClick ? " cursor-pointer hover:bg-surface active:bg-surface transition-colors" : ""
+  }`;
 
   const content = (
     <>
-      <div className="min-w-0 flex-1">
-        <p className="text-text-secondary text-sm">{label}</p>
-        <div className="mt-0.5">{value}</div>
+      {/* label: 왼쪽 — flex-1로 value를 오른쪽으로 밀어냄 */}
+      <span className="text-sm font-medium text-text-primary flex-1">{label}</span>
+      {/* value + action: 오른쪽 정렬 */}
+      <div className="flex items-center gap-2 ml-3 shrink-0">
+        {value}
+        {action}
       </div>
-      {action && <div className="ml-3 shrink-0">{action}</div>}
     </>
   );
 

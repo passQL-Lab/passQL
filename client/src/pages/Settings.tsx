@@ -18,7 +18,9 @@ export default function Settings() {
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // 개발자 모드 Easter Egg — sessionStorage 복원으로 페이지 재진입 시에도 row 유지
-  const [devUnlocked, setDevUnlocked] = useState(() => sessionStorage.getItem("devUnlocked") === "1");
+  const [devUnlocked, setDevUnlocked] = useState(
+    () => sessionStorage.getItem("devUnlocked") === "1",
+  );
   const clickCountRef = useRef(0);
   // 2초 안에 5번 클릭하지 않으면 카운터 리셋
   const clickResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -91,11 +93,14 @@ export default function Settings() {
       {/* ② 계정 섹션 */}
       <section className={s1.className}>
         <SettingsSection label="계정" isFirst>
-          <div className="bg-surface-card border border-border rounded-2xl">
+          {/* flat 스타일: 카드 래퍼 없음, divide-y로 row 간 구분선 처리 */}
+          <div className="bg-surface-card border-y border-border divide-y divide-border">
             <SettingsRow
               label="닉네임"
               value={
-                <p className="text-body font-bold">{nickname || uuid.slice(0, 8)}</p>
+                <p className="text-sm font-bold text-text-primary">
+                  {nickname || uuid.slice(0, 8)}
+                </p>
               }
               action={
                 <button
@@ -106,7 +111,11 @@ export default function Settings() {
                       : "text-text-caption hover:text-brand"
                   }`}
                   title="닉네임 재생성"
-                  onClick={() => regenerateMutation.mutate()}
+                  onClick={() =>
+                    regenerateMutation.mutate(undefined, {
+                      onSuccess: () => showToast("닉네임이 변경됐어요"),
+                    })
+                  }
                   disabled={regenerateMutation.isPending}
                 >
                   <RefreshCw size={16} />
@@ -116,61 +125,69 @@ export default function Settings() {
             <SettingsRow
               label="디바이스 ID"
               value={
-                <p className="font-mono text-[13px] text-text-primary">{truncatedUuid}</p>
+                <p className="font-mono text-xs text-text-secondary">
+                  {truncatedUuid}
+                </p>
               }
               action={
                 <button
                   type="button"
-                  className="w-8 h-8 flex items-center justify-center text-text-caption hover:text-brand transition-colors"
+                  className="w-8 h-8 flex items-center justify-center transition-colors"
                   title="복사"
                   onClick={handleCopy}
                 >
+                  {/* copied 상태: 초록 체크, 아이콘에 직접 색상 지정해 wrapper 색상 상속 차단 */}
                   {copied ? (
                     <Check size={16} className="text-sem-success" />
                   ) : (
-                    <Copy size={16} />
+                    <Copy
+                      size={16}
+                      className="text-text-caption hover:text-brand"
+                    />
                   )}
                 </button>
               }
-              isLast
             />
           </div>
         </SettingsSection>
       </section>
 
-      {/* ③ 건의사항 섹션 — 서브페이지 진입 row */}
-      <section className={`mt-6 ${s2.className}`}>
-        <SettingsSection label="건의사항">
-          <div className="bg-surface-card border border-border rounded-2xl">
+      {/* ③ 이용안내 섹션 — 서브페이지 진입 row */}
+      <section className={s2.className}>
+        <SettingsSection label="이용안내">
+          <div className="bg-surface-card border-y border-border divide-y divide-border">
             <SettingsRow
               label="건의사항"
-              value={<p className="text-body font-medium">의견 남기기</p>}
+              value={<p className="text-sm text-text-secondary">의견 남기기</p>}
               action={<ChevronRight size={16} className="text-text-caption" />}
               onClick={() => navigate("/settings/feedback")}
-              isLast
             />
           </div>
         </SettingsSection>
       </section>
 
       {/* ④ 앱 정보 섹션 */}
-      <section className={`mt-6 ${s3.className}`}>
+      <section className={s3.className}>
         <SettingsSection label="앱 정보">
-          <div className="bg-surface-card border border-border rounded-2xl">
+          <div className="bg-surface-card border-y border-border divide-y divide-border">
             <SettingsRow
               label="버전"
-              value={<p className="text-caption">{__APP_VERSION__}</p>}
+              value={
+                <p className="text-sm text-text-caption">{__APP_VERSION__}</p>
+              }
               onClick={devUnlocked ? undefined : handleVersionClick}
-              isLast={!devUnlocked}
             />
             {/* 개발자 모드 row — Easter Egg 잠금 해제 시 노출 */}
             {devUnlocked && (
               <SettingsRow
                 label="개발자 모드"
-                value={<p className="text-caption text-text-secondary">개발자 전용 도구</p>}
-                action={<ChevronRight size={16} className="text-text-caption" />}
+                value={
+                  <p className="text-sm text-text-caption">개발자 전용 도구</p>
+                }
+                action={
+                  <ChevronRight size={16} className="text-text-caption" />
+                }
                 onClick={() => navigate("/dev")}
-                isLast
               />
             )}
           </div>
@@ -178,15 +195,17 @@ export default function Settings() {
       </section>
 
       {/* ⑤ 로고 + 카피라이트 */}
-      <section className={`text-center mt-8 space-y-2 ${s4.className}`}>
+      <section className={`text-center mt-12 space-y-2 ${s4.className}`}>
         <img src={logo} alt="passQL" className="h-5 w-auto mx-auto" />
-        <p className="text-xs text-text-caption">© 2026 passQL. All rights reserved.</p>
+        <p className="text-xs text-text-caption">
+          © 2026 passQL. All rights reserved.
+        </p>
       </section>
 
       {/* Toast 알림 — 하단 중앙 고정 */}
       {toastMsg && (
         <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
-          <div className="bg-toast-bg text-white text-sm px-4 py-3 rounded-lg shadow-lg whitespace-nowrap">
+          <div className="bg-brand text-white text-sm font-medium px-4 py-2.5 rounded-lg shadow-md whitespace-nowrap">
             {toastMsg}
           </div>
         </div>

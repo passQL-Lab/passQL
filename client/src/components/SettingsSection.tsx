@@ -11,27 +11,21 @@ interface SettingsSectionProps {
 }
 
 /**
- * 설정 페이지 섹션 헤더 래퍼
- * - 좌측: text-text-secondary 라벨
- * - 우측: count가 있으면 인디고 pill (홈 화면 패턴과 동일)
+ * 설정 페이지 섹션 헤더 래퍼 (flat 스타일)
+ * - iOS/토스 패턴: 소문자 회색 라벨만, 섹션 간 여백으로 위계 표현
+ * - 기존 카드 elevation 없이 텍스트 라벨 + 구분선으로만 구분
  */
 export default function SettingsSection({
   label,
-  count,
   children,
   isFirst,
   className,
 }: SettingsSectionProps) {
   return (
     <div className={[isFirst ? "" : "mt-6", className ?? ""].filter(Boolean).join(" ")}>
-      <div className="flex items-center gap-2 mb-2 px-0.5">
-        <span className="text-text-secondary text-sm font-medium">{label}</span>
-        {!!count && (
-          <span className="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 bg-brand-light text-brand rounded-full text-[11px] font-bold">
-            {count}
-          </span>
-        )}
-      </div>
+      {/* 소문자 회색 라벨 — iOS 설정 앱 스타일 */}
+      {/* 섹션 라벨 — 아래 여백 8px로 그룹 소유감 확보 */}
+      <p className="text-sm text-text-caption px-1 mb-2">{label}</p>
       {children}
     </div>
   );
