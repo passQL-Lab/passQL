@@ -1,11 +1,28 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-13T11:34:38Z",
-    "currentVersion": "0.0.145",
+    "lastUpdated": "2026-04-13T11:50:22Z",
+    "currentVersion": "0.0.146",
     "projectType": "basic",
-    "totalReleases": 63
+    "totalReleases": 64
   },
   "releases": [
+    {
+      "version": "0.0.146",
+      "project_type": "basic",
+      "date": "2026-04-13",
+      "pr_number": 257,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **Chores**\n  * 프로젝트 버전이 v0.0.146으로 업데이트되었습니다.\n  * 프로덕션 환경 설정 및 배포 구성이 개선되었습니다.",
+      "parsed_changes": {
+        "chores": {
+          "title": "Chores",
+          "items": [
+            "프로젝트 버전이 v0.0.146으로 업데이트되었습니다.",
+            "프로덕션 환경 설정 및 배포 구성이 개선되었습니다."
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.145",
       "project_type": "basic",

@@ -57,12 +57,12 @@ jobs:
           echo "📊 정리 후 디스크 사용량:"
           df -h
 
-      - name: .env 파일 생성
+      - name: .env.prod 파일 생성
         run: |
-          cat > ai/.env << 'EOF'
+          cat > ai/.env.prod << 'EOF'
           ${{ secrets.AI_ENV_FILE }}
           EOF
-          echo "✅ .env 파일이 생성되었습니다"
+          echo "✅ .env.prod 파일이 생성되었습니다"
 
       - name: Docker 빌드환경 설정
         uses: docker/setup-buildx-action@v3

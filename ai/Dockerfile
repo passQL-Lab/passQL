@@ -30,7 +30,7 @@ RUN pip install --no-cache-dir uv
 # 프로젝트 파일 복사
 COPY pyproject.toml ./
 COPY src/ ./src/
-COPY .env ./
+COPY .env.prod .env.prod
 
 # 의존성 설치
 RUN uv pip install --system --no-cache .
