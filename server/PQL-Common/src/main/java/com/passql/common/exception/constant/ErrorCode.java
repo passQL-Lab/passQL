@@ -85,6 +85,11 @@ public enum ErrorCode {
     // === Admin Question Generation (신규: Sub-plan 1) ===
     QUESTION_GENERATE_INPUT_INVALID(HttpStatus.BAD_REQUEST, "문제 생성 입력값이 올바르지 않습니다."),
 
+    // Feedback
+    FEEDBACK_NOT_FOUND(HttpStatus.NOT_FOUND, "건의사항을 찾을 수 없습니다."),
+    FEEDBACK_CONTENT_EMPTY(HttpStatus.BAD_REQUEST, "건의사항 내용을 입력해 주세요."),
+    FEEDBACK_CONTENT_TOO_LONG(HttpStatus.BAD_REQUEST, "건의사항은 500자 이하로 입력해 주세요."),
+
     // === Import/Export ===
     IMPORT_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "한 번에 최대 100건까지 가져올 수 있습니다."),
     EXPORT_NO_DATA(HttpStatus.NOT_FOUND, "내보낼 문제가 없습니다.");

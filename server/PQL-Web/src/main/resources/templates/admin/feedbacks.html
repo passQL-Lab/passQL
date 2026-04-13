@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+
+<th:block layout:fragment="title">건의사항 관리</th:block>
+
+<th:block layout:fragment="content">
+
+    <!-- 요약 배지 -->
+    <div class="flex gap-2 mb-4">
+        <div class="badge badge-neutral badge-lg">
+            전체 <span class="ml-1 font-bold" th:text="${feedbacks.totalElements}">0</span>
+        </div>
+    </div>
+
+    <!-- 건의사항 목록 -->
+    <div class="card bg-base-100 shadow">
+        <div class="card-body p-0">
+            <div class="overflow-x-auto">
+                <table class="table table-sm table-fixed w-full">
+                    <thead>
+                    <tr>
+                        <th class="w-36">회원 UUID</th>
+                        <th class="w-auto">내용</th>
+                        <th class="w-28">상태</th>
+                        <th class="w-28">제출일</th>
+                        <th class="w-48">상태 변경</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="f : ${feedbacks}">
+                        <!-- 회원 UUID — 클릭 시 회원 상세 이동 -->
+                        <td>
+                            <a th:href="@{/admin/members/{uuid}(uuid=${f.memberUuid})}"
+                               class="link link-hover font-mono text-xs"
+                               th:text="${#strings.substring(f.memberUuid.toString(), 0, 8)}">550e8400</a>
+                        </td>
+                        <!-- 내용 — 클릭 시 모달 -->
+                        <td class="max-w-xs">
+                            <span class="cursor-pointer hover:text-primary truncate block"
+                                  th:text="${#strings.length(f.content) > 50 ? #strings.substring(f.content, 0, 50) + '...' : f.content}"
+                                  th:data-uuid="${f.feedbackUuid}"
+                                  th:data-content="${f.content}"
+                                  th:data-member="${f.memberUuid}"
+                                  th:data-status="${f.status}"
+                                  th:data-created="${f.createdAt != null ? #temporals.format(f.createdAt, 'yyyy-MM-dd HH:mm') : '-'}"
+                                  onclick="openModal(this)">내용</span>
+                        </td>
+                        <!-- 상태 배지 -->
+                        <td>
+                            <span class="badge badge-sm"
+                                  th:classappend="${f.status == 'PENDING'} ? 'badge-warning' : (${f.status == 'REVIEWED'} ? 'badge-info' : 'badge-success')"
+                                  th:text="${f.status}">PENDING</span>
+                        </td>
+                        <!-- 제출일 -->
+                        <td class="text-xs"
+                            th:text="${f.createdAt != null ? #temporals.format(f.createdAt, 'yyyy-MM-dd') : '-'}">2026-04-13</td>
+                        <!-- 상태 변경 -->
+                        <td>
+                            <div class="flex gap-1 items-center">
+                                <select class="select select-xs select-bordered w-28"
+                                        th:data-uuid="${f.feedbackUuid}"
+                                        th:id="'select-' + ${f.feedbackUuid}">
+                                    <option th:each="s : ${statuses}"
+                                            th:value="${s.name()}"
+                                            th:text="${s.name()}"
+                                            th:selected="${f.status == s.name()}">PENDING</option>
+                                </select>
+                                <button class="btn btn-xs btn-primary"
+                                        th:data-uuid="${f.feedbackUuid}"
+                                        onclick="updateStatus(this.dataset.uuid)">변경</button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Empty state -->
+                    <tr th:if="${feedbacks == null or feedbacks.isEmpty()}">
+                        <td colspan="5" class="text-center text-base-content/50 py-12">
+                            <i data-lucide="message-circle" class="size-10 mx-auto mb-2 opacity-40"></i>
+                            <p>건의사항이 없습니다.</p>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 페이지네이션 -->
+            <div class="flex justify-center p-4" th:if="${feedbacks != null and feedbacks.totalPages > 1}">
+                <div class="join">
+                    <a th:href="@{/admin/feedbacks(page=${feedbacks.number - 1})}"
+                       class="join-item btn btn-sm"
+                       th:classappend="${feedbacks.first} ? 'btn-disabled'">«</a>
+                    <button class="join-item btn btn-sm btn-active"
+                            th:text="${feedbacks.number + 1} + ' / ' + ${feedbacks.totalPages}">1 / 10</button>
+                    <a th:href="@{/admin/feedbacks(page=${feedbacks.number + 1})}"
+                       class="join-item btn btn-sm"
+                       th:classappend="${feedbacks.last} ? 'btn-disabled'">»</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 내용 확인 모달 -->
+    <dialog id="feedbackModal" class="modal">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg mb-4">건의사항 상세</h3>
+            <div class="space-y-2 text-sm">
+                <div class="flex gap-2">
+                    <span class="text-base-content/60 w-20 shrink-0">회원 UUID</span>
+                    <span id="modalMember" class="font-mono break-all"></span>
+                </div>
+                <div class="flex gap-2">
+                    <span class="text-base-content/60 w-20 shrink-0">상태</span>
+                    <span id="modalStatus"></span>
+                </div>
+                <div class="flex gap-2">
+                    <span class="text-base-content/60 w-20 shrink-0">제출일</span>
+                    <span id="modalCreated"></span>
+                </div>
+                <div class="flex gap-2 mt-3">
+                    <span class="text-base-content/60 w-20 shrink-0">내용</span>
+                    <p id="modalContent" class="whitespace-pre-wrap break-all"></p>
+                </div>
+            </div>
+            <div class="modal-action">
+                <form method="dialog">
+                    <button class="btn btn-sm">닫기</button>
+                </form>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop"><button>close</button></form>
+    </dialog>
+
+</th:block>
+
+<th:block layout:fragment="js">
+    <script>
+        lucide.createIcons();
+
+        function openModal(el) {
+            document.getElementById('modalMember').textContent = el.dataset.member;
+            document.getElementById('modalStatus').textContent = el.dataset.status;
+            document.getElementById('modalCreated').textContent = el.dataset.created;
+            document.getElementById('modalContent').textContent = el.dataset.content;
+            document.getElementById('feedbackModal').showModal();
+        }
+
+        function updateStatus(uuid) {
+            const select = document.getElementById('select-' + uuid);
+            const status = select.value;
+            fetch('/admin/feedbacks/' + uuid + '/status', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: status })
+            }).then(res => {
+                if (res.ok) location.reload();
+                else alert('상태 변경에 실패했습니다.');
+            }).catch(() => alert('네트워크 오류가 발생했습니다.'));
+        }
+    </script>
+</th:block>
+</html>
