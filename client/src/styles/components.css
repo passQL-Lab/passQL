@@ -236,6 +236,139 @@
   padding: 20px;
 }
 
+/* ── 10-1. Report Modal 전용 ── */
+
+/* 신고 카테고리 행 — 기본 */
+.report-category-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.report-category-row:hover {
+  background-color: var(--color-surface);
+}
+
+/* 선택된 행 */
+.report-category-row--selected {
+  background-color: var(--color-sem-error-light);
+}
+
+/* 커스텀 라디오 원 — 기본 */
+.report-radio {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--color-border-muted);
+  background-color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: border-color 150ms ease, background-color 150ms ease;
+}
+
+/* 선택된 라디오 */
+.report-radio--selected {
+  border-color: var(--color-sem-error);
+  background-color: var(--color-sem-error);
+}
+
+/* 라디오 내부 흰 점 */
+.report-radio-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: white;
+}
+
+/* 카테고리 텍스트 — 기본 */
+.report-category-label {
+  font-size: 14px;
+  color: var(--color-text-primary);
+}
+
+/* 선택된 텍스트 */
+.report-category-label--selected {
+  font-size: 14px;
+  color: var(--color-sem-error-text);
+  font-weight: 500;
+}
+
+/* 상세 입력 textarea */
+.report-textarea {
+  width: 100%;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: var(--font-ui);
+  color: var(--color-text-primary);
+  resize: none;
+  outline: none;
+  transition: border-color 150ms ease;
+}
+
+.report-textarea:focus {
+  border-color: var(--color-sem-error);
+}
+
+/* 취소 버튼 — outline 스타일 */
+.btn-cancel {
+  flex: 1;
+  height: 44px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background-color: white;
+  color: var(--color-text-secondary);
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 150ms ease;
+}
+
+.btn-cancel:hover {
+  background-color: var(--color-surface);
+}
+
+.btn-cancel:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* 신고 제출 버튼 */
+.btn-report {
+  flex: 1;
+  height: 44px;
+  border: none;
+  border-radius: 8px;
+  background-color: var(--color-sem-error);
+  color: white;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 150ms ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-report:hover {
+  opacity: 0.9;
+}
+
+.btn-report:disabled {
+  background-color: var(--color-border);
+  color: var(--color-text-caption);
+  cursor: not-allowed;
+}
+
 /* ── Global body ── */
 body {
   font-family: var(--font-ui);

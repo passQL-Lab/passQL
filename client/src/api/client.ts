@@ -71,7 +71,10 @@ export async function apiFetch<T>(
       throw new ApiError(res.status, body);
     }
 
-    const data = (await res.json()) as T;
+    // 204 No Content 또는 body가 없는 201 응답은 JSON 파싱 없이 반환
+    const contentLength = res.headers.get("content-length");
+    const hasBody = res.status !== 204 && contentLength !== "0";
+    const data = hasBody ? ((await res.json()) as T) : (undefined as T);
     log("RES", method, path, data);
     return data;
   } catch (err) {

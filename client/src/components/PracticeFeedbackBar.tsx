@@ -63,8 +63,8 @@ export default function PracticeFeedbackBar({
                 aria-label="문제 신고"
                 className={`w-7 h-7 flex items-center justify-center rounded-full transition-all ${
                   Boolean(isReported)
-                    ? "bg-black/10 opacity-40 cursor-not-allowed"
-                    : "bg-black/10 hover:bg-black/20"
+                    ? `opacity-40 cursor-not-allowed ${isCorrect ? "feedback-bar-icon--correct" : "feedback-bar-icon--error"}`
+                    : `${isCorrect ? "feedback-bar-icon--correct hover:brightness-95" : "feedback-bar-icon--error hover:brightness-95"}`
                 }`}
                 onClick={Boolean(isReported) ? undefined : onReport}
                 disabled={Boolean(isReported)}
