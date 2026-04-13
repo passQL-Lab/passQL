@@ -11,10 +11,12 @@ import {
   ChevronUp,
 } from "lucide-react";
 import { usePracticeStore } from "../stores/practiceStore";
+import { useMemberStore } from "../stores/memberStore";
 import { fetchAiComment } from "../api/progress";
 import { useAiText } from "../hooks/useAiText";
 import ScoreCountUp from "../components/ScoreCountUp";
 import StepNavigator from "../components/StepNavigator";
+import ReportModal from "../components/ReportModal";
 
 function formatDuration(ms: number): string {
   if (!Number.isFinite(ms) || ms <= 0) return "0초";
@@ -43,12 +45,26 @@ export default function PracticeResult() {
   );
   const initialStep = initialStepRef.current;
 
+  // memberStore에서 UUID 읽기 — ReportModal API 인증에 사용
+  const memberUuid = useMemberStore((s) => s.uuid);
+
   const [visibleStats, setVisibleStats] = useState<boolean[]>([
     false,
     false,
     false,
   ]);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  // 신고 모달 대상 — null이면 모달 닫힘
+  const [reportModalTarget, setReportModalTarget] = useState<{
+    questionUuid: string;
+    submissionUuid: string;
+    choiceSetUuid?: string;
+  } | null>(null);
+  // 신고 완료된 submissionUuid 목록 — 중복 신고 방지
+  const [reportedSubmissions, setReportedSubmissions] = useState<Set<string>>(new Set());
+  // 신고 접수 토스트 표시 여부 — DOM 조작 대신 React 상태로 관리
+  const [showReportToast, setShowReportToast] = useState(false);
 
   // 문제 카드 순차 등장 상태 — 인덱스별 visible 여부
   const [visibleCards, setVisibleCards] = useState<boolean[]>([]);
@@ -312,16 +328,39 @@ export default function PracticeResult() {
                           >
                             내 답: {r.selectedChoiceBody}
                           </p>
-                          <Link
-                            to={`/recommendation/${r.questionUuid}`}
-                            state={{
-                              returnPath: `/practice/${sessionId}`,
-                              initialStep: 1,
-                            }}
-                            className="inline-flex items-center gap-1.5 text-xs font-medium text-brand bg-accent-light rounded-md px-3 py-1.5"
-                          >
-                            <RotateCcw size={12} /> 다시 풀기
-                          </Link>
+                          <div className="flex items-center gap-2">
+                            <Link
+                              to={`/recommendation/${r.questionUuid}`}
+                              state={{
+                                returnPath: `/practice/${sessionId}`,
+                                initialStep: 1,
+                              }}
+                              className="inline-flex items-center gap-1.5 text-xs font-medium text-brand bg-accent-light rounded-md px-3 py-1.5"
+                            >
+                              <RotateCcw size={12} /> 다시 풀기
+                            </Link>
+                            {/* submissionUuid가 있을 때만 신고 버튼 표시 — 제출 실패 건 제외 */}
+                            {r.submissionUuid && memberUuid && (
+                              <button
+                                type="button"
+                                className={`btn btn-ghost btn-xs text-error ${
+                                  reportedSubmissions.has(r.submissionUuid) ? 'opacity-50 cursor-not-allowed' : ''
+                                }`}
+                                disabled={reportedSubmissions.has(r.submissionUuid)}
+                                onClick={() => {
+                                  if (!reportedSubmissions.has(r.submissionUuid!)) {
+                                    setReportModalTarget({
+                                      questionUuid: r.questionUuid,
+                                      submissionUuid: r.submissionUuid!,
+                                      choiceSetUuid: r.choiceSetUuid,
+                                    });
+                                  }
+                                }}
+                              >
+                                {reportedSubmissions.has(r.submissionUuid) ? '신고 완료' : '신고'}
+                              </button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -347,6 +386,35 @@ export default function PracticeResult() {
           navigate("/questions", { replace: true });
         }}
       />
+
+      {/* 신고 접수 토스트 — React 상태로 마운트/언마운트 */}
+      {showReportToast && (
+        <div className="toast toast-top toast-end z-50">
+          <div className="alert alert-success text-sm">
+            <span>신고가 접수되었습니다.</span>
+          </div>
+        </div>
+      )}
+
+      {/* 신고 모달 — reportModalTarget이 있을 때만 렌더 */}
+      {reportModalTarget && (
+        <ReportModal
+          questionUuid={reportModalTarget.questionUuid}
+          submissionUuid={reportModalTarget.submissionUuid}
+          choiceSetUuid={reportModalTarget.choiceSetUuid}
+          onClose={() => setReportModalTarget(null)}
+          onSuccess={() => {
+            // 신고 완료 처리 — 해당 submissionUuid를 완료 목록에 추가
+            if (reportModalTarget) {
+              setReportedSubmissions((prev) => new Set([...prev, reportModalTarget.submissionUuid]));
+            }
+            setReportModalTarget(null);
+            // 신고 접수 토스트 표시 (2.5초 후 자동 숨김)
+            setShowReportToast(true);
+            setTimeout(() => setShowReportToast(false), 2500);
+          }}
+        />
+      )}
     </div>
   );
 }
