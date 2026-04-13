@@ -1,11 +1,29 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-13T11:50:22Z",
-    "currentVersion": "0.0.146",
+    "lastUpdated": "2026-04-13T12:07:03Z",
+    "currentVersion": "0.0.147",
     "projectType": "basic",
-    "totalReleases": 64
+    "totalReleases": 65
   },
   "releases": [
+    {
+      "version": "0.0.147",
+      "project_type": "basic",
+      "date": "2026-04-13",
+      "pr_number": 258,
+      "raw_summary": "## Summary by CodeRabbit\n\n* **Chores**\n  * 프로젝트 버전을 v0.0.147로 업데이트했습니다.\n  * 앱의 빌드 번호를 147로 증가시키고 마지막 업데이트 시간을 갱신했습니다.\n  * 버전 관련 모든 설정과 문서가 최신 정보로 동기화되어 시스템 일관성이 유지되었습니다.",
+      "parsed_changes": {
+        "chores": {
+          "title": "Chores",
+          "items": [
+            "프로젝트 버전을 v0.0.147로 업데이트했습니다.",
+            "앱의 빌드 번호를 147로 증가시키고 마지막 업데이트 시간을 갱신했습니다.",
+            "버전 관련 모든 설정과 문서가 최신 정보로 동기화되어 시스템 일관성이 유지되었습니다."
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.146",
       "project_type": "basic",
