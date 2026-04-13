@@ -111,7 +111,11 @@ export default function Settings() {
                       : "text-text-caption hover:text-brand"
                   }`}
                   title="닉네임 재생성"
-                  onClick={() => regenerateMutation.mutate()}
+                  onClick={() =>
+                    regenerateMutation.mutate(undefined, {
+                      onSuccess: () => showToast("닉네임이 변경됐어요"),
+                    })
+                  }
                   disabled={regenerateMutation.isPending}
                 >
                   <RefreshCw size={16} />
@@ -128,14 +132,15 @@ export default function Settings() {
               action={
                 <button
                   type="button"
-                  className="w-8 h-8 flex items-center justify-center text-text-caption hover:text-brand transition-colors"
+                  className="w-8 h-8 flex items-center justify-center transition-colors"
                   title="복사"
                   onClick={handleCopy}
                 >
+                  {/* copied 상태: 초록 체크, 아이콘에 직접 색상 지정해 wrapper 색상 상속 차단 */}
                   {copied ? (
                     <Check size={16} className="text-sem-success" />
                   ) : (
-                    <Copy size={16} />
+                    <Copy size={16} className="text-text-caption hover:text-brand" />
                   )}
                 </button>
               }
