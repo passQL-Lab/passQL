@@ -92,7 +92,13 @@ public enum ErrorCode {
 
     // === Import/Export ===
     IMPORT_LIMIT_EXCEEDED(HttpStatus.BAD_REQUEST, "한 번에 최대 100건까지 가져올 수 있습니다."),
-    EXPORT_NO_DATA(HttpStatus.NOT_FOUND, "내보낼 문제가 없습니다.");
+    EXPORT_NO_DATA(HttpStatus.NOT_FOUND, "내보낼 문제가 없습니다."),
+
+    // Report
+    REPORT_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 신고한 제출입니다."),
+    REPORT_NOT_FOUND(HttpStatus.NOT_FOUND, "신고를 찾을 수 없습니다."),
+    REPORT_ALREADY_RESOLVED(HttpStatus.BAD_REQUEST, "이미 처리된 신고입니다."),
+    REPORT_CHOICE_SET_REQUIRED(HttpStatus.BAD_REQUEST, "선택지 세트 기준 보정은 choiceSetUuid가 필요합니다.");
 
     private final HttpStatus status;
     private final String message;
