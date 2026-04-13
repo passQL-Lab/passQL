@@ -1,11 +1,34 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-13T04:44:36Z",
-    "currentVersion": "0.0.123",
+    "lastUpdated": "2026-04-13T04:50:50Z",
+    "currentVersion": "0.0.125",
     "projectType": "basic",
-    "totalReleases": 51
+    "totalReleases": 52
   },
   "releases": [
+    {
+      "version": "0.0.125",
+      "project_type": "basic",
+      "date": "2026-04-13",
+      "pr_number": 221,
+      "raw_summary": "## Summary by CodeRabbit\n\n# 릴리스 노트\n\n* **Bug Fixes**\n  * 피드백 상태 표시가 \"RESOLVED\"에서 \"APPLIED\"로 변경되었습니다.\n  * 피드백 상태 배지의 스타일이 개선되었습니다.\n\n* **Chores**\n  * 버전이 v0.0.125로 업데이트되었습니다.",
+      "parsed_changes": {
+        "bug_fixes": {
+          "title": "Bug Fixes",
+          "items": [
+            "피드백 상태 표시가 \"RESOLVED\"에서 \"APPLIED\"로 변경되었습니다.",
+            "피드백 상태 배지의 스타일이 개선되었습니다."
+          ]
+        },
+        "chores": {
+          "title": "Chores",
+          "items": [
+            "버전이 v0.0.125로 업데이트되었습니다."
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.123",
       "project_type": "basic",
