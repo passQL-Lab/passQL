@@ -86,10 +86,10 @@ export default function DevPage() {
         </SettingsSection>
       </div>
 
-      {/* Toast 알림 — 하단 중앙 고정 */}
+      {/* Toast 알림 — 하단 중앙 고정 (w-full 없이 내용 너비 기준 중앙 정렬) */}
       {toastMsg && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none px-4 w-full max-w-sm">
-          <div className="bg-toast-bg text-white text-sm px-4 py-3 rounded-lg shadow-lg text-center">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
+          <div className="bg-toast-bg text-white text-sm px-4 py-3 rounded-lg shadow-lg text-center max-w-xs">
             {toastMsg}
           </div>
         </div>
