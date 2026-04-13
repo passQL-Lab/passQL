@@ -144,6 +144,12 @@
                     </a>
                 </li>
                 <li>
+                    <a th:href="@{/admin/embeddings}" th:classappend="${currentMenu == 'embeddings'} ? 'active'">
+                        <i data-lucide="layers" class="size-5"></i>
+                        임베딩 관리
+                    </a>
+                </li>
+                <li>
                     <a th:href="@{/admin/monitor}" th:classappend="${currentMenu == 'monitor'} ? 'active'">
                         <i data-lucide="activity" class="size-5"></i>
                         모니터링
