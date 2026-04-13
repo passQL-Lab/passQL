@@ -336,7 +336,7 @@ export default function PracticeResult() {
   );
 
   return (
-    <div className="h-screen max-w-120 mx-auto px-4 sm:px-0">
+    <div className="h-screen max-w-120 mx-auto px-4">
       <StepNavigator
         key={initialStep}
         steps={[step1, step2]}

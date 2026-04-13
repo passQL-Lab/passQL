@@ -1,11 +1,33 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-12T23:09:03Z",
-    "currentVersion": "0.0.115",
+    "lastUpdated": "2026-04-13T01:34:51Z",
+    "currentVersion": "0.0.116",
     "projectType": "basic",
-    "totalReleases": 47
+    "totalReleases": 48
   },
   "releases": [
+    {
+      "version": "0.0.116",
+      "project_type": "basic",
+      "date": "2026-04-13",
+      "pr_number": 207,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **Chores**\n  * 버전이 v0.0.116으로 업데이트되었습니다.\n\n* **Style**\n  * 버튼 스타일링 및 레이아웃 간격이 개선되었습니다.",
+      "parsed_changes": {
+        "chores": {
+          "title": "Chores",
+          "items": [
+            "버전이 v0.0.116으로 업데이트되었습니다."
+          ]
+        },
+        "style": {
+          "title": "Style",
+          "items": [
+            "버튼 스타일링 및 레이아웃 간격이 개선되었습니다."
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.115",
       "project_type": "basic",
