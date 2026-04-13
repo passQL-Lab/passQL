@@ -1,11 +1,33 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-13T12:45:31Z",
-    "currentVersion": "0.0.148",
+    "lastUpdated": "2026-04-13T12:58:02Z",
+    "currentVersion": "0.0.149",
     "projectType": "basic",
-    "totalReleases": 66
+    "totalReleases": 67
   },
   "releases": [
+    {
+      "version": "0.0.149",
+      "project_type": "basic",
+      "date": "2026-04-13",
+      "pr_number": 264,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새로운 기능**\n  * AI 코멘트 기능이 화면 유형에 따라 맞춤형 인사이트를 제공하도록 개선되었습니다. 통계 화면에서는 최근 활동 요약을, 세션 결과에서는 세션 통계 정보를 포함하여 더욱 관련성 높은 피드백을 제공합니다.\n\n* **기타**\n  * 버전이 v0.0.149로 업데이트되었습니다.",
+      "parsed_changes": {
+        "새로운_기능": {
+          "title": "새로운 기능",
+          "items": [
+            "AI 코멘트 기능이 화면 유형에 따라 맞춤형 인사이트를 제공하도록 개선되었습니다. 통계 화면에서는 최근 활동 요약을, 세션 결과에서는 세션 통계 정보를 포함하여 더욱 관련성 높은 피드백을 제공합니다."
+          ]
+        },
+        "기타": {
+          "title": "기타",
+          "items": [
+            "버전이 v0.0.149로 업데이트되었습니다."
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.148",
       "project_type": "basic",
