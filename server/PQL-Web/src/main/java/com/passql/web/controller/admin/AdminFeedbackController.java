@@ -29,7 +29,7 @@ public class AdminFeedbackController {
                        @RequestParam(defaultValue = "20") int size) {
         int clampedPage = Math.max(0, page);
         int clampedSize = Math.min(Math.max(1, size), 100);
-        Pageable pageable = PageRequest.of(clampedPage, clampedSize, Sort.unsorted());
+        Pageable pageable = PageRequest.of(clampedPage, clampedSize, Sort.unsorted()); // 정렬은 findAllByOrderByCreatedAtDesc 메서드명에서 처리
 
         var statusCounts = feedbackService.countByStatus();
         model.addAttribute("feedbacks", feedbackService.getAllFeedbacks(pageable));

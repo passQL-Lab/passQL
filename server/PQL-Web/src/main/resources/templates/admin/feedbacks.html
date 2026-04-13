@@ -62,7 +62,7 @@
                         <!-- 상태 배지 -->
                         <td>
                             <span class="badge badge-sm"
-                                  th:classappend="${f.status == 'PENDING'} ? 'badge-warning' : (${f.status == 'REVIEWED'} ? 'badge-info' : 'badge-success')"
+                                  th:classappend="${f.status == 'PENDING'} ? 'badge-warning' : (${f.status == 'REVIEWED'} ? 'badge-info' : (${f.status == 'APPLIED'} ? 'badge-success' : 'badge-neutral'))"
                                   th:text="${f.status}">PENDING</span>
                         </td>
                         <!-- 제출일 -->
