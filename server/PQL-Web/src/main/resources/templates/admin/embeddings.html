@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+
+<th:block layout:fragment="title">임베딩 인덱스 관리</th:block>
+
+<th:block layout:fragment="content">
+
+    <!-- Flash 메시지 -->
+    <div th:if="${successMessage}" class="alert alert-success mb-4">
+        <i data-lucide="check-circle" class="size-5"></i>
+        <span th:text="${successMessage}"></span>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-error mb-4">
+        <i data-lucide="alert-circle" class="size-5"></i>
+        <span th:text="${errorMessage}"></span>
+    </div>
+
+    <!-- AI 서버 연결 실패 배너 -->
+    <div th:if="${status == null}" class="alert alert-warning mb-4">
+        <i data-lucide="wifi-off" class="size-5"></i>
+        <span>AI 서버 연결 실패 — 색인 상태를 조회할 수 없습니다. 색인 작업은 정상적으로 실행할 수 있습니다.</span>
+    </div>
+
+    <!-- 상태 카드 3개 -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6" th:if="${status != null}">
+
+        <div class="card bg-base-100 shadow">
+            <div class="card-body p-4">
+                <div class="flex items-center gap-3">
+                    <div class="bg-primary/10 p-3 rounded-lg">
+                        <i data-lucide="database" class="size-6 text-primary"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-base-content/60">DB 활성 문제</p>
+                        <p class="text-2xl font-bold" th:text="${status.dbQuestionCount}">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card bg-base-100 shadow">
+            <div class="card-body p-4">
+                <div class="flex items-center gap-3">
+                    <div class="bg-success/10 p-3 rounded-lg">
+                        <i data-lucide="layers" class="size-6 text-success"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-base-content/60">Qdrant 색인 수</p>
+                        <p class="text-2xl font-bold" th:text="${status.collectionPointsCount}">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card bg-base-100 shadow">
+            <div class="card-body p-4">
+                <div class="flex items-center gap-3">
+                    <div th:class="${status.unindexedCount > 0} ? 'bg-error/10 p-3 rounded-lg' : 'bg-base-200 p-3 rounded-lg'">
+                        <i data-lucide="alert-triangle"
+                           th:class="${status.unindexedCount > 0} ? 'size-6 text-error' : 'size-6 text-base-content/40'"></i>
+                    </div>
+                    <div>
+                        <p class="text-xs text-base-content/60">미색인 문제</p>
+                        <p class="text-2xl font-bold"
+                           th:class="${status.unindexedCount > 0} ? 'text-error' : ''"
+                           th:text="${status.unindexedCount}">0</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- 액션 카드 -->
+    <div class="card bg-base-100 shadow mb-6">
+        <div class="card-body p-4">
+            <div class="flex items-center justify-between">
+                <h3 class="card-title text-base">
+                    <i data-lucide="refresh-cw" class="size-5"></i>
+                    재색인 작업
+                </h3>
+                <div class="flex gap-2">
+                    <!-- 전체 재색인 — form POST 방식 -->
+                    <form th:action="@{/admin/embeddings/index-all}" method="post" id="indexAllForm">
+                        <button type="button" class="btn btn-sm btn-primary gap-2"
+                                onclick="confirmIndexAll()">
+                            <i data-lucide="layers" class="size-4"></i>
+                            전체 색인
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <p class="text-xs text-base-content/60 mt-1">
+                전체 색인은 DB의 모든 활성 문제를 bge-m3 임베딩 후 Qdrant에 적재합니다.
+                문제 수에 따라 수 분이 소요될 수 있습니다.
+            </p>
+        </div>
+    </div>
+
+    <!-- 미색인 문제 목록 -->
+    <div class="card bg-base-100 shadow" th:if="${status != null and !status.unindexedUuids.isEmpty()}">
+        <div class="card-body p-4">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="card-title text-base text-error">
+                    <i data-lucide="alert-triangle" class="size-5"></i>
+                    미색인 문제 목록
+                    <span class="badge badge-error badge-sm" th:text="${status.unindexedCount}">0</span>
+                </h3>
+                <div class="flex items-center gap-2">
+                    <label class="flex items-center gap-2 text-sm cursor-pointer">
+                        <input type="checkbox" class="checkbox checkbox-sm" id="selectAllUnindexed"
+                               onchange="toggleSelectAllUnindexed(this)"/>
+                        전체선택
+                    </label>
+                    <button class="btn btn-sm btn-warning gap-2" id="indexSelectedBtn"
+                            onclick="indexSelectedUnindexed()" disabled>
+                        <i data-lucide="zap" class="size-4"></i>
+                        선택 색인
+                    </button>
+                </div>
+            </div>
+
+            <div class="overflow-x-auto max-h-96">
+                <table class="table table-sm table-pin-rows">
+                    <thead>
+                    <tr>
+                        <th class="w-10">
+                            <input type="checkbox" class="checkbox checkbox-sm" id="selectAllUnindexed2"
+                                   onchange="toggleSelectAllUnindexed(this)"/>
+                        </th>
+                        <th>문제 UUID</th>
+                    </tr>
+                    </thead>
+                    <tbody id="unindexedTableBody">
+                    <tr th:each="uuid : ${status.unindexedUuids}">
+                        <td>
+                            <input type="checkbox" class="checkbox checkbox-sm unindexed-checkbox"
+                                   th:data-uuid="${uuid}"
+                                   onchange="onUnindexedCheckboxChange()"/>
+                        </td>
+                        <td class="font-mono text-xs" th:text="${uuid}">uuid</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 미색인 없음 상태 -->
+    <div class="card bg-base-100 shadow" th:if="${status != null and status.unindexedUuids.isEmpty()}">
+        <div class="card-body p-6 items-center text-center">
+            <i data-lucide="check-circle" class="size-12 text-success mb-2"></i>
+            <p class="text-base font-semibold">모든 문제가 색인되어 있습니다.</p>
+            <p class="text-sm text-base-content/60">DB와 Qdrant 색인이 동기화된 상태입니다.</p>
+        </div>
+    </div>
+
+    <!-- 전체 색인 확인 모달 -->
+    <dialog id="confirmModal" class="modal">
+        <div class="modal-box">
+            <h3 class="font-bold text-lg">전체 색인 확인</h3>
+            <p class="py-4">모든 활성 문제를 Qdrant에 재색인합니다. 계속하시겠습니까?</p>
+            <div class="modal-action">
+                <button class="btn btn-ghost" onclick="document.getElementById('confirmModal').close()">취소</button>
+                <button class="btn btn-primary" onclick="document.getElementById('indexAllForm').submit()">색인 시작</button>
+            </div>
+        </div>
+        <form method="dialog" class="modal-backdrop">
+            <button>닫기</button>
+        </form>
+    </dialog>
+
+    <!-- 선택 색인 결과 토스트 -->
+    <div id="toast" class="toast toast-end hidden z-50">
+        <div id="toastAlert" class="alert alert-success">
+            <span id="toastMessage"></span>
+        </div>
+    </div>
+
+</th:block>
+
+<th:block layout:fragment="js">
+    <script>
+        lucide.createIcons();
+
+        function confirmIndexAll() {
+            document.getElementById('confirmModal').showModal();
+        }
+
+        function toggleSelectAllUnindexed(checkbox) {
+            // 두 전체선택 체크박스를 동기화
+            document.getElementById('selectAllUnindexed').checked = checkbox.checked;
+            document.getElementById('selectAllUnindexed2').checked = checkbox.checked;
+            document.querySelectorAll('.unindexed-checkbox').forEach(cb => {
+                cb.checked = checkbox.checked;
+            });
+            updateIndexSelectedBtn();
+        }
+
+        function onUnindexedCheckboxChange() {
+            const all = document.querySelectorAll('.unindexed-checkbox');
+            const checked = document.querySelectorAll('.unindexed-checkbox:checked');
+            const allChecked = all.length > 0 && all.length === checked.length;
+            document.getElementById('selectAllUnindexed').checked = allChecked;
+            document.getElementById('selectAllUnindexed2').checked = allChecked;
+            updateIndexSelectedBtn();
+        }
+
+        function updateIndexSelectedBtn() {
+            const count = document.querySelectorAll('.unindexed-checkbox:checked').length;
+            const btn = document.getElementById('indexSelectedBtn');
+            btn.disabled = count === 0;
+        }
+
+        function indexSelectedUnindexed() {
+            const uuids = Array.from(document.querySelectorAll('.unindexed-checkbox:checked'))
+                .map(cb => cb.dataset.uuid);
+
+            if (uuids.length === 0) return;
+
+            const btn = document.getElementById('indexSelectedBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loading loading-spinner loading-xs"></span> 색인 중...';
+
+            fetch('/admin/embeddings/index-selected', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({uuids: uuids})
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.error) {
+                    showToast('오류: ' + data.error, 'error');
+                } else {
+                    showToast(`색인 완료: ${data.succeeded}개 성공, ${data.failed}개 실패`, 'success');
+                    // 성공 시 3초 후 페이지 새로고침으로 상태 갱신
+                    setTimeout(() => location.reload(), 2000);
+                }
+            })
+            .catch(err => {
+                showToast('요청 실패: ' + err.message, 'error');
+                btn.disabled = false;
+                btn.innerHTML = '<i data-lucide="zap" class="size-4"></i> 선택 색인';
+                lucide.createIcons();
+            });
+        }
+
+        function showToast(message, type) {
+            const toast = document.getElementById('toast');
+            const alert = document.getElementById('toastAlert');
+            const msg = document.getElementById('toastMessage');
+            alert.className = 'alert ' + (type === 'error' ? 'alert-error' : 'alert-success');
+            msg.textContent = message;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 4000);
+        }
+    </script>
+</th:block>
+</html>
