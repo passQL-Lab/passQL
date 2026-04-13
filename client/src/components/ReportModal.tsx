@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { submitReport, ReportCategory } from "../api/reports";
+import { submitReport } from "../api/reports";
+import type { ReportCategory } from "../api/reports";
 import { useMemberStore } from "../stores/memberStore";
 
 interface ReportModalProps {
