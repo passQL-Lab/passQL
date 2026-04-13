@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { CheckSquare, BarChart2, Zap, HelpCircle } from "lucide-react";
 import { useProgress } from "../hooks/useProgress";
 import { fetchTopicAnalysis, fetchAiComment } from "../api/progress";
+import { useMemberStore } from "../stores/memberStore";
 import ErrorFallback from "../components/ErrorFallback";
 import StatsAnalysisCard from "../components/StatsAnalysisCard";
 import StatsRadarChart from "../components/StatsRadarChart";
@@ -89,6 +90,8 @@ function ReadinessPopover({
 export default function Stats() {
   const [readinessPopoverOpen, setReadinessPopoverOpen] = useState(false);
   const readinessBtnRef = useRef<HTMLButtonElement>(null);
+  // UUID 없이 호출하면 400이므로 enabled 가드 필수
+  const uuid = useMemberStore((s) => s.uuid);
 
   const {
     data: progress,
@@ -99,15 +102,17 @@ export default function Stats() {
 
   // 토픽별 정답률/풀이 수 (레이더·리스트)
   const { data: topicAnalysis } = useQuery({
-    queryKey: ["topicAnalysis"],
+    queryKey: ["topicAnalysis", uuid],
     queryFn: fetchTopicAnalysis,
+    enabled: !!uuid,
     staleTime: 1000 * 60 * 5,
   });
 
   // AI 코멘트 — Stats 페이지는 세션 무관 전체 분석이므로 sessionUuid 빈 문자열 전달
   const { data: aiComment, isLoading: aiCommentLoading } = useQuery({
-    queryKey: ["aiComment"],
+    queryKey: ["aiComment", uuid],
     queryFn: () => fetchAiComment(),
+    enabled: !!uuid,
     staleTime: 1000 * 60 * 60,
   });
 
