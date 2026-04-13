@@ -265,7 +265,7 @@ export default function PracticeSet() {
       {showReportToast && (
         <div className="toast toast-top toast-end z-50">
           <div className="alert alert-success text-sm">
-            <span>신고가 접수되었습니다.</span>
+            <span>신고했어요.</span>
           </div>
         </div>
       )}
