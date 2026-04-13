@@ -62,6 +62,10 @@ public class FeedbackService {
             .map(FeedbackAdminResponse::from);
     }
 
+    public long countByStatus(FeedbackStatus status) {
+        return feedbackRepository.countByStatus(status);
+    }
+
     @Transactional
     public void updateStatus(UUID feedbackUuid, FeedbackStatus status) {
         Feedback feedback = feedbackRepository.findById(feedbackUuid)

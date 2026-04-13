@@ -7,11 +7,23 @@
 
 <th:block layout:fragment="content">
 
-    <!-- 요약 배지 -->
-    <div class="flex gap-2 mb-4">
+    <!-- 요약 배지 + 새로고침 -->
+    <div class="flex items-center gap-2 mb-4">
         <div class="badge badge-neutral badge-lg">
             전체 <span class="ml-1 font-bold" th:text="${feedbacks.totalElements}">0</span>
         </div>
+        <div class="badge badge-warning badge-lg">
+            PENDING <span class="ml-1 font-bold" th:text="${pendingCount}">0</span>
+        </div>
+        <div class="badge badge-info badge-lg">
+            REVIEWED <span class="ml-1 font-bold" th:text="${reviewedCount}">0</span>
+        </div>
+        <div class="badge badge-success badge-lg">
+            RESOLVED <span class="ml-1 font-bold" th:text="${resolvedCount}">0</span>
+        </div>
+        <button class="btn btn-sm btn-ghost ml-auto" onclick="location.reload()">
+            <i data-lucide="refresh-cw" class="size-4"></i>새로고침
+        </button>
     </div>
 
     <!-- 건의사항 목록 -->

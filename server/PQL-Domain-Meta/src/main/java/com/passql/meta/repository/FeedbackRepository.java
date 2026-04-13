@@ -1,5 +1,6 @@
 package com.passql.meta.repository;
 
+import com.passql.meta.constant.FeedbackStatus;
 import com.passql.meta.entity.Feedback;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,4 +14,6 @@ public interface FeedbackRepository extends JpaRepository<Feedback, UUID> {
     List<Feedback> findByMemberUuidOrderByCreatedAtDesc(UUID memberUuid);
 
     Page<Feedback> findAllByOrderByCreatedAtDesc(Pageable pageable);
+
+    long countByStatus(FeedbackStatus status);
 }
