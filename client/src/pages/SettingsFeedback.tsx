@@ -29,7 +29,7 @@ export default function SettingsFeedback() {
       </div>
 
       {/* 콘텐츠 */}
-      <div className="px-4 py-6 w-full max-w-lg mx-auto space-y-3">
+      <div className="py-6 px-4 space-y-3">
         {/* 오프라인 배너 */}
         {!isOnline && (
           <div className="flex items-center gap-2.5 px-3.5 py-2.5 bg-sem-warning-light border border-[#FDE68A] rounded-xl text-xs text-[#92400E]">
