@@ -10,12 +10,17 @@ interface FeedbackListProps {
   readonly disabled?: boolean;
 }
 
-/** ISO 8601 → 날짜 구분선 표시 텍스트 */
+/** ISO 8601 → 날짜 구분선 표시 텍스트 (로컬 캘린더 날짜 기준) */
 function getDateLabel(isoString: string): string {
-  const diffDays = Math.floor(
-    (Date.now() - new Date(isoString).getTime()) / 86_400_000
-  );
-  if (diffDays === 0) return "오늘";
+  const date = new Date(isoString);
+  if (isNaN(date.getTime())) return "";
+  // 경과 밀리초 비교는 자정 경계에서 틀어짐 → 로컬 00:00 기준으로 비교
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const target = new Date(date);
+  target.setHours(0, 0, 0, 0);
+  const diffDays = Math.round((today.getTime() - target.getTime()) / 86_400_000);
+  if (diffDays <= 0) return "오늘";
   if (diffDays === 1) return "어제";
   if (diffDays < 7) return `${diffDays}일 전`;
   return `${Math.floor(diffDays / 7)}주 전`;

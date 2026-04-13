@@ -27,11 +27,17 @@ function formatBubbleTime(isoString: string): string {
 }
 
 /**
- * ISO 8601 → "YYYY-MM-DD" 날짜 키 (날짜 구분선 비교용)
+ * ISO 8601 → "YYYY-MM-DD" 로컬 날짜 키 (날짜 구분선 비교용)
+ * ISO 문자열 직접 슬라이스는 UTC 기준이라 로컬 자정과 어긋남.
  * FeedbackList에서 import해서 사용한다.
  */
 export function toDateKey(isoString: string): string {
-  return isoString.slice(0, 10);
+  const d = new Date(isoString);
+  if (isNaN(d.getTime())) return "";
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
 }
 
 interface FeedbackItemProps {
