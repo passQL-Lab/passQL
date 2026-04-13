@@ -47,10 +47,21 @@ export function useSelectedSchedule() {
   });
 }
 
+/** 로컬 타임존 기준 YYYY-MM-DD 반환 — toISOString()은 UTC 기준이라 KST에서 날짜 밀림 발생 */
+function toLocalDateStr(date: Date): string {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
 export function useHeatmap() {
   const uuid = useMemberStore((s) => s.uuid);
-  const today = new Date().toISOString().slice(0, 10);
-  const from = new Date(Date.now() - 29 * 86400000).toISOString().slice(0, 10);
+  const now = new Date();
+  const today = toLocalDateStr(now);
+  const fromDate = new Date(now);
+  fromDate.setDate(fromDate.getDate() - 29);
+  const from = toLocalDateStr(fromDate);
   return useQuery({
     queryKey: ["heatmap", uuid, from, today],
     queryFn: () => fetchHeatmap(uuid, from, today),

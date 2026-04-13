@@ -60,12 +60,15 @@ function ReadinessPopover({
       </p>
       <div className="flex flex-col gap-1.5">
         {[
-          { label: "정답률", value: readiness.accuracy },
-          { label: "범위", value: readiness.coverage },
-          { label: "꾸준함", value: readiness.recency },
+          { label: "맞힌 비율",  value: readiness.accuracy },
+          { label: "공부 범위",  value: readiness.coverage },
+          { label: "꾸준함",     value: readiness.recency },
+          { label: "난이도 도전", value: readiness.difficulty },
+          { label: "오답 복습",  value: readiness.retry },
+          { label: "고른 학습",  value: readiness.spread },
         ].map(({ label, value }) => (
           <div key={label} className="flex items-center gap-2">
-            <span className="text-[11px] text-gray-400 w-12 shrink-0">{label}</span>
+            <span className="text-[11px] text-gray-400 w-16 shrink-0">{label}</span>
             <div className="flex-1 h-1 bg-white/15 rounded-full overflow-hidden">
               <div
                 className="h-full bg-brand-medium rounded-full [width:var(--bar-w)]"

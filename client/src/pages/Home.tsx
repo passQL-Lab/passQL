@@ -290,11 +290,11 @@ export default function Home() {
             )}
           </p>
           <div className="flex gap-4 mt-3 text-xs text-text-caption">
-            <span>정확도 {Math.round(progress.readiness.accuracy * 100)}%</span>
+            <span>맞힌 비율 {Math.round(progress.readiness.accuracy * 100)}%</span>
             <span>
-              커버리지 {Math.round(progress.readiness.coverage * 100)}%
+              공부 범위 {Math.round(progress.readiness.coverage * 100)}%
             </span>
-            <span>최근도 {Math.round(progress.readiness.recency * 100)}%</span>
+            <span>꾸준함 {Math.round(progress.readiness.recency * 100)}%</span>
           </div>
         </section>
       ) : (

@@ -8,6 +8,7 @@ import com.passql.question.entity.Question;
 import com.passql.question.repository.DailyChallengeRepository;
 import com.passql.question.repository.QuestionRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -83,5 +84,38 @@ public class AdminDailyChallengeService {
     public void unassign(LocalDate date) {
         dailyChallengeRepository.findByChallengeDate(date)
                 .ifPresent(dailyChallengeRepository::delete);
+    }
+
+    /**
+     * 폴백 결과를 daily_challenge 테이블에 확정 저장한다.
+     * 이미 배정된 날짜는 스킵한다. 활성 문제가 없으면 저장하지 않는다.
+     * DailyChallengeScheduler(자정 cron)에서 호출한다.
+     */
+    @Transactional
+    public void confirmFallback(LocalDate date) {
+        // 이미 배정된 날짜면 스킵
+        if (dailyChallengeRepository.findByChallengeDate(date).isPresent()) {
+            return;
+        }
+
+        List<UUID> active = questionRepository.findActiveUuidsOrderedByCreatedAt();
+        if (active.isEmpty()) {
+            return;
+        }
+
+        long seed = date.toEpochDay();
+        UUID pick = active.get((int) Math.floorMod(seed, active.size()));
+
+        try {
+            // saveAndFlush: 트랜잭션 커밋 전에 즉시 flush하여 UNIQUE 위반을 여기서 감지
+            dailyChallengeRepository.saveAndFlush(
+                    DailyChallenge.builder()
+                            .challengeDate(date)
+                            .questionUuid(pick)
+                            .build()
+            );
+        } catch (DataIntegrityViolationException ignored) {
+            // 동시 호출로 다른 스레드가 먼저 저장 완료 — 결정론적 알고리즘이므로 동일한 pick 사용
+        }
     }
 }

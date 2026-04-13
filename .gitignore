@@ -95,3 +95,6 @@ coverage/
 
 # superpowers
 .superpowers/brainstorm
+
+# git worktrees
+.worktrees/

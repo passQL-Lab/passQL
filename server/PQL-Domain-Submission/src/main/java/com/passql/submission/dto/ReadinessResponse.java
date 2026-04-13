@@ -5,16 +5,18 @@ import com.passql.submission.readiness.ToneKey;
 import java.time.LocalDateTime;
 
 /**
- * 합격 준비도(Readiness) 응답 블록.
+ * 합격 준비도(Readiness) 응답 블록 (v2).
  *
- * 산식의 3요소(정답률/커버리지/최신성)와 원본 카운트를 투명하게 공개한다.
- * FE는 (toneKey, scoreBand) 조합으로 카피를 선택한다.
+ * 6요소 원본값을 모두 공개해 FE가 팝오버에서 드릴다운할 수 있게 한다.
  */
 public record ReadinessResponse(
     double score,
     double accuracy,
     double coverage,
     double recency,
+    double difficulty,
+    double retry,
+    double spread,
     LocalDateTime lastStudiedAt,
     int recentAttemptCount,
     int coveredTopicCount,

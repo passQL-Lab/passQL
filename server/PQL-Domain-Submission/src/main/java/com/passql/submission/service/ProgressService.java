@@ -23,9 +23,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -47,7 +51,7 @@ public class ProgressService {
         Double rateRaw = submissionRepository.calculateCorrectRateByMemberUuid(memberUuid.toString());
         double correctRate = rateRaw == null ? 0.0 : Math.round(rateRaw * 100.0) / 100.0;
         int streakDays = StreakCalculator.calculate(
-            submissionRepository.findSubmissionDatesByMemberUuid(memberUuid)
+            submissionRepository.findSubmissionDatesByMemberUuid(memberUuid.toString())
         );
 
         ReadinessResponse readiness = buildReadiness(memberUuid);
@@ -56,7 +60,8 @@ public class ProgressService {
     }
 
     private ReadinessResponse buildReadiness(UUID memberUuid) {
-        LocalDate today = LocalDate.now();
+        // KST 기준 오늘 날짜 — 서버 컨테이너의 기본 타임존(UTC)에 의존하지 않도록 명시
+        LocalDate today = LocalDate.now(ReadinessConstants.ZONE);
 
         // 최근 N개 시도 (정답 여부 + 시각) — 단일 쿼리
         List<RecentAttemptProjection> recentAttempts = submissionRepository.findRecentAttemptsByMemberUuid(
@@ -77,19 +82,44 @@ public class ProgressService {
 
         int activeTopicCount = topicRepository.findByIsActiveTrueOrderBySortOrderAsc().size();
 
-        LocalDateTime since = today
-            .minusDays(ReadinessConstants.COVERAGE_WINDOW_DAYS)
-            .atStartOfDay();
+        // KST 자정을 UTC LocalDateTime으로 변환 — atStartOfDay()만 쓰면 UTC 자정으로 DB 전달되어 9시간 오차 발생
+        LocalDateTime since = ZonedDateTime.of(
+                today.minusDays(ReadinessConstants.COVERAGE_WINDOW_DAYS).atStartOfDay(),
+                ReadinessConstants.ZONE
+            ).withZoneSameInstant(ZoneOffset.UTC)
+            .toLocalDateTime();
         long coveredLong = submissionRepository.countDistinctRecentActiveTopicsByMemberUuid(
             memberUuid.toString(), since
         );
         int coveredTopicCount = (int) coveredLong;
+
+        // Difficulty — 최근 50문제 평균 난이도
+        Double avgDifficulty = submissionRepository.findAvgDifficultyOfRecentAttempts(
+            memberUuid.toString(), ReadinessConstants.RECENT_ATTEMPT_WINDOW
+        );
+
+        // Retry — 전체 이력 기반 오답 복습 비율
+        long wrongCount   = submissionRepository.countDistinctWrongQuestions(memberUuid.toString());
+        long retriedCount = submissionRepository.countRetriedAndCorrectQuestions(memberUuid.toString());
+
+        // Spread — 최근 14일 토픽별 제출 카운트 → Map으로 변환
+        List<Object[]> topicRows = submissionRepository.findTopicSubmissionCountsAfter(
+            memberUuid.toString(), since
+        );
+        Map<String, Long> topicCountMap = new HashMap<>();
+        for (Object[] row : topicRows) {
+            topicCountMap.put((String) row[0], ((Number) row[1]).longValue());
+        }
 
         ReadinessCalculator.ReadinessResult result = ReadinessCalculator.calculate(
             recentFlags,
             lastStudiedDate,
             coveredTopicCount,
             activeTopicCount,
+            topicCountMap,
+            wrongCount,
+            retriedCount,
+            avgDifficulty,
             today
         );
 
@@ -107,6 +137,9 @@ public class ProgressService {
             result.accuracy(),
             result.coverage(),
             result.recency(),
+            result.difficulty(),
+            result.retry(),
+            result.spread(),
             lastStudiedAt,
             result.recentAttemptCount(),
             coveredTopicCount,
@@ -121,7 +154,8 @@ public class ProgressService {
             throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
         }
 
-        LocalDate today = LocalDate.now();
+        // KST 기준 오늘 날짜 — 서버가 UTC Docker 컨테이너에서 실행되므로 타임존 명시 필수
+        LocalDate today = LocalDate.now(ReadinessConstants.ZONE);
         LocalDate effectiveFrom = (from != null) ? from : today.minusDays(30);
         LocalDate effectiveTo = (to != null) ? to : today;
 
@@ -129,8 +163,14 @@ public class ProgressService {
             return new HeatmapResponse(Collections.emptyList());
         }
 
-        LocalDateTime fromDateTime = effectiveFrom.atStartOfDay();
-        LocalDateTime toDateTimeExclusive = effectiveTo.plusDays(1).atStartOfDay();
+        // KST 자정을 UTC LocalDateTime으로 변환하여 DB 쿼리 범위 설정
+        // submitted_at은 TIMESTAMP(타임존 없음)이지만 서버가 UTC로 저장하므로 KST→UTC 변환 필요
+        LocalDateTime fromDateTime = ZonedDateTime.of(effectiveFrom.atStartOfDay(), ReadinessConstants.ZONE)
+            .withZoneSameInstant(ZoneOffset.UTC)
+            .toLocalDateTime();
+        LocalDateTime toDateTimeExclusive = ZonedDateTime.of(effectiveTo.plusDays(1).atStartOfDay(), ReadinessConstants.ZONE)
+            .withZoneSameInstant(ZoneOffset.UTC)
+            .toLocalDateTime();
 
         List<Object[]> rows = submissionRepository.findHeatmapByMemberUuid(
             memberUuid.toString(), fromDateTime, toDateTimeExclusive

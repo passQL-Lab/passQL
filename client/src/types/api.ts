@@ -130,6 +130,9 @@ export interface ReadinessResponse {
   readonly accuracy: number;
   readonly coverage: number;
   readonly recency: number;
+  readonly difficulty: number;
+  readonly retry: number;
+  readonly spread: number;
   readonly lastStudiedAt: string | null;
   readonly recentAttemptCount: number;
   readonly coveredTopicCount: number;
