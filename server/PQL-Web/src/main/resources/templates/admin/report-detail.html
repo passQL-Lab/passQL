@@ -249,13 +249,6 @@
 
             const resultEl = document.getElementById('resolveResult');
 
-            // memberUuid가 없으면 처리 불가 — 유효하지 않은 UUID는 서버에서 400 반환
-            if (!adminMemberUuid) {
-                resultEl.textContent = '관리자 UUID를 찾을 수 없습니다. 다시 로그인하세요.';
-                resultEl.className = 'text-sm ml-2 text-error';
-                return;
-            }
-
             resultEl.textContent = '처리 중...';
             resultEl.className = 'text-sm ml-2 text-base-content/60';
 
@@ -264,12 +257,13 @@
 
             for (const reportUuid of pendingReportUuids) {
                 try {
+                    // X-Member-UUID가 없어도 동작하도록 optional 처리 (mock 환경)
+                    const headers = { 'Content-Type': 'application/json' };
+                    if (adminMemberUuid) headers['X-Member-UUID'] = adminMemberUuid;
+
                     const res = await fetch(`/admin/api/reports/${reportUuid}/resolve`, {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-Member-UUID': adminMemberUuid
-                        },
+                        headers,
                         body: JSON.stringify({
                             correctionScope: correctionScope,
                             deactivateQuestion: deactivateQuestion
