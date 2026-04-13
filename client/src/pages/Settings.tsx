@@ -145,7 +145,7 @@ export default function Settings() {
       </section>
 
       {/* ③ 이용안내 섹션 — 서브페이지 진입 row */}
-      <section className={`mt-6 ${s2.className}`}>
+      <section className={s2.className}>
         <SettingsSection label="이용안내">
           <div className="bg-surface-card border-y border-border divide-y divide-border">
             <SettingsRow
@@ -159,7 +159,7 @@ export default function Settings() {
       </section>
 
       {/* ④ 앱 정보 섹션 */}
-      <section className={`mt-6 ${s3.className}`}>
+      <section className={s3.className}>
         <SettingsSection label="앱 정보">
           <div className="bg-surface-card border-y border-border divide-y divide-border">
             <SettingsRow
@@ -187,7 +187,7 @@ export default function Settings() {
       </section>
 
       {/* ⑤ 로고 + 카피라이트 */}
-      <section className={`text-center mt-8 space-y-2 ${s4.className}`}>
+      <section className={`text-center mt-12 space-y-2 ${s4.className}`}>
         <img src={logo} alt="passQL" className="h-5 w-auto mx-auto" />
         <p className="text-xs text-text-caption">
           © 2026 passQL. All rights reserved.
