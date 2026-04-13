@@ -10,7 +10,7 @@ export function useMyFeedback() {
   return useQuery({
     queryKey: ["feedback", "my"],
     queryFn: fetchMyFeedback,
-    staleTime: 1000 * 60 * 2, // 2분
+    staleTime: 0, // 페이지 진입 시마다 최신 상태 반영 (PENDING→REVIEWED→APPLIED 변화 감지)
     retry: false,
   });
 }
