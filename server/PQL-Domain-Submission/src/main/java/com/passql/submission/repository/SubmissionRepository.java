@@ -31,8 +31,14 @@ public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
     @Query(value = "WITH latest AS (SELECT question_uuid, is_correct, ROW_NUMBER() OVER (PARTITION BY question_uuid ORDER BY submitted_at DESC) rn FROM submission WHERE member_uuid = CAST(:memberUuid AS uuid)) SELECT COALESCE(AVG(CASE WHEN is_correct=true THEN 1.0 ELSE 0.0 END),0) FROM latest WHERE rn=1", nativeQuery = true)
     Double calculateCorrectRateByMemberUuid(@Param("memberUuid") String memberUuid);
 
-    @Query("SELECT DISTINCT FUNCTION('DATE', s.submittedAt) FROM Submission s WHERE s.memberUuid = :memberUuid ORDER BY FUNCTION('DATE', s.submittedAt) DESC")
-    List<java.sql.Date> findSubmissionDatesByMemberUuid(@Param("memberUuid") UUID memberUuid);
+    // KST 기준 날짜 추출 — JPQL FUNCTION('DATE')은 타임존 지정 불가이므로 네이티브 쿼리로 전환
+    @Query(value =
+        "SELECT DISTINCT DATE(s.submitted_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Seoul') " +
+        "FROM submission s " +
+        "WHERE s.member_uuid = CAST(:memberUuid AS uuid) " +
+        "ORDER BY 1 DESC",
+        nativeQuery = true)
+    List<java.sql.Date> findSubmissionDatesByMemberUuid(@Param("memberUuid") String memberUuid);
 
     /**
      * Readiness 계산용 최근 시도 투영 (Accuracy + lastStudiedAt 단일 조회).
@@ -86,15 +92,16 @@ public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
      * @return Object[] = { java.sql.Date date, long solvedCount, long correctCount }
      */
     @Query(value =
-        // PostgreSQL: CAST(:param AS uuid) 사용, SUM(boolean) 불가 → CASE로 변환
-        "SELECT DATE(s.submitted_at) AS date, " +
+        // PostgreSQL: submitted_at은 UTC TIMESTAMP로 저장되므로 KST(Asia/Seoul)로 변환 후 DATE 추출
+        // AT TIME ZONE 'UTC' → AT TIME ZONE 'Asia/Seoul': TIMESTAMP → TIMESTAMPTZ → KST TIMESTAMP
+        "SELECT DATE(s.submitted_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Seoul') AS date, " +
         "       COUNT(*)              AS solved_count, " +
         "       SUM(CASE WHEN s.is_correct THEN 1 ELSE 0 END) AS correct_count " +
         "FROM submission s " +
         "WHERE s.member_uuid = CAST(:memberUuid AS uuid) " +
         "  AND s.submitted_at >= :fromDate " +
         "  AND s.submitted_at < :toDateExclusive " +
-        "GROUP BY DATE(s.submitted_at) " +
+        "GROUP BY DATE(s.submitted_at AT TIME ZONE 'UTC' AT TIME ZONE 'Asia/Seoul') " +
         "ORDER BY date ASC",
         nativeQuery = true)
     List<Object[]> findHeatmapByMemberUuid(
@@ -144,6 +151,77 @@ public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
     List<String> findSolvedQuestionUuids(
         @Param("memberUuid") String memberUuid,
         @Param("limit") int limit
+    );
+
+    /**
+     * 최근 N건 시도의 문제 평균 난이도 (Difficulty 계산용).
+     *
+     * JPQL은 LIMIT 미지원이라 네이티브 쿼리 사용.
+     * 이력 없으면 null 반환.
+     */
+    @Query(value =
+        "SELECT AVG(q.difficulty) " +
+        "FROM ( " +
+        "  SELECT s.question_uuid " +
+        "  FROM submission s " +
+        "  WHERE s.member_uuid = CAST(:memberUuid AS uuid) " +
+        "  ORDER BY s.submitted_at DESC, s.submission_uuid DESC " +
+        "  LIMIT :limitCount " +
+        ") recent " +
+        "JOIN question q ON q.question_uuid = recent.question_uuid",
+        nativeQuery = true)
+    Double findAvgDifficultyOfRecentAttempts(
+        @Param("memberUuid") String memberUuid,
+        @Param("limitCount") int limitCount
+    );
+
+    /**
+     * 전체 이력 중 틀렸다가 이후 정답을 낸 DISTINCT 문제 수 (Retry 분자).
+     */
+    @Query(value =
+        "SELECT COUNT(DISTINCT s1.question_uuid) " +
+        "FROM submission s1 " +
+        "WHERE s1.member_uuid = CAST(:memberUuid AS uuid) " +
+        "  AND s1.is_correct = false " +
+        "  AND EXISTS ( " +
+        "    SELECT 1 FROM submission s2 " +
+        "    WHERE s2.member_uuid = s1.member_uuid " +
+        "      AND s2.question_uuid = s1.question_uuid " +
+        "      AND s2.is_correct = true " +
+        "      AND s2.submitted_at > s1.submitted_at " +
+        "  )",
+        nativeQuery = true)
+    long countRetriedAndCorrectQuestions(@Param("memberUuid") String memberUuid);
+
+    /**
+     * 전체 이력 중 한 번이라도 틀린 DISTINCT 문제 수 (Retry 분모).
+     */
+    @Query(value =
+        "SELECT COUNT(DISTINCT question_uuid) " +
+        "FROM submission " +
+        "WHERE member_uuid = CAST(:memberUuid AS uuid) " +
+        "  AND is_correct = false",
+        nativeQuery = true)
+    long countDistinctWrongQuestions(@Param("memberUuid") String memberUuid);
+
+    /**
+     * 최근 N일 내 활성 토픽별 제출 건수 (Spread 계산용).
+     *
+     * @return Object[] = { String topicUuid, long count }
+     */
+    @Query(value =
+        "SELECT CAST(q.topic_uuid AS varchar), COUNT(*) AS cnt " +
+        "FROM submission s " +
+        "JOIN question q ON q.question_uuid = s.question_uuid " +
+        "JOIN topic t ON t.topic_uuid = q.topic_uuid " +
+        "WHERE s.member_uuid = CAST(:memberUuid AS uuid) " +
+        "  AND s.submitted_at >= :since " +
+        "  AND t.is_active = true " +
+        "GROUP BY q.topic_uuid",
+        nativeQuery = true)
+    List<Object[]> findTopicSubmissionCountsAfter(
+        @Param("memberUuid") String memberUuid,
+        @Param("since") LocalDateTime since
     );
 
     @Modifying

@@ -1,5 +1,6 @@
 package com.passql.submission.util;
 
+import com.passql.submission.readiness.ReadinessConstants;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
@@ -19,7 +20,8 @@ public final class StreakCalculator {
         if (dates == null || dates.isEmpty()) {
             return 0;
         }
-        LocalDate today = LocalDate.now();
+        // KST 기준 오늘 날짜 — 서버 컨테이너의 기본 타임존(UTC)에 의존하지 않도록 명시
+        LocalDate today = LocalDate.now(ReadinessConstants.ZONE);
         int streak = 0;
         LocalDate expected = today;
         boolean started = false;
