@@ -24,7 +24,7 @@ export default function SettingsRow({ label, value, action, isLast, onClick }: S
       onClick={onClick}
       className={`flex items-center justify-between px-5 py-4 ${
         isLast ? "" : "border-b border-border"
-      } ${onClick ? "cursor-pointer hover:bg-surface active:bg-surface-code transition-colors" : ""}`}
+      } ${onClick ? "cursor-pointer hover:bg-surface active:bg-surface transition-colors" : ""}`}
     >
       <div className="min-w-0 flex-1">
         <p className="text-text-secondary text-sm">{label}</p>

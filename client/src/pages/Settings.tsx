@@ -75,6 +75,8 @@ export default function Settings() {
     if (count === 3) showToast("개발자 모드까지 2번 남았습니다");
     else if (count === 4) showToast("개발자 모드까지 1번 남았습니다");
     else if (count >= 5) {
+      // 카운터 리셋 — 중복 toast 방지 (React state 업데이트 이전 추가 클릭 대비)
+      clickCountRef.current = 0;
       setDevUnlocked(true);
       showToast("개발자 모드가 활성화되었습니다");
     }

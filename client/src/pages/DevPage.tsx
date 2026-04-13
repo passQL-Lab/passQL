@@ -36,7 +36,7 @@ export default function DevPage() {
       confirmTimerRef.current = setTimeout(() => setConfirmClear(false), 3000);
       return;
     }
-    clearTimeout(confirmTimerRef.current!);
+    if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current);
     localStorage.clear();
     window.location.reload();
   };
