@@ -78,7 +78,7 @@ function MdInlineCode({ children }: { children?: React.ReactNode }) {
   // 인덱스 소비는 부모(MdP, MdLi 등)의 animateTextNodes에서 처리
   // 이 컴포넌트는 스타일만 담당
   return (
-    <code className="bg-surface-code px-1 rounded text-xs font-mono">{children}</code>
+    <code className="bg-surface-code px-1 rounded text-sm font-mono">{children}</code>
   );
 }
 

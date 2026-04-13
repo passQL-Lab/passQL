@@ -51,6 +51,12 @@
                 <a th:href="@{/admin/questions}" class="btn btn-sm btn-ghost">초기화</a>
 
                 <div class="ml-auto flex gap-2 items-center">
+                    <!-- 선택 색인 버튼: 체크박스 선택 시 활성화 -->
+                    <button type="button" id="indexSelectedBtn" class="btn btn-sm btn-warning btn-outline" onclick="indexSelected()" disabled>
+                        <i data-lucide="zap" class="size-4"></i>
+                        <span id="indexSelectedLabel">선택 색인</span>
+                    </button>
+
                     <!-- 선택 삭제 버튼: 체크박스 선택 시 활성화 -->
                     <button type="button" id="deleteSelectedBtn" class="btn btn-sm btn-error btn-outline" onclick="deleteSelected()" disabled>
                         <i data-lucide="trash-2" class="size-4"></i>
@@ -138,12 +144,17 @@
                         <th class="w-20">난이도</th>
                         <th class="w-28">실행 모드</th>
                         <th class="w-32">생성일</th>
-                        <th class="w-24">액션</th>
+                        <th class="w-16">편집</th>
                     </tr>
                     </thead>
                     <tbody>
-                    <tr th:each="q : ${questions}" th:if="${questions != null and !questions.isEmpty()}">
-                        <td><input type="checkbox" class="checkbox checkbox-xs question-checkbox" th:data-uuid="${q.questionUuid}" onchange="onCheckboxChange()"/></td>
+                    <tr th:each="q : ${questions}" th:if="${questions != null and !questions.isEmpty()}"
+                        class="cursor-pointer hover:bg-base-200"
+                        th:data-href="@{/admin/questions/{uuid}(uuid=${q.questionUuid})}"
+                        onclick="if(!event.target.closest('input,a,button')) location.href=this.dataset.href">
+                        <td onclick="event.stopPropagation()">
+                            <input type="checkbox" class="checkbox checkbox-xs question-checkbox" th:data-uuid="${q.questionUuid}" onchange="onCheckboxChange()"/>
+                        </td>
                         <td class="font-mono text-xs" th:text="${#strings.substring(q.questionUuid.toString(), 0, 8)}">xxxxxxxx</td>
                         <td class="max-w-xs truncate text-sm" th:text="${q.stemPreview}">
                             다음 중 employees 테이블에서 부서별 평균 급여를...
@@ -162,24 +173,11 @@
                                   th:text="${q.executionMode != null and q.executionMode.name() == 'EXECUTABLE'} ? '실행형' : '개념형'">개념형</span>
                         </td>
                         <td class="text-xs" th:text="${q.createdAt != null ? #temporals.format(q.createdAt, 'yyyy-MM-dd') : '-'}">2026-04-01</td>
-                        <td>
-                            <div class="flex gap-1">
-                                <a th:href="@{/admin/questions/{uuid}(uuid=${q.questionUuid})}"
-                                   class="btn btn-xs btn-ghost" title="상세">
-                                    <i data-lucide="eye" class="size-3"></i>
-                                </a>
-                                <a th:href="@{/admin/questions/{uuid}/edit(uuid=${q.questionUuid})}"
-                                   class="btn btn-xs btn-ghost" title="편집">
-                                    <i data-lucide="pencil" class="size-3"></i>
-                                </a>
-                                <button type="button" class="btn btn-xs btn-ghost text-error"
-                                        title="삭제"
-                                        th:data-uuid="${q.questionUuid}"
-                                        th:data-title="${q.stemPreview}"
-                                        onclick="openDeleteModal(this)">
-                                    <i data-lucide="trash-2" class="size-3"></i>
-                                </button>
-                            </div>
+                        <td onclick="event.stopPropagation()">
+                            <a th:href="@{/admin/questions/{uuid}/edit(uuid=${q.questionUuid})}"
+                               class="btn btn-xs btn-ghost" title="편집">
+                                <i data-lucide="pencil" class="size-3"></i>
+                            </a>
                         </td>
                     </tr>
 

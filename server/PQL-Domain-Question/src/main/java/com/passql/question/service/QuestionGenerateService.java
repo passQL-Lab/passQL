@@ -217,6 +217,101 @@ public class QuestionGenerateService {
     }
 
     /**
+     * 활성 문제 전체를 Qdrant에 재색인한다 (관리자 "전체 색인" 버튼용).
+     * 타임아웃 문제를 방지하기 위해 1개씩 순차 전송한다.
+     */
+    @Transactional(readOnly = true)
+    public IndexQuestionsBulkResult reindexAll() {
+        List<Question> questions = questionRepository.findByIsActiveTrue();
+        log.info("[reindex-all] 전체 재색인 시작: 활성 문제 수={}", questions.size());
+
+        List<IndexQuestionRequest> requests = questions.stream()
+                .map(q -> buildIndexRequest(q))
+                .toList();
+
+        return indexOneByOne(requests, "reindex-all");
+    }
+
+    /**
+     * 선택한 문제 UUID 목록을 Qdrant에 재색인한다 (관리자 "선택 색인" 버튼용).
+     * 타임아웃 문제를 방지하기 위해 1개씩 순차 전송한다.
+     * 존재하지 않는 UUID는 조용히 스킵한다.
+     */
+    @Transactional(readOnly = true)
+    public IndexQuestionsBulkResult reindexSelected(List<String> questionUuids) {
+        log.info("[reindex-selected] 선택 재색인 시작: 요청 수={}", questionUuids.size());
+
+        List<IndexQuestionRequest> requests = questionUuids.stream()
+                .map(uuidStr -> questionRepository.findById(UUID.fromString(uuidStr)).orElse(null))
+                .filter(q -> q != null)
+                .map(q -> buildIndexRequest(q))
+                .toList();
+
+        log.info("[reindex-selected] 실제 처리할 문제 수={}", requests.size());
+        return indexOneByOne(requests, "reindex-selected");
+    }
+
+    /**
+     * IndexQuestionRequest 목록을 1개씩 순차 전송하여 결과를 집계한다.
+     * bulk 전송 시 타임아웃이 발생하는 경우를 방지한다.
+     */
+    private IndexQuestionsBulkResult indexOneByOne(List<IndexQuestionRequest> requests, String logPrefix) {
+        int succeeded = 0;
+        int failed = 0;
+        List<String> failedUuids = new java.util.ArrayList<>();
+
+        int total = requests.size();
+        for (int i = 0; i < total; i++) {
+            IndexQuestionRequest req = requests.get(i);
+            try {
+                var result = aiGatewayClient.indexQuestion(req);
+                if (result != null) {
+                    succeeded++;
+                } else {
+                    failed++;
+                    failedUuids.add(req.questionUuid());
+                    log.warn("[{}] 색인 결과 null: uuid={}", logPrefix, req.questionUuid());
+                }
+            } catch (Exception e) {
+                failed++;
+                failedUuids.add(req.questionUuid());
+                log.warn("[{}] 색인 실패: uuid={}, error={}", logPrefix, req.questionUuid(), e.getMessage());
+            }
+            // 매 문제마다 진행 상황 로그
+            log.info("[{}] 진행: {}/{} (성공={}, 실패={})", logPrefix, i + 1, total, succeeded, failed);
+        }
+
+        log.info("[{}] 완료: total={}, succeeded={}, failed={}", logPrefix, requests.size(), succeeded, failed);
+        return new IndexQuestionsBulkResult(requests.size(), succeeded, failed, failedUuids);
+    }
+
+    /**
+     * Question 엔티티 → IndexQuestionRequest 변환.
+     * 토픽/서브토픽 이름과 태그 키 조회를 포함한다.
+     */
+    private IndexQuestionRequest buildIndexRequest(Question question) {
+        String topicName = topicRepository.findById(question.getTopicUuid())
+                .map(Topic::getDisplayName)
+                .orElse("");
+        String subtopicName = question.getSubtopicUuid() != null
+                ? subtopicRepository.findById(question.getSubtopicUuid())
+                        .map(Subtopic::getDisplayName)
+                        .orElse(null)
+                : null;
+        List<String> tagKeys = questionConceptTagRepository
+                .findTagKeysByQuestionUuid(question.getQuestionUuid().toString());
+
+        return new IndexQuestionRequest(
+                question.getQuestionUuid().toString(),
+                topicName,
+                subtopicName,
+                question.getDifficulty(),
+                tagKeys,
+                question.getStem() != null ? question.getStem() : ""
+        );
+    }
+
+    /**
      * 문제를 Qdrant에 임베딩 적재한다.
      * VirtualThread로 실행하여 문제 등록 응답 속도에 영향을 주지 않는다.
      */

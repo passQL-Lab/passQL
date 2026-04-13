@@ -1,18 +1,17 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AlertCircle, Sparkles } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { useTopics } from "../hooks/useTopics";
 import { getTopicIcon } from "../constants/topicIcons";
 import { generatePractice } from "../api/practice";
 import { usePracticeStore } from "../stores/practiceStore";
-import LoadingOverlay from "../components/LoadingOverlay";
 import ErrorFallback from "../components/ErrorFallback";
 import { useStagger } from "../hooks/useStagger";
 
 export default function CategoryCards() {
   const { data: topics, isLoading, isError, refetch } = useTopics();
-  const [generating, setGenerating] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  // 문제가 없는 카테고리 클릭 시 안내 모달 표시 여부
+  const [showEmptyModal, setShowEmptyModal] = useState(false);
   const navigate = useNavigate();
   const startSession = usePracticeStore((s) => s.startSession);
 
@@ -22,15 +21,15 @@ export default function CategoryCards() {
   const s1 = stagger(1); // 카드 그리드
 
   const handleSelect = async (code: string, displayName: string) => {
-    setGenerating(displayName);
-    setError(null);
     try {
       const { sessionId, questions } = await generatePractice(code);
       startSession(sessionId, code, displayName, questions);
       navigate(`/practice/${sessionId}`);
-    } catch {
-      setGenerating(null);
-      setError("문제 생성에 실패했어요. 다시 시도해주세요.");
+    } catch (err) {
+      // 문제가 없는 카테고리인 경우 안내 모달 표시
+      if (err instanceof Error && err.message.includes("풀 수 있는 문제가 없어요")) {
+        setShowEmptyModal(true);
+      }
     }
   };
 
@@ -97,14 +96,33 @@ export default function CategoryCards() {
         </section>
       )}
 
-      {error && (
-        <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-xl mt-4">
-          <AlertCircle size={16} className="text-red-500 shrink-0" />
-          <p className="text-sm text-red-700">{error}</p>
+      {/* 문제 없는 카테고리 클릭 시 안내 모달 — 센터 모달 */}
+      {showEmptyModal && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-base-content/50 px-6"
+          onClick={() => setShowEmptyModal(false)}
+        >
+          <div
+            className="w-full max-w-[320px] bg-white border border-border rounded-2xl px-6 py-7 space-y-4"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="space-y-1.5 text-center">
+              <h2 className="text-lg font-bold text-text-primary">문제가 준비중이에요</h2>
+              <p className="text-sm text-text-secondary">
+                아직 이 카테고리의 문제가 등록되지 않았어요. 다른 카테고리를 먼저 시도해보세요.
+              </p>
+            </div>
+            <button
+              type="button"
+              className="btn btn-primary w-full"
+              onClick={() => setShowEmptyModal(false)}
+            >
+              확인
+            </button>
+          </div>
         </div>
       )}
 
-      {generating && <LoadingOverlay topicName={generating} />}
     </div>
   );
 }

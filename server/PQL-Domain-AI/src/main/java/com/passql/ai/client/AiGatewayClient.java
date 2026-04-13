@@ -145,6 +145,27 @@ public class AiGatewayClient {
     }
 
     // ========================
+    //  getIndexStatus
+    // ========================
+
+    /**
+     * DB 전체 문제 UUID vs Qdrant 색인 UUID 비교하여 미색인 목록 반환.
+     * 관리자 임베딩 인덱스 관리 화면에서 사용.
+     * AI 서버 장애 시 null 반환 — 호출부에서 에러 배너 처리.
+     */
+    public IndexStatusResult getIndexStatus(IndexStatusRequest request) {
+        try {
+            log.info("[AiGateway] getIndexStatus 요청: db_uuid_count={}", request.questionUuids().size());
+            IndexStatusResult result = postToPython("/api/ai/index-status", request, IndexStatusResult.class);
+            log.info("[AiGateway] getIndexStatus 완료: unindexed_count={}", result.unindexedCount());
+            return result;
+        } catch (Exception e) {
+            log.warn("[AiGateway] getIndexStatus 실패 (null 반환): error={}", e.getMessage());
+            return null;
+        }
+    }
+
+    // ========================
     //  내부 HTTP 처리
     // ========================
 

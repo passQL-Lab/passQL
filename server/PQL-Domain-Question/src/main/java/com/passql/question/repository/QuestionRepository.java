@@ -61,4 +61,12 @@ public interface QuestionRepository extends JpaRepository<Question, UUID> {
 
     @Query(value = "SELECT q.topic_uuid, COUNT(*) FROM question q WHERE q.is_active = true GROUP BY q.topic_uuid", nativeQuery = true)
     List<Object[]> countActiveByTopic();
+
+    /**
+     * 임베딩 색인 상태 확인용 — 활성 문제 전체 UUID를 문자열로 반환.
+     * Hibernate JPQL은 UUID → String 캐스팅이 DB 종속적이므로 네이티브 쿼리 사용.
+     * SubmissionRepository의 CAST(question_uuid AS varchar) 패턴과 동일.
+     */
+    @Query(value = "SELECT CAST(q.question_uuid AS varchar) FROM question q WHERE q.is_active = true", nativeQuery = true)
+    List<String> findAllActiveQuestionUuids();
 }

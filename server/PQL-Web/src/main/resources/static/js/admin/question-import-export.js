@@ -46,6 +46,57 @@ function updateExportButtonState() {
         deleteBtn.disabled = count === 0;
         deleteLabel.textContent = count > 0 ? `선택 삭제 (${count})` : '선택 삭제';
     }
+
+    // 선택 색인 버튼 상태
+    const indexBtn = document.getElementById('indexSelectedBtn');
+    const indexLabel = document.getElementById('indexSelectedLabel');
+    if (indexBtn && indexLabel) {
+        indexBtn.disabled = count === 0;
+        indexLabel.textContent = count > 0 ? `선택 색인 (${count})` : '선택 색인';
+    }
+}
+
+// ── 선택 색인 ─────────────────────────────────────────────────
+
+/**
+ * 선택된 문제들을 Qdrant에 재색인한다.
+ * POST /admin/embeddings/index-selected JSON API 호출.
+ */
+async function indexSelected() {
+    const uuids = getSelectedUuids();
+    if (uuids.length === 0) {
+        alert('색인할 문제를 선택해주세요.');
+        return;
+    }
+
+    const btn = document.getElementById('indexSelectedBtn');
+    const label = document.getElementById('indexSelectedLabel');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span class="loading loading-spinner loading-xs"></span> 색인 중...';
+    }
+
+    try {
+        const resp = await fetch('/admin/embeddings/index-selected', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({uuids})
+        });
+        const data = await resp.json();
+        if (data.error) {
+            alert('색인 오류: ' + data.error);
+        } else {
+            alert(`색인 완료: ${data.succeeded}개 성공, ${data.failed}개 실패`);
+        }
+    } catch (e) {
+        alert('색인 요청 실패: ' + e.message);
+    } finally {
+        if (btn && label) {
+            btn.disabled = false;
+            updateExportButtonState(); // 라벨 복구
+            lucide.createIcons();
+        }
+    }
 }
 
 // ── 선택 일괄삭제 ─────────────────────────────────────────────

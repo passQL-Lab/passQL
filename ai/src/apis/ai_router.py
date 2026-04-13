@@ -13,6 +13,7 @@ from src.models.ai_request import (
     GenerateQuestionFullRequest,
     IndexQuestionRequest,
     IndexQuestionsBulkRequest,
+    IndexStatusRequest,
     RecommendRequest,
     TestPromptRequest,
 )
@@ -22,6 +23,7 @@ from src.models.ai_response import (
     GenerateQuestionFullResponse,
     IndexQuestionResponse,
     IndexQuestionsBulkResponse,
+    IndexStatusResponse,
     RecommendResponse,
     SimilarResponse,
     TestPromptResponse,
@@ -306,4 +308,36 @@ async def recommend(
         raise HTTPException(status_code=500, detail=e.message)
     except Exception as e:
         logger.error(f"[recommend] 예기치 않은 오류: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="서버 내부 오류가 발생했습니다")
+
+
+@router.post(
+    "/index-status",
+    response_model=IndexStatusResponse,
+    status_code=200,
+)
+async def index_status(
+    request: IndexStatusRequest,
+    _: None = Depends(verify_api_key),
+):
+    """
+    DB 전체 문제 UUID와 Qdrant 색인 UUID를 비교하여 미색인 목록 반환.
+
+    Java 서버가 DB에서 조회한 전체 문제 UUID를 전달하면
+    Python이 Qdrant scroll로 현재 색인된 UUID와 비교하여 미색인 목록을 반환한다.
+    관리자 임베딩 인덱스 관리 화면에서 사용한다.
+
+    - POST /api/ai/index-status
+    - Header: X-API-Key: {AI_SERVER_API_KEY}
+    - Body: IndexStatusRequest
+    - 성공: 200 + IndexStatusResponse
+    """
+    logger.info(f"[index-status] db_uuid_count={len(request.question_uuids)}")
+    try:
+        return await ai_service.get_index_status(request)
+    except CustomError as e:
+        logger.error(f"[index-status] 실패: {e.message}")
+        raise HTTPException(status_code=500, detail=e.message)
+    except Exception as e:
+        logger.error(f"[index-status] 예기치 않은 오류: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="서버 내부 오류가 발생했습니다")

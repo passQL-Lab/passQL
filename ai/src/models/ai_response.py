@@ -92,3 +92,15 @@ class RecommendResponse(BaseModel):
     items: list[RecommendedQuestion]
     # 쿼리에 사용된 오답 문제 수 (디버깅/로깅용)
     query_source_count: int
+
+
+class IndexStatusResponse(BaseModel):
+    """Qdrant 색인 상태 응답.
+
+    DB UUID 목록과 Qdrant 포인트 UUID 비교 결과를 반환.
+    관리자 화면에서 미색인 문제 탐지 및 재색인 트리거에 사용.
+    """
+    collection_points_count: int   # Qdrant 현재 포인트 수
+    db_question_count: int         # Java가 전달한 DB 문제 수
+    unindexed_count: int           # 미색인 문제 수
+    unindexed_uuids: list[str]     # 미색인 문제 UUID 목록

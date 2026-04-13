@@ -112,3 +112,13 @@ class RecommendRequest(BaseModel):
     recent_wrong_question_uuids: list[str] = Field(default_factory=list)
     # 이미 푼 문제 UUID 목록 — Qdrant 필터로 제외
     solved_question_uuids: list[str] = Field(default_factory=list)
+
+
+class IndexStatusRequest(BaseModel):
+    """DB 전체 문제 UUID 목록 기반 색인 상태 확인 요청.
+
+    Java가 DB에서 조회한 전체 문제 UUID를 전달하면
+    Python이 Qdrant scroll과 비교하여 미색인 목록 반환.
+    """
+    # Java가 DB에서 조회한 전체 문제 UUID 목록
+    question_uuids: list[str]
