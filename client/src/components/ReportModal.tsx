@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { Flag } from "lucide-react";
 import { submitReport } from "../api/reports";
 import type { ReportCategory } from "../api/reports";
 import { ApiError } from "../api/client";
@@ -89,33 +90,47 @@ export default function ReportModal({
   };
 
   return (
-    // dialog 오버레이 — modal-open으로 항상 표시
-    <dialog className="modal modal-open">
-      {/* 모달 박스 — 클릭 이벤트 버블링 방지 */}
-      <div className="modal-box" onClick={(e) => e.stopPropagation()}>
-        <h3 className="font-bold text-lg mb-4 text-text-primary">문제 신고</h3>
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="modal-card" onClick={(e) => e.stopPropagation()}>
 
-        <div className="flex flex-col gap-3 mb-4">
-          {CATEGORIES.map(({ value, label }) => (
-            <label
-              key={value}
-              className="flex items-center gap-3 cursor-pointer"
-            >
-              <input
-                type="checkbox"
-                className="checkbox checkbox-sm"
-                checked={selected.has(value)}
-                onChange={() => toggle(value)}
-                disabled={loading}
-              />
-              <span className="text-sm text-text-primary">{label}</span>
-            </label>
-          ))}
+        {/* 헤더 — Flag 아이콘 + 타이틀 */}
+        <div className="flex items-center gap-2 mb-5">
+          <div className="feedback-bar-icon--error w-7 h-7 rounded-full flex items-center justify-center shrink-0">
+            <Flag size={13} className="feedback-bar-heading--error" />
+          </div>
+          <h3 className="font-bold text-lg text-text-primary">문제 신고</h3>
+        </div>
+
+        {/* 카테고리 선택 */}
+        <div className="flex flex-col mb-5">
+          {CATEGORIES.map(({ value, label }) => {
+            const isSelected = selected.has(value);
+            return (
+              <label
+                key={value}
+                className={`report-category-row ${isSelected ? "report-category-row--selected" : ""} ${loading ? "opacity-60 cursor-not-allowed" : ""}`}
+              >
+                <span className={`report-radio ${isSelected ? "report-radio--selected" : ""}`}>
+                  {isSelected && <span className="report-radio-dot" />}
+                </span>
+                <input
+                  type="checkbox"
+                  className="sr-only"
+                  checked={isSelected}
+                  onChange={() => toggle(value)}
+                  disabled={loading}
+                />
+                <span className={isSelected ? "report-category-label--selected" : "report-category-label"}>
+                  {label}
+                </span>
+              </label>
+            );
+          })}
 
           {/* ETC 선택 시 상세 입력 textarea 표시 */}
           {selected.has("ETC") && (
             <textarea
-              className="textarea textarea-bordered text-sm mt-1 w-full"
+              className="report-textarea mt-2"
               placeholder="구체적인 내용을 입력해주세요"
               rows={3}
               value={detail}
@@ -127,38 +142,24 @@ export default function ReportModal({
 
         {/* 에러 메시지 — API 호출 실패 시 표시 */}
         {error && (
-          <p className="text-sm text-error mb-2">{error}</p>
+          <p className="error-code-text text-sm mb-3">{error}</p>
         )}
 
-        <div className="modal-action">
-          {/* 취소 버튼 — 제출 중에는 비활성화 */}
-          <button
-            type="button"
-            className="btn btn-ghost btn-sm"
-            onClick={onClose}
-            disabled={loading}
-          >
+        {/* 액션 버튼 */}
+        <div className="flex gap-2">
+          <button type="button" className="btn-cancel" onClick={onClose} disabled={loading}>
             취소
           </button>
-
-          {/* 신고 제출 버튼 — canSubmit 조건 미충족 시 비활성화 */}
-          <button
-            type="button"
-            className="btn btn-primary btn-sm"
-            onClick={handleSubmit}
-            disabled={!canSubmit}
-          >
+          <button type="button" className="btn-report" onClick={handleSubmit} disabled={!canSubmit}>
             {loading ? (
-              <span className="loading loading-spinner loading-xs" />
+              <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
             ) : (
               "신고하기"
             )}
           </button>
         </div>
-      </div>
 
-      {/* 배경 클릭 시 모달 닫기 */}
-      <div className="modal-backdrop" onClick={onClose} />
-    </dialog>
+      </div>
+    </div>
   );
 }
