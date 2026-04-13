@@ -1,5 +1,10 @@
 import { useEffect } from "react";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
+
+/** /dev route guard — sessionStorage에 잠금 해제 플래그가 없으면 설정 화면으로 redirect */
+function DevGuard() {
+  return sessionStorage.getItem("devUnlocked") ? <DevPage /> : <Navigate to="/settings" replace />;
+}
 import AppLayout from "./components/AppLayout";
 import Home from "./pages/Home";
 import CategoryCards from "./pages/CategoryCards";
@@ -50,10 +55,10 @@ const router = createBrowserRouter([
     path: "recommendation/:questionUuid",
     element: <RecommendationPractice />,
   },
-  // 개발자 전용 도구 (Easter Egg 잠금 해제 후 접근)
+  // 개발자 전용 도구 — sessionStorage 잠금 해제 확인 후에만 접근 허용
   {
     path: "dev",
-    element: <DevPage />,
+    element: <DevGuard />,
   },
 ]);
 

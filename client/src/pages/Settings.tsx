@@ -32,6 +32,8 @@ export default function Settings() {
   // 개발자 모드 Easter Egg — 세션 한정 (새로고침 시 리셋)
   const [devUnlocked, setDevUnlocked] = useState(false);
   const clickCountRef = useRef(0);
+  // 2초 안에 5번 클릭하지 않으면 카운터 리셋
+  const clickResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // toast 메시지 — null이면 미표시
   const [toastMsg, setToastMsg] = useState<string | null>(null);
@@ -50,6 +52,7 @@ export default function Settings() {
     return () => {
       if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
       if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+      if (clickResetTimerRef.current) clearTimeout(clickResetTimerRef.current);
     };
   }, []);
 
@@ -66,17 +69,26 @@ export default function Settings() {
     copyTimerRef.current = setTimeout(() => setCopied(false), 2000);
   };
 
-  // 버전 row 클릭 — 5번 연속 클릭 시 개발자 모드 잠금 해제
+  // 버전 row 클릭 — 2초 안에 5번 연속 클릭 시 개발자 모드 잠금 해제
   const handleVersionClick = () => {
     if (devUnlocked) return;
     clickCountRef.current += 1;
     const count = clickCountRef.current;
 
+    // 마지막 클릭으로부터 2초 경과 시 카운터 리셋
+    if (clickResetTimerRef.current) clearTimeout(clickResetTimerRef.current);
+    clickResetTimerRef.current = setTimeout(() => {
+      clickCountRef.current = 0;
+    }, 2000);
+
     if (count === 3) showToast("개발자 모드까지 2번 남았습니다");
     else if (count === 4) showToast("개발자 모드까지 1번 남았습니다");
     else if (count >= 5) {
-      // 카운터 리셋 — 중복 toast 방지 (React state 업데이트 이전 추가 클릭 대비)
+      // 카운터·타이머 정리 후 잠금 해제
       clickCountRef.current = 0;
+      if (clickResetTimerRef.current) clearTimeout(clickResetTimerRef.current);
+      // sessionStorage에 저장 — route guard에서 접근 허용 여부 확인
+      sessionStorage.setItem("devUnlocked", "1");
       setDevUnlocked(true);
       showToast("개발자 모드가 활성화되었습니다");
     }
