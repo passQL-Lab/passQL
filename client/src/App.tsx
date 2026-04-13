@@ -11,6 +11,7 @@ import AnswerFeedback from "./pages/AnswerFeedback";
 import RecommendationPractice from "./pages/RecommendationPractice";
 import Stats from "./pages/Stats";
 import Settings from "./pages/Settings";
+import DevPage from "./pages/DevPage";
 import { ensureRegistered } from "./stores/memberStore";
 
 const router = createBrowserRouter([
@@ -48,6 +49,11 @@ const router = createBrowserRouter([
   {
     path: "recommendation/:questionUuid",
     element: <RecommendationPractice />,
+  },
+  // 개발자 전용 도구 (Easter Egg 잠금 해제 후 접근)
+  {
+    path: "dev",
+    element: <DevPage />,
   },
 ]);
 
