@@ -1,3 +1,16 @@
+const EXECUTABLE_GRADING_MESSAGES: readonly string[] = [
+  "쿼리를 직접 실행해보는 중이에요",
+  "SQL을 실제로 돌려보는 중이에요",
+  "결과를 직접 확인해보는 중이에요",
+  "DB에 쿼리를 날려보는 중이에요",
+  "실행 결과로 정답을 가리는 중이에요",
+];
+
+export function getRandomExecutableGradingMessage(): string {
+  const idx = Math.floor(Math.random() * EXECUTABLE_GRADING_MESSAGES.length);
+  return EXECUTABLE_GRADING_MESSAGES[idx];
+}
+
 const LOADING_MESSAGES: readonly string[] = [
   "AI가 머리를 굴리는 중...",
   "SQL 요정이 문제를 짓는 중...",

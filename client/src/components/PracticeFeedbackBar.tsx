@@ -1,6 +1,7 @@
 import { useRef } from "react";
 import { Check, X, Flag } from "lucide-react";
 import type { SubmitResult } from "../types/api";
+import { getRandomExecutableGradingMessage } from "../constants/microcopy";
 
 interface PracticeFeedbackBarProps {
   readonly result: SubmitResult;
@@ -26,6 +27,8 @@ export default function PracticeFeedbackBar({
   const isCorrect = result.isCorrect;
   // 버튼 언마운트 전 이중 클릭 방지 — 한 번 눌리면 플래그 세팅, 부모 언마운트 시 자동 초기화
   const hasActedRef = useRef(false);
+  // EXECUTABLE 문제: 마운트 시 한 번만 뽑아 리렌더 때 바뀌지 않도록 ref에 고정
+  const executableMessageRef = useRef(getRandomExecutableGradingMessage());
   const guard = (fn: () => void) => () => {
     if (hasActedRef.current) return;
     hasActedRef.current = true;
@@ -76,9 +79,15 @@ export default function PracticeFeedbackBar({
           {/* 해설 텍스트 */}
           {result.rationale && (
             <p
-              className="text-sm leading-relaxed mb-5 feedback-bar-rationale"
+              className="text-sm leading-relaxed mb-3 feedback-bar-rationale"
             >
               {result.rationale}
+            </p>
+          )}
+          {/* EXECUTABLE 문제: 실제 DB에서 검증됐음을 어필 */}
+          {result.correctResult != null && (
+            <p className="text-xs text-text-secondary mb-5">
+              {executableMessageRef.current}
             </p>
           )}
 

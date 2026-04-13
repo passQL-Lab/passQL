@@ -500,8 +500,9 @@ export default function QuestionDetail({
       {submitMutation.isPending && (
         <LoadingOverlay
           topicName={question.topicName}
-          staticMessage="채점 중..."
+          staticMessage="채점 중이에요"
           subMessage="정답을 확인하고 있어요"
+          isExecutable={question.executionMode === "EXECUTABLE"}
         />
       )}
 
