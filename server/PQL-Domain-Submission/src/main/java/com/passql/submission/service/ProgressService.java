@@ -27,7 +27,9 @@ import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -91,11 +93,33 @@ public class ProgressService {
         );
         int coveredTopicCount = (int) coveredLong;
 
+        // Difficulty — 최근 50문제 평균 난이도
+        Double avgDifficulty = submissionRepository.findAvgDifficultyOfRecentAttempts(
+            memberUuid.toString(), ReadinessConstants.RECENT_ATTEMPT_WINDOW
+        );
+
+        // Retry — 전체 이력 기반 오답 복습 비율
+        long wrongCount   = submissionRepository.countDistinctWrongQuestions(memberUuid.toString());
+        long retriedCount = submissionRepository.countRetriedAndCorrectQuestions(memberUuid.toString());
+
+        // Spread — 최근 14일 토픽별 제출 카운트 → Map으로 변환
+        List<Object[]> topicRows = submissionRepository.findTopicSubmissionCountsAfter(
+            memberUuid.toString(), since
+        );
+        Map<String, Long> topicCountMap = new HashMap<>();
+        for (Object[] row : topicRows) {
+            topicCountMap.put((String) row[0], ((Number) row[1]).longValue());
+        }
+
         ReadinessCalculator.ReadinessResult result = ReadinessCalculator.calculate(
             recentFlags,
             lastStudiedDate,
             coveredTopicCount,
             activeTopicCount,
+            topicCountMap,
+            wrongCount,
+            retriedCount,
+            avgDifficulty,
             today
         );
 
@@ -113,6 +137,9 @@ public class ProgressService {
             result.accuracy(),
             result.coverage(),
             result.recency(),
+            result.difficulty(),
+            result.retry(),
+            result.spread(),
             lastStudiedAt,
             result.recentAttemptCount(),
             coveredTopicCount,
