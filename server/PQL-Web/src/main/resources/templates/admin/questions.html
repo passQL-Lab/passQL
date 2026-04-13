@@ -51,6 +51,12 @@
                 <a th:href="@{/admin/questions}" class="btn btn-sm btn-ghost">초기화</a>
 
                 <div class="ml-auto flex gap-2 items-center">
+                    <!-- 선택 색인 버튼: 체크박스 선택 시 활성화 -->
+                    <button type="button" id="indexSelectedBtn" class="btn btn-sm btn-warning btn-outline" onclick="indexSelected()" disabled>
+                        <i data-lucide="zap" class="size-4"></i>
+                        <span id="indexSelectedLabel">선택 색인</span>
+                    </button>
+
                     <!-- 선택 삭제 버튼: 체크박스 선택 시 활성화 -->
                     <button type="button" id="deleteSelectedBtn" class="btn btn-sm btn-error btn-outline" onclick="deleteSelected()" disabled>
                         <i data-lucide="trash-2" class="size-4"></i>
