@@ -3,12 +3,12 @@ import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react-swc";
 import tailwindcss from "@tailwindcss/vite";
 import { readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+import { resolve } from "node:path";
 
 // version.yml을 직접 읽어 버전 추출 — package.json 동기화 문제 우회
-// vite.config.ts 기준 ../../version.yml = 레포 루트 version.yml
+// process.cwd()는 빌드 실행 위치(client/)를 기준으로 하므로 CI 환경에서도 안정적
 const versionYml = readFileSync(
-  fileURLToPath(new URL("../../version.yml", import.meta.url)),
+  resolve(process.cwd(), "../version.yml"),
   "utf-8",
 );
 const appVersion = versionYml.match(/^version:\s*"([^"]+)"/m)?.[1] ?? "0.0.0";

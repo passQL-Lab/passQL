@@ -17,7 +17,7 @@ interface PracticeActions {
   readonly startSession: (sessionId: string, topicCode: string, topicName: string, questions: readonly QuestionSummary[]) => void;
   readonly addQuestion: (question: QuestionSummary) => void;
   readonly startTimer: () => void;
-  readonly submitAndAdvance: (questionUuid: string, isCorrect: boolean, selectedChoiceKey: string, selectedChoiceBody: string) => void;
+  readonly submitAndAdvance: (questionUuid: string, isCorrect: boolean, selectedChoiceKey: string, selectedChoiceBody: string, submissionUuid?: string, choiceSetUuid?: string) => void;
   // 다시 풀기로 정답 맞춘 경우 — 해당 문제 결과를 정답으로 갱신
   readonly markCorrect: (questionUuid: string) => void;
   // 결과 화면 복귀 스텝 제어 — location.state 의존 없이 안정적으로 전달
@@ -47,11 +47,12 @@ export const usePracticeStore = create<PracticeState & PracticeActions>()((set, 
 
   startTimer: () => set({ startedAt: Date.now() }),
 
-  submitAndAdvance: (questionUuid, isCorrect, selectedChoiceKey, selectedChoiceBody) => {
+  submitAndAdvance: (questionUuid, isCorrect, selectedChoiceKey, selectedChoiceBody, submissionUuid, choiceSetUuid) => {
     // startedAt은 타이머 기록용 — set 콜백 밖에서 읽어도 안전
     const { startedAt } = get();
     const durationMs = startedAt ? Date.now() - startedAt : 0;
-    const newResult: PracticeQuestionResult = { questionUuid, isCorrect, selectedChoiceKey, selectedChoiceBody, durationMs };
+    // submissionUuid, choiceSetUuid는 신고 기능에 사용 — undefined일 경우 신고 버튼 미표시
+    const newResult: PracticeQuestionResult = { questionUuid, isCorrect, selectedChoiceKey, selectedChoiceBody, durationMs, submissionUuid, choiceSetUuid };
     // results는 set 콜백 내부의 최신 상태(s.results)로 추가 — 연속 클릭 시 race condition 방지
     set((s) => ({
       results: [...s.results, newResult],

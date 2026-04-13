@@ -68,6 +68,8 @@ export interface SubmitResult {
   readonly correctResult: ExecuteResult | null;
   readonly selectedSql: string | null;
   readonly correctSql: string | null;
+  // 신고 기능에 사용 — 백엔드 미지원 시 undefined
+  readonly submissionUuid?: string;
 }
 
 // === SSE (선택지 생성) ===
@@ -291,6 +293,10 @@ export interface PracticeQuestionResult {
   // 결과 화면에서 선택지 키(A/B/C/D) 대신 실제 선택지 텍스트를 보여주기 위해 저장
   readonly selectedChoiceBody: string;
   readonly durationMs: number;
+  // 신고 기능에 사용 — 제출 시 서버가 반환한 UUID (백엔드 미지원 시 undefined)
+  readonly submissionUuid?: string;
+  // 신고 시 어떤 선택지 세트를 사용했는지 식별
+  readonly choiceSetUuid?: string;
 }
 
 export interface PracticeSubmitPayload {

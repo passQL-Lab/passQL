@@ -1,0 +1,49 @@
+name: 🔨 React Build Check
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'client/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'client/**'
+
+jobs:
+  Build-Check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: client/package-lock.json
+
+      - name: 📦 Install dependencies
+        working-directory: client
+        run: npm ci
+
+      - name: 🔨 Build (TypeScript + Vite)
+        working-directory: client
+        run: npm run build
+
+      - name: 📋 Build Summary
+        if: always()
+        run: |
+          echo "## 🔨 React 빌드 결과" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ **빌드 성공**" >> $GITHUB_STEP_SUMMARY
+            echo "- 📅 **시간**: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ **빌드 실패**" >> $GITHUB_STEP_SUMMARY
+            echo "- 커밋: \`${{ github.sha }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "- 브랜치: \`${{ github.ref_name }}\`" >> $GITHUB_STEP_SUMMARY
+            echo "- Actions 탭에서 'Build (TypeScript + Vite)' 스텝 로그를 확인하세요." >> $GITHUB_STEP_SUMMARY
+          fi

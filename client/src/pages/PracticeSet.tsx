@@ -77,11 +77,14 @@ export default function PracticeSet() {
           storeSessionId ?? crypto.randomUUID(),
         );
         setFeedback(result);
+        // submissionUuid: 백엔드가 응답에 포함하면 전달, 없으면 undefined → 결과 화면에서 신고 버튼 미표시
         submitAndAdvance(
           displayQuestion.questionUuid,
           result.isCorrect,
           selectedChoiceKey,
           selectedChoiceBody,
+          result.submissionUuid,
+          choiceSetId,
         );
         // 마지막 문제 제출 완료 시에만 무효화 — 도중 이탈은 갱신하지 않기로 결정
         if (currentIndex + 1 >= totalQuestions) {
@@ -99,11 +102,14 @@ export default function PracticeSet() {
           correctSql: null,
         };
         setFeedback(fallback);
+        // 제출 실패 시 submissionUuid 없음 → 신고 버튼 미표시
         submitAndAdvance(
           displayQuestion.questionUuid,
           false,
           selectedChoiceKey,
           selectedChoiceBody,
+          undefined,
+          choiceSetId,
         );
       } finally {
         isProcessingRef.current = false;
