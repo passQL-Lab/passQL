@@ -11,36 +11,25 @@ export default function DevPage() {
   const [confirmClear, setConfirmClear] = useState(false);
   const confirmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // toast 메시지 — null이면 미표시
-  const [toastMsg, setToastMsg] = useState<string | null>(null);
-  const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   useEffect(() => {
     return () => {
       if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current);
-      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
     };
   }, []);
 
-  const showToast = (msg: string) => {
-    setToastMsg(msg);
-    if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-    toastTimerRef.current = setTimeout(() => setToastMsg(null), 3000);
-  };
-
-  // 1차 클릭: 경고 toast + "진짜요?" 버튼 전환 (3초 후 자동 복원)
+  // 1차 클릭: 인라인 경고 노출 + "진짜요?" 버튼 전환 (3초 후 자동 복원)
   // 2차 클릭: localStorage 전체 삭제 + 페이지 reload
   const handleClearStorage = () => {
     if (!confirmClear) {
       setConfirmClear(true);
-      showToast("초기화하면 풀이 기록, 닉네임이 모두 삭제되고 새 계정으로 시작됩니다. 되돌릴 수 없어요.");
       if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current);
       confirmTimerRef.current = setTimeout(() => setConfirmClear(false), 3000);
       return;
     }
     if (confirmTimerRef.current) clearTimeout(confirmTimerRef.current);
     localStorage.clear();
-    window.location.reload();
+    sessionStorage.clear();
+    window.location.href = "/";
   };
 
   return (
@@ -55,7 +44,9 @@ export default function DevPage() {
         >
           <ArrowLeft size={20} />
         </button>
-        <h1 className="text-base font-semibold text-text-primary">개발자 모드</h1>
+        <h1 className="text-base font-semibold text-text-primary">
+          개발자 모드
+        </h1>
       </div>
 
       {/* 콘텐츠 */}
@@ -65,7 +56,9 @@ export default function DevPage() {
             <SettingsRow
               label="localStorage 초기화"
               value={
-                <p className="text-sm text-text-secondary">앱 데이터 전체 삭제 후 재시작</p>
+                <p className="text-sm text-text-secondary">
+                  앱 데이터 전체 삭제 후 재시작
+                </p>
               }
               action={
                 <button
@@ -83,17 +76,15 @@ export default function DevPage() {
               isLast
             />
           </div>
+          {/* 2차 확인 시 인라인 경고 — 되돌릴 수 없음을 명시 */}
+          {confirmClear && (
+            <p className="mt-2 px-1 text-xs text-sem-error-text">
+              초기화하면 풀이 기록, 닉네임이 모두 삭제되고 새 계정으로
+              시작됩니다. 되돌릴 수 없어요.
+            </p>
+          )}
         </SettingsSection>
       </div>
-
-      {/* Toast 알림 — 하단 중앙 고정 (w-full 없이 내용 너비 기준 중앙 정렬) */}
-      {toastMsg && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 pointer-events-none">
-          <div className="bg-toast-bg text-white text-sm px-4 py-3 rounded-lg shadow-lg text-center max-w-xs">
-            {toastMsg}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
