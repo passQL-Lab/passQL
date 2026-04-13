@@ -1,6 +1,6 @@
 # SQLD 학습 플랫폼 — Product Requirements Document
 
-**작성일:** 2026-04-07  
+**작성일:** 2026-04-13  
 **데드라인:** D+6 코드 프리즈 (이후 코드 수정 = 실격)  
 **원칙:** 코드 프리즈 이후 모든 고도화는 DB(Thymeleaf 관리자 UI)에서만 수행
 
@@ -27,7 +27,7 @@ SQLD 자격증 학습 앱. 기존 교재/인강을 대체하는 것이 목표.
 
 | 기능 | 설명 |
 |------|------|
-| SQL 실행 샌드박스 | 모든 선택지 SQL을 실제 MariaDB 샌드박스에 실행 → 결과/에러를 눈으로 확인 |
+| SQL 실행 샌드박스 | 모든 선택지 SQL을 Oracle SQL 문법 환경(PostgreSQL 실행) 샌드박스에 실행 → 결과/에러를 눈으로 확인 |
 | AI 오답 해설 | 에러 발생 시 AI가 친절하게 번역 + RAG 기반 개인화 오답 해설 |
 | 유사 문제 추천 | 임베딩(bge-m3) 기반 유사 문제 추천 |
 
@@ -50,13 +50,14 @@ SQLD 자격증 학습 앱. 기존 교재/인강을 대체하는 것이 목표.
 ```
 [React SPA (Vercel CDN)] ──HTTPS──> [Spring Boot 3 / JDK 21 (Synology NAS :8080)]
                                           │
-                                          ├─ MariaDB sqld_app    (도메인/설정)
-                                          ├─ MariaDB sqld_q###   (샌드박스 DB, 문제별)
-                                          ├─ Qdrant              (bge-m3 1024-dim)
-                                          ├─ Redis               (캐시/레이트리밋)
-                                          └─ Ollama (ai.suhsaechan.kr, X-API-Key)
-                                             ├─ qwen2.5:7b (chat)
-                                             └─ bge-m3     (embed)
+                                          ├─ PostgreSQL sqld_app  (도메인/설정)
+                                          ├─ PostgreSQL sqld_q###  (샌드박스 DB, 문제별 — Oracle SQL 문법 환경)
+                                          ├─ Qdrant               (bge-m3 1024-dim)
+                                          ├─ Redis                (캐시/레이트리밋)
+                                          └─ FastAPI AI 서버 (:8001, X-API-Key)
+                                             ├─ Gemini API (google-genai) — 오답 역설계, AI 해설
+                                             ├─ Ollama qwen2.5:7b (chat)
+                                             └─ Ollama bge-m3     (embed)
 ```
 
 ### 2.2 배포 토폴로지
@@ -66,7 +67,8 @@ SQLD 자격증 학습 앱. 기존 교재/인강을 대체하는 것이 목표.
 | Frontend (React) | Vercel (글로벌 CDN, Git push 자동 배포) |
 | Backend (Spring Boot) | Synology NAS Docker (backend-api 컨테이너 1개) |
 | Admin UI (Thymeleaf) | 백엔드와 동일 컨테이너 (/admin/**) |
-| MariaDB / Qdrant / Redis / Ollama | Synology NAS (기존 인프라 재사용) |
+| FastAPI AI 서버 | Synology NAS Docker (:8001) |
+| PostgreSQL / Qdrant / Redis / Ollama | Synology NAS (기존 인프라 재사용) |
 
 ### 2.3 기술 스택
 
@@ -76,7 +78,7 @@ SQLD 자격증 학습 앱. 기존 교재/인강을 대체하는 것이 목표.
 | Language/Runtime | Java 21 | 주력 언어 |
 | Framework | Spring Boot 3 | 검증된 스택 |
 | ORM/DB | HikariCP, Flyway | 마이그레이션 관리 |
-| AI 통합 | RestClient (spring-ai 미사용) | X-API-Key 헤더 커스터마이징 비용 < 직접 구현 |
+| AI 통합 | RestClient → FastAPI AI 서버 프록시 | X-API-Key 헤더 커스터마이징, spring-ai 미사용 |
 | 캐시 | Caffeine | AppSetting/Prompt 5초 TTL |
 | 회복성 | Resilience4j (CB + TL) | AI 호출 폴백 |
 | Vector DB | io.qdrant:client | 유사 문제 검색 |
@@ -85,14 +87,14 @@ SQLD 자격증 학습 앱. 기존 교재/인강을 대체하는 것이 목표.
 #### Frontend
 | 영역 | 선택 | 이유 |
 |------|------|------|
-| Build | Vite + TypeScript | 빠른 HMR, TS 기본 지원 |
-| UI | React 18 | 생태계, 컴포넌트 재사용성 |
-| 서버 상태 | TanStack Query v5 | staleTime 캐시 정책 제어 |
-| 클라이언트 상태 | Zustand | 최소 보일러플레이트 |
-| 라우팅 | React Router v7 | SPA 4탭 + 중첩 라우트 |
+| Build | Vite 8.0.4 + TypeScript | 빠른 HMR, TS 기본 지원 |
+| UI | React 19.2.4 | 생태계, 컴포넌트 재사용성 |
+| 서버 상태 | fetch wrapper (커스텀) | TanStack Query 미사용, 외부 의존성 최소화 |
+| 클라이언트 상태 | Zustand 5 | 최소 보일러플레이트 |
+| 라우팅 | React Router DOM 7 | SPA 4탭 + 중첩 라우트 |
 | SQL 하이라이팅 | CodeMirror 6 | readonly 모드, SQL dialect 지원 |
 | 차트 | Recharts | 히트맵/바 차트 |
-| 스타일링 | Tailwind CSS | 빠른 프로토타이핑 |
+| 스타일링 | Tailwind CSS 4 + daisyUI 5 | 빠른 프로토타이핑 |
 | 마크다운 | react-markdown | AI 응답 렌더링 |
 | HTTP | fetch wrapper (커스텀) | 외부 의존성 최소화 |
 | 배포 | Vercel | Git push 자동 배포 |
@@ -101,43 +103,40 @@ SQLD 자격증 학습 앱. 기존 교재/인강을 대체하는 것이 목표.
 
 ```
 passQL/
-├── docker-compose.yml          # backend-api 1개 서비스
-├── server/                     # Spring Boot 3 백엔드
+├── docker-compose.yml          # backend-api + ai-server 서비스
+├── server/                     # Spring Boot 3 멀티모듈 백엔드
 │   ├── Dockerfile
 │   ├── build.gradle
-│   └── src/main/
-│       ├── java/com/passql/
-│       │   ├── config/         # Security(permitAll), SandboxDataSourceConfig
-│       │   ├── question/       # Question/Choice 도메인 + API
-│       │   ├── sandbox/        # SandboxExecutor, SqlSafetyValidator
-│       │   ├── submission/
-│       │   ├── progress/
-│       │   ├── ai/             # OllamaClient, QdrantSearcher, AiService
-│       │   ├── prompt/         # PromptService (Caffeine)
-│       │   ├── setting/        # AppSettingService (Caffeine)
-│       │   ├── meta/           # topic / subtopic / tag
-│       │   └── admin/          # Thymeleaf controllers
+│   ├── PQL-Common/             # 공통 유틸, 예외, 설정
+│   ├── PQL-Domain-Member/      # 회원 도메인 (UUID 기반 무계정)
+│   ├── PQL-Domain-Question/    # 문제/선택지/샌드박스 도메인
+│   ├── PQL-Domain-Submission/  # 제출/진도 도메인
+│   ├── PQL-Domain-AI/          # AI 서버 프록시 클라이언트
+│   ├── PQL-Domain-Meta/        # topic/subtopic/tag 메타
+│   ├── PQL-Application/        # 서비스 레이어 조합
+│   └── PQL-Web/                # Spring MVC 컨트롤러, Thymeleaf admin
 │       └── resources/
 │           ├── application.yml / -dev.yml / -prod.yml
 │           ├── templates/admin/
-│           └── db/migration/   # V1__schema.sql, V2__bootstrap_meta.sql
+│           └── db/migration/   # V0_0_*.sql (Flyway V0_0_ 접두사)
 ├── client/                     # React (Vite + TypeScript) → Vercel 배포
 │   ├── vercel.json             # SPA fallback + /api 리라이트
 │   ├── package.json
 │   ├── vite.config.ts
-│   ├── tailwind.config.ts
 │   ├── tsconfig.json
 │   └── src/
 │       ├── main.tsx
 │       ├── App.tsx
 │       ├── api/                # fetch wrapper, API 함수
-│       ├── hooks/              # TanStack Query 커스텀 훅
-│       ├── stores/             # Zustand (uuid, ui 상태)
+│       ├── stores/             # Zustand 5 (uuid, ui 상태)
 │       ├── pages/              # Home, Questions, QuestionDetail, Stats, Settings
 │       ├── components/         # layout, question, result, stats
 │       ├── types/              # TypeScript 인터페이스
 │       └── utils/              # uuid.ts, nickname.ts
-└── ai/                         # AI 서버 (필요 시)
+└── ai/                         # FastAPI AI 서버 (포트 8001)
+    ├── Dockerfile
+    ├── main.py
+    └── requirements.txt        # google-genai, ollama 등
 ```
 
 ### 2.5 docker-compose.yml
@@ -151,9 +150,14 @@ services:
     environment:
       SPRING_PROFILES_ACTIVE: prod
     restart: unless-stopped
+  ai-server:
+    build: ./ai
+    image: passql/ai-server:latest
+    ports: ["8001:8001"]
+    restart: unless-stopped
 ```
 
-> 기존 MariaDB / Qdrant / Redis / Ollama는 Synology에서 IP:Port로 접근.  
+> 기존 PostgreSQL / Qdrant / Redis / Ollama는 Synology에서 IP:Port로 접근.  
 > 프론트엔드는 Vercel에서 서빙 → Docker에 포함하지 않음.
 
 ### 2.6 vercel.json
@@ -179,33 +183,57 @@ services:
 
 > "런타임 편집" 표시 항목은 관리자 UI(Thymeleaf)에서 전부 편집 가능. 이것이 코드 프리즈 원칙의 실제 구현.
 
+### 3.0 회원
+
+**member**
+
+| 컬럼 | 타입 | 설명 |
+|------|------|------|
+| member_uuid | UUID PK | 브라우저 UUID, 계정 없음 |
+| nickname | VARCHAR | 랜덤 생성 닉네임 |
+| role | ENUM | 역할 (USER 등) |
+| status | ENUM | 상태 (ACTIVE 등) |
+| created_at / updated_at | TIMESTAMP | |
+
 ### 3.1 문제 / 선택지
 
 **question**
 
 | 컬럼 | 타입 | 설명 |
 |------|------|------|
-| id | BIGINT PK | |
+| question_uuid | UUID PK | |
 | topic_code | VARCHAR FK → topic.code | |
 | subtopic_code | VARCHAR FK → subtopic.code | nullable |
 | difficulty | TINYINT | 1~5 |
 | execution_mode | ENUM('executable','concept_only') | concept_only는 샌드박스 없음 |
-| dialect | ENUM('mariadb') | Phase 2에서 oracle 추가 예정 |
+| dialect | ENUM('oracle') | Oracle SQL 문법 환경 (실행은 PostgreSQL) |
 | sandbox_db_name | VARCHAR | 예: sqld_q123 |
 | stem | TEXT | 문제 지문 |
 | schema_display | TEXT | 사용자에게 보여줄 스키마 텍스트 |
 | schema_ddl | TEXT | 실제 샌드박스 생성용 DDL+INSERT |
 | explanation_summary | TEXT | 전체 해설 |
 | extra_meta_json | JSON | 확장용 |
-| created_at / updated_at | DATETIME | |
+| created_at / updated_at | TIMESTAMP | |
 
-**question_choice**
+**question_choice_set**
 
 | 컬럼 | 타입 | 설명 |
 |------|------|------|
-| id | BIGINT PK | |
-| question_id | FK | |
-| choice_key | CHAR(1) | A~E |
+| choice_set_uuid | UUID PK | |
+| question_uuid | FK | |
+| choice_set_policy | ENUM | AI_ONLY / ODD_ONE_OUT / RESULT_MATCH / HYBRID / CURATED_ONLY |
+| source | VARCHAR | 생성 출처 |
+| status | ENUM | ACTIVE 등 |
+| sandbox_validation_passed | BOOLEAN | 샌드박스 검증 통과 여부 |
+| created_at / updated_at | TIMESTAMP | |
+
+**question_choice_set_item**
+
+| 컬럼 | 타입 | 설명 |
+|------|------|------|
+| item_uuid | UUID PK | |
+| choice_set_uuid | FK | |
+| choice_key | CHAR(1) | A/B/C/D |
 | kind | ENUM('sql','text') | |
 | body | TEXT | 선택지 본문 |
 | is_correct | BOOLEAN | |
@@ -214,7 +242,7 @@ services:
 
 **question_concept_tag** (M:N)
 
-- `question_id` FK, `tag_key` FK
+- `question_uuid` FK, `tag_key` FK
 
 ### 3.2 메타 (런타임 편집)
 
@@ -263,7 +291,7 @@ services:
 
 캐시: Caffeine 5초 TTL + 저장 시 evict
 
-#### app_setting 초기값 (V2__bootstrap_meta.sql)
+#### app_setting 초기값 (V0_0_ 접두사 마이그레이션)
 
 | key | value |
 |-----|-------|
@@ -285,25 +313,26 @@ services:
 ### 3.4 사용자 활동
 
 **submission**
-- `id`, `user_uuid`, `question_id`, `selected_key`, `is_correct`, `submitted_at`
+- `submission_uuid`, `member_uuid`, `question_uuid`, `choice_set_uuid`, `selected_choice_key`, `is_correct`, `submitted_at`
 
 **execution_log**
-- `id`, `user_uuid`, `question_id`, `choice_key`, `sql_text`, `status`, `error_code`, `error_message`, `row_count`, `elapsed_ms`, `executed_at`
+- `log_uuid`, `member_uuid`, `question_uuid`, `sql_text`, `status`, `error_code`, `error_message`, `row_count`, `elapsed_ms`, `executed_at`
 
 ### 3.5 샌드박스 DB 전략
 
-- 문제 ID당 DB 1개: `sqld_q{id}`
-- 관리자가 문제 등록 시 `SandboxProvisioner`가 DB 생성 → `schema_ddl` 실행
-- 접근 계정: `sqld_runner` (GRANT SELECT ON `sqld_q%.*` TO sqld_runner)
-- DDL은 별도 admin 계정으로만 실행
+- 문제별 PostgreSQL 스키마 1개: `sqld_q{uuid}`
+- Oracle SQL 문법 환경으로 포지셔닝 (실행 엔진은 PostgreSQL, Oracle 호환 함수/문법 지원)
+- 관리자가 문제 등록 시 `SandboxProvisioner`가 스키마 생성 → `schema_ddl` 실행
 - HikariCP 풀은 최초 요청 시 lazy 생성
 
 ### 3.6 Flyway 범위 (코드 프리즈 원칙)
 
-| 파일 | 내용 |
-|------|------|
-| V1__schema.sql | 전체 테이블/인덱스/FK |
-| V2__bootstrap_meta.sql | app_setting 기본값, prompt_template 3종 v1, topic 10개, 샘플 concept_tag 20개 |
+Flyway 마이그레이션 접두사: `V0_0_` (예: `V0_0_1__schema.sql`)
+
+| 파일 패턴 | 내용 |
+|----------|------|
+| V0_0_1__schema.sql | 전체 테이블/인덱스/FK |
+| V0_0_2__bootstrap_meta.sql | app_setting 기본값, prompt_template 3종 v1, topic 10개, 샘플 concept_tag 20개 |
 
 > `question` / `concept_doc` 본문은 Flyway에 없음 — 관리자 UI에서 등록
 
@@ -313,19 +342,69 @@ services:
 
 ### 4.1 Public API
 
+#### Members
+
 | Method | Path | Body/Query | 응답 |
 |--------|------|-----------|------|
-| GET | `/api/meta/topics` | — | topic + subtopic 트리 |
-| GET | `/api/meta/tags` | — | concept_tag 활성 목록 |
-| GET | `/api/questions` | `topic, subtopic, difficulty, mode, page, size` | `Page<QuestionSummary>` |
-| GET | `/api/questions/{id}` | — | Question 상세 + choices + schema_display |
-| POST | `/api/questions/{id}/execute` | `{userUuid, choiceKey?, sql?}` | ExecuteResult |
-| POST | `/api/questions/{id}/submit` | `{userUuid, selectedKey}` | `{isCorrect, rationale, correctKey}` |
-| POST | `/api/ai/explain-error` | `{userUuid, questionId, sql, errorMessage}` | `{text, promptVersion}` |
-| POST | `/api/ai/diff-explain` | `{userUuid, questionId, selectedKey}` | `{text, promptVersion, citedTags[]}` |
-| GET | `/api/ai/similar/{questionId}?k=` | — | 유사 문제 목록 |
-| GET | `/api/progress?userUuid=` | — | 진도 요약 |
-| GET | `/api/progress/heatmap?userUuid=` | — | 토픽별 숙련도 |
+| POST | `/members/register` | — | MemberRegisterResponse |
+| GET | `/members/me` | `?memberUuid=` | MemberMeResponse |
+| POST | `/members/me/regenerate-nickname` | `?memberUuid=` | NicknameRegenerateResponse |
+
+#### Questions
+
+| Method | Path | Body/Query | 응답 |
+|--------|------|-----------|------|
+| GET | `/questions` | `?page&size&topic&subtopic&difficulty&mode` | `Page<QuestionSummary>` |
+| GET | `/questions/{questionUuid}` | — | Question 상세 + choices + schema_display |
+| GET | `/questions/today` | `?memberUuid=` | 오늘의 문제 |
+| GET | `/questions/recommendations` | `?size&excludeQuestionUuid` | 추천 문제 목록 |
+| POST | `/questions/{questionUuid}/submit` | `{choiceSetId, selectedChoiceKey}` + `X-Member-UUID` 헤더 | SubmitResponse |
+| POST | `/questions/{questionUuid}/execute` | `{sql}` | ExecuteResult |
+| POST | `/questions/{questionUuid}/generate-choices` | — + `X-Member-UUID` 헤더 | SSE stream |
+
+#### AI
+
+| Method | Path | Body/Query | 응답 |
+|--------|------|-----------|------|
+| POST | `/ai/explain-error` | `{questionUuid, sql, errorMessage}` + `X-Member-UUID` 헤더 | AiExplainResponse |
+| POST | `/ai/diff-explain` | `{questionUuid, selectedChoiceKey}` + `X-Member-UUID` 헤더 | AiDiffExplainResponse |
+| GET | `/ai/similar/{questionUuid}` | `?k=` | 유사 문제 목록 |
+
+#### Progress
+
+| Method | Path | Body/Query | 응답 |
+|--------|------|-----------|------|
+| GET | `/progress` | `?memberUuid=` | 진도 요약 |
+| GET | `/progress/topic-analysis` | `?memberUuid=` | 토픽별 분석 |
+| GET | `/progress/heatmap` | `?memberUuid=&from&to` | 히트맵 데이터 |
+| GET | `/progress/ai-comment` | `?memberUuid=` | AI 진도 코멘트 |
+
+#### Meta
+
+| Method | Path | Body/Query | 응답 |
+|--------|------|-----------|------|
+| GET | `/meta/topics` | — | topic + subtopic 트리 |
+| GET | `/meta/tags` | — | concept_tag 활성 목록 |
+
+#### Home
+
+| Method | Path | Body/Query | 응답 |
+|--------|------|-----------|------|
+| GET | `/home/greeting` | `?memberUuid=` | 홈 인사/요약 |
+
+#### Feedback
+
+| Method | Path | Body/Query | 응답 |
+|--------|------|-----------|------|
+| POST | `/feedback` | `{content}` + `X-Member-UUID` 헤더 | — |
+| GET | `/feedback/me` | `X-Member-UUID` 헤더 | 내 피드백 목록 |
+
+#### ExamSchedule
+
+| Method | Path | Body/Query | 응답 |
+|--------|------|-----------|------|
+| GET | `/exam-schedules` | `?certType=` | 시험 일정 목록 |
+| GET | `/exam-schedules/selected` | — | 선택된 시험 일정 |
 
 ### 4.2 응답 포맷 — 실행 결과
 
@@ -380,7 +459,7 @@ services:
 - 폴백 시 `errorCode=AI_UNAVAILABLE` + 서버 고정 메시지 반환
 - 레이트리밋은 Redis 기반, 키: `rl:{user_uuid}:{bucket}`
 - SQL 실행 전 `SqlSafetyValidator` 통과 필수 (SELECT/WITH만, 단일 문, 길이 제한)
-- 샌드박스 실행은 MariaDB `max_statement_time` + HikariCP timeout 이중 방어
+- 샌드박스 실행은 PostgreSQL statement_timeout + HikariCP timeout 이중 방어
 
 ---
 
@@ -432,18 +511,9 @@ AiExplainSheet (dialog)
 
 | 레이어 | 도구 | 역할 |
 |--------|------|------|
-| 서버 상태 | TanStack Query v5 | 캐시, 로딩/에러 자동 관리 |
-| 클라이언트 상태 | Zustand | UUID, 닉네임, 현재 선택한 답, UI 토글 |
+| 서버 상태 | fetch wrapper (커스텀) | TanStack Query 미사용, 직접 호출 |
+| 클라이언트 상태 | Zustand 5 | UUID, 닉네임, 현재 선택한 답, UI 토글 |
 | HTTP | fetch wrapper | `/api/*` → Vercel 리라이트 → NAS 백엔드 |
-
-#### 캐싱 전략
-
-| 데이터 | staleTime | 무효화 |
-|--------|-----------|--------|
-| topics / tags | Infinity | 브라우저 새로고침 |
-| 문제 목록 | 30_000ms | 필터 변경 시 자동 refetch |
-| 문제 상세 | 0 | 탭 진입 시마다 재조회 (관리자 수정 즉시 반영) |
-| 진도 | 0 | 탭 진입 시마다 재조회 |
 
 ### 5.4 API 클라이언트 (api/client.ts)
 
@@ -619,7 +689,7 @@ public class OllamaClient {
 #### SandboxExecutor
 
 1. `sandbox_db_name`으로 HikariCP 풀 조회 (lazy 생성)
-2. `SET SESSION max_statement_time = {app_setting}` 먼저 실행
+2. `SET statement_timeout = '{app_setting}s'` 먼저 실행 (PostgreSQL)
 3. SELECT 실행 → ResultSet → columns, rows, rowCount
 4. `rowCount > max_rows` 초과 시 잘라냄
 5. 레이트리밋: `ratelimit.execute.per_minute` (Redis)
@@ -662,31 +732,50 @@ public class AiService {
 
 ## 7. AI 서버
 
-현재 MVP에서는 별도 AI 서버 없이 Spring Boot 백엔드에서 Ollama 게이트웨이를 직접 호출.
+`ai/` 디렉토리에 별도 **FastAPI AI 서버**가 존재하며, 포트 8001에서 실행된다.  
+Spring Boot 백엔드는 이 서버로 `X-API-Key` 헤더를 통해 프록시 요청을 보낸다.
+
+### 7.1 구성
 
 | 항목 | 값 |
 |------|-----|
-| 게이트웨이 URL | `https://ai.suhsaechan.kr` |
+| 프레임워크 | FastAPI (Python) |
+| 포트 | 8001 |
 | 인증 | `X-API-Key` 헤더 |
-| Chat 모델 | `qwen2.5:7b` |
-| Embedding 모델 | `bge-m3` (1024-dim) |
 
-> `spring-ai` 미채택 사유: X-API-Key 헤더 커스터마이징 비용이 직접 RestClient 쓰는 것보다 크다.
+### 7.2 사용 모델 / SDK
+
+| 용도 | 모델 / SDK | 비고 |
+|------|-----------|------|
+| 오답 역설계, AI 해설 | Gemini API (`google-genai` SDK) | Google Gemini 모델 |
+| 채팅 (RAG 등) | Ollama `qwen2.5:7b` | Synology NAS 자체 호스팅 |
+| 임베딩 | Ollama `bge-m3` (1024-dim) | 유사 문제 검색 |
+
+### 7.3 Spring Boot → FastAPI 연동
+
+- Spring Boot의 `PQL-Domain-AI` 모듈이 FastAPI AI 서버 클라이언트 역할
+- RestClient로 `X-API-Key` 헤더 첨부 후 `http://<ai-server>:8001/` 로 프록시
+- AI 호출은 `@CircuitBreaker(name="ai") + @TimeLimiter(name="ai")` 로 폴백 보호
+- `spring-ai` 미채택 사유: X-API-Key 헤더 커스터마이징 비용이 직접 RestClient 쓰는 것보다 크다.
 
 ---
 
 ## 8. 일정 / 리스크 / 운영
 
-### 8.1 6일 개발 일정
+### 8.1 개발 일정 — 완료 (현재 v0.0.129 운영 중)
 
-| Day | 작업 | 완료 기준 |
-|-----|------|----------|
-| D1 | 모노레포, Dockerfile(backend), Flyway V1/V2, Spring 부팅, MariaDB/Qdrant/Ollama 연결 테스트, Vercel 프로젝트 연결 | 각 연결 ping 성공 |
-| D2 | question/choice CRUD, SandboxProvisioner, SqlSafetyValidator, SandboxExecutor, `/questions/*`, `/execute` | execute 1회 성공 (ok + error 각 1건) |
-| D3 | OllamaClient, PromptService(Caffeine), QdrantSearcher, AiService(CB/TL), concept_doc 자동 임베딩, `/ai/*` | `/api/ai/*` explain-error, diff-explain, similar 각 1회 성공 |
-| D4 | Thymeleaf 7화면 + AppSettingService (React D1~D2 병행) | 각 화면 CRUD 1회씩 성공, 설정 변경 즉시 반영 확인 |
-| D5 | React 4탭 + 문제상세 + AI 시트 + API 클라이언트 + UUID + Vercel 배포 확인 | React에서 문제 1개 끝까지 풀이 가능 |
-| D6 | 문제 30~40개 입력, concept_doc 20개 작성, E2E 리허설, 버그픽스, 데모 배포 | 데모 시나리오 3회 무결점 실행 |
+> 초기 6일 개발 일정은 완료됨. 현재 운영 단계이며 지속적으로 기능 개선 중.
+
+| Day | 작업 | 상태 |
+|-----|------|------|
+| D1 | 멀티모듈 구성, Dockerfile, Flyway V0_0_, Spring 부팅, PostgreSQL/Qdrant/Ollama 연결 | ✅ 완료 |
+| D2 | question/choiceSet CRUD, SandboxProvisioner, SqlSafetyValidator, SandboxExecutor, `/questions/*`, `/execute` | ✅ 완료 |
+| D3 | FastAPI AI 서버, Gemini API 연동, QdrantSearcher, AiService(CB/TL), `/ai/*` | ✅ 완료 |
+| D4 | Thymeleaf admin UI + AppSettingService (React 병행) | ✅ 완료 |
+| D5 | React 4탭 + 문제상세 + AI 시트 + UUID + Vercel 배포 | ✅ 완료 |
+| D6 | 문제 입력, E2E 리허설, 버그픽스, 데모 배포 | ✅ 완료 |
+
+**CI/CD**: GitHub Actions workflows 16개 (Spring Boot CI/CD, FastAPI AI 서버 CI/CD, React 빌드 체크, Vercel 자동 배포, 버전 자동 동기화, CHANGELOG 자동 생성, QA 이슈 봇 등)
 
 ### 8.2 리스크
 
@@ -710,11 +799,11 @@ public class AiService {
 - LLM 파라미터 조정 (top_k, temperature, timeout, rate limit)
 - 기능 플래그 on/off (app_setting: feature.*)
 
-### 8.4 Phase 2 (코드 프리즈 이후 차기 버전)
+### 8.4 Phase 2 (차기 버전)
 
 - PWA (Service Worker, 오프라인)
 - 인증/계정 시스템
-- Oracle dialect (PIVOT, CONNECT BY, REGEXP_LIKE)
+- ~~Oracle dialect (PIVOT, CONNECT BY, REGEXP_LIKE)~~ → **완료**: 이미 Oracle SQL 문법 환경으로 포지셔닝됨
 - 다크모드
 - 소셜/리더보드
 - 푸시 알림 (학습 리마인더)

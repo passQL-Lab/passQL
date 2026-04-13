@@ -181,6 +181,11 @@ export const SchemaViewer = memo(function SchemaViewer({
                 {/* 샘플 데이터 카드 — space-y-2 간격으로 분리 */}
                 {hasSample && (
                   <div className="rounded-xl border border-border bg-surface-card overflow-hidden">
+                    {/* 샘플 데이터 헤더 — 스키마 카드와 동일한 스타일 */}
+                    <div className="px-3 py-1.5 flex items-center gap-1.5 text-sm font-semibold font-mono bg-accent-light text-brand border-b border-border">
+                      <Table2 size={14} />
+                      {table.tableName}
+                    </div>
                     <div className="overflow-x-auto">
                       <table className="text-sm whitespace-nowrap w-full border-collapse">
                         <thead>

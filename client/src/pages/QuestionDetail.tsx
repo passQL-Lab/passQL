@@ -436,12 +436,14 @@ export default function QuestionDetail({
       {/* 문제 지문 (토글) */}
       <button
         type="button"
-        className="bg-surface-card border border-border rounded-2xl p-4 sm:p-6 shadow-sm w-full text-left flex items-start gap-2 mt-2"
+        className="bg-brand-light border border-brand-medium rounded-2xl p-4 sm:p-6 shadow-sm w-full text-left mt-2"
         onClick={() => setStemOpen((prev) => !prev)}
       >
-        {!stemOpen && (
-          <BookOpen size={16} className="text-brand mt-0.5 shrink-0" />
-        )}
+        {/* 접힘/펼침 무관하게 항상 표시되는 지문 라벨 */}
+        <div className="flex items-center gap-1.5 mb-2 text-brand text-xs font-semibold uppercase tracking-wide">
+          <BookOpen size={12} className="shrink-0" />
+          문제
+        </div>
         {stemOpen ? (
           // 펼친 상태: MarkdownText로 코드 블록 포함 마크다운 렌더링
           <MarkdownText
