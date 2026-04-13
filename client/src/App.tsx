@@ -12,6 +12,7 @@ import RecommendationPractice from "./pages/RecommendationPractice";
 import Stats from "./pages/Stats";
 import Settings from "./pages/Settings";
 import DevPage from "./pages/DevPage";
+import SettingsFeedback from "./pages/SettingsFeedback";
 import { ensureRegistered } from "./stores/memberStore";
 
 /** /dev route guard — sessionStorage에 잠금 해제 플래그가 없으면 설정 화면으로 redirect */
@@ -59,6 +60,11 @@ const router = createBrowserRouter([
   {
     path: "dev",
     element: <DevGuard />,
+  },
+  // 건의사항 서브페이지 — AppLayout 밖 독립 라우트 (탭바 없는 몰입형)
+  {
+    path: "settings/feedback",
+    element: <SettingsFeedback />,
   },
 ]);
 
