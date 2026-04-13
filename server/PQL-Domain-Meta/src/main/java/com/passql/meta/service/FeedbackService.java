@@ -16,7 +16,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Slf4j
@@ -60,6 +62,16 @@ public class FeedbackService {
     public Page<FeedbackAdminResponse> getAllFeedbacks(Pageable pageable) {
         return feedbackRepository.findAllByOrderByCreatedAtDesc(pageable)
             .map(FeedbackAdminResponse::from);
+    }
+
+    public Map<FeedbackStatus, Long> countByStatus() {
+        Map<FeedbackStatus, Long> result = new EnumMap<>(FeedbackStatus.class);
+        for (FeedbackStatus s : FeedbackStatus.values()) {
+            result.put(s, 0L);
+        }
+        feedbackRepository.countGroupByStatus()
+            .forEach(row -> result.put((FeedbackStatus) row[0], (Long) row[1]));
+        return result;
     }
 
     @Transactional
