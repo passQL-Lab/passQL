@@ -1,11 +1,36 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-13T09:49:35Z",
-    "currentVersion": "0.0.141",
+    "lastUpdated": "2026-04-13T11:31:55Z",
+    "currentVersion": "0.0.143",
     "projectType": "basic",
-    "totalReleases": 61
+    "totalReleases": 62
   },
   "releases": [
+    {
+      "version": "0.0.143",
+      "project_type": "basic",
+      "date": "2026-04-13",
+      "pr_number": 252,
+      "raw_summary": "## Summary by CodeRabbit\n\n## Release Notes\n\n* **New Features**\n  * 임베딩 인덱스 관리 기능 추가 - 관리자 페이지에서 색인 상태 확인 및 선택적/전체 재색인 실행 가능\n  * 연습 결과 화면 시각 개선 - 정답/오답 카드를 색상으로 구분 표시\n\n* **Style**\n  * 연습 피드백 버튼 스타일 개선 - 정답/오답 상태에 따라 색상 적용\n  * 네비게이션 레이블 업데이트 - 카테고리 목록에서 태그 목록으로 변경\n  * 마크다운 인라인 코드 텍스트 크기 조정",
+      "parsed_changes": {
+        "new_features": {
+          "title": "New Features",
+          "items": [
+            "임베딩 인덱스 관리 기능 추가 - 관리자 페이지에서 색인 상태 확인 및 선택적/전체 재색인 실행 가능",
+            "연습 결과 화면 시각 개선 - 정답/오답 카드를 색상으로 구분 표시"
+          ]
+        },
+        "style": {
+          "title": "Style",
+          "items": [
+            "연습 피드백 버튼 스타일 개선 - 정답/오답 상태에 따라 색상 적용",
+            "네비게이션 레이블 업데이트 - 카테고리 목록에서 태그 목록으로 변경",
+            "마크다운 인라인 코드 텍스트 크기 조정"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.141",
       "project_type": "basic",
