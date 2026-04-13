@@ -36,7 +36,7 @@ public class AdminFeedbackController {
         model.addAttribute("statuses", FeedbackStatus.values());
         model.addAttribute("pendingCount", statusCounts.get(FeedbackStatus.PENDING));
         model.addAttribute("reviewedCount", statusCounts.get(FeedbackStatus.REVIEWED));
-        model.addAttribute("resolvedCount", statusCounts.get(FeedbackStatus.RESOLVED));
+        model.addAttribute("appliedCount", statusCounts.get(FeedbackStatus.APPLIED));
         model.addAttribute("pageTitle", "건의사항 관리");
         model.addAttribute("currentMenu", "feedbacks");
         return "admin/feedbacks";
