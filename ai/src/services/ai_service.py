@@ -14,6 +14,7 @@ from src.models.ai_request import (
     GenerateQuestionFullRequest,
     IndexQuestionRequest,
     IndexQuestionsBulkRequest,
+    IndexStatusRequest,
     RecommendRequest,
     TestPromptRequest,
 )
@@ -25,6 +26,7 @@ from src.models.ai_response import (
     GenerationMetadata,
     IndexQuestionResponse,
     IndexQuestionsBulkResponse,
+    IndexStatusResponse,
     RecommendedQuestion,
     RecommendResponse,
     SimilarItem,
@@ -451,6 +453,47 @@ class AiService:
 
         logger.info(f"[recommend] 추천 완료: {len(items)}개")
         return RecommendResponse(items=items, query_source_count=len(source_vectors))
+
+    async def get_index_status(self, req: IndexStatusRequest) -> IndexStatusResponse:
+        """
+        DB 전체 문제 UUID와 Qdrant 색인 UUID를 비교하여 미색인 목록 반환.
+
+        흐름:
+        1. Qdrant scroll_all_ids로 컬렉션의 모든 포인트 UUID 수집
+        2. DB UUID 집합과 차집합 계산 → 미색인 UUID 목록 도출
+
+        Args:
+            req: IndexStatusRequest (Java에서 전달한 DB 전체 문제 UUID 목록)
+
+        Returns:
+            IndexStatusResponse: 컬렉션 포인트 수, DB 문제 수, 미색인 수, 미색인 UUID 목록
+        """
+        logger.info(f"[index-status] 요청: db_uuid_count={len(req.question_uuids)}")
+
+        # Qdrant에서 현재 색인된 모든 UUID 수집
+        qdrant_ids = await qdrant_search_client.scroll_all_ids(self.QUESTION_COLLECTION)
+        qdrant_uuid_set = set(qdrant_ids)
+        db_uuid_set = set(req.question_uuids)
+
+        # 차집합: DB에 있지만 Qdrant에 없는 UUID = 미색인
+        unindexed = list(db_uuid_set - qdrant_uuid_set)
+
+        logger.info(
+            f"[index-status] 결과: db={len(db_uuid_set)}, qdrant={len(qdrant_uuid_set)}, "
+            f"미색인={len(unindexed)}"
+        )
+        # 미색인 UUID 앞 10개만 DEBUG 출력 (목록이 길 경우 로그 폭발 방지)
+        logger.debug(
+            f"[index-status] 미색인 UUID (앞 10개): "
+            f"{unindexed[:10]}{'...' if len(unindexed) > 10 else ''}"
+        )
+
+        return IndexStatusResponse(
+            collection_points_count=len(qdrant_uuid_set),
+            db_question_count=len(db_uuid_set),
+            unindexed_count=len(unindexed),
+            unindexed_uuids=unindexed,
+        )
 
 
 # 싱글턴 인스턴스
