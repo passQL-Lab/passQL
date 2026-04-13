@@ -80,7 +80,7 @@ public class SubmissionService {
                 .sessionUuid(sessionUuid)
                 .submittedAt(LocalDateTime.now())
                 .build();
-        submissionRepository.save(submission);
+        submission = submissionRepository.save(submission);
 
         // 6. EXECUTABLE 문제: 양쪽 SQL 실행 결과 비교
         ExecuteResult selectedResult = null;
@@ -135,7 +135,9 @@ public class SubmissionService {
                 selectedResult,
                 correctResult,
                 correctSql,
-                selectedSql
+                selectedSql,
+                // 저장된 제출 UUID — 프론트 신고 기능에서 submissionUuid 식별에 사용
+                submission.getSubmissionUuid()
         );
     }
 

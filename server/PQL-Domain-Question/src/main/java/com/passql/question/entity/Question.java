@@ -87,4 +87,8 @@ public class Question extends BaseEntity {
 
     @Column(nullable = false)
     private Boolean isActive = true;
+
+    public void deactivate() {
+        this.isActive = false;
+    }
 }

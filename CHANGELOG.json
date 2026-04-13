@@ -1,11 +1,37 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-13T05:29:06Z",
-    "currentVersion": "0.0.127",
+    "lastUpdated": "2026-04-13T06:12:30Z",
+    "currentVersion": "0.0.128",
     "projectType": "basic",
-    "totalReleases": 53
+    "totalReleases": 54
   },
   "releases": [
+    {
+      "version": "0.0.128",
+      "project_type": "basic",
+      "date": "2026-04-13",
+      "pr_number": 231,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 새로운 기능\n* 문제 신고 기능 추가: 신고 카테고리 선택 및 상세 내용 입력 지원\n* 신고 상태 조회 기능 추가\n* 관리자 신고 관리 인터페이스 추가: 신고 내역 조회 및 처리 기능\n\n## Chores\n* 버전 업데이트 (0.0.127 → 0.0.128)",
+      "parsed_changes": {
+        "문제_신고_기능_추가__신고_카테고리_선택_및_상세_내용_입력_지원": {
+          "title": "문제 신고 기능 추가: 신고 카테고리 선택 및 상세 내용 입력 지원",
+          "items": []
+        },
+        "신고_상태_조회_기능_추가": {
+          "title": "신고 상태 조회 기능 추가",
+          "items": []
+        },
+        "관리자_신고_관리_인터페이스_추가__신고_내역_조회_및_처리_기능": {
+          "title": "관리자 신고 관리 인터페이스 추가: 신고 내역 조회 및 처리 기능",
+          "items": []
+        },
+        "버전_업데이트__0_0_127___0_0_128": {
+          "title": "버전 업데이트 (0.0.127 → 0.0.128)",
+          "items": []
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.127",
       "project_type": "basic",
