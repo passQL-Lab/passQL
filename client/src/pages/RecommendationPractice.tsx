@@ -16,7 +16,7 @@ export default function RecommendationPractice() {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
-  const { markCorrect, setReturnStep, sessionId: storeSessionId } = usePracticeStore();
+  const { setReturnStep, sessionId: storeSessionId } = usePracticeStore();
 
   // PracticeResult 등 이전 화면으로 복귀할 경로 — 없으면 홈으로
   const locationState = location.state as { returnPath?: string; initialStep?: number } | null;
@@ -53,10 +53,6 @@ export default function RecommendationPractice() {
         // heatmap·progress 무효화 — 학습 현황 캘린더와 streak 즉시 갱신
         queryClient.invalidateQueries({ queryKey: ["heatmap"] });
         queryClient.invalidateQueries({ queryKey: ["progress"] });
-        // PracticeResult에서 진입한 경우 정답 시 store 결과 갱신
-        if (result.isCorrect && isPracticeReview) {
-          markCorrect(questionUuid);
-        }
         setFeedback(result);
       } catch {
         navigate("/", { replace: true });
@@ -65,7 +61,7 @@ export default function RecommendationPractice() {
         setSubmitting(false);
       }
     },
-    [questionUuid, navigate, queryClient, isPracticeReview, markCorrect, sessionUuid],
+    [questionUuid, navigate, queryClient, sessionUuid],
   );
 
   if (!questionUuid) {
