@@ -2,7 +2,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import { useParams, useNavigate, useBlocker } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft, BookOpen, RefreshCw, Sparkles } from "lucide-react";
-import ReactMarkdown from "react-markdown";
+import MarkdownText from "../components/MarkdownText";
 import { StarRating } from "../components/StarRating";
 import { ChoiceCard } from "../components/ChoiceCard";
 import AiExplanationSheet from "../components/AiExplanationSheet";
@@ -443,28 +443,11 @@ export default function QuestionDetail({
           <BookOpen size={16} className="text-brand mt-0.5 shrink-0" />
         )}
         {stemOpen ? (
-          // 펼친 상태: react-markdown으로 코드 블록 포함 마크다운 렌더링
-          <div className="text-sm text-body min-w-0 w-full">
-            <ReactMarkdown
-              components={{
-                code({ children, className }) {
-                  // 코드 블록은 디자인 시스템 code-block 스타일 적용
-                  const isBlock = className?.includes("language-");
-                  return isBlock ? (
-                    <pre className="bg-surface-code rounded-lg px-4 py-3 text-xs leading-relaxed whitespace-pre-wrap wrap-break-word font-mono">
-                      <code>{children}</code>
-                    </pre>
-                  ) : (
-                    <code className="bg-surface-code px-1 rounded text-xs font-mono">
-                      {children}
-                    </code>
-                  );
-                },
-              }}
-            >
-              {question.stem}
-            </ReactMarkdown>
-          </div>
+          // 펼친 상태: MarkdownText로 코드 블록 포함 마크다운 렌더링
+          <MarkdownText
+            text={question.stem}
+            className="text-sm text-body min-w-0 w-full"
+          />
         ) : (
           // 접힌 상태: 마크다운 문법 제거 후 한 줄 truncate
           <p className="text-body text-sm truncate">

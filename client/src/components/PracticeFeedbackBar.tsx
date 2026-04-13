@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { Check, X, Flag } from "lucide-react";
 import type { SubmitResult } from "../types/api";
 import { getRandomExecutableGradingMessage } from "../constants/microcopy";
+import MarkdownText from "./MarkdownText";
 
 interface PracticeFeedbackBarProps {
   readonly result: SubmitResult;
@@ -78,11 +79,10 @@ export default function PracticeFeedbackBar({
 
           {/* 해설 텍스트 */}
           {result.rationale && (
-            <p
+            <MarkdownText
+              text={result.rationale}
               className="text-sm leading-relaxed mb-3 feedback-bar-rationale"
-            >
-              {result.rationale}
-            </p>
+            />
           )}
           {/* EXECUTABLE 문제: 실제 DB에서 검증됐음을 어필 */}
           {result.correctResult != null && (

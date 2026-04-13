@@ -13,7 +13,7 @@ import {
 import { usePracticeStore } from "../stores/practiceStore";
 import { useMemberStore } from "../stores/memberStore";
 import { fetchAiComment } from "../api/progress";
-import { useAiText } from "../hooks/useAiText";
+import MarkdownText from "../components/MarkdownText";
 import ScoreCountUp from "../components/ScoreCountUp";
 import StepNavigator from "../components/StepNavigator";
 import ReportModal from "../components/ReportModal";
@@ -27,7 +27,7 @@ function formatDuration(ms: number): string {
   return remSec > 0 ? `${min}분 ${remSec}초` : `${min}분`;
 }
 
-/** useAiText 단어 수 기반 총 애니메이션 시간 계산 (훅과 동일 상수) */
+/** MarkdownText animated 단어 수 기반 총 애니메이션 시간 계산 */
 function calcAiAnimDuration(text: string): number {
   const wordCount = text.split(/\s+/).filter(Boolean).length;
   // startDelay 200ms + 단어 간격 55ms + 마지막 fade 300ms + 여유 300ms
@@ -105,12 +105,6 @@ export default function PracticeResult() {
     : aiCommentError
       ? false
       : (aiCommentData?.comment ?? "");
-
-  // AI 텍스트 단어 fade-in 훅 — 실패 시 undefined로 훅 비활성
-  const aiTextRef = useAiText(
-    typeof aiComment === "string" ? aiComment : undefined,
-    { startDelay: 200 },
-  );
 
   // AI 애니메이션 완료 or 실패 시 문제 카드 순차 등장
   useEffect(() => {
@@ -252,7 +246,11 @@ export default function PracticeResult() {
               <div className="h-4 bg-border rounded w-4/6" />
             </div>
           ) : (
-            <p ref={aiTextRef} className="text-body leading-relaxed mb-6" />
+            <MarkdownText
+                text={aiComment}
+                animated
+                className="text-body leading-relaxed mb-6"
+              />
           )}
         </>
       )}

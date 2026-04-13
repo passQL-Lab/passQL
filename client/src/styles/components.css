@@ -478,6 +478,17 @@ body {
   animation: ai-word-in 0.25s ease-out both;
 }
 
+/* ── MarkdownText 단어 fade-in (CSS custom property 방식) ── */
+/* animated=true 시 각 단어 <span>에 style="--i: N" 주입 → delay 자동 계산 */
+.md-word {
+  display: inline;
+  opacity: 0;
+  filter: blur(4px);
+  transform: translateY(2px);
+  animation: ai-word-in 0.25s ease-out both;
+  animation-delay: calc(var(--i, 0) * 55ms + 200ms);
+}
+
 /* ── AI 카드 헤더 슬라이드 ── */
 @keyframes ai-header-slide {
   from { opacity: 0; transform: translateX(-6px); }
