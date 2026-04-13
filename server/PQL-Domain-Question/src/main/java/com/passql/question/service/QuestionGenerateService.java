@@ -217,9 +217,8 @@ public class QuestionGenerateService {
     }
 
     /**
-     * 활성 문제 전체를 Qdrant에 일괄 재색인한다 (관리자 "전체 색인" 버튼용).
-     * DB에서 전체 활성 문제를 조회하여 IndexQuestionRequest 목록을 구성한 뒤
-     * Python AI 서버 POST /api/ai/index-questions-bulk 를 호출한다.
+     * 활성 문제 전체를 Qdrant에 재색인한다 (관리자 "전체 색인" 버튼용).
+     * 타임아웃 문제를 방지하기 위해 1개씩 순차 전송한다.
      */
     @Transactional(readOnly = true)
     public IndexQuestionsBulkResult reindexAll() {
@@ -230,16 +229,12 @@ public class QuestionGenerateService {
                 .map(q -> buildIndexRequest(q))
                 .toList();
 
-        IndexQuestionsBulkResult result = aiGatewayClient.indexQuestionsBulk(
-                new IndexQuestionsBulkRequest(requests)
-        );
-        log.info("[reindex-all] 완료: total={}, succeeded={}, failed={}",
-                result.total(), result.succeeded(), result.failed());
-        return result;
+        return indexOneByOne(requests, "reindex-all");
     }
 
     /**
-     * 선택한 문제 UUID 목록을 Qdrant에 일괄 재색인한다 (관리자 "선택 색인" 버튼용).
+     * 선택한 문제 UUID 목록을 Qdrant에 재색인한다 (관리자 "선택 색인" 버튼용).
+     * 타임아웃 문제를 방지하기 위해 1개씩 순차 전송한다.
      * 존재하지 않는 UUID는 조용히 스킵한다.
      */
     @Transactional(readOnly = true)
@@ -253,13 +248,41 @@ public class QuestionGenerateService {
                 .toList();
 
         log.info("[reindex-selected] 실제 처리할 문제 수={}", requests.size());
+        return indexOneByOne(requests, "reindex-selected");
+    }
 
-        IndexQuestionsBulkResult result = aiGatewayClient.indexQuestionsBulk(
-                new IndexQuestionsBulkRequest(requests)
-        );
-        log.info("[reindex-selected] 완료: total={}, succeeded={}, failed={}",
-                result.total(), result.succeeded(), result.failed());
-        return result;
+    /**
+     * IndexQuestionRequest 목록을 1개씩 순차 전송하여 결과를 집계한다.
+     * bulk 전송 시 타임아웃이 발생하는 경우를 방지한다.
+     */
+    private IndexQuestionsBulkResult indexOneByOne(List<IndexQuestionRequest> requests, String logPrefix) {
+        int succeeded = 0;
+        int failed = 0;
+        List<String> failedUuids = new java.util.ArrayList<>();
+
+        int total = requests.size();
+        for (int i = 0; i < total; i++) {
+            IndexQuestionRequest req = requests.get(i);
+            try {
+                var result = aiGatewayClient.indexQuestion(req);
+                if (result != null) {
+                    succeeded++;
+                } else {
+                    failed++;
+                    failedUuids.add(req.questionUuid());
+                    log.warn("[{}] 색인 결과 null: uuid={}", logPrefix, req.questionUuid());
+                }
+            } catch (Exception e) {
+                failed++;
+                failedUuids.add(req.questionUuid());
+                log.warn("[{}] 색인 실패: uuid={}, error={}", logPrefix, req.questionUuid(), e.getMessage());
+            }
+            // 매 문제마다 진행 상황 로그
+            log.info("[{}] 진행: {}/{} (성공={}, 실패={})", logPrefix, i + 1, total, succeeded, failed);
+        }
+
+        log.info("[{}] 완료: total={}, succeeded={}, failed={}", logPrefix, requests.size(), succeeded, failed);
+        return new IndexQuestionsBulkResult(requests.size(), succeeded, failed, failedUuids);
     }
 
     /**

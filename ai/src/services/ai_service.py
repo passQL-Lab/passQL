@@ -285,8 +285,8 @@ class AiService:
 
     # Qdrant 컬렉션명 상수
     QUESTION_COLLECTION = "passql_questions"
-    # bge-m3 임베딩 차원
-    EMBED_DIM = 1024
+    # qwen3-embedding:4b 임베딩 차원
+    EMBED_DIM = 2560
 
     def _build_embed_text(self, req: IndexQuestionRequest) -> str:
         """

@@ -3,7 +3,7 @@ Qdrant 벡터 DB 클라이언트 (search / upsert)
 """
 import logging
 import httpx
-from src.core.config import settings
+from src.core.config import settings, QDRANT_API_KEY
 from src.core.exceptions import CustomError
 
 logger = logging.getLogger(__name__)
@@ -20,18 +20,20 @@ class QdrantSearchClient:
 
     def __init__(self):
         self.base_url = settings.QDRANT_URL.rstrip("/")
+        self.api_key = QDRANT_API_KEY  # pydantic 우회해서 raw로 읽은 값
         self.timeout = 30
 
     def _headers(self) -> dict:
         """공통 요청 헤더 반환"""
-        return {
-            "Content-Type": "application/json",
-        }
+        headers = {"Content-Type": "application/json"}
+        if self.api_key:
+            headers["api-key"] = self.api_key
+        return headers
 
     async def create_collection_if_not_exists(
         self,
         collection: str,
-        vector_size: int = 1024,
+        vector_size: int = 2560,  # qwen3-embedding:4b 기본 차원
     ) -> bool:
         """
         Qdrant 컬렉션이 없으면 생성 (있으면 스킵)
