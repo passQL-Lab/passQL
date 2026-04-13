@@ -210,6 +210,16 @@ public class QuestionService {
         q.setChoiceSetPolicy(policy);
     }
 
+    /**
+     * 임베딩 색인 상태 확인을 위해 활성 문제 전체 UUID를 문자열 목록으로 반환.
+     * AdminEmbeddingController에서 AiGatewayClient.getIndexStatus() 호출 전 사용한다.
+     */
+    public List<String> getAllActiveQuestionUuids() {
+        List<String> uuids = questionRepository.findAllActiveQuestionUuids();
+        log.debug("[embedding-status] 활성 문제 UUID 조회 완료: count={}", uuids.size());
+        return uuids;
+    }
+
     private String topicName(UUID topicUuid) {
         if (topicUuid == null) return null;
         return topicRepository.findById(topicUuid).map(Topic::getDisplayName).orElse(null);

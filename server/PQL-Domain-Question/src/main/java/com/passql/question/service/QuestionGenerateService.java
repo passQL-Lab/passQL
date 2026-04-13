@@ -217,6 +217,78 @@ public class QuestionGenerateService {
     }
 
     /**
+     * 활성 문제 전체를 Qdrant에 일괄 재색인한다 (관리자 "전체 색인" 버튼용).
+     * DB에서 전체 활성 문제를 조회하여 IndexQuestionRequest 목록을 구성한 뒤
+     * Python AI 서버 POST /api/ai/index-questions-bulk 를 호출한다.
+     */
+    @Transactional(readOnly = true)
+    public IndexQuestionsBulkResult reindexAll() {
+        List<Question> questions = questionRepository.findByIsActiveTrue();
+        log.info("[reindex-all] 전체 재색인 시작: 활성 문제 수={}", questions.size());
+
+        List<IndexQuestionRequest> requests = questions.stream()
+                .map(q -> buildIndexRequest(q))
+                .toList();
+
+        IndexQuestionsBulkResult result = aiGatewayClient.indexQuestionsBulk(
+                new IndexQuestionsBulkRequest(requests)
+        );
+        log.info("[reindex-all] 완료: total={}, succeeded={}, failed={}",
+                result.total(), result.succeeded(), result.failed());
+        return result;
+    }
+
+    /**
+     * 선택한 문제 UUID 목록을 Qdrant에 일괄 재색인한다 (관리자 "선택 색인" 버튼용).
+     * 존재하지 않는 UUID는 조용히 스킵한다.
+     */
+    @Transactional(readOnly = true)
+    public IndexQuestionsBulkResult reindexSelected(List<String> questionUuids) {
+        log.info("[reindex-selected] 선택 재색인 시작: 요청 수={}", questionUuids.size());
+
+        List<IndexQuestionRequest> requests = questionUuids.stream()
+                .map(uuidStr -> questionRepository.findById(UUID.fromString(uuidStr)).orElse(null))
+                .filter(q -> q != null)
+                .map(q -> buildIndexRequest(q))
+                .toList();
+
+        log.info("[reindex-selected] 실제 처리할 문제 수={}", requests.size());
+
+        IndexQuestionsBulkResult result = aiGatewayClient.indexQuestionsBulk(
+                new IndexQuestionsBulkRequest(requests)
+        );
+        log.info("[reindex-selected] 완료: total={}, succeeded={}, failed={}",
+                result.total(), result.succeeded(), result.failed());
+        return result;
+    }
+
+    /**
+     * Question 엔티티 → IndexQuestionRequest 변환.
+     * 토픽/서브토픽 이름과 태그 키 조회를 포함한다.
+     */
+    private IndexQuestionRequest buildIndexRequest(Question question) {
+        String topicName = topicRepository.findById(question.getTopicUuid())
+                .map(Topic::getDisplayName)
+                .orElse("");
+        String subtopicName = question.getSubtopicUuid() != null
+                ? subtopicRepository.findById(question.getSubtopicUuid())
+                        .map(Subtopic::getDisplayName)
+                        .orElse(null)
+                : null;
+        List<String> tagKeys = questionConceptTagRepository
+                .findTagKeysByQuestionUuid(question.getQuestionUuid().toString());
+
+        return new IndexQuestionRequest(
+                question.getQuestionUuid().toString(),
+                topicName,
+                subtopicName,
+                question.getDifficulty(),
+                tagKeys,
+                question.getStem() != null ? question.getStem() : ""
+        );
+    }
+
+    /**
      * 문제를 Qdrant에 임베딩 적재한다.
      * VirtualThread로 실행하여 문제 등록 응답 속도에 영향을 주지 않는다.
      */
