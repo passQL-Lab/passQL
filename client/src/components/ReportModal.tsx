@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { submitReport } from "../api/reports";
 import type { ReportCategory } from "../api/reports";
+import { ApiError } from "../api/client";
 import { useMemberStore } from "../stores/memberStore";
 
 interface ReportModalProps {
@@ -75,8 +76,13 @@ export default function ReportModal({
         detail: selected.has("ETC") ? detail.trim() : undefined,
       });
       onSuccess();
-    } catch {
-      setError("신고 제출에 실패했습니다. 잠시 후 다시 시도해주세요.");
+    } catch (err) {
+      // 409: 이미 신고한 제출 — 성공으로 처리하여 버튼 비활성화 + 모달 닫기
+      if (err instanceof ApiError && err.status === 409) {
+        onSuccess();
+      } else {
+        setError("신고 제출에 실패했습니다. 잠시 후 다시 시도해주세요.");
+      }
     } finally {
       setLoading(false);
     }

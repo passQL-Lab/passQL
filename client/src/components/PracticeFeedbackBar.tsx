@@ -64,15 +64,15 @@ export default function PracticeFeedbackBar({
               <button
                 type="button"
                 aria-label="문제 신고"
-                className={`w-7 h-7 flex items-center justify-center rounded-full transition-opacity ${
+                className={`w-7 h-7 flex items-center justify-center rounded-full transition-all ${
                   Boolean(isReported)
-                    ? "opacity-40 cursor-not-allowed"
-                    : "opacity-60 hover:opacity-100"
+                    ? "bg-black/10 opacity-40 cursor-not-allowed"
+                    : "bg-black/10 hover:bg-black/20"
                 }`}
                 onClick={Boolean(isReported) ? undefined : guard(onReport)}
                 disabled={Boolean(isReported)}
               >
-                <Flag size={14} className={isCorrect ? "feedback-bar-heading--correct" : "feedback-bar-heading--error"} />
+                <Flag size={13} className={isCorrect ? "feedback-bar-heading--correct" : "feedback-bar-heading--error"} />
               </button>
             )}
           </div>
