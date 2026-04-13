@@ -1,11 +1,33 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-13T12:58:02Z",
-    "currentVersion": "0.0.149",
+    "lastUpdated": "2026-04-13T13:18:48Z",
+    "currentVersion": "0.0.150",
     "projectType": "basic",
-    "totalReleases": 67
+    "totalReleases": 68
   },
   "releases": [
+    {
+      "version": "0.0.150",
+      "project_type": "basic",
+      "date": "2026-04-13",
+      "pr_number": 265,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **New Features**\n  * 소셜 미디어에서 링크 공유 시 향상된 페이지 미리보기 지원 추가\n\n* **Chores**\n  * 버전을 0.0.150으로 업데이트",
+      "parsed_changes": {
+        "new_features": {
+          "title": "New Features",
+          "items": [
+            "소셜 미디어에서 링크 공유 시 향상된 페이지 미리보기 지원 추가"
+          ]
+        },
+        "chores": {
+          "title": "Chores",
+          "items": [
+            "버전을 0.0.150으로 업데이트"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.149",
       "project_type": "basic",
