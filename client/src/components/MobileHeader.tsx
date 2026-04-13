@@ -14,7 +14,7 @@ export default function MobileHeader({ onTeamClick }: MobileHeaderProps) {
       {/* 팀 아이콘 — 모달 오픈은 부모(AppLayout)가 담당 */}
       <button
         onClick={onTeamClick}
-        className="flex items-center justify-center w-8 h-8 rounded-full bg-accent-light text-brand hover:bg-indigo-100 transition-colors"
+        className="flex items-center justify-center w-8 h-8 rounded-full bg-brand-light text-brand hover:bg-brand-medium/20 transition-colors"
         aria-label="팀 정보 보기"
       >
         <Users size={16} />
