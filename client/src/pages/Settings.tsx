@@ -29,8 +29,8 @@ export default function Settings() {
       ? feedbackData.items.length
       : undefined;
 
-  // 개발자 모드 Easter Egg — 세션 한정 (새로고침 시 리셋)
-  const [devUnlocked, setDevUnlocked] = useState(false);
+  // 개발자 모드 Easter Egg — sessionStorage 복원으로 페이지 재진입 시에도 row 유지
+  const [devUnlocked, setDevUnlocked] = useState(() => sessionStorage.getItem("devUnlocked") === "1");
   const clickCountRef = useRef(0);
   // 2초 안에 5번 클릭하지 않으면 카운터 리셋
   const clickResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
