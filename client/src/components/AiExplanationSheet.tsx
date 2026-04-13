@@ -1,78 +1,11 @@
-import { useMemo } from "react";
 import { X } from "lucide-react";
+import MarkdownText from "./MarkdownText";
 
 interface AiExplanationSheetProps {
   readonly isOpen: boolean;
   readonly isLoading: boolean;
   readonly text: string;
   readonly onClose: () => void;
-}
-
-function renderMarkdown(text: string) {
-  const parts: Array<{ readonly type: string; readonly content: string }> = [];
-  const lines = text.split("\n");
-  let i = 0;
-
-  while (i < lines.length) {
-    const line = lines[i];
-
-    if (line.startsWith("```")) {
-      const codeLines: string[] = [];
-      i++;
-      while (i < lines.length && !lines[i].startsWith("```")) {
-        codeLines.push(lines[i]);
-        i++;
-      }
-      parts.push({ type: "code", content: codeLines.join("\n") });
-      i++;
-      continue;
-    }
-
-    parts.push({ type: "text", content: line });
-    i++;
-  }
-
-  return parts.map((part, idx) => {
-    if (part.type === "code") {
-      return (
-        <pre key={idx} className="code-block my-3">
-          <code>{part.content}</code>
-        </pre>
-      );
-    }
-
-    if (part.content === "") {
-      return <div key={idx} className="h-4" />;
-    }
-
-    const rendered = part.content.split(/(\*\*[^*]+\*\*|`[^`]+`)/).map((segment, j) => {
-      if (segment.startsWith("**") && segment.endsWith("**")) {
-        return (
-          <strong key={j} className="font-bold text-text-primary">
-            {segment.slice(2, -2)}
-          </strong>
-        );
-      }
-      if (segment.startsWith("`") && segment.endsWith("`")) {
-        return (
-          <code
-            key={j}
-            className="font-mono text-[13px] px-1 py-0.5 rounded"
-            style={{ backgroundColor: "var(--color-surface-code)" }}
-          >
-            {segment.slice(1, -1)}
-          </code>
-        );
-      }
-      return segment;
-    });
-
-    return (
-      <p key={idx} className="text-[15px] leading-relaxed" style={{ color: "#374151" }}>
-        {rendered}
-      </p>
-    );
-  });
 }
 
 function LoadingSkeleton() {
@@ -87,11 +20,6 @@ function LoadingSkeleton() {
 }
 
 export default function AiExplanationSheet({ isOpen, isLoading, text, onClose }: AiExplanationSheetProps) {
-  const renderedContent = useMemo(
-    () => (isLoading || !text ? null : renderMarkdown(text)),
-    [isLoading, text],
-  );
-
   if (!isOpen) return null;
 
   return (
@@ -113,7 +41,9 @@ export default function AiExplanationSheet({ isOpen, isLoading, text, onClose }:
             </button>
           </div>
           <div className="px-5 py-4">
-            {isLoading ? <LoadingSkeleton /> : renderedContent}
+            {isLoading ? <LoadingSkeleton /> : (
+              <MarkdownText text={text} className="text-[15px] leading-relaxed text-body" />
+            )}
           </div>
           {!isLoading && text && (
             <div className="px-5 pb-4 text-right">

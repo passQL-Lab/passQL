@@ -1,5 +1,6 @@
 import { memo } from "react";
 import type { ChoiceItem, ExecuteResult } from "../types/api";
+import MarkdownText from "./MarkdownText";
 import { ResultTable } from "./ResultTable";
 import { ResultMatchTable } from "./ResultMatchTable";
 
@@ -63,10 +64,11 @@ export const ChoiceCard = memo(function ChoiceCard({
         // stopPropagation 불필요 — 내부에 버튼 없으므로 카드 클릭 이벤트 그대로 전파
         <ResultMatchTable body={choice.body} inverted={isSelected} />
       ) : isConceptText ? (
-        // CONCEPT_ONLY: 일반 텍스트 렌더링 — 선택 시 흰색으로 반전
-        <p className={`text-body ${isSelected ? "choice-text-inverted" : ""}`}>
-          {choice.body}
-        </p>
+        // CONCEPT_ONLY: 마크다운 렌더링 — 선택 시 흰색으로 반전
+        <MarkdownText
+          text={choice.body}
+          className={`text-body ${isSelected ? "choice-text-inverted" : ""}`}
+        />
       ) : (
         // EXECUTABLE SQL: 모노 폰트 + 실행 버튼 (풀이 중 isExecutable=false로 숨김)
         <>
