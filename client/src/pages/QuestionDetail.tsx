@@ -73,6 +73,10 @@ export default function QuestionDetail({
   >({});
   const executeCacheRef = useRef(executeCache);
   executeCacheRef.current = executeCache;
+  // 선택지별 독립 실행 상태 — Set으로 병렬 실행 추적 (단일 mutation 상태에 의존하지 않음)
+  const [executingKeys, setExecutingKeys] = useState<Set<string>>(new Set());
+  const executingKeysRef = useRef(executingKeys);
+  executingKeysRef.current = executingKeys;
   // 연타 방지 — key 변경(문제 교체) 시 컴포넌트 리마운트로 자동 초기화
   const isSubmittingRef = useRef(false);
   const [aiSheetOpen, setAiSheetOpen] = useState(false);
@@ -98,6 +102,8 @@ export default function QuestionDetail({
     setSseChoiceSetId(null);
     setSseError(null);
     setSseRetryCount(0);
+    // 문제 교체 시 실행 중 상태 초기화 — practiceMode에서 리마운트 없이 questionUuid만 바뀌는 케이스 대응
+    setExecutingKeys(new Set());
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [questionUuid]);
 
@@ -183,14 +189,27 @@ export default function QuestionDetail({
   });
 
   const handleExecute = useCallback(
-    (choiceKey: string, sql: string) => {
+    async (choiceKey: string, sql: string) => {
+      // 이미 캐시된 결과나 실행 중이면 중복 호출 방지
       if (executeCacheRef.current[choiceKey]) return;
-      executeMutation.mutate(sql, {
-        onSuccess: (result) => {
-          setExecuteCache((prev) => ({ ...prev, [choiceKey]: result }));
-        },
-      });
+      if (executingKeysRef.current.has(choiceKey)) return;
+
+      setExecutingKeys((prev) => new Set([...prev, choiceKey]));
+      try {
+        // mutateAsync: 각 호출이 독립된 Promise를 반환해 병렬 실행 시 콜백 덮어씌우기 방지
+        const result = await executeMutation.mutateAsync(sql);
+        setExecuteCache((prev) => ({ ...prev, [choiceKey]: result }));
+      } catch {
+        // 에러 표시는 ChoiceCard 내부에서 처리
+      } finally {
+        setExecutingKeys((prev) => {
+          const next = new Set(prev);
+          next.delete(choiceKey);
+          return next;
+        });
+      }
     },
+    // executingKeys는 ref로 읽으므로 의존성 불필요
     [executeMutation],
   );
 
@@ -365,10 +384,7 @@ export default function QuestionDetail({
             cached={showExecution ? executeCache[choice.key] : undefined}
             // 제출 후(showExecution=true)에만 실행 버튼 표시
             isExecutable={showExecution && question.executionMode === "EXECUTABLE"}
-            isExecuting={
-              executeMutation.isPending &&
-              executeMutation.variables === choice.body
-            }
+            isExecuting={executingKeys.has(choice.key)}
             // 제출 후 선택 변경 방지 — showExecution이면 no-op
             onSelect={showExecution ? () => {} : handleSelect}
             onExecute={handleExecute}
