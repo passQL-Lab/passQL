@@ -1,11 +1,41 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-13T08:33:33Z",
-    "currentVersion": "0.0.138",
+    "lastUpdated": "2026-04-13T09:49:35Z",
+    "currentVersion": "0.0.141",
     "projectType": "basic",
-    "totalReleases": 60
+    "totalReleases": 61
   },
   "releases": [
+    {
+      "version": "0.0.141",
+      "project_type": "basic",
+      "date": "2026-04-13",
+      "pr_number": 249,
+      "raw_summary": "## Summary by CodeRabbit\n\n# 릴리스 노트\n\n* **New Features**\n  - RAG 기반 개인화 문제 추천 시스템 구현 (bge-m3 임베딩, Qdrant 검색)\n  - 관리자 대시보드 화면 추가 (통계, 주요 지표, 빠른 링크)\n  - 모바일 홈화면 헤더 및 팀 정보 모달 추가\n\n* **Bug Fixes**\n  - 문제풀이 후 학습현황 heatmap 즉시갱신 기능 개선\n  - SSE 선택지생성 에러 처리 및 타임아웃 추가\n  - 제출 시 FK 제약 조건 오류 해결\n  - API 단일 실패 시 전체 화면 교체 버그 수정\n\n* **Improvements**\n  - 결과화면 UI 전면 개선 (Step 통합, 애니메이션 추가)\n  - 문제풀이 중 이탈 시 경고 모달 구현\n  - 지문 카드 시각적 구분 개선\n  - 실행 UI 통일 및 샘플데이터 파싱 버그 수정\n\n* **Infrastructure**\n  - Sandbox DB 엔진 MariaDB에서 PostgreSQL로 전환\n\n* **Documentation**\n  - 라이선스 BUSL-1.1 적용 (상업적 이용 금지)",
+      "parsed_changes": {
+        "new_features": {
+          "title": "New Features",
+          "items": []
+        },
+        "bug_fixes": {
+          "title": "Bug Fixes",
+          "items": []
+        },
+        "improvements": {
+          "title": "Improvements",
+          "items": []
+        },
+        "infrastructure": {
+          "title": "Infrastructure",
+          "items": []
+        },
+        "documentation": {
+          "title": "Documentation",
+          "items": []
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.138",
       "project_type": "basic",
