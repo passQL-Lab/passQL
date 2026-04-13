@@ -1,11 +1,29 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-13T12:07:03Z",
-    "currentVersion": "0.0.147",
+    "lastUpdated": "2026-04-13T12:45:31Z",
+    "currentVersion": "0.0.148",
     "projectType": "basic",
-    "totalReleases": 65
+    "totalReleases": 66
   },
   "releases": [
+    {
+      "version": "0.0.148",
+      "project_type": "basic",
+      "date": "2026-04-13",
+      "pr_number": 263,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **새로운 기능**\n  - 일일 문제 자동 할당 폴백 메커니즘 추가\n  - 풀이도 메트릭 확대 (난이도, 재시도, 분산 포함, 총 6개 항목)\n\n* **개선사항**\n  - 풀이도 레이블 업데이트 (\"정확도\" → \"맞힌 비율\", \"커버리지\" → \"공부 범위\", \"최근도\" → \"꾸준함\")\n  - 히트맵 시간대 처리 개선",
+      "parsed_changes": {
+        "새로운_기능": {
+          "title": "새로운 기능",
+          "items": []
+        },
+        "개선사항": {
+          "title": "개선사항",
+          "items": []
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.147",
       "project_type": "basic",
