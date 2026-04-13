@@ -19,7 +19,7 @@ public class DailyChallengeScheduler {
      * 매일 자정에 당일 daily_challenge 배정이 없으면 폴백 결과를 저장한다.
      * 활성 문제가 없는 경우 저장을 건너뛴다.
      */
-    @Scheduled(cron = "0 0 0 * * *")
+    @Scheduled(cron = "0 0 0 * * *", zone = "Asia/Seoul")
     public void confirmTodayChallenge() {
         LocalDate today = LocalDate.now();
         log.info("[DailyChallengeScheduler] 오늘의 챌린지 폴백 저장 시작: date={}", today);
