@@ -1,65 +1,91 @@
 import type { FeedbackItem as FeedbackItemType, FeedbackStatus } from "../types/api";
 
-// 상태별 pill 디자인 설정 (기존 디자인 토큰 사용)
-const STATUS_CONFIG: Record<
-  FeedbackStatus,
-  { label: string; bg: string; text: string; dot: string }
-> = {
-  PENDING:  { label: "대기",   bg: "bg-sem-warning-light", text: "text-sem-warning-text", dot: "bg-sem-warning-text" },
-  REVIEWED: { label: "확인됨", bg: "bg-brand-light",       text: "text-brand",            dot: "bg-brand"           },
-  APPLIED:  { label: "반영됨", bg: "bg-sem-success-light", text: "text-sem-success-text", dot: "bg-sem-success-text" },
+const STATUS_LABEL: Record<FeedbackStatus, string> = {
+  PENDING: "대기",
+  REVIEWED: "확인됨",
+  APPLIED: "반영됨",
 };
 
-/** ISO 8601 문자열 → "방금 / N분 전 / N시간 전 / N일 전 / N주 전" */
-function formatRelativeTime(isoString: string): string {
+/**
+ * ISO 8601 → 버블 내부 표시용 상대 시간
+ * 방금 / N분 전 / 오늘 / 어제 / N일 전 / N주 전
+ */
+function formatBubbleTime(isoString: string): string {
   const date = new Date(isoString);
   if (isNaN(date.getTime())) return "";
-  const diff = Date.now() - date.getTime();
-  if (diff < 0) return "방금";
-  const minutes = Math.floor(diff / 60_000);
-  if (minutes < 1) return "방금";
+  const diffMs = Date.now() - date.getTime();
+  if (diffMs < 60_000) return "방금";
+  const minutes = Math.floor(diffMs / 60_000);
   if (minutes < 60) return `${minutes}분 전`;
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours}시간 전`;
+  if (hours < 24) return "오늘";
+  if (hours < 48) return "어제";
   const days = Math.floor(hours / 24);
   if (days < 7) return `${days}일 전`;
-  return `${Math.floor(days / 7)}주 전`;
+  const weeks = Math.floor(days / 7);
+  return `${weeks}주 전`;
+}
+
+/**
+ * ISO 8601 → "YYYY-MM-DD" 날짜 키 (날짜 구분선 비교용)
+ * FeedbackList에서 import해서 사용한다.
+ */
+export function toDateKey(isoString: string): string {
+  return isoString.slice(0, 10);
 }
 
 interface FeedbackItemProps {
   readonly item: FeedbackItemType;
-  /** 부모(FeedbackList)에서 생성한 stagger 클래스 — 목록 순차 페이드인에 사용 */
+  /** FeedbackList에서 주입하는 stagger 애니메이션 클래스 */
   readonly className?: string;
 }
 
 /**
- * 건의사항 단일 row
- * - 상단: 상태 pill + 상대 시간
- * - 하단: 본문 텍스트
- * - 부모로부터 className으로 stagger 클래스를 받아 진입 애니메이션 적용
+ * 건의사항 단일 버블
+ * - 오른쪽 정렬, 하단에 날짜 + 상태 pill
+ * - PENDING: 인디고 solid / REVIEWED: 인디고 연한 / APPLIED: 그린 연한
  */
 export default function FeedbackItem({ item, className }: FeedbackItemProps) {
-  const config = STATUS_CONFIG[item.status];
+  const { status } = item;
+
+  // 버블 배경+텍스트
+  const bubbleClass =
+    status === "PENDING"
+      ? "bg-brand text-white"
+      : status === "REVIEWED"
+      ? "bg-brand-light border border-[#C7D2FE] text-text-primary"
+      : "bg-sem-success-light border border-[#BBF7D0] text-text-primary";
+
+  // 상태 pill
+  const pillClass =
+    status === "PENDING"
+      ? "bg-white/20 text-white"
+      : status === "REVIEWED"
+      ? "bg-brand text-white"
+      : "bg-sem-success-text text-white";
+
+  // 시간 색상
+  const timeClass = status === "PENDING" ? "text-white/60" : "text-text-caption";
 
   return (
-    <div
-      className={`px-4 py-3.5 border-b border-surface-code last:border-b-0 hover:bg-surface transition-colors${className ? ` ${className}` : ""}`}
-    >
-      {/* 상단: 상태 pill + 시간 */}
-      <div className="flex items-center justify-between mb-1.5">
-        <span
-          className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[11px] font-semibold ${config.bg} ${config.text}`}
-        >
-          <span className={`w-1.5 h-1.5 rounded-full shrink-0 ${config.dot}`} />
-          {config.label}
-        </span>
-        <span className="text-[11px] text-text-caption">
-          {formatRelativeTime(item.createdAt)}
-        </span>
+    <div className={`flex justify-end${className ? ` ${className}` : ""}`}>
+      <div
+        className={`max-w-[82%] px-3 py-2.5 rounded-[16px_16px_3px_16px] text-[11.5px] leading-snug ${bubbleClass}`}
+      >
+        {/* 본문 */}
+        <p className="mb-1.5 break-words">{item.content}</p>
+        {/* 메타: 시간 + 상태 pill */}
+        <div className="flex items-center justify-end gap-1.5">
+          <span className={`text-[8.5px] ${timeClass}`}>
+            {formatBubbleTime(item.createdAt)}
+          </span>
+          <span
+            className={`text-[8px] font-semibold px-1.5 py-px rounded-full ${pillClass}`}
+          >
+            {STATUS_LABEL[status]}
+          </span>
+        </div>
       </div>
-
-      {/* 하단: 본문 */}
-      <p className="text-[13.5px] text-text-primary leading-snug">{item.content}</p>
     </div>
   );
 }
