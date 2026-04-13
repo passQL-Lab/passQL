@@ -106,6 +106,46 @@ public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
     /** 특정 시간 이후 제출 건수 (대시보드 오늘 제출 집계용) */
     long countBySubmittedAtAfter(LocalDateTime since);
 
+    /**
+     * 최근 N건의 오답 문제 UUID 목록 조회 (RAG 추천 쿼리 벡터용).
+     *
+     * 동일 문제를 여러 번 틀렸어도 1번만 포함 (DISTINCT).
+     * 최신 오답 순으로 정렬하여 최근 학습 맥락을 반영한다.
+     */
+    @Query(value =
+        // GROUP BY로 최신 오답 시각 기준 정렬 — DISTINCT + ORDER BY MAX()는 PostgreSQL에서 허용되지 않음
+        "SELECT CAST(s.question_uuid AS varchar) " +
+        "FROM submission s " +
+        "WHERE s.member_uuid = CAST(:memberUuid AS uuid) " +
+        "  AND s.is_correct = false " +
+        "GROUP BY s.question_uuid " +
+        "ORDER BY MAX(s.submitted_at) DESC " +
+        "LIMIT :limit",
+        nativeQuery = true)
+    List<String> findRecentWrongQuestionUuids(
+        @Param("memberUuid") String memberUuid,
+        @Param("limit") int limit
+    );
+
+    /**
+     * 회원이 최근 푼 문제 UUID 목록 조회 (Qdrant must_not 필터용).
+     *
+     * 전량 조회 시 페이로드 과부하 우려가 있어 최근 N건으로 제한.
+     * 추천에서 최근 풀어본 문제를 제외하는 용도이므로 오래된 기록까지 제외할 필요 없음.
+     */
+    @Query(value =
+        "SELECT CAST(s.question_uuid AS varchar) " +
+        "FROM submission s " +
+        "WHERE s.member_uuid = CAST(:memberUuid AS uuid) " +
+        "GROUP BY s.question_uuid " +
+        "ORDER BY MAX(s.submitted_at) DESC " +
+        "LIMIT :limit",
+        nativeQuery = true)
+    List<String> findSolvedQuestionUuids(
+        @Param("memberUuid") String memberUuid,
+        @Param("limit") int limit
+    );
+
     @Modifying
     @Transactional
     void deleteByQuestionUuid(UUID questionUuid);

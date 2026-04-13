@@ -3,6 +3,7 @@ package com.passql.web.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.passql.application.service.HomeService;
 import com.passql.application.service.QuestionExecutionService;
+import com.passql.application.service.RecommendationService;
 import com.passql.common.exception.CustomException;
 import com.passql.common.exception.constant.ErrorCode;
 import com.passql.question.dto.ChoiceSetGenerateResponse;
@@ -43,6 +44,7 @@ public class QuestionController implements QuestionControllerDocs {
 
     private final QuestionService questionService;
     private final HomeService homeService;
+    private final RecommendationService recommendationService;
     private final SandboxExecutor sandboxExecutor;
     private final QuestionExecutionService questionExecutionService;
     private final SubmissionService submissionService;
@@ -71,9 +73,10 @@ public class QuestionController implements QuestionControllerDocs {
     @GetMapping("/recommendations")
     public ResponseEntity<RecommendationsResponse> getRecommendations(
         @RequestParam(defaultValue = "3") int size,
-        @RequestParam(required = false) UUID excludeQuestionUuid
+        @RequestParam(required = false) UUID excludeQuestionUuid,
+        @RequestParam(required = false) UUID memberUuid
     ) {
-        return ResponseEntity.ok(questionService.getRecommendations(size, excludeQuestionUuid));
+        return ResponseEntity.ok(recommendationService.recommend(size, excludeQuestionUuid, memberUuid));
     }
 
     @GetMapping("/{questionUuid}")
