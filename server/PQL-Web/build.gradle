@@ -16,6 +16,12 @@ dependencies {
     implementation 'nz.net.ultraq.thymeleaf:thymeleaf-layout-dialect'
     implementation 'com.fasterxml.jackson.core:jackson-databind'
     implementation 'com.fasterxml.jackson.datatype:jackson-datatype-jsr310'
+
+    // Spring Security
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+
+    // Firebase Admin SDK (FirebaseConfig가 PQL-Web/config에 위치)
+    implementation 'com.google.firebase:firebase-admin:9.3.0'
 }
 
 tasks.named('bootJar') {
