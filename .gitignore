@@ -98,3 +98,5 @@ coverage/
 
 # git worktrees
 .worktrees/
+# Firebase 서비스 계정 키 (민감 정보)
+**/firebase-service-account*.json
