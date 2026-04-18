@@ -2,7 +2,6 @@ package com.passql.web.controller;
 
 import com.passql.common.dto.Author;
 import com.passql.member.dto.MemberMeResponse;
-import com.passql.member.dto.MemberRegisterResponse;
 import com.passql.member.dto.NicknameRegenerateResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -12,30 +11,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.UUID;
 
-@Tag(name = "Member", description = "회원 등록 / 조회 / 닉네임 재생성")
+@Tag(name = "Member", description = "회원 조회 / 닉네임 재생성")
 public interface MemberControllerDocs {
-
-  @ApiLogs({
-      @ApiLog(date = "2026.04.07", author = Author.SUHSAECHAN, issueNumber = 6, description = "익명 회원 등록 API 추가"),
-  })
-  @Operation(
-      summary = "익명 회원 등록",
-      description = """
-          ## 인증(JWT): **불필요**
-
-          ## 요청 파라미터
-          - 없음
-
-          ## 반환값 (MemberRegisterResponse)
-          - **`memberUuid`**: 발급된 회원 UUID
-          - **`nickname`**: 자동 생성된 닉네임
-
-          ## 설명
-          - UUID와 닉네임을 자동 발급한다.
-          - 닉네임은 서버에서 랜덤 생성된다.
-          """
-  )
-  MemberRegisterResponse register();
 
   @ApiLogs({
       @ApiLog(date = "2026.04.07", author = Author.SUHSAECHAN, issueNumber = 6, description = "본인 정보 조회 API 추가"),

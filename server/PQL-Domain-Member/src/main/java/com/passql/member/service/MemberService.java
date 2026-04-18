@@ -5,7 +5,6 @@ import com.passql.common.exception.constant.ErrorCode;
 import com.passql.common.util.NicknameGenerator;
 import com.passql.member.constant.MemberStatus;
 import com.passql.member.dto.MemberMeResponse;
-import com.passql.member.dto.MemberRegisterResponse;
 import com.passql.member.dto.NicknameRegenerateResponse;
 import com.passql.member.entity.Member;
 import com.passql.member.entity.MemberSuspendHistory;
@@ -19,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+
 
 @Slf4j
 @Service
@@ -35,27 +35,6 @@ public class MemberService {
     private final MemberRepository memberRepository;
     private final NicknameGenerator nicknameGenerator;
     private final MemberSuspendHistoryRepository memberSuspendHistoryRepository;
-
-    /** 익명 회원 등록. UUID와 닉네임을 자동 발급한다. */
-    @Transactional
-    public MemberRegisterResponse register() {
-        for (int attempt = 1; attempt <= UNIQUE_CONFLICT_RETRY; attempt++) {
-            String nickname = generateUniqueNicknameOrThrow();
-            Member member = Member.createAnonymous(nickname);
-            try {
-                Member saved = memberRepository.saveAndFlush(member);
-                log.info("Member registered: uuid={}, nickname={}", saved.getMemberUuid(), saved.getNickname());
-                return new MemberRegisterResponse(saved.getMemberUuid(), saved.getNickname());
-            } catch (DataIntegrityViolationException e) {
-                log.warn("Nickname UNIQUE conflict on register (attempt {}/{}): nickname={}",
-                    attempt, UNIQUE_CONFLICT_RETRY, nickname);
-                if (attempt == UNIQUE_CONFLICT_RETRY) {
-                    throw new CustomException(ErrorCode.NICKNAME_GENERATION_FAILED, e);
-                }
-            }
-        }
-        throw new CustomException(ErrorCode.NICKNAME_GENERATION_FAILED);
-    }
 
     /** 본인 정보 조회 + last_seen_at throttled 갱신. */
     @Transactional

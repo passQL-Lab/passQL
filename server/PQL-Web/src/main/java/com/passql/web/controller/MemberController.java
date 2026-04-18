@@ -1,7 +1,6 @@
 package com.passql.web.controller;
 
 import com.passql.member.dto.MemberMeResponse;
-import com.passql.member.dto.MemberRegisterResponse;
 import com.passql.member.dto.NicknameRegenerateResponse;
 import com.passql.member.service.MemberService;
 import lombok.RequiredArgsConstructor;
@@ -19,11 +18,6 @@ import java.util.UUID;
 public class MemberController implements MemberControllerDocs {
 
     private final MemberService memberService;
-
-    @PostMapping("/register")
-    public MemberRegisterResponse register() {
-        return memberService.register();
-    }
 
     @GetMapping("/me")
     public MemberMeResponse getMe(@RequestParam("memberUuid") UUID memberUuid) {
