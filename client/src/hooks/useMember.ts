@@ -1,20 +1,20 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetchMe, regenerateNickname } from "../api/members";
-import { useMemberStore } from "../stores/memberStore";
+import { useAuthStore } from "../stores/authStore";
 
 export function useMember() {
-  const uuid = useMemberStore((s) => s.uuid);
-  const setNickname = useMemberStore((s) => s.setNickname);
+  const accessToken = useAuthStore((s) => s.accessToken);
+  const setNickname = useAuthStore((s) => s.setNickname);
 
   const query = useQuery({
-    queryKey: ["member", uuid],
+    queryKey: ["member", accessToken],
     queryFn: fetchMe,
-    enabled: !!uuid,
+    enabled: !!accessToken,
     staleTime: 1000 * 60 * 10,
     retry: false,
   });
 
-  if (query.data?.nickname && query.data.nickname !== useMemberStore.getState().nickname) {
+  if (query.data?.nickname && query.data.nickname !== useAuthStore.getState().nickname) {
     setNickname(query.data.nickname);
   }
 
@@ -23,7 +23,7 @@ export function useMember() {
 
 export function useRegenerateNickname() {
   const queryClient = useQueryClient();
-  const setNickname = useMemberStore((s) => s.setNickname);
+  const setNickname = useAuthStore((s) => s.setNickname);
 
   return useMutation({
     mutationFn: regenerateNickname,

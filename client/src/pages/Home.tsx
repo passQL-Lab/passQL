@@ -4,7 +4,7 @@ import { Link } from "react-router-dom";
 import { useState, useCallback, type CSSProperties } from "react";
 import { useProgress } from "../hooks/useProgress";
 import { useMember } from "../hooks/useMember";
-import { useMemberStore } from "../stores/memberStore";
+import { useAuthStore } from "../stores/authStore";
 import { StarRating } from "../components/StarRating";
 import { HeatmapCalendar } from "../components/HeatmapCalendar";
 import {
@@ -83,8 +83,8 @@ export default function Home() {
     });
   }, [recommendationsFetching, spinning, refetchRecommendations]);
 
-  const uuid = useMemberStore((s) => s.uuid);
-  const nickname = useMemberStore((s) => s.nickname);
+  const uuid = useAuthStore((s) => s.memberUuid ?? "");
+  const nickname = useAuthStore((s) => s.nickname ?? "");
   const displayName = nickname || uuid.slice(0, 8);
 
   // progress 에러/미로드 시 0으로 안전하게 fallback

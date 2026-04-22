@@ -6,6 +6,8 @@ import com.passql.application.service.QuestionExecutionService;
 import com.passql.application.service.RecommendationService;
 import com.passql.common.exception.CustomException;
 import com.passql.common.exception.constant.ErrorCode;
+import com.passql.member.auth.presentation.annotation.AuthMember;
+import com.passql.member.auth.presentation.security.LoginMember;
 import com.passql.question.dto.ChoiceSetGenerateResponse;
 import com.passql.question.dto.ExecuteResult;
 import com.passql.question.dto.QuestionDetail;
@@ -65,18 +67,18 @@ public class QuestionController implements QuestionControllerDocs {
 
     @GetMapping("/today")
     public ResponseEntity<TodayQuestionResponse> getToday(
-        @RequestParam(required = false) UUID memberUuid
+        @AuthMember LoginMember loginMember
     ) {
-        return ResponseEntity.ok(homeService.getToday(memberUuid));
+        return ResponseEntity.ok(homeService.getToday(loginMember.memberUuid()));
     }
 
     @GetMapping("/recommendations")
     public ResponseEntity<RecommendationsResponse> getRecommendations(
+        @AuthMember LoginMember loginMember,
         @RequestParam(defaultValue = "3") int size,
-        @RequestParam(required = false) UUID excludeQuestionUuid,
-        @RequestParam(required = false) UUID memberUuid
+        @RequestParam(required = false) UUID excludeQuestionUuid
     ) {
-        return ResponseEntity.ok(recommendationService.recommend(size, excludeQuestionUuid, memberUuid));
+        return ResponseEntity.ok(recommendationService.recommend(size, excludeQuestionUuid, loginMember.memberUuid()));
     }
 
     @GetMapping("/{questionUuid}")
@@ -100,8 +102,9 @@ public class QuestionController implements QuestionControllerDocs {
     @PostMapping(value = "/{questionUuid}/generate-choices", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public SseEmitter generateChoices(
         @PathVariable UUID questionUuid,
-        @RequestHeader(value = "X-Member-UUID") UUID memberUuid
+        @AuthMember LoginMember loginMember
     ) {
+        UUID memberUuid = loginMember.memberUuid();
         SseEmitter emitter = new SseEmitter(60_000L);
 
         Thread.startVirtualThread(() -> {
@@ -178,10 +181,10 @@ public class QuestionController implements QuestionControllerDocs {
     @PostMapping("/{questionUuid}/submit")
     public ResponseEntity<SubmitResult> submit(
         @PathVariable UUID questionUuid,
-        @RequestHeader(value = "X-Member-UUID") UUID memberUuid,
+        @AuthMember LoginMember loginMember,
         @RequestBody SubmitRequest request
     ) {
         return ResponseEntity.ok(submissionService.submit(
-                memberUuid, questionUuid, request.choiceSetId(), request.selectedChoiceKey(), request.sessionUuid()));
+                loginMember.memberUuid(), questionUuid, request.choiceSetId(), request.selectedChoiceKey(), request.sessionUuid()));
     }
 }

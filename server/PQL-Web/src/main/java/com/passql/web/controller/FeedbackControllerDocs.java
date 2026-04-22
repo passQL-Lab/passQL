@@ -1,6 +1,8 @@
 package com.passql.web.controller;
 
 import com.passql.common.dto.Author;
+import com.passql.member.auth.presentation.annotation.AuthMember;
+import com.passql.member.auth.presentation.security.LoginMember;
 import com.passql.meta.dto.FeedbackListResponse;
 import com.passql.meta.dto.FeedbackSubmitRequest;
 import com.passql.meta.dto.FeedbackSubmitResponse;
@@ -9,23 +11,18 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.suhsaechan.suhapilog.annotation.ApiLog;
 import kr.suhsaechan.suhapilog.annotation.ApiLogs;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-
-import java.util.UUID;
 
 @Tag(name = "Feedback", description = "건의사항 제출 / 내 건의사항 목록 조회")
 public interface FeedbackControllerDocs {
 
     @ApiLogs({
         @ApiLog(date = "2026.04.13", author = Author.SUHSAECHAN, issueNumber = 200, description = "건의사항 제출 API 추가"),
+        @ApiLog(date = "2026.04.19", author = Author.SUHSAECHAN, issueNumber = 120, description = "X-Member-UUID 헤더 → @AuthMember JWT 인증 전환"),
     })
     @Operation(
         summary = "건의사항 제출",
         description = """
-            ## 인증(JWT): **불필요**
-
-            ## 요청 헤더
-            - **`X-Member-UUID`**: 회원 UUID
+            ## 인증(JWT): **필요**
 
             ## 요청 바디 (FeedbackSubmitRequest)
             - **`content`**: 건의사항 내용 (1자 이상 500자 이하, 필수)
@@ -40,20 +37,18 @@ public interface FeedbackControllerDocs {
             """
     )
     FeedbackSubmitResponse submit(
-        @RequestHeader("X-Member-UUID") UUID memberUuid,
+        @AuthMember LoginMember loginMember,
         @RequestBody FeedbackSubmitRequest request
     );
 
     @ApiLogs({
         @ApiLog(date = "2026.04.13", author = Author.SUHSAECHAN, issueNumber = 200, description = "내 건의사항 목록 조회 API 추가"),
+        @ApiLog(date = "2026.04.19", author = Author.SUHSAECHAN, issueNumber = 120, description = "X-Member-UUID 헤더 → @AuthMember JWT 인증 전환"),
     })
     @Operation(
         summary = "내 건의사항 목록 조회",
         description = """
-            ## 인증(JWT): **불필요**
-
-            ## 요청 헤더
-            - **`X-Member-UUID`**: 회원 UUID
+            ## 인증(JWT): **필요**
 
             ## 반환값 (FeedbackListResponse)
             - **`items`**: 건의사항 목록 (createdAt 내림차순)
@@ -67,6 +62,6 @@ public interface FeedbackControllerDocs {
             """
     )
     FeedbackListResponse getMyFeedbacks(
-        @RequestHeader("X-Member-UUID") UUID memberUuid
+        @AuthMember LoginMember loginMember
     );
 }

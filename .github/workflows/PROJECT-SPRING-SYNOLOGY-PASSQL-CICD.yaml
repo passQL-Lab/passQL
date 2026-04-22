@@ -48,6 +48,11 @@ jobs:
           echo "${{ secrets.APPLICATION_PROD_YML }}" > ./${{ env.APPLICATION_YML_DIR }}/application-prod.yml
           echo "✅ application-prod.yml 파일 생성 완료"
 
+      - name: Firebase 서비스 계정 JSON 생성 (prod)
+        run: |
+          echo "${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}" > ./${{ env.APPLICATION_YML_DIR }}/firebase-service-account.json
+          echo "✅ firebase-service-account.json 생성 완료"
+
       - name: Build with Gradle
         working-directory: server
         run: ./gradlew clean build -x test ${{ env.GRADLE_OPTS }}

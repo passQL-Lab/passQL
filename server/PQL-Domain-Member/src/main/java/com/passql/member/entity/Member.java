@@ -92,23 +92,19 @@ public class Member extends SoftDeletableBaseEntity {
 
     // === 정적 팩토리 ===
 
-    /** 익명 회원 생성. 닉네임은 호출자가 NicknameGenerator로 미리 만들어 전달한다. */
-    public static Member createAnonymous(String nickname) {
+    /** OAuth 소셜 로그인으로 신규 가입 시 호출. 닉네임은 호출자가 NicknameGenerator로 미리 만들어 전달한다. */
+    public static Member signUp(String providerUserId, AuthProvider authProvider,
+                                String email, Boolean emailVerified, String nickname) {
         Member m = new Member();
         m.nickname = nickname;
         m.role = MemberRole.USER;
         m.status = MemberStatus.ACTIVE;
-        m.authProvider = AuthProvider.ANONYMOUS;
-        m.emailVerified = false;
+        m.authProvider = authProvider;
+        m.providerUserId = providerUserId;
+        m.email = email;
+        m.emailVerified = emailVerified != null ? emailVerified : false;
         m.isTestAccount = false;
         m.lastSeenAt = LocalDateTime.now();
-        return m;
-    }
-
-    /** 테스트 계정 생성. 통계/랭킹 집계에서 제외되도록 {@code isTestAccount}가 true로 설정된다. */
-    public static Member createTestAccount(String nickname) {
-        Member m = createAnonymous(nickname);
-        m.isTestAccount = true;
         return m;
     }
 }

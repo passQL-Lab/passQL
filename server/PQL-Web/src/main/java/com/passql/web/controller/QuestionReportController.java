@@ -1,6 +1,8 @@
 package com.passql.web.controller;
 
 import com.passql.application.service.QuestionReportService;
+import com.passql.member.auth.presentation.annotation.AuthMember;
+import com.passql.member.auth.presentation.security.LoginMember;
 import com.passql.web.dto.report.ReportRequest;
 import com.passql.web.dto.report.ReportStatusResponse;
 import lombok.RequiredArgsConstructor;
@@ -20,12 +22,12 @@ public class QuestionReportController implements QuestionReportControllerDocs {
     @ResponseStatus(HttpStatus.CREATED)
     public void submitReport(
             @PathVariable UUID questionUuid,
-            @RequestHeader("X-Member-UUID") UUID memberUuid,
+            @AuthMember LoginMember loginMember,
             @RequestBody ReportRequest request) {
 
         questionReportService.submitReport(
                 questionUuid,
-                memberUuid,
+                loginMember.memberUuid(),
                 request.submissionUuid(),
                 request.choiceSetUuid(),
                 request.categories(),
@@ -36,10 +38,10 @@ public class QuestionReportController implements QuestionReportControllerDocs {
     @GetMapping("/status")
     public ReportStatusResponse getReportStatus(
             @PathVariable UUID questionUuid,
-            @RequestHeader("X-Member-UUID") UUID memberUuid,
+            @AuthMember LoginMember loginMember,
             @RequestParam UUID submissionUuid) {
 
-        boolean reported = questionReportService.isReported(questionUuid, memberUuid, submissionUuid);
+        boolean reported = questionReportService.isReported(questionUuid, loginMember.memberUuid(), submissionUuid);
         return new ReportStatusResponse(reported);
     }
 }

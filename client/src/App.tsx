@@ -1,5 +1,4 @@
-import { useEffect } from "react";
-import { createBrowserRouter, RouterProvider, Navigate } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Navigate, Outlet } from "react-router-dom";
 import AppLayout from "./components/AppLayout";
 import Home from "./pages/Home";
 import CategoryCards from "./pages/CategoryCards";
@@ -13,65 +12,85 @@ import Stats from "./pages/Stats";
 import Settings from "./pages/Settings";
 import DevPage from "./pages/DevPage";
 import SettingsFeedback from "./pages/SettingsFeedback";
-import { ensureRegistered } from "./stores/memberStore";
+import Login from "./pages/Login";
+import { isAuthenticated } from "./stores/authStore";
 
 /** /dev route guard — sessionStorage에 잠금 해제 플래그가 없으면 설정 화면으로 redirect */
 function DevGuard() {
   return sessionStorage.getItem("devUnlocked") ? <DevPage /> : <Navigate to="/settings" replace />;
 }
 
+/** 인증 필수 가드 — 미로그인 시 /login으로 redirect */
+function RequireAuth() {
+  return isAuthenticated() ? <Outlet /> : <Navigate to="/login" replace />;
+}
+
+/** 이미 로그인된 경우 /login 접근 시 홈으로 redirect */
+function RedirectIfAuth() {
+  return isAuthenticated() ? <Navigate to="/" replace /> : <Outlet />;
+}
+
 const router = createBrowserRouter([
+  // 로그인 페이지 — 인증 후 접근 시 홈으로 redirect
   {
-    element: <AppLayout />,
+    element: <RedirectIfAuth />,
     children: [
-      { index: true, element: <Home /> },
-      { path: "questions", element: <CategoryCards /> },
-      { path: "stats", element: <Stats /> },
-      { path: "settings", element: <Settings /> },
+      { path: "login", element: <Login /> },
     ],
   },
-  // AppLayout 밖: 전체화면 몰입형 화면 (문제 풀이는 집중 모드)
+  // 인증 필수 영역
   {
-    path: "questions/:questionUuid",
-    element: <QuestionDetail />,
-  },
-  {
-    path: "daily-challenge",
-    element: <DailyChallenge />,
-  },
-  {
-    path: "questions/:questionUuid/result",
-    element: <AnswerFeedback />,
-  },
-  {
-    path: "practice/:sessionId",
-    element: <PracticeSet />,
-  },
-  {
-    path: "practice/:sessionId/result",
-    element: <PracticeResult />,
-  },
-  // 홈 추천 문제 — DailyChallenge 패턴의 단건 풀이 모드
-  {
-    path: "recommendation/:questionUuid",
-    element: <RecommendationPractice />,
-  },
-  // 개발자 전용 도구 — sessionStorage 잠금 해제 확인 후에만 접근 허용
-  {
-    path: "dev",
-    element: <DevGuard />,
-  },
-  // 건의사항 서브페이지 — AppLayout 밖 독립 라우트 (탭바 없는 몰입형)
-  {
-    path: "settings/feedback",
-    element: <SettingsFeedback />,
+    element: <RequireAuth />,
+    children: [
+      {
+        element: <AppLayout />,
+        children: [
+          { index: true, element: <Home /> },
+          { path: "questions", element: <CategoryCards /> },
+          { path: "stats", element: <Stats /> },
+          { path: "settings", element: <Settings /> },
+        ],
+      },
+      // AppLayout 밖: 전체화면 몰입형 화면 (문제 풀이는 집중 모드)
+      {
+        path: "questions/:questionUuid",
+        element: <QuestionDetail />,
+      },
+      {
+        path: "daily-challenge",
+        element: <DailyChallenge />,
+      },
+      {
+        path: "questions/:questionUuid/result",
+        element: <AnswerFeedback />,
+      },
+      {
+        path: "practice/:sessionId",
+        element: <PracticeSet />,
+      },
+      {
+        path: "practice/:sessionId/result",
+        element: <PracticeResult />,
+      },
+      // 홈 추천 문제 — DailyChallenge 패턴의 단건 풀이 모드
+      {
+        path: "recommendation/:questionUuid",
+        element: <RecommendationPractice />,
+      },
+      // 개발자 전용 도구 — sessionStorage 잠금 해제 확인 후에만 접근 허용
+      {
+        path: "dev",
+        element: <DevGuard />,
+      },
+      // 건의사항 서브페이지 — AppLayout 밖 독립 라우트 (탭바 없는 몰입형)
+      {
+        path: "settings/feedback",
+        element: <SettingsFeedback />,
+      },
+    ],
   },
 ]);
 
 export default function App() {
-  useEffect(() => {
-    ensureRegistered();
-  }, []);
-
   return <RouterProvider router={router} />;
 }

@@ -2,6 +2,8 @@ package com.passql.web.controller;
 
 import com.passql.ai.dto.AiCommentResponse;
 import com.passql.common.dto.Author;
+import com.passql.member.auth.presentation.annotation.AuthMember;
+import com.passql.member.auth.presentation.security.LoginMember;
 import com.passql.submission.dto.HeatmapResponse;
 import com.passql.submission.dto.ProgressResponse;
 import com.passql.submission.dto.TopicAnalysisResponse;
@@ -23,14 +25,12 @@ public interface ProgressControllerDocs {
         @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 4, description = "진도 요약 조회 API"),
         @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 22, description = "Submission PK 를 UUID 로 재작성. memberUuid(UUID) 기준 집계. 응답 DTO: ProgressResponse{solvedCount, correctRate(0.0~1.0 둘째자리 반올림), streakDays(하루 그레이스)}"),
         @ApiLog(date = "2026.04.10", author = Author.SUHSAECHAN, issueNumber = 52, description = "합격 준비도(readiness) 블록 응답에 추가 — Accuracy × Coverage × Recency 3요소 곱셈 + D-day 기반 toneKey. 기존 3필드 보존."),
+        @ApiLog(date = "2026.04.19", author = Author.SUHSAECHAN, issueNumber = 120, description = "memberUuid 쿼리 파라미터 → @AuthMember JWT 인증 전환"),
     })
     @Operation(
         summary = "진도 요약 조회",
         description = """
-            ## 인증(JWT): **불필요** (추후 헤더 전환 예정)
-
-            ## 요청 파라미터
-            - memberUuid (UUID, required): 회원 식별자
+            ## 인증(JWT): **필요**
 
             ## 반환값 (ProgressResponse)
             - solvedCount: 푼 문제 수 (distinct questionUuid 기준)
@@ -51,19 +51,19 @@ public interface ProgressControllerDocs {
             """
     )
     ResponseEntity<ProgressResponse> getProgress(
-        @RequestParam UUID memberUuid
+        @AuthMember LoginMember loginMember
     );
 
     @ApiLogs({
         @ApiLog(date = "2026.04.10", author = Author.SUHSAECHAN, issueNumber = 42, description = "날짜별 학습 기록 히트맵 API 추가 — DATE(submitted_at) 기준 GROUP BY 집계, sparse array 반환"),
+        @ApiLog(date = "2026.04.19", author = Author.SUHSAECHAN, issueNumber = 120, description = "memberUuid 쿼리 파라미터 → @AuthMember JWT 인증 전환"),
     })
     @Operation(
         summary = "날짜별 학습 히트맵 조회",
         description = """
-            ## 인증(JWT): **불필요** (추후 헤더 전환 예정)
+            ## 인증(JWT): **필요**
 
             ## 요청 파라미터
-            - memberUuid (UUID, required): 회원 식별자
             - from (LocalDate, optional): 조회 시작일 (기본: 30일 전)
             - to (LocalDate, optional): 조회 종료일 (기본: 오늘)
 
@@ -75,21 +75,19 @@ public interface ProgressControllerDocs {
             """
     )
     ResponseEntity<HeatmapResponse> getHeatmap(
-        @RequestParam UUID memberUuid,
+        @AuthMember LoginMember loginMember,
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
     );
 
     @ApiLogs({
         @ApiLog(date = "2026.04.10", author = Author.SUHSAECHAN, issueNumber = 71, description = "토픽별 정답률/문제수 분석 API 추가"),
+        @ApiLog(date = "2026.04.19", author = Author.SUHSAECHAN, issueNumber = 120, description = "memberUuid 쿼리 파라미터 → @AuthMember JWT 인증 전환"),
     })
     @Operation(
         summary = "토픽별 분석 조회",
         description = """
-            ## 인증(JWT): **불필요** (추후 헤더 전환 예정)
-
-            ## 요청 파라미터
-            - memberUuid (UUID, required): 회원 식별자
+            ## 인증(JWT): **필요**
 
             ## 반환값 (TopicAnalysisResponse)
             - topicStats: 토픽별 집계 목록
@@ -102,20 +100,20 @@ public interface ProgressControllerDocs {
             """
     )
     ResponseEntity<TopicAnalysisResponse> getTopicAnalysis(
-        @RequestParam UUID memberUuid
+        @AuthMember LoginMember loginMember
     );
 
     @ApiLogs({
         @ApiLog(date = "2026.04.10", author = Author.SUHSAECHAN, issueNumber = 71, description = "AI 영역 분석 코멘트 API 추가 (Redis 캐시 24h TTL, Submission 저장 시 evict)"),
         @ApiLog(date = "2026.04.12", author = Author.SUHSAECHAN, issueNumber = 176, description = "sessionUuid 파라미터 추가. 캐시 키 세션 단위 변경(ai-comment:{memberUuid}:{sessionUuid}, TTL 2h). 프롬프트 DB 이관(ai_comment 키). 이번 세션 결과 + 누적 통계 통합 피드백."),
+        @ApiLog(date = "2026.04.19", author = Author.SUHSAECHAN, issueNumber = 120, description = "memberUuid 쿼리 파라미터 → @AuthMember JWT 인증 전환"),
     })
     @Operation(
         summary = "AI 영역 분석 코멘트 조회",
         description = """
-            ## 인증(JWT): **불필요** (추후 헤더 전환 예정)
+            ## 인증(JWT): **필요**
 
             ## 요청 파라미터
-            - memberUuid (UUID, required): 회원 식별자
             - sessionUuid (UUID, required): 퀴즈 세션 식별자
 
             ## 반환값 (AiCommentResponse)
@@ -130,7 +128,7 @@ public interface ProgressControllerDocs {
             """
     )
     ResponseEntity<AiCommentResponse> getAiComment(
-        @RequestParam UUID memberUuid,
+        @AuthMember LoginMember loginMember,
         @RequestParam(required = false) UUID sessionUuid
     );
 }

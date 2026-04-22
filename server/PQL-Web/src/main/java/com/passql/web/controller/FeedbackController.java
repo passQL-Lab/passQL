@@ -1,5 +1,7 @@
 package com.passql.web.controller;
 
+import com.passql.member.auth.presentation.annotation.AuthMember;
+import com.passql.member.auth.presentation.security.LoginMember;
 import com.passql.meta.dto.FeedbackListResponse;
 import com.passql.meta.dto.FeedbackSubmitRequest;
 import com.passql.meta.dto.FeedbackSubmitResponse;
@@ -8,11 +10,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/feedback")
@@ -23,16 +22,16 @@ public class FeedbackController implements FeedbackControllerDocs {
 
     @PostMapping
     public FeedbackSubmitResponse submit(
-        @RequestHeader("X-Member-UUID") UUID memberUuid,
+        @AuthMember LoginMember loginMember,
         @RequestBody FeedbackSubmitRequest request
     ) {
-        return feedbackService.submit(memberUuid, request);
+        return feedbackService.submit(loginMember.memberUuid(), request);
     }
 
     @GetMapping("/me")
     public FeedbackListResponse getMyFeedbacks(
-        @RequestHeader("X-Member-UUID") UUID memberUuid
+        @AuthMember LoginMember loginMember
     ) {
-        return feedbackService.getMyFeedbacks(memberUuid);
+        return feedbackService.getMyFeedbacks(loginMember.memberUuid());
     }
 }

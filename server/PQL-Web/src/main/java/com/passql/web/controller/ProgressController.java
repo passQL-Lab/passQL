@@ -2,6 +2,8 @@ package com.passql.web.controller;
 
 import com.passql.ai.dto.AiCommentResponse;
 import com.passql.application.service.AiCommentService;
+import com.passql.member.auth.presentation.annotation.AuthMember;
+import com.passql.member.auth.presentation.security.LoginMember;
 import com.passql.submission.dto.HeatmapResponse;
 import com.passql.submission.dto.ProgressResponse;
 import com.passql.submission.dto.TopicAnalysisResponse;
@@ -26,32 +28,32 @@ public class ProgressController implements ProgressControllerDocs {
 
     @GetMapping
     public ResponseEntity<ProgressResponse> getProgress(
-        @RequestParam UUID memberUuid
+        @AuthMember LoginMember loginMember
     ) {
-        return ResponseEntity.ok(progressService.getProgress(memberUuid));
+        return ResponseEntity.ok(progressService.getProgress(loginMember.memberUuid()));
     }
 
     @GetMapping("/topic-analysis")
     public ResponseEntity<TopicAnalysisResponse> getTopicAnalysis(
-        @RequestParam UUID memberUuid
+        @AuthMember LoginMember loginMember
     ) {
-        return ResponseEntity.ok(topicAnalysisService.getTopicAnalysis(memberUuid));
+        return ResponseEntity.ok(topicAnalysisService.getTopicAnalysis(loginMember.memberUuid()));
     }
 
     @GetMapping("/heatmap")
     public ResponseEntity<HeatmapResponse> getHeatmap(
-        @RequestParam UUID memberUuid,
+        @AuthMember LoginMember loginMember,
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to
     ) {
-        return ResponseEntity.ok(progressService.getHeatmap(memberUuid, from, to));
+        return ResponseEntity.ok(progressService.getHeatmap(loginMember.memberUuid(), from, to));
     }
 
     @GetMapping("/ai-comment")
     public ResponseEntity<AiCommentResponse> getAiComment(
-        @RequestParam UUID memberUuid,
+        @AuthMember LoginMember loginMember,
         @RequestParam(required = false) UUID sessionUuid
     ) {
-        return ResponseEntity.ok(aiCommentService.getAiComment(memberUuid, sessionUuid));
+        return ResponseEntity.ok(aiCommentService.getAiComment(loginMember.memberUuid(), sessionUuid));
     }
 }

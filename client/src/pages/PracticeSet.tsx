@@ -3,7 +3,7 @@ import { useParams, useNavigate, Navigate, useBlocker } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { ArrowLeft } from "lucide-react";
 import { usePracticeStore } from "../stores/practiceStore";
-import { useMemberStore } from "../stores/memberStore";
+import { useAuthStore } from "../stores/authStore";
 import { submitAnswer } from "../api/questions";
 import { getRandomMessage } from "../constants/microcopy";
 import QuestionDetail from "./QuestionDetail";
@@ -34,7 +34,7 @@ export default function PracticeSet() {
   const topicName = usePracticeStore((s) => s.topicName);
   const submitAndAdvance = usePracticeStore((s) => s.submitAndAdvance);
 
-  const memberUuid = useMemberStore((s) => s.uuid);
+  const memberUuid = useAuthStore((s) => s.memberUuid ?? "");
 
   const [feedback, setFeedback] = useState<SubmitResult | null>(null);
   // 제출 시점의 choiceSetUuid — SubmitResult에 없으므로 별도 보관 (신고 API에 필요)

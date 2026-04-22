@@ -1,6 +1,8 @@
 package com.passql.web.controller;
 
 import com.passql.common.dto.Author;
+import com.passql.member.auth.presentation.annotation.AuthMember;
+import com.passql.member.auth.presentation.security.LoginMember;
 import com.passql.question.dto.ExecuteResult;
 import com.passql.question.dto.QuestionDetail;
 import com.passql.question.dto.QuestionSummary;
@@ -17,7 +19,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
@@ -46,10 +47,10 @@ public interface QuestionControllerDocs {
   })
   @Operation(summary = "오늘의 문제 조회",
       description = "오늘의 데일리 챌린지 문제를 반환. 큐레이션 행(daily_challenge)이 있으면 그 문제, 없으면 활성 문제 풀에서 날짜 시드 기반 결정적 폴백. " +
-          "memberUuid 가 주어지면 오늘(00:00~24:00) 해당 문제 제출 여부를 alreadySolvedToday 로 함께 반환. " +
+          "JWT 인증 회원 기준으로 오늘(00:00~24:00) 해당 문제 제출 여부를 alreadySolvedToday 로 함께 반환. " +
           "활성 문제가 0개면 { question: null, alreadySolvedToday: false }.")
   ResponseEntity<TodayQuestionResponse> getToday(
-      @RequestParam(required = false) UUID memberUuid
+      @AuthMember LoginMember loginMember
   );
 
   @ApiLogs({
@@ -58,13 +59,13 @@ public interface QuestionControllerDocs {
       @ApiLog(date = "2026.04.13", author = Author.SUHSAECHAN, issueNumber = 63, description = "memberUuid 파라미터 추가 — RAG 기반 개인화 추천 도입, RecommendationService 위임, 오답 없거나 AI 실패 시 RANDOM fallback"),
   })
   @Operation(summary = "추천 문제 조회",
-      description = "memberUuid 있으면 RAG 기반 개인화 추천(최근 오답 벡터 평균 → Qdrant 유사도 검색). " +
-          "없거나 오답 기록 없으면 활성 문제 풀에서 RANDOM 추천. " +
+      description = "JWT 인증 회원 기준 RAG 기반 개인화 추천(최근 오답 벡터 평균 → Qdrant 유사도 검색). " +
+          "오답 기록 없으면 활성 문제 풀에서 RANDOM 추천. " +
           "size 기본 3, 최대 5. excludeQuestionUuid 미지정 시 오늘의 데일리 챌린지 자동 제외.")
   ResponseEntity<RecommendationsResponse> getRecommendations(
+      @AuthMember LoginMember loginMember,
       @RequestParam(defaultValue = "3") int size,
-      @RequestParam(required = false) UUID excludeQuestionUuid,
-      @RequestParam(required = false) UUID memberUuid
+      @RequestParam(required = false) UUID excludeQuestionUuid
   );
 
   @ApiLogs({
@@ -93,10 +94,10 @@ public interface QuestionControllerDocs {
   })
   @Operation(summary = "AI 선택지 세트 생성 (SSE)",
       description = "AI가 4지선다 선택지를 실시간 생성. SSE 이벤트: status(generating/validating), complete(choiceSetId+choices), error. " +
-          "생성된 세트는 DB에 저장되어 관리자 화면에서 조회 가능. 헤더 X-Member-UUID(UUID) 필수.")
+          "생성된 세트는 DB에 저장되어 관리자 화면에서 조회 가능. JWT 인증 필요.")
   SseEmitter generateChoices(
       @PathVariable UUID questionUuid,
-      @RequestHeader(value = "X-Member-UUID") UUID memberUuid
+      @AuthMember LoginMember loginMember
   );
 
   @ApiLogs({
@@ -107,12 +108,12 @@ public interface QuestionControllerDocs {
               description = "SubmitRequest에 choiceSetId 추가, SubmitResult에 ExecuteResult 비교 필드(selectedResult/correctResult/correctSql/selectedSql) 추가"),
   })
   @Operation(summary = "문제 제출",
-      description = "선택지 제출 후 정답 여부 + SQL 실행 결과 비교 반환. 헤더 X-Member-UUID(UUID) 필수. " +
+      description = "선택지 제출 후 정답 여부 + SQL 실행 결과 비교 반환. JWT 인증 필요. " +
           "Body: { \"choiceSetId\": \"uuid\", \"selectedChoiceKey\": \"A\" }. " +
           "EXECUTABLE 문제: selectedResult/correctResult에 양쪽 SQL 실행 결과 포함. CONCEPT_ONLY: null.")
   ResponseEntity<SubmitResult> submit(
       @PathVariable UUID questionUuid,
-      @RequestHeader(value = "X-Member-UUID") UUID memberUuid,
+      @AuthMember LoginMember loginMember,
       @RequestBody SubmitRequest request
   );
 }
