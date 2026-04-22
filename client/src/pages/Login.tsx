@@ -59,11 +59,6 @@ export default function Login() {
 
         {/* 로그인 카드 */}
         <div className="w-full bg-white border border-[#E5E7EB] rounded-xl p-8">
-          <h1 className="text-[#111827] text-xl font-bold mb-2">로그인</h1>
-          <p className="text-[#6B7280] text-sm mb-6">
-            소셜 계정으로 간편하게 시작하세요
-          </p>
-
           <div className="flex flex-col gap-3 w-full">
             <button
               onClick={handleGoogleLogin}
