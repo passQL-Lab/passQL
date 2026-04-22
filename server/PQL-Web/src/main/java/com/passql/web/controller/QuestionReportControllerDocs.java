@@ -1,6 +1,8 @@
 package com.passql.web.controller;
 
 import com.passql.common.dto.Author;
+import com.passql.member.auth.presentation.annotation.AuthMember;
+import com.passql.member.auth.presentation.security.LoginMember;
 import com.passql.web.dto.report.ReportRequest;
 import com.passql.web.dto.report.ReportStatusResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -9,7 +11,6 @@ import kr.suhsaechan.suhapilog.annotation.ApiLog;
 import kr.suhsaechan.suhapilog.annotation.ApiLogs;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.UUID;
@@ -19,17 +20,15 @@ public interface QuestionReportControllerDocs {
 
     @ApiLogs({
         @ApiLog(date = "2026.04.13", author = Author.SUHSAECHAN, issueNumber = 34, description = "문제 신고 제출 API 추가"),
+        @ApiLog(date = "2026.04.19", author = Author.SUHSAECHAN, issueNumber = 120, description = "X-Member-UUID 헤더 → @AuthMember JWT 인증 전환"),
     })
     @Operation(
         summary = "문제 신고 제출",
         description = """
-            ## 인증(JWT): **불필요**
+            ## 인증(JWT): **필요**
 
             ## 경로 변수
             - **`questionUuid`**: 신고할 문제 UUID
-
-            ## 요청 헤더
-            - **`X-Member-UUID`**: 회원 UUID
 
             ## 요청 바디 (ReportRequest)
             - **`submissionUuid`**: 제출 UUID (필수)
@@ -45,23 +44,21 @@ public interface QuestionReportControllerDocs {
     )
     void submitReport(
         @PathVariable UUID questionUuid,
-        @RequestHeader("X-Member-UUID") UUID memberUuid,
+        @AuthMember LoginMember loginMember,
         @RequestBody ReportRequest request
     );
 
     @ApiLogs({
         @ApiLog(date = "2026.04.13", author = Author.SUHSAECHAN, issueNumber = 34, description = "신고 여부 조회 API 추가"),
+        @ApiLog(date = "2026.04.19", author = Author.SUHSAECHAN, issueNumber = 120, description = "X-Member-UUID 헤더 → @AuthMember JWT 인증 전환"),
     })
     @Operation(
         summary = "신고 여부 조회",
         description = """
-            ## 인증(JWT): **불필요**
+            ## 인증(JWT): **필요**
 
             ## 경로 변수
             - **`questionUuid`**: 문제 UUID
-
-            ## 요청 헤더
-            - **`X-Member-UUID`**: 회원 UUID
 
             ## 쿼리 파라미터
             - **`submissionUuid`**: 제출 UUID (필수)
@@ -72,7 +69,7 @@ public interface QuestionReportControllerDocs {
     )
     ReportStatusResponse getReportStatus(
         @PathVariable UUID questionUuid,
-        @RequestHeader("X-Member-UUID") UUID memberUuid,
+        @AuthMember LoginMember loginMember,
         @RequestParam UUID submissionUuid
     );
 }
