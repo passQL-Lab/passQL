@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" data-theme="light">
+<head>
+    <meta charset="utf-8"/>
+    <title>passQL Admin | 로그인</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="icon" type="image/x-icon" th:href="@{/favicon.ico}"/>
+    <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css"/>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body class="min-h-screen bg-base-200 flex items-center justify-center">
+
+<div class="card w-full max-w-sm bg-base-100 shadow-md">
+    <div class="card-body gap-4">
+
+        <!-- 헤더 -->
+        <div class="text-center">
+            <img th:src="@{/images/logo.png}" alt="passQL" class="h-14 w-auto mx-auto mb-2"/>
+            <p class="text-base-content/60 text-sm mt-1">관리자 로그인</p>
+        </div>
+
+        <!-- 로그아웃 메시지 -->
+        <div th:if="${logoutMessage}" class="alert alert-success">
+            <i data-lucide="check-circle" class="size-4"></i>
+            <span th:text="${logoutMessage}"></span>
+        </div>
+
+        <!-- 에러 메시지 -->
+        <div th:if="${errorMessage}" class="alert alert-error">
+            <i data-lucide="alert-circle" class="size-4"></i>
+            <span th:text="${errorMessage}"></span>
+        </div>
+
+        <!-- 로그인 폼 — POST는 Spring Security formLogin이 처리 -->
+        <form th:action="@{/admin/login}" method="post" class="flex flex-col gap-3">
+            <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" th:if="${_csrf}"/>
+
+            <label class="form-control">
+                <div class="label">
+                    <span class="label-text font-medium">아이디</span>
+                </div>
+                <input type="text" name="username" placeholder="관리자 아이디"
+                       class="input input-bordered w-full" required autofocus/>
+            </label>
+
+            <label class="form-control">
+                <div class="label">
+                    <span class="label-text font-medium">비밀번호</span>
+                </div>
+                <input type="password" name="password" placeholder="비밀번호"
+                       class="input input-bordered w-full" required/>
+            </label>
+
+            <button type="submit" class="btn btn-primary w-full mt-2">
+                <i data-lucide="log-in" class="size-4"></i>
+                로그인
+            </button>
+        </form>
+
+    </div>
+</div>
+
+<script>lucide.createIcons();</script>
+</body>
+</html>
