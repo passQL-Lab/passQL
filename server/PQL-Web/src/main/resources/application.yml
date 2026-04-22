@@ -34,3 +34,7 @@ springdoc:
     path: /docs/api-docs
   packages-to-scan: com.passql
   paths-to-match: /api/**
+
+admin:
+  username: ${ADMIN_USERNAME:admin}
+  password-hash: ${ADMIN_PASSWORD_HASH:}
