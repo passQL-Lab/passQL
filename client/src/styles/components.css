@@ -138,6 +138,38 @@
   background-color: rgba(255, 255, 255, 0.15);
 }
 
+/* ── 소셜 로그인 버튼 공통 베이스 ── */
+.btn-social {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  height: 44px;
+  border-radius: 8px;
+  font-family: var(--font-ui);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 150ms ease;
+  border: none;
+}
+
+.btn-social:hover { opacity: 0.88; }
+.btn-social:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btn-social--google {
+  background-color: #FFFFFF;
+  color: #111827;
+  border: 1px solid #E5E7EB;
+}
+.btn-social--google:hover { background-color: #F9FAFB; opacity: 1; }
+
+.btn-social--kakao  { background-color: #FEE500; color: #191919; }
+.btn-social--naver  { background-color: #03C75A; color: #FFFFFF; }
+.btn-social--github { background-color: #24292E; color: #FFFFFF; }
+.btn-social--apple  { background-color: #000000; color: #FFFFFF; }
+
 /* ── 5. Code Block ── */
 .code-block {
   background-color: var(--color-surface-code);
@@ -377,6 +409,7 @@ body {
   color: var(--color-text-primary);
   background-color: var(--color-surface);
 }
+
 
 /* ── Slide-up animation ── */
 @keyframes slide-up {
