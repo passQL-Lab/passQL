@@ -54,15 +54,17 @@ jobs:
           host: ${{ secrets.SERVER_HOST }}
           username: ${{ secrets.SERVER_USER }}
           password: ${{ secrets.SERVER_PASSWORD }}
+          port: 2022
           script: |
+            DOCKER=/volume1/@appstore/ContainerManager/usr/bin/docker
             IMAGE="${{ secrets.DOCKERHUB_USERNAME }}/passql-server:latest"
 
-            docker pull "$IMAGE"
+            $DOCKER pull "$IMAGE"
 
-            docker stop passql-server 2>/dev/null || true
-            docker rm   passql-server 2>/dev/null || true
+            $DOCKER stop passql-server 2>/dev/null || true
+            $DOCKER rm   passql-server 2>/dev/null || true
 
-            docker run -d \
+            $DOCKER run -d \
               --name passql-server \
               --restart unless-stopped \
               -p 8080:8080 \
