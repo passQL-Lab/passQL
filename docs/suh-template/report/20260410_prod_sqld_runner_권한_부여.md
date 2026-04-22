@@ -13,12 +13,12 @@ prod 서버에서 샌드박스 기능 실행 시 두 단계에 걸쳐 오류가 
 **에러**: `Access denied for user 'sqld_runner'@'172.30.1.254' (using password: YES)`
 
 - `application-prod.yml`의 sandbox datasource가 NAS MariaDB(`suh-project.synology.me:3306`)를 가리키고 있으나, `sqld_runner` 유저 자체가 존재하지 않았음
-- SSH 비밀번호 인증이 시놀로지 기본 설정상 비활성화되어 있어, MariaDB 3306 포트에 `kimchi` 계정으로 직접 접속하여 처리
+- SSH 비밀번호 인증이 시놀로지 기본 설정상 비활성화되어 있어, MariaDB 3306 포트에 관리자 계정으로 직접 접속하여 처리
 
 **실행한 SQL**
 
 ```sql
-CREATE USER IF NOT EXISTS 'sqld_runner'@'%' IDENTIFIED BY 'Kimchi123@';
+CREATE USER IF NOT EXISTS 'sqld_runner'@'%' IDENTIFIED BY '{DB_PASSWORD}';
 GRANT ALL PRIVILEGES ON `sandbox_%`.* TO 'sqld_runner'@'%';
 GRANT ALL PRIVILEGES ON `sqld_q%`.* TO 'sqld_runner'@'%';
 GRANT SELECT ON mysql.* TO 'sqld_runner'@'%';
