@@ -34,7 +34,7 @@ public class AdminSecurityConfig {
             .formLogin(form -> form
                 .loginPage("/admin/login")
                 .loginProcessingUrl("/admin/login")
-                .defaultSuccessUrl("/admin/dashboard", true)
+                .defaultSuccessUrl("/admin", true)
                 .failureUrl("/admin/login?error=true")
                 .usernameParameter("username")
                 .passwordParameter("password")
