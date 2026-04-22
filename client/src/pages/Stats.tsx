@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { CheckSquare, BarChart2, Zap, HelpCircle } from "lucide-react";
 import { useProgress } from "../hooks/useProgress";
 import { fetchTopicAnalysis, fetchAiComment } from "../api/progress";
-import { useMemberStore } from "../stores/memberStore";
+import { useAuthStore } from "../stores/authStore";
 import ErrorFallback from "../components/ErrorFallback";
 import StatsAnalysisCard from "../components/StatsAnalysisCard";
 import StatsRadarChart from "../components/StatsRadarChart";
@@ -91,7 +91,7 @@ export default function Stats() {
   const [readinessPopoverOpen, setReadinessPopoverOpen] = useState(false);
   const readinessBtnRef = useRef<HTMLButtonElement>(null);
   // UUID 없이 호출하면 400이므로 enabled 가드 필수
-  const uuid = useMemberStore((s) => s.uuid);
+  const uuid = useAuthStore((s) => s.memberUuid ?? "");
 
   const {
     data: progress,

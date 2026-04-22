@@ -1,5 +1,5 @@
 import { apiFetch, BASE_URL } from "./client";
-import { getMemberUuid } from "../stores/memberStore";
+import { getAccessToken } from "../stores/authStore";
 import type {
   Page,
   QuestionSummary,
@@ -41,23 +41,17 @@ export function fetchQuestion(questionUuid: string): Promise<QuestionDetail> {
   return apiFetch(`/questions/${questionUuid}`);
 }
 
-export function fetchTodayQuestion(memberUuid?: string): Promise<TodayQuestionResponse> {
-  const query = new URLSearchParams();
-  if (memberUuid) query.set("memberUuid", memberUuid);
-  const qs = query.toString();
-  return apiFetch(`/questions/today${qs ? `?${qs}` : ""}`);
+export function fetchTodayQuestion(): Promise<TodayQuestionResponse> {
+  return apiFetch("/questions/today");
 }
 
 export function fetchRecommendations(
   size?: number,
   excludeQuestionUuid?: string,
-  memberUuid?: string,
 ): Promise<RecommendationsResponse> {
   const query = new URLSearchParams();
   if (size != null) query.set("size", String(size));
   if (excludeQuestionUuid) query.set("excludeQuestionUuid", excludeQuestionUuid);
-  // AI 개인화 추천을 위해 memberUuid 전달 — 없으면 백엔드가 RANDOM fallback
-  if (memberUuid) query.set("memberUuid", memberUuid);
   const qs = query.toString();
   return apiFetch(`/questions/recommendations${qs ? `?${qs}` : ""}`);
 }
@@ -79,12 +73,13 @@ export function generateChoices(
     let receivedTerminalEvent = false;
 
     try {
+      const accessToken = getAccessToken();
       const response = await fetch(
         `${BASE_URL}/questions/${questionUuid}/generate-choices`,
         {
           method: "POST",
           headers: {
-            "X-Member-UUID": getMemberUuid(),
+            ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
             Accept: "text/event-stream",
           },
           signal: abortController.signal,
@@ -218,7 +213,6 @@ export function submitAnswer(
 ): Promise<SubmitResult> {
   return apiFetch(`/questions/${questionUuid}/submit`, {
     method: "POST",
-    headers: { "X-Member-UUID": getMemberUuid() },
     body: JSON.stringify({ choiceSetId, selectedChoiceKey, sessionUuid }),
   });
 }

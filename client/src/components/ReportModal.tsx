@@ -3,7 +3,7 @@ import { Flag } from "lucide-react";
 import { submitReport } from "../api/reports";
 import type { ReportCategory } from "../api/reports";
 import { ApiError } from "../api/client";
-import { useMemberStore } from "../stores/memberStore";
+import { useAuthStore } from "../stores/authStore";
 
 interface ReportModalProps {
   readonly questionUuid: string;
@@ -29,8 +29,7 @@ export default function ReportModal({
   onClose,
   onSuccess,
 }: ReportModalProps) {
-  // memberStore의 uuid 필드 — API 인증 헤더에 사용
-  const memberUuid = useMemberStore((s) => s.uuid);
+  const isLoggedIn = useAuthStore((s) => !!s.accessToken);
   const [selected, setSelected] = useState<Set<ReportCategory>>(new Set());
   const [detail, setDetail] = useState("");
   const [loading, setLoading] = useState(false);
@@ -65,11 +64,11 @@ export default function ReportModal({
     !loading;
 
   const handleSubmit = async () => {
-    if (!memberUuid || !canSubmit) return;
+    if (!isLoggedIn || !canSubmit) return;
     setLoading(true);
     setError(null);
     try {
-      await submitReport(questionUuid, memberUuid, {
+      await submitReport(questionUuid, {
         submissionUuid,
         choiceSetUuid,
         categories: [...selected],

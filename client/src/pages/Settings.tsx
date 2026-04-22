@@ -1,7 +1,8 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Copy, Check, RefreshCw, ChevronRight } from "lucide-react";
-import { useMemberStore } from "../stores/memberStore";
+import { Copy, Check, RefreshCw, ChevronRight, LogOut } from "lucide-react";
+import { useAuthStore, getRefreshToken } from "../stores/authStore";
+import { logout } from "../api/auth";
 import logo from "../assets/logo/logo.png";
 import { useRegenerateNickname } from "../hooks/useMember";
 import { useStagger } from "../hooks/useStagger";
@@ -10,11 +11,13 @@ import SettingsRow from "../components/SettingsRow";
 
 export default function Settings() {
   const navigate = useNavigate();
-  const uuid = useMemberStore((s) => s.uuid);
-  const nickname = useMemberStore((s) => s.nickname);
+  const uuid = useAuthStore((s) => s.memberUuid ?? "");
+  const nickname = useAuthStore((s) => s.nickname ?? "");
   const truncatedUuid = `${uuid.slice(0, 20)}...`;
   const regenerateMutation = useRegenerateNickname();
+  const clearTokens = useAuthStore((s) => s.clearTokens);
   const [copied, setCopied] = useState(false);
+  const [logoutLoading, setLogoutLoading] = useState(false);
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // 개발자 모드 Easter Egg — sessionStorage 복원으로 페이지 재진입 시에도 row 유지
@@ -35,7 +38,8 @@ export default function Settings() {
   const s1 = stagger(1); // 계정 섹션
   const s2 = stagger(2); // 건의사항 row
   const s3 = stagger(3); // 앱 정보 섹션
-  const s4 = stagger(4); // 로고 + 카피라이트
+  const s4 = stagger(4); // 로그아웃 섹션
+  const s5 = stagger(5); // 로고 + 카피라이트
 
   useEffect(() => {
     return () => {
@@ -49,6 +53,20 @@ export default function Settings() {
     setToastMsg(msg);
     if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
     toastTimerRef.current = setTimeout(() => setToastMsg(null), 2000);
+  };
+
+  const handleLogout = async () => {
+    setLogoutLoading(true);
+    try {
+      const refreshToken = getRefreshToken();
+      if (refreshToken) {
+        // 서버 세션 무효화 — 실패해도 로컬 토큰은 정리
+        await logout(refreshToken).catch(() => {});
+      }
+    } finally {
+      clearTokens();
+      navigate("/login", { replace: true });
+    }
   };
 
   const handleCopy = () => {
@@ -194,8 +212,32 @@ export default function Settings() {
         </SettingsSection>
       </section>
 
-      {/* ⑤ 로고 + 카피라이트 */}
-      <section className={`text-center mt-12 space-y-2 ${s4.className}`}>
+      {/* ⑤ 로그아웃 */}
+      <section className={s4.className}>
+        <SettingsSection label="계정 관리">
+          <div className="bg-surface-card border-y border-border">
+            <SettingsRow
+              label="로그아웃"
+              value={
+                <p className="text-sm text-text-secondary">
+                  {logoutLoading ? "로그아웃 중..." : "현재 계정에서 로그아웃"}
+                </p>
+              }
+              action={
+                logoutLoading ? (
+                  <span className="w-4 h-4 inline-block border-2 border-text-caption border-t-transparent rounded-full animate-spin" />
+                ) : (
+                  <LogOut size={16} className="text-sem-error" />
+                )
+              }
+              onClick={logoutLoading ? undefined : handleLogout}
+            />
+          </div>
+        </SettingsSection>
+      </section>
+
+      {/* ⑥ 로고 + 카피라이트 */}
+      <section className={`text-center mt-12 space-y-2 ${s5.className}`}>
         <img src={logo} alt="passQL" className="h-5 w-auto mx-auto" />
         <p className="text-xs text-text-caption">
           © 2026 passQL. All rights reserved.

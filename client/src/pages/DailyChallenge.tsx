@@ -3,7 +3,7 @@ import { useNavigate, Navigate, useBlocker } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import { Home } from "lucide-react";
 import { useTodayQuestion } from "../hooks/useHome";
-import { useMemberStore } from "../stores/memberStore";
+import { useAuthStore } from "../stores/authStore";
 import { submitAnswer } from "../api/questions";
 import QuestionDetail from "./QuestionDetail";
 import PracticeFeedbackBar from "../components/PracticeFeedbackBar";
@@ -14,7 +14,7 @@ import type { ChoiceItem, SubmitResult } from "../types/api";
 export default function DailyChallenge() {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
-  const uuid = useMemberStore((s) => s.uuid);
+  const uuid = useAuthStore((s) => s.memberUuid ?? "");
   const { data: today, isLoading } = useTodayQuestion();
   const [feedback, setFeedback] = useState<SubmitResult | null>(null);
   // 답안 제출 API 호출 중 화면 조작 차단

@@ -3,36 +3,35 @@ import { fetchGreeting } from "../api/home";
 import { fetchTodayQuestion, fetchRecommendations } from "../api/questions";
 import { fetchSelectedSchedule } from "../api/examSchedules";
 import { fetchHeatmap } from "../api/progress";
-import { useMemberStore } from "../stores/memberStore";
+import { useAuthStore } from "../stores/authStore";
 
 export function useGreeting() {
-  const uuid = useMemberStore((s) => s.uuid);
+  const accessToken = useAuthStore((s) => s.accessToken);
   return useQuery({
-    queryKey: ["greeting", uuid],
-    queryFn: () => fetchGreeting(uuid),
-    enabled: !!uuid,
+    queryKey: ["greeting", accessToken],
+    queryFn: fetchGreeting,
+    enabled: !!accessToken,
     staleTime: 1000 * 60 * 5,
     retry: false,
   });
 }
 
 export function useTodayQuestion() {
-  const uuid = useMemberStore((s) => s.uuid);
+  const accessToken = useAuthStore((s) => s.accessToken);
   return useQuery({
-    queryKey: ["todayQuestion", uuid],
-    queryFn: () => fetchTodayQuestion(uuid),
-    enabled: !!uuid,
+    queryKey: ["todayQuestion", accessToken],
+    queryFn: fetchTodayQuestion,
+    enabled: !!accessToken,
     staleTime: 1000 * 60 * 5,
     retry: false,
   });
 }
 
 export function useRecommendations() {
-  const uuid = useMemberStore((s) => s.uuid);
+  const accessToken = useAuthStore((s) => s.accessToken);
   return useQuery({
-    // uuid를 queryKey에 포함 — 로그인 상태 변경 시 자동 재조회
-    queryKey: ["recommendations", uuid],
-    queryFn: () => fetchRecommendations(3, undefined, uuid ?? undefined),
+    queryKey: ["recommendations", accessToken],
+    queryFn: () => fetchRecommendations(3),
     staleTime: 1000 * 60 * 5,
     retry: false,
   });
@@ -56,16 +55,16 @@ function toLocalDateStr(date: Date): string {
 }
 
 export function useHeatmap() {
-  const uuid = useMemberStore((s) => s.uuid);
+  const accessToken = useAuthStore((s) => s.accessToken);
   const now = new Date();
   const today = toLocalDateStr(now);
   const fromDate = new Date(now);
   fromDate.setDate(fromDate.getDate() - 29);
   const from = toLocalDateStr(fromDate);
   return useQuery({
-    queryKey: ["heatmap", uuid, from, today],
-    queryFn: () => fetchHeatmap(uuid, from, today),
-    enabled: !!uuid,
+    queryKey: ["heatmap", accessToken, from, today],
+    queryFn: () => fetchHeatmap(from, today),
+    enabled: !!accessToken,
     staleTime: 1000 * 60 * 5,
     retry: false,
   });
