@@ -2,13 +2,11 @@
 
 ## 보안 정책
 
-### Spring Security 인증 개방 (의도적)
+### Spring Security 인증 구조
 
-`SecurityConfig`의 `anyRequest().permitAll()`은 **의도적으로 전체 개방한 상태**다.
-관리자 페이지(`/admin/**`)를 포함한 모든 경로가 Spring Security 레벨에서는 무인증이다.
-
-**이유**: 현재 개발/내부 환경에서만 운영 중이며, 인프라 레벨(VPN 또는 접속 IP 제한)에서 외부 접근을 차단하고 있다.
-Spring Security 인증을 추가하지 말 것 — 향후 인증 도입 시 별도 이슈로 처리한다.
+- `/admin/**` 경로: 세션 기반 폼 로그인 (`AdminSecurityConfig`, `@Order(1)`)
+- `/api/**` 경로: JWT 무상태 인증 (`SecurityConfig`, `@Order(2)`)
+- 관리자 계정은 환경변수(`ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH`)로 관리
 
 ---
 
