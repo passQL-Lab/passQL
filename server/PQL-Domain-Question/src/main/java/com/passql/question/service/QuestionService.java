@@ -33,6 +33,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -155,18 +156,23 @@ public class QuestionService {
      * RANDOM 기반 추천.
      * memberUuid 없거나 AI 추천 실패 시 호출되는 fallback.
      */
-    public RecommendationsResponse getRecommendations(int size, UUID excludeQuestionUuid) {
+    public RecommendationsResponse getRecommendations(int size, List<UUID> excludeQuestionUuids) {
         int clamped = Math.max(1, Math.min(size, 5));
-        UUID exclude = excludeQuestionUuid;
-        if (exclude == null) {
-            DailyChallenge dc = dailyChallengeRepository.findByChallengeDate(LocalDate.now()).orElse(null);
-            if (dc != null) {
-                exclude = dc.getQuestionUuid();
-            }
+
+        // 오늘의 문제도 제외 목록에 추가
+        List<String> excludeList = new ArrayList<>(
+                excludeQuestionUuids != null
+                        ? excludeQuestionUuids.stream().map(UUID::toString).toList()
+                        : List.of()
+        );
+        DailyChallenge dc = dailyChallengeRepository.findByChallengeDate(LocalDate.now()).orElse(null);
+        if (dc != null) {
+            excludeList.add(dc.getQuestionUuid().toString());
         }
-        List<Question> list = (exclude != null)
-                ? questionRepository.findRandomActiveExcluding(clamped, exclude.toString())
-                : questionRepository.findRandomActive(clamped);
+
+        List<Question> list = excludeList.isEmpty()
+                ? questionRepository.findRandomActive(clamped)
+                : questionRepository.findRandomActiveExcludingList(clamped, excludeList);
         return new RecommendationsResponse(list.stream().map(this::toSummary).toList());
     }
 
