@@ -1,6 +1,8 @@
 package com.passql.meta.dto;
 
+import jakarta.validation.constraints.NotBlank;
+
 public record LegalUpdateRequest(
-        String title,
-        String content
+        @NotBlank String title,
+        @NotBlank String content
 ) {}

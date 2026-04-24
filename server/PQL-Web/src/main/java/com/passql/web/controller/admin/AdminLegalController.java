@@ -4,6 +4,7 @@ import com.passql.meta.constant.LegalStatus;
 import com.passql.meta.constant.LegalType;
 import com.passql.meta.dto.LegalUpdateRequest;
 import com.passql.meta.service.LegalService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -29,7 +30,7 @@ public class AdminLegalController {
     @PutMapping("/{type}")
     @ResponseBody
     public ResponseEntity<Void> update(@PathVariable LegalType type,
-                                       @RequestBody LegalUpdateRequest request) {
+                                       @Valid @RequestBody LegalUpdateRequest request) {
         legalService.update(type, request);
         return ResponseEntity.ok().build();
     }
