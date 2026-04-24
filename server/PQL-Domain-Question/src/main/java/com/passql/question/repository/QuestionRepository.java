@@ -53,6 +53,10 @@ public interface QuestionRepository extends JpaRepository<Question, UUID> {
     @Query(value = "SELECT * FROM question WHERE is_active = true AND question_uuid <> CAST(:excludeUuid AS uuid) ORDER BY RANDOM() LIMIT :size", nativeQuery = true)
     List<Question> findRandomActiveExcluding(@Param("size") int size, @Param("excludeUuid") String excludeUuid);
 
+    // 복수 UUID 제외 — 세션 내 이미 추천된 문제를 제외할 때 사용
+    @Query(value = "SELECT * FROM question WHERE is_active = true AND question_uuid::text NOT IN (:excludeUuids) ORDER BY RANDOM() LIMIT :size", nativeQuery = true)
+    List<Question> findRandomActiveExcludingList(@Param("size") int size, @Param("excludeUuids") List<String> excludeUuids);
+
     @Query("SELECT q.questionUuid FROM Question q WHERE q.isActive = true ORDER BY q.createdAt ASC")
     List<UUID> findActiveUuidsOrderedByCreatedAt();
 
