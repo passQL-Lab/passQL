@@ -47,11 +47,12 @@ export function fetchTodayQuestion(): Promise<TodayQuestionResponse> {
 
 export function fetchRecommendations(
   size?: number,
-  excludeQuestionUuid?: string,
+  excludeQuestionUuids?: string[],
 ): Promise<RecommendationsResponse> {
   const query = new URLSearchParams();
   if (size != null) query.set("size", String(size));
-  if (excludeQuestionUuid) query.set("excludeQuestionUuid", excludeQuestionUuid);
+  // 동일 키 반복 append — Spring @RequestParam List<String> 자동 처리
+  excludeQuestionUuids?.forEach((uuid) => query.append("excludeQuestionUuids", uuid));
   const qs = query.toString();
   return apiFetch(`/questions/recommendations${qs ? `?${qs}` : ""}`);
 }
