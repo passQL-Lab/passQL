@@ -147,6 +147,12 @@
                     </a>
                 </li>
                 <li>
+                    <a th:href="@{/admin/legal}" th:classappend="${currentMenu == 'legal'} ? 'active'">
+                        <i data-lucide="file-text" class="size-5"></i>
+                        약관 관리
+                    </a>
+                </li>
+                <li>
                     <a th:href="@{/admin/settings}" th:classappend="${currentMenu == 'settings'} ? 'active'">
                         <i data-lucide="settings" class="size-5"></i>
                         앱 설정

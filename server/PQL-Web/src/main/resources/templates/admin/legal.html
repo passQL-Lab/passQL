@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="~{admin/layout}">
+
+<th:block layout:fragment="title">약관 관리</th:block>
+
+<th:block layout:fragment="content">
+
+    <div class="space-y-4">
+        <div th:each="legal : ${legals}" class="card bg-base-100 shadow">
+            <div class="card-body p-4">
+
+                <!-- 헤더 -->
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <h3 class="card-title text-base" th:text="${legal.title}">이용약관</h3>
+                        <span class="badge badge-xs"
+                              th:classappend="${legal.status.name() == 'PUBLISHED'} ? 'badge-success' : 'badge-ghost'"
+                              th:text="${legal.status.name() == 'PUBLISHED'} ? '게시됨' : '초안'">게시됨</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <!-- 상태 토글 버튼 -->
+                        <button th:if="${legal.status.name() == 'PUBLISHED'}"
+                                class="btn btn-xs btn-outline btn-warning"
+                                th:data-type="${legal.type}"
+                                onclick="updateStatus(this.dataset.type, 'DRAFT')">
+                            초안으로 변경
+                        </button>
+                        <button th:if="${legal.status.name() == 'DRAFT'}"
+                                class="btn btn-xs btn-outline btn-success"
+                                th:data-type="${legal.type}"
+                                onclick="updateStatus(this.dataset.type, 'PUBLISHED')">
+                            게시
+                        </button>
+                        <!-- 수정 버튼 -->
+                        <button class="btn btn-xs btn-ghost"
+                                th:data-type="${legal.type}"
+                                onclick="startEdit(this.dataset.type)">
+                            <i data-lucide="pencil" class="size-3"></i>
+                            수정
+                        </button>
+                    </div>
+                </div>
+
+                <!-- 제목 입력 (편집 모드) -->
+                <div th:id="'title_row_' + ${legal.type}" class="hidden mb-2">
+                    <label class="text-xs text-base-content/60 mb-1 block">제목</label>
+                    <input type="text"
+                           th:id="'title_' + ${legal.type}"
+                           th:value="${legal.title}"
+                           class="input input-bordered input-sm w-full"/>
+                </div>
+
+                <!-- 본문 -->
+                <div th:id="'view_' + ${legal.type}">
+                    <p class="text-xs text-base-content/50 mb-1">type: <code th:text="${legal.type}">TERMS_OF_SERVICE</code></p>
+                    <pre class="bg-base-200 rounded p-3 text-xs whitespace-pre-wrap max-h-48 overflow-y-auto font-mono"
+                         th:text="${legal.content}"></pre>
+                </div>
+
+                <!-- 본문 편집 textarea (편집 모드) -->
+                <div th:id="'edit_' + ${legal.type}" class="hidden">
+                    <label class="text-xs text-base-content/60 mb-1 block">본문 (Markdown)</label>
+                    <textarea th:id="'content_' + ${legal.type}"
+                              class="textarea textarea-bordered w-full font-mono text-xs"
+                              rows="16"
+                              th:text="${legal.content}"></textarea>
+                    <div class="flex justify-end gap-2 mt-2">
+                        <button class="btn btn-sm btn-ghost"
+                                th:data-type="${legal.type}"
+                                onclick="cancelEdit(this.dataset.type)">취소</button>
+                        <button class="btn btn-sm btn-primary"
+                                th:data-type="${legal.type}"
+                                onclick="saveEdit(this.dataset.type)">저장</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+</th:block>
+
+<th:block layout:fragment="js">
+    <script>
+        lucide.createIcons();
+
+        function startEdit(type) {
+            document.getElementById('view_' + type).classList.add('hidden');
+            document.getElementById('edit_' + type).classList.remove('hidden');
+            document.getElementById('title_row_' + type).classList.remove('hidden');
+        }
+
+        function cancelEdit(type) {
+            document.getElementById('view_' + type).classList.remove('hidden');
+            document.getElementById('edit_' + type).classList.add('hidden');
+            document.getElementById('title_row_' + type).classList.add('hidden');
+        }
+
+        function saveEdit(type) {
+            const title = document.getElementById('title_' + type).value;
+            const content = document.getElementById('content_' + type).value;
+            fetch('/admin/legal/' + encodeURIComponent(type), {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, content })
+            }).then(r => {
+                if (r.ok) location.reload();
+                else alert('저장 실패');
+            });
+        }
+
+        function updateStatus(type, status) {
+            fetch('/admin/legal/' + encodeURIComponent(type) + '/status?status=' + status, {
+                method: 'PUT'
+            }).then(r => {
+                if (r.ok) location.reload();
+                else alert('상태 변경 실패');
+            });
+        }
+    </script>
+</th:block>
+</html>
