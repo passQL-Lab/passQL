@@ -66,6 +66,7 @@ export default function Home() {
 
   const {
     data: recommendations,
+    isLoading: recommendationsLoading,
     isError: recommendationsError,
     isFetching: recommendationsFetching,
   } = useRecommendations();
@@ -99,10 +100,10 @@ export default function Home() {
     setSpinning(true);
     setIsRefreshing(true);
     // 새로고침 시에만 seenUuids를 제외 목록으로 전달 — 평소엔 queryKey 고정 유지
-    refreshRecommendations(seenUuids).then(() => {
-      setRefreshKey((k) => k + 1);
-      setIsRefreshing(false);
-    });
+    // finally로 에러 시에도 isRefreshing 복구 — 미처리 시 버튼 영구 비활성화 발생
+    refreshRecommendations(seenUuids)
+      .then(() => { setRefreshKey((k) => k + 1); })
+      .finally(() => { setIsRefreshing(false); });
   }, [recommendationsFetching, isRefreshing, spinning, refreshRecommendations, seenUuids]);
 
   const uuid = useAuthStore((s) => s.memberUuid ?? "");
@@ -341,17 +342,16 @@ export default function Home() {
         </section>
       )}
 
-      {/* ⑥ 추천 문제 섹션: 에러 또는 데이터 없으면 섹션 전체 숨김 */}
-      {!recommendationsError && recommendations && recommendations.questions.length > 0 && (
+      {/* ⑥ 추천 문제 섹션: 에러 시 숨김, 초기 로딩 시 스켈레톤 표시 */}
+      {!recommendationsError && (recommendationsLoading || (recommendations && recommendations.questions.length > 0)) && (
         <section className={`mt-6 ${s5.className}`}>
-          {/* Sparkles 아이콘으로 AI 추천 기능임을 명시 */}
           <h2 className="text-secondary text-sm mb-3 flex items-center gap-2">
             <Sparkles size={14} fill="currentColor" />
             AI 추천문제
             {/* 다른 추천 문제 세트를 원할 때 재요청 — staleTime 내에도 강제 refetch */}
             <button
               onClick={handleRefresh}
-              disabled={recommendationsFetching || spinning}
+              disabled={recommendationsFetching || isRefreshing || spinning}
               onAnimationEnd={() => setSpinning(false)}
               className="p-1 rounded hover:bg-gray-100 transition-colors disabled:opacity-40"
               aria-label="추천 문제 새로고침"
@@ -362,29 +362,38 @@ export default function Home() {
               />
             </button>
           </h2>
-          <div key={refreshKey} className="space-y-3">
-            {recommendations.questions.map((q) => (
-              <Link
-                key={q.questionUuid}
-                to={`/questions/${q.questionUuid}`}
-                className="block animate-card-in"
-              >
-                <div className="bg-surface-card border border-border rounded-2xl p-4 sm:p-6 shadow-sm flex items-center gap-3 cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:border-brand transition-all duration-200">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-body truncate">{q.stemPreview}</p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <span className="badge-topic">{q.topicName}</span>
-                      <StarRating level={q.difficulty} />
+          {recommendationsLoading ? (
+            // 초기 로딩 시에만 스켈레톤 — 새로고침(isFetching)은 기존 카드 유지
+            <div className="space-y-3">
+              <div className="skeleton h-[72px] rounded-2xl" />
+              <div className="skeleton h-[72px] rounded-2xl" />
+              <div className="skeleton h-[72px] rounded-2xl" />
+            </div>
+          ) : (
+            <div key={refreshKey} className="space-y-3">
+              {recommendations!.questions.map((q) => (
+                <Link
+                  key={q.questionUuid}
+                  to={`/questions/${q.questionUuid}`}
+                  className="block animate-card-in"
+                >
+                  <div className="bg-surface-card border border-border rounded-2xl p-4 sm:p-6 shadow-sm flex items-center gap-3 cursor-pointer hover:shadow-md hover:-translate-y-0.5 hover:border-brand transition-all duration-200">
+                    <div className="flex-1 min-w-0">
+                      <p className="text-body truncate">{q.stemPreview}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="badge-topic">{q.topicName}</span>
+                        <StarRating level={q.difficulty} />
+                      </div>
                     </div>
+                    <ChevronRight
+                      size={16}
+                      className="text-text-caption shrink-0"
+                    />
                   </div>
-                  <ChevronRight
-                    size={16}
-                    className="text-text-caption shrink-0"
-                  />
-                </div>
-              </Link>
-            ))}
-          </div>
+                </Link>
+              ))}
+            </div>
+          )}
         </section>
       )}
     </div>
