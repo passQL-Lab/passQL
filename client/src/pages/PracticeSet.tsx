@@ -100,10 +100,11 @@ export default function PracticeSet() {
           result.submissionUuid,
           choiceSetId,
         );
-        // 마지막 문제 제출 완료 시에만 무효화 — 도중 이탈은 갱신하지 않기로 결정
+        // 마지막 문제 제출 완료 시에만 즉시 재조회 — 도중 이탈은 갱신하지 않기로 결정
+        // refetchQueries: 무효화 + 강제 재요청 동시 수행 → 네비게이션 타이밍과 무관하게 최신 데이터 보장
         if (currentIndex + 1 >= totalQuestions) {
-          queryClient.invalidateQueries({ queryKey: ["heatmap"] });
-          queryClient.invalidateQueries({ queryKey: ["progress"] });
+          queryClient.refetchQueries({ queryKey: ["heatmap"] });
+          queryClient.refetchQueries({ queryKey: ["progress"] });
         }
       } catch {
         const fallback: SubmitResult = {

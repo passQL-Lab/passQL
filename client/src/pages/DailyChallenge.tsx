@@ -47,12 +47,12 @@ export default function DailyChallenge() {
         // 정답: 백엔드에 제출 → 완료 처리 (alreadySolvedToday=true)
         try {
           const result = await submitAnswer(today.question.questionUuid, choiceSetId, selectedChoiceKey, sessionUuid);
-          // 백그라운드에서 캐시 무효화 — 홈 복귀 시 완료 상태·추천 문제 목록·학습 현황 즉시 반영
-          queryClient.invalidateQueries({ queryKey: ["todayQuestion", uuid] });
-          queryClient.invalidateQueries({ queryKey: ["recommendations"] });
-          // 문제 풀이 완료 시 heatmap·progress 무효화 — 학습 현황 캘린더와 streak 즉시 갱신
-          queryClient.invalidateQueries({ queryKey: ["heatmap"] });
-          queryClient.invalidateQueries({ queryKey: ["progress"] });
+          // 백그라운드에서 캐시 즉시 재조회 — 홈 복귀 시 완료 상태·추천 문제 목록·학습 현황 반영
+          // refetchQueries: 무효화 + 강제 재요청 동시 수행 → 네비게이션 타이밍과 무관하게 최신 데이터 보장
+          queryClient.refetchQueries({ queryKey: ["todayQuestion", uuid] });
+          queryClient.refetchQueries({ queryKey: ["recommendations"] });
+          queryClient.refetchQueries({ queryKey: ["heatmap"] });
+          queryClient.refetchQueries({ queryKey: ["progress"] });
           setFeedback(result);
         } catch {
           navigate("/", { replace: true });
