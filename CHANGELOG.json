@@ -1,11 +1,27 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-25T23:48:07Z",
-    "currentVersion": "0.0.173",
+    "lastUpdated": "2026-04-25T23:51:23Z",
+    "currentVersion": "0.0.174",
     "projectType": "basic",
-    "totalReleases": 83
+    "totalReleases": 84
   },
   "releases": [
+    {
+      "version": "0.0.174",
+      "project_type": "basic",
+      "date": "2026-04-25",
+      "pr_number": 302,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 합격 준비도 점수 계산 방식 개선으로 초반 100% 표시 오류 해결",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "합격 준비도 점수 계산 방식 개선으로 초반 100% 표시 오류 해결"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.173",
       "project_type": "basic",
