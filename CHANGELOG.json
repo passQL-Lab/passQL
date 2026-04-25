@@ -1,11 +1,27 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-25T23:09:22Z",
-    "currentVersion": "0.0.168",
+    "lastUpdated": "2026-04-25T23:14:00Z",
+    "currentVersion": "0.0.169",
     "projectType": "basic",
-    "totalReleases": 79
+    "totalReleases": 80
   },
   "releases": [
+    {
+      "version": "0.0.169",
+      "project_type": "basic",
+      "date": "2026-04-25",
+      "pr_number": 296,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 닉네임 중복 확인 및 닉네임 재생성 시 서버 오류(500) 해결",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "닉네임 중복 확인 및 닉네임 재생성 시 서버 오류(500) 해결"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.168",
       "project_type": "basic",
