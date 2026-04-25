@@ -1,6 +1,8 @@
 package com.passql.web.controller;
 
 import com.passql.common.dto.Author;
+import com.passql.meta.constant.LegalType;
+import com.passql.meta.dto.LegalResponse;
 import com.passql.meta.dto.TopicTree;
 import com.passql.meta.entity.ConceptTag;
 import io.swagger.v3.oas.annotations.Operation;
@@ -8,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.suhsaechan.suhapilog.annotation.ApiLog;
 import kr.suhsaechan.suhapilog.annotation.ApiLogs;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
@@ -51,4 +54,26 @@ public interface MetaControllerDocs {
           """
   )
   ResponseEntity<List<ConceptTag>> getTags();
+
+  @ApiLogs({
+      @ApiLog(date = "2026.04.24", author = Author.SUHSAECHAN, issueNumber = 283, description = "공개 약관 조회 API 추가 — TERMS_OF_SERVICE / PRIVACY_POLICY"),
+  })
+  @Operation(
+      summary = "공개 약관 조회",
+      description = """
+          ## 인증(JWT): **불필요**
+
+          ## 경로 변수
+          - **`type`**: TERMS_OF_SERVICE | PRIVACY_POLICY
+
+          ## 반환값 (LegalResponse)
+          - title: 약관 제목
+          - content: 약관 본문 (마크다운)
+          - status: PUBLISHED
+
+          ## 에러
+          - 404: 해당 type의 PUBLISHED 약관이 없는 경우
+          """
+  )
+  ResponseEntity<LegalResponse> getLegal(@PathVariable LegalType type);
 }
