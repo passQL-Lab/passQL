@@ -173,10 +173,11 @@ function LegalModal({
   const [fetchError, setFetchError] = useState(false);
 
   // 모달 열기 + 닫힐 때 onClose 연동
+  // open 체크: onClose 참조 변경 시 재실행되어도 이미 열린 dialog에 showModal 중복 호출 방지
   useEffect(() => {
     const dialog = dialogRef.current;
     if (!dialog) return;
-    dialog.showModal();
+    if (!dialog.open) dialog.showModal();
     const handleClose = () => onClose();
     dialog.addEventListener("close", handleClose);
     return () => dialog.removeEventListener("close", handleClose);

@@ -97,12 +97,17 @@
             document.getElementById('title_row_' + type).classList.add('hidden');
         }
 
+        // layout.html의 CSRF 메타 태그에서 토큰을 읽어 PUT 요청에 포함
+        const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute('content');
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute('content');
+        const csrfHeaders = (csrfToken && csrfHeader) ? { [csrfHeader]: csrfToken } : {};
+
         function saveEdit(type) {
             const title = document.getElementById('title_' + type).value;
             const content = document.getElementById('content_' + type).value;
             fetch('/admin/legal/' + encodeURIComponent(type), {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', ...csrfHeaders },
                 body: JSON.stringify({ title, content })
             }).then(r => {
                 if (r.ok) location.reload();
@@ -112,7 +117,8 @@
 
         function updateStatus(type, status) {
             fetch('/admin/legal/' + encodeURIComponent(type) + '/status?status=' + status, {
-                method: 'PUT'
+                method: 'PUT',
+                headers: csrfHeaders
             }).then(r => {
                 if (r.ok) location.reload();
                 else alert('상태 변경 실패');

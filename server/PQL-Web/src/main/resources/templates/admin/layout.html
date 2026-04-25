@@ -16,6 +16,10 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
+    <!-- CSRF 토큰 (fetch PUT/POST 요청에 사용) -->
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
     <!-- Additional CSS -->
     <th:block layout:fragment="css"></th:block>
 </head>
