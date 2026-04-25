@@ -29,9 +29,11 @@ export function useTodayQuestion() {
 
 export function useRecommendations(excludeUuids: string[] = []) {
   const accessToken = useAuthStore((s) => s.accessToken);
+  // 배열을 직렬화해야 React Query가 내용 기준으로 캐시 키를 비교함
+  // 배열 참조를 그대로 넣으면 렌더마다 새 참조 → 무한 재요청 발생
+  const excludeKey = JSON.stringify(excludeUuids);
   return useQuery({
-    // excludeUuids가 바뀌면 새 요청 트리거 — 세션 내 중복 제외 핵심
-    queryKey: ["recommendations", accessToken, excludeUuids],
+    queryKey: ["recommendations", accessToken, excludeKey],
     queryFn: () => fetchRecommendations(3, excludeUuids),
     staleTime: 1000 * 60 * 5,
     retry: false,
