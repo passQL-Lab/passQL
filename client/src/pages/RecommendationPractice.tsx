@@ -49,7 +49,7 @@ export default function RecommendationPractice() {
       try {
         const result = await submitAnswer(questionUuid, choiceSetId, selectedChoiceKey, sessionUuid);
         // 추천 문제·학습 현황 즉시 재조회 — 홈 복귀 시 새 목록·heatmap 반영
-        // refetchQueries: 무효화 + 강제 재요청 동시 수행 → 네비게이션 타이밍과 무관하게 최신 데이터 보장
+        // excludeUuids=[]로 새 랜덤 세트를 받음 — 문제를 푼 직후이므로 의도된 동작
         queryClient.refetchQueries({ queryKey: ["recommendations"] });
         queryClient.refetchQueries({ queryKey: ["heatmap"] });
         queryClient.refetchQueries({ queryKey: ["progress"] });

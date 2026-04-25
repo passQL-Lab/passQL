@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchGreeting } from "../api/home";
 import { fetchTodayQuestion, fetchRecommendations } from "../api/questions";
@@ -49,10 +50,11 @@ export function useRecommendations() {
 export function useRefreshRecommendations() {
   const accessToken = useAuthStore((s) => s.accessToken);
   const queryClient = useQueryClient();
-  return async (excludeUuids: string[]) => {
+  // accessToken·queryClient 변경 시에만 새 함수 참조 생성 — Home의 handleRefresh useCallback 안정화
+  return useCallback(async (excludeUuids: string[]) => {
     const data = await fetchRecommendations(3, excludeUuids);
     queryClient.setQueryData(RECOMMENDATIONS_KEY(accessToken), data);
-  };
+  }, [accessToken, queryClient]);
 }
 
 export function useSelectedSchedule() {

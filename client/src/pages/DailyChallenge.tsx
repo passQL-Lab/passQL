@@ -48,8 +48,8 @@ export default function DailyChallenge() {
         try {
           const result = await submitAnswer(today.question.questionUuid, choiceSetId, selectedChoiceKey, sessionUuid);
           // 백그라운드에서 캐시 즉시 재조회 — 홈 복귀 시 완료 상태·추천 문제 목록·학습 현황 반영
-          // refetchQueries: 무효화 + 강제 재요청 동시 수행 → 네비게이션 타이밍과 무관하게 최신 데이터 보장
           queryClient.refetchQueries({ queryKey: ["todayQuestion", uuid] });
+          // excludeUuids=[]로 새 랜덤 세트를 받음 — 데일리 챌린지 완료 후이므로 의도된 동작
           queryClient.refetchQueries({ queryKey: ["recommendations"] });
           queryClient.refetchQueries({ queryKey: ["heatmap"] });
           queryClient.refetchQueries({ queryKey: ["progress"] });
