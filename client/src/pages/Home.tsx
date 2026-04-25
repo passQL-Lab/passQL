@@ -76,7 +76,9 @@ export default function Home() {
         const newUuids = recommendations.questions
           .map((q) => q.questionUuid)
           .filter((uuid) => !prev.includes(uuid));
-        return newUuids.length > 0 ? [...prev, ...newUuids] : prev;
+        if (newUuids.length === 0) return prev;
+        // FIFO 30개 유지 — 무제한 누적 시 POST body 비대화 방지
+        return [...prev, ...newUuids].slice(-30);
       });
     }
   }, [recommendations]);

@@ -16,6 +16,10 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
 
+    <!-- CSRF 토큰 (fetch PUT/POST 요청에 사용) -->
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+
     <!-- Additional CSS -->
     <th:block layout:fragment="css"></th:block>
 </head>
@@ -144,6 +148,12 @@
                     <a th:href="@{/admin/reports}" th:classappend="${currentMenu == 'reports'} ? 'active'">
                         <i data-lucide="flag" class="size-5"></i>
                         신고 관리
+                    </a>
+                </li>
+                <li>
+                    <a th:href="@{/admin/legal}" th:classappend="${currentMenu == 'legal'} ? 'active'">
+                        <i data-lucide="file-text" class="size-5"></i>
+                        약관 관리
                     </a>
                 </li>
                 <li>

@@ -1,10 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { signInWithPopup } from "firebase/auth";
 import { firebaseAuth, googleProvider } from "../lib/firebase";
 import { login, type AuthProvider } from "../api/auth";
 import { useAuthStore } from "../stores/authStore";
 import { ApiError } from "../api/client";
+import { fetchLegal, type LegalType } from "../api/legal";
+import MarkdownText from "../components/MarkdownText";
 import logo from "../assets/logo/logo.png";
 
 export default function Login() {
@@ -12,6 +14,7 @@ export default function Login() {
   const setTokens = useAuthStore((s) => s.setTokens);
   const [loadingProvider, setLoadingProvider] = useState<AuthProvider | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [legalModal, setLegalModal] = useState<LegalType | null>(null);
 
   const isLoading = loadingProvider !== null;
 
@@ -126,11 +129,117 @@ export default function Login() {
           )}
         </div>
 
+        {/* 약관 동의 안내 */}
         <p className="mt-6 text-center text-[#9CA3AF] text-xs">
-          로그인하면 이용약관 및 개인정보처리방침에 동의하게 됩니다
+          로그인하면{" "}
+          <button
+            type="button"
+            className="underline underline-offset-2 hover:text-[#6B7280] transition-colors"
+            onClick={() => setLegalModal("TERMS_OF_SERVICE")}
+          >
+            이용약관
+          </button>
+          {" "}및{" "}
+          <button
+            type="button"
+            className="underline underline-offset-2 hover:text-[#6B7280] transition-colors"
+            onClick={() => setLegalModal("PRIVACY_POLICY")}
+          >
+            개인정보처리방침
+          </button>
+          에 동의하게 됩니다
         </p>
       </div>
+
+      {/* daisyUI 반응형 모달 — 모바일 하단 시트, 데스크톱 중앙 */}
+      {legalModal !== null && (
+        <LegalModal type={legalModal} onClose={() => setLegalModal(null)} />
+      )}
     </div>
+  );
+}
+
+function LegalModal({
+  type,
+  onClose,
+}: {
+  readonly type: LegalType;
+  readonly onClose: () => void;
+}) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const [title, setTitle] = useState<string | null>(null);
+  const [content, setContent] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [fetchError, setFetchError] = useState(false);
+
+  // 모달 열기 + 닫힐 때 onClose 연동
+  // open 체크: onClose 참조 변경 시 재실행되어도 이미 열린 dialog에 showModal 중복 호출 방지
+  useEffect(() => {
+    const dialog = dialogRef.current;
+    if (!dialog) return;
+    if (!dialog.open) dialog.showModal();
+    const handleClose = () => onClose();
+    dialog.addEventListener("close", handleClose);
+    return () => dialog.removeEventListener("close", handleClose);
+  }, [onClose]);
+
+  // 약관 내용 fetch
+  useEffect(() => {
+    setLoading(true);
+    setFetchError(false);
+    fetchLegal(type)
+      .then((data) => {
+        setTitle(data.title);
+        setContent(data.content);
+      })
+      .catch(() => setFetchError(true))
+      .finally(() => setLoading(false));
+  }, [type]);
+
+  return (
+    <dialog ref={dialogRef} className="modal modal-bottom sm:modal-middle">
+      <div className="modal-box flex flex-col max-h-[80vh] p-0 overflow-hidden">
+        {/* 헤더 */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-[#E5E7EB] shrink-0">
+          <h3 className="text-base font-bold text-[#111827]">
+            {title ?? (loading ? "" : "약관")}
+          </h3>
+          <form method="dialog">
+            <button
+              type="submit"
+              className="btn btn-sm btn-circle btn-ghost text-[#9CA3AF]"
+              aria-label="닫기"
+            >
+              ✕
+            </button>
+          </form>
+        </div>
+
+        {/* 본문 스크롤 영역 */}
+        <div className="overflow-y-auto px-5 py-4 flex-1">
+          {loading && (
+            <div className="flex justify-center py-8">
+              <span className="loading loading-spinner loading-md text-[#4F46E5]" />
+            </div>
+          )}
+          {fetchError && (
+            <p className="text-sm text-[#EF4444] text-center py-8">
+              약관을 불러오지 못했습니다. 잠시 후 다시 시도해주세요.
+            </p>
+          )}
+          {!loading && !fetchError && content && (
+            <div className="prose prose-sm max-w-none text-[#374151]">
+              <MarkdownText text={content} animated={false} />
+            </div>
+          )}
+          <div className="h-4" />
+        </div>
+      </div>
+      {/* 오버레이 클릭 시 닫기 */}
+      <form method="dialog" className="modal-backdrop">
+        <button type="submit">닫기</button>
+      </form>
+    </dialog>
   );
 }
 

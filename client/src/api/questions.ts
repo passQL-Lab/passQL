@@ -45,16 +45,15 @@ export function fetchTodayQuestion(): Promise<TodayQuestionResponse> {
   return apiFetch("/questions/today");
 }
 
+// GET → POST 전환: 제외 UUID가 쿼리스트링으로 무제한 누적되면 Tomcat 8KB 헤더 한도 초과 → 400 에러
 export function fetchRecommendations(
-  size?: number,
-  excludeQuestionUuids?: string[],
+  size = 3,
+  excludeQuestionUuids: string[] = [],
 ): Promise<RecommendationsResponse> {
-  const query = new URLSearchParams();
-  if (size != null) query.set("size", String(size));
-  // 동일 키 반복 append — Spring @RequestParam List<String> 자동 처리
-  excludeQuestionUuids?.forEach((uuid) => query.append("excludeQuestionUuids", uuid));
-  const qs = query.toString();
-  return apiFetch(`/questions/recommendations${qs ? `?${qs}` : ""}`);
+  return apiFetch("/questions/recommendations", {
+    method: "POST",
+    body: JSON.stringify({ size, excludeQuestionUuids }),
+  });
 }
 
 // SSE로 AI 선택지를 생성하고 choiceSetId를 받는다.

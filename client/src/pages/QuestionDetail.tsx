@@ -247,11 +247,11 @@ export default function QuestionDetail({
             schemaDdl: question.schemaDdl ?? null,
             schemaSampleData: question.schemaSampleData ?? null,
           };
-          // 제출 완료 시 추천 문제·학습 현황 캐시 무효화 — 홈 복귀 시 목록·heatmap 즉시 갱신
-          queryClient.invalidateQueries({ queryKey: ["recommendations"] });
-          // heatmap·progress 무효화 — 학습 현황 캘린더와 streak 즉시 갱신
-          queryClient.invalidateQueries({ queryKey: ["heatmap"] });
-          queryClient.invalidateQueries({ queryKey: ["progress"] });
+          // 제출 완료 시 추천 문제·학습 현황 즉시 재조회 — 홈 복귀 시 목록·heatmap 즉시 갱신
+          // refetchQueries: 무효화 + 강제 재요청 동시 수행 → 네비게이션 타이밍과 무관하게 최신 데이터 보장
+          queryClient.refetchQueries({ queryKey: ["recommendations"] });
+          queryClient.refetchQueries({ queryKey: ["heatmap"] });
+          queryClient.refetchQueries({ queryKey: ["progress"] });
           if (onSubmitSuccess) {
             // 데일리 챌린지 등 호출자가 네비게이션 제어
             onSubmitSuccess(fullResult as SubmitResult, questionUuid!);
