@@ -8,7 +8,7 @@ interface StarRatingProps {
 export const StarRating = memo(function StarRating({ level }: StarRatingProps) {
   return (
     <span className="flex gap-0.5">
-      {Array.from({ length: 3 }, (_, i) => (
+      {Array.from({ length: 5 }, (_, i) => (
         <Star
           key={i}
           size={14}
