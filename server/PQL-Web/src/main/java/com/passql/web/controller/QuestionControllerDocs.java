@@ -6,6 +6,7 @@ import com.passql.member.auth.presentation.security.LoginMember;
 import com.passql.question.dto.ExecuteResult;
 import com.passql.question.dto.QuestionDetail;
 import com.passql.question.dto.QuestionSummary;
+import com.passql.question.dto.RecommendationsRequest;
 import com.passql.question.dto.RecommendationsResponse;
 import com.passql.question.dto.SubmitRequest;
 import com.passql.question.dto.SubmitResult;
@@ -22,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
 
-import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -59,6 +59,7 @@ public interface QuestionControllerDocs {
       @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 22, description = "네이티브 쿼리를 exclude 유무 기준 2분기로 분리하여 UUID 바인딩 타입 안전성 확보"),
       @ApiLog(date = "2026.04.13", author = Author.SUHSAECHAN, issueNumber = 63, description = "memberUuid 파라미터 추가 — RAG 기반 개인화 추천 도입, RecommendationService 위임, 오답 없거나 AI 실패 시 RANDOM fallback"),
       @ApiLog(date = "2026.04.24", author = Author.SUHSAECHAN, issueNumber = 284, description = "excludeQuestionUuids 복수 파라미터로 변경 — 세션 내 중복 노출 제외 지원"),
+      @ApiLog(date = "2026.04.26", author = Author.SUHSAECHAN, issueNumber = 291, description = "GET → POST 전환 — 쿼리스트링 누적 시 Tomcat 8KB 헤더 한도 초과(400) 해결, RequestBody로 변경"),
   })
   @Operation(summary = "추천 문제 조회",
       description = "JWT 인증 회원 기준 RAG 기반 개인화 추천(최근 오답 벡터 평균 → Qdrant 유사도 검색). " +
@@ -66,8 +67,7 @@ public interface QuestionControllerDocs {
           "size 기본 3, 최대 5. excludeQuestionUuids 미지정 시 오늘의 데일리 챌린지 자동 제외.")
   ResponseEntity<RecommendationsResponse> getRecommendations(
       @AuthMember LoginMember loginMember,
-      @RequestParam(defaultValue = "3") int size,
-      @RequestParam(required = false) List<String> excludeQuestionUuids
+      @RequestBody RecommendationsRequest request
   );
 
   @ApiLogs({
