@@ -70,18 +70,20 @@ export default function Home() {
     isFetching: recommendationsFetching,
   } = useRecommendations(seenUuids);
   // 추천 결과가 도착하면 해당 UUID를 seenUuids에 누적
+  // questions 배열 참조 기준으로 의존 — recommendations 객체 전체를 넣으면
+  // 다른 필드 변경에도 effect가 실행되어 불필요한 state 업데이트 발생
+  const recommendedQuestions = recommendations?.questions;
   useEffect(() => {
-    if (recommendations?.questions && recommendations.questions.length > 0) {
-      setSeenUuids((prev) => {
-        const newUuids = recommendations.questions
-          .map((q) => q.questionUuid)
-          .filter((uuid) => !prev.includes(uuid));
-        if (newUuids.length === 0) return prev;
-        // FIFO 30개 유지 — 무제한 누적 시 POST body 비대화 방지
-        return [...prev, ...newUuids].slice(-30);
-      });
-    }
-  }, [recommendations]);
+    if (!recommendedQuestions || recommendedQuestions.length === 0) return;
+    setSeenUuids((prev) => {
+      const newUuids = recommendedQuestions
+        .map((q) => q.questionUuid)
+        .filter((uuid) => !prev.includes(uuid));
+      if (newUuids.length === 0) return prev;
+      // FIFO 30개 유지 — 무제한 누적 시 POST body 비대화 방지
+      return [...prev, ...newUuids].slice(-30);
+    });
+  }, [recommendedQuestions]);
   const { data: schedule } = useSelectedSchedule();
   const {
     data: heatmap,
