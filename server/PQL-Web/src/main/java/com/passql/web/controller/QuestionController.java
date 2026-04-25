@@ -76,9 +76,14 @@ public class QuestionController implements QuestionControllerDocs {
     public ResponseEntity<RecommendationsResponse> getRecommendations(
         @AuthMember LoginMember loginMember,
         @RequestParam(defaultValue = "3") int size,
-        @RequestParam(required = false) UUID excludeQuestionUuid
+        @RequestParam(required = false) List<String> excludeQuestionUuids
     ) {
-        return ResponseEntity.ok(recommendationService.recommend(size, excludeQuestionUuid, loginMember.memberUuid()));
+        // String → UUID 변환 — Controller는 변환만 담당
+        List<UUID> excludeUuids = excludeQuestionUuids == null ? List.of() :
+                excludeQuestionUuids.stream()
+                        .map(UUID::fromString)
+                        .toList();
+        return ResponseEntity.ok(recommendationService.recommend(size, excludeUuids, loginMember.memberUuid()));
     }
 
     @GetMapping("/{questionUuid}")

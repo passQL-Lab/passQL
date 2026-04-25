@@ -1,7 +1,7 @@
 import { Flame, ChevronRight, Check, RefreshCw, Sparkles } from "lucide-react";
 import { getReadinessCopy } from "../constants/readinessCopy";
 import { Link } from "react-router-dom";
-import { useState, useCallback, type CSSProperties } from "react";
+import { useState, useCallback, useEffect, type CSSProperties } from "react";
 import { useProgress } from "../hooks/useProgress";
 import { useMember } from "../hooks/useMember";
 import { useAuthStore } from "../stores/authStore";
@@ -56,12 +56,30 @@ export default function Home() {
   useMember();
   const { data: greeting } = useGreeting();
   const { data: today } = useTodayQuestion();
+  // 버튼 1회전 트리거 — 애니메이션 클래스를 뗐다 붙이기 위해 별도 state 사용
+  const [spinning, setSpinning] = useState(false);
+  // 카드 페이드인 재트리거 — key가 바뀌면 카드 목록이 재마운트되어 애니메이션 재실행
+  const [refreshKey, setRefreshKey] = useState(0);
+  // 세션 내 이미 추천된 UUID 누적 — 새로고침 시 제외 목록으로 전달
+  const [seenUuids, setSeenUuids] = useState<string[]>([]);
+
   const {
     data: recommendations,
     isError: recommendationsError,
     refetch: refetchRecommendations,
     isFetching: recommendationsFetching,
-  } = useRecommendations();
+  } = useRecommendations(seenUuids);
+  // 추천 결과가 도착하면 해당 UUID를 seenUuids에 누적
+  useEffect(() => {
+    if (recommendations?.questions && recommendations.questions.length > 0) {
+      setSeenUuids((prev) => {
+        const newUuids = recommendations.questions
+          .map((q) => q.questionUuid)
+          .filter((uuid) => !prev.includes(uuid));
+        return newUuids.length > 0 ? [...prev, ...newUuids] : prev;
+      });
+    }
+  }, [recommendations]);
   const { data: schedule } = useSelectedSchedule();
   const {
     data: heatmap,
@@ -69,11 +87,6 @@ export default function Home() {
     isError: heatmapError,
     refetch: refetchHeatmap,
   } = useHeatmap();
-
-  // 버튼 1회전 트리거 — 애니메이션 클래스를 뗐다 붙이기 위해 별도 state 사용
-  const [spinning, setSpinning] = useState(false);
-  // 카드 페이드인 재트리거 — key가 바뀌면 카드 목록이 재마운트되어 애니메이션 재실행
-  const [refreshKey, setRefreshKey] = useState(0);
 
   const handleRefresh = useCallback(() => {
     if (recommendationsFetching || spinning) return;

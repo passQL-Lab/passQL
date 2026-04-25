@@ -52,6 +52,9 @@ public class Member extends SoftDeletableBaseEntity {
     @Column(length = 50, nullable = false)
     private String nickname;
 
+    // 닉네임 마지막 변경 시각 — 3일 쿨다운 계산 기준
+    private LocalDateTime nicknameChangedAt;
+
     // === 권한 / 상태 ===
     @Enumerated(EnumType.STRING)
     @Column(length = 30, nullable = false)
@@ -106,5 +109,17 @@ public class Member extends SoftDeletableBaseEntity {
         m.isTestAccount = false;
         m.lastSeenAt = LocalDateTime.now();
         return m;
+    }
+
+    // 닉네임 직접 변경 — 쿨다운 갱신 포함
+    public void changeNickname(String newNickname) {
+        this.nickname = newNickname;
+        this.nicknameChangedAt = LocalDateTime.now();
+    }
+
+    // 3일 쿨다운 여부 확인
+    public boolean isNicknameChangeCooldown() {
+        if (nicknameChangedAt == null) return false;
+        return LocalDateTime.now().isBefore(nicknameChangedAt.plusDays(3));
     }
 }

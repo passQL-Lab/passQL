@@ -27,11 +27,12 @@ export function useTodayQuestion() {
   });
 }
 
-export function useRecommendations() {
+export function useRecommendations(excludeUuids: string[] = []) {
   const accessToken = useAuthStore((s) => s.accessToken);
   return useQuery({
-    queryKey: ["recommendations", accessToken],
-    queryFn: () => fetchRecommendations(3),
+    // excludeUuids가 바뀌면 새 요청 트리거 — 세션 내 중복 제외 핵심
+    queryKey: ["recommendations", accessToken, excludeUuids],
+    queryFn: () => fetchRecommendations(3, excludeUuids),
     staleTime: 1000 * 60 * 5,
     retry: false,
   });
