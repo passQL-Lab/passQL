@@ -11,6 +11,7 @@ import {
   useGreeting,
   useTodayQuestion,
   useRecommendations,
+  useRefreshRecommendations,
   useSelectedSchedule,
   useHeatmap,
 } from "../hooks/useHome";
@@ -66,9 +67,10 @@ export default function Home() {
   const {
     data: recommendations,
     isError: recommendationsError,
-    refetch: refetchRecommendations,
     isFetching: recommendationsFetching,
-  } = useRecommendations(seenUuids);
+  } = useRecommendations();
+  const refreshRecommendations = useRefreshRecommendations();
+  const [isRefreshing, setIsRefreshing] = useState(false);
   // 추천 결과가 도착하면 해당 UUID를 seenUuids에 누적
   // questions 배열 참조 기준으로 의존 — recommendations 객체 전체를 넣으면
   // 다른 필드 변경에도 effect가 실행되어 불필요한 state 업데이트 발생
@@ -93,12 +95,15 @@ export default function Home() {
   } = useHeatmap();
 
   const handleRefresh = useCallback(() => {
-    if (recommendationsFetching || spinning) return;
+    if (recommendationsFetching || isRefreshing || spinning) return;
     setSpinning(true);
-    refetchRecommendations().then(() => {
+    setIsRefreshing(true);
+    // 새로고침 시에만 seenUuids를 제외 목록으로 전달 — 평소엔 queryKey 고정 유지
+    refreshRecommendations(seenUuids).then(() => {
       setRefreshKey((k) => k + 1);
+      setIsRefreshing(false);
     });
-  }, [recommendationsFetching, spinning, refetchRecommendations]);
+  }, [recommendationsFetching, isRefreshing, spinning, refreshRecommendations, seenUuids]);
 
   const uuid = useAuthStore((s) => s.memberUuid ?? "");
   const nickname = useAuthStore((s) => s.nickname ?? "");
