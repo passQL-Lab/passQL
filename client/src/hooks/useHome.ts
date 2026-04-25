@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchGreeting } from "../api/home";
 import { fetchTodayQuestion, fetchRecommendations } from "../api/questions";
 import { fetchSelectedSchedule } from "../api/examSchedules";
@@ -27,17 +27,32 @@ export function useTodayQuestion() {
   });
 }
 
-export function useRecommendations(excludeUuids: string[] = []) {
+const RECOMMENDATIONS_KEY = (accessToken: string | null) =>
+  ["recommendations", accessToken] as const;
+
+export function useRecommendations() {
   const accessToken = useAuthStore((s) => s.accessToken);
-  // 배열을 직렬화해야 React Query가 내용 기준으로 캐시 키를 비교함
-  // 배열 참조를 그대로 넣으면 렌더마다 새 참조 → 무한 재요청 발생
-  const excludeKey = JSON.stringify(excludeUuids);
+  // excludeUuids를 queryKey에 포함하면 seenUuids 변경마다 캐시 키가 달라져 무한 재요청 발생
+  // → queryKey는 고정, excludeUuids는 useRefreshRecommendations에서 명시적 갱신 시에만 전달
   return useQuery({
-    queryKey: ["recommendations", accessToken, excludeKey],
-    queryFn: () => fetchRecommendations(3, excludeUuids),
-    staleTime: 1000 * 60 * 5,
+    queryKey: RECOMMENDATIONS_KEY(accessToken),
+    queryFn: () => fetchRecommendations(3, []),
+    staleTime: Infinity,
     retry: false,
   });
+}
+
+/**
+ * 새로고침 버튼 클릭 시 seenUuids를 제외 목록으로 전달하여 캐시를 갱신하는 훅
+ * useRecommendations의 queryKey는 고정이므로 setQueryData로 덮어쓴다
+ */
+export function useRefreshRecommendations() {
+  const accessToken = useAuthStore((s) => s.accessToken);
+  const queryClient = useQueryClient();
+  return async (excludeUuids: string[]) => {
+    const data = await fetchRecommendations(3, excludeUuids);
+    queryClient.setQueryData(RECOMMENDATIONS_KEY(accessToken), data);
+  };
 }
 
 export function useSelectedSchedule() {
