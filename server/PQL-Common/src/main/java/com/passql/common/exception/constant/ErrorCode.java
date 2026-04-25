@@ -53,6 +53,9 @@ public enum ErrorCode {
     INVALID_SUSPEND_UNTIL(HttpStatus.BAD_REQUEST, "제재 만료 시각이 유효하지 않습니다."),
     NICKNAME_DUPLICATE(HttpStatus.CONFLICT, "이미 사용 중인 닉네임입니다."),
     NICKNAME_GENERATION_FAILED(HttpStatus.INTERNAL_SERVER_ERROR, "닉네임 생성에 실패했습니다."),
+    NICKNAME_COOLDOWN(HttpStatus.BAD_REQUEST, "변경 후 3일간 바꿀 수 없어요"),
+    NICKNAME_INVALID(HttpStatus.BAD_REQUEST, "한글, 영문, 숫자만 사용 가능해요 (2~10자)"),
+    NICKNAME_FORBIDDEN(HttpStatus.BAD_REQUEST, "사용할 수 없는 닉네임이에요"),
 
     // === AI Gateway / Choice Set Generation (신규: Sub-plan 1) ===
     AI_SERVER_UNAVAILABLE(HttpStatus.SERVICE_UNAVAILABLE, "AI 서버에 연결할 수 없습니다."),
