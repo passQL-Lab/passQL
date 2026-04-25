@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 @RequestMapping("/admin/legal")
 @RequiredArgsConstructor
-public class AdminLegalController {
+public class AdminLegalController implements AdminLegalControllerDocs {
 
     private final LegalService legalService;
 
