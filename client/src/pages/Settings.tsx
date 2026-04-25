@@ -1,10 +1,10 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Copy, Check, RefreshCw, ChevronRight, LogOut } from "lucide-react";
+import { Copy, Check, Pencil, ChevronRight, LogOut } from "lucide-react";
 import { useAuthStore, getRefreshToken } from "../stores/authStore";
 import { logout } from "../api/auth";
 import logo from "../assets/logo/logo.png";
-import { useRegenerateNickname } from "../hooks/useMember";
+import NicknameChangeModal from "../components/NicknameChangeModal";
 import { useStagger } from "../hooks/useStagger";
 import SettingsSection from "../components/SettingsSection";
 import SettingsRow from "../components/SettingsRow";
@@ -14,8 +14,9 @@ export default function Settings() {
   const uuid = useAuthStore((s) => s.memberUuid ?? "");
   const nickname = useAuthStore((s) => s.nickname ?? "");
   const truncatedUuid = `${uuid.slice(0, 20)}...`;
-  const regenerateMutation = useRegenerateNickname();
   const clearTokens = useAuthStore((s) => s.clearTokens);
+  // 닉네임 변경 모달 열림 여부
+  const [isNicknameModalOpen, setIsNicknameModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -123,20 +124,11 @@ export default function Settings() {
               action={
                 <button
                   type="button"
-                  className={`w-8 h-8 flex items-center justify-center transition-colors ${
-                    regenerateMutation.isPending
-                      ? "text-text-caption animate-spin"
-                      : "text-text-caption hover:text-brand"
-                  }`}
-                  title="닉네임 재생성"
-                  onClick={() =>
-                    regenerateMutation.mutate(undefined, {
-                      onSuccess: () => showToast("닉네임이 변경됐어요"),
-                    })
-                  }
-                  disabled={regenerateMutation.isPending}
+                  className="w-8 h-8 flex items-center justify-center transition-colors text-text-caption hover:text-brand"
+                  title="닉네임 변경"
+                  onClick={() => setIsNicknameModalOpen(true)}
                 >
-                  <RefreshCw size={16} />
+                  <Pencil size={15} />
                 </button>
               }
             />
@@ -252,6 +244,16 @@ export default function Settings() {
           </div>
         </div>
       )}
+      {/* 닉네임 직접 변경 모달 */}
+      <NicknameChangeModal
+        isOpen={isNicknameModalOpen}
+        currentNickname={nickname || ""}
+        onClose={() => setIsNicknameModalOpen(false)}
+        onSuccess={() => {
+          showToast("닉네임이 변경됐어요");
+          setIsNicknameModalOpen(false);
+        }}
+      />
     </div>
   );
 }
