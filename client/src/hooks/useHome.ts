@@ -38,6 +38,8 @@ export function useRecommendations() {
   return useQuery({
     queryKey: RECOMMENDATIONS_KEY(accessToken),
     queryFn: () => fetchRecommendations(3, []),
+    // 미인증 상태에서 호출 방지 — null 키 캐시 엔트리 생성 방지
+    enabled: !!accessToken,
     staleTime: Infinity,
     retry: false,
   });
