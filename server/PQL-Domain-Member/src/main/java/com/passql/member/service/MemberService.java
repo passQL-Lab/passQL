@@ -5,6 +5,9 @@ import com.passql.common.exception.constant.ErrorCode;
 import com.passql.common.util.NicknameGenerator;
 import com.passql.member.constant.MemberStatus;
 import com.passql.member.dto.MemberMeResponse;
+import com.passql.member.dto.NicknameChangeRequest;
+import com.passql.member.dto.NicknameChangeResponse;
+import com.passql.member.dto.NicknameCheckResponse;
 import com.passql.member.dto.NicknameRegenerateResponse;
 import com.passql.member.entity.Member;
 import com.passql.member.entity.MemberSuspendHistory;
@@ -89,6 +92,34 @@ public class MemberService {
             }
         }
         throw new CustomException(ErrorCode.NICKNAME_GENERATION_FAILED);
+    }
+
+    // 닉네임 중복 확인 — 유효성은 컨트롤러 @Valid에서 처리
+    @Transactional(readOnly = true)
+    public NicknameCheckResponse checkNickname(String nickname) {
+        boolean available = !memberRepository.existsByNicknameAndIsDeletedFalse(nickname);
+        return new NicknameCheckResponse(available);
+    }
+
+    // 닉네임 직접 변경 — 쿨다운, 중복 검증 포함
+    @Transactional
+    public NicknameChangeResponse changeNickname(UUID memberUuid, NicknameChangeRequest request) {
+        Member member = findActiveMember(memberUuid);
+
+        // 3일 쿨다운 체크
+        if (member.isNicknameChangeCooldown()) {
+            throw new CustomException(ErrorCode.NICKNAME_COOLDOWN);
+        }
+
+        // 중복 체크 (본인 제외)
+        String newNickname = request.nickname();
+        if (!newNickname.equals(member.getNickname())
+                && memberRepository.existsByNicknameAndIsDeletedFalse(newNickname)) {
+            throw new CustomException(ErrorCode.NICKNAME_DUPLICATE);
+        }
+
+        member.changeNickname(newNickname);
+        return new NicknameChangeResponse(member.getNickname());
     }
 
     // === 내부 헬퍼 ===
