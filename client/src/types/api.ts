@@ -248,6 +248,14 @@ export interface NicknameRegenerateResponse {
   readonly nickname: string;
 }
 
+export interface NicknameCheckResponse {
+  readonly available: boolean;
+}
+
+export interface NicknameChangeResponse {
+  readonly nickname: string;
+}
+
 // === AI Payloads ===
 export interface ExplainErrorPayload {
   readonly questionUuid: string;
