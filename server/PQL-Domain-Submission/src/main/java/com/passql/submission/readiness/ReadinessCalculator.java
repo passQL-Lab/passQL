@@ -8,11 +8,13 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 합격 준비도 6요소 가중 평균 계산기 (v2).
+ * 합격 준비도 계산기 (v3).
  *
- * score = accuracy×0.35 + coverage×0.25 + recency×0.20
- *       + difficulty×0.10 + retry×0.05 + spread×0.05
+ * score = clamp(base × bonus, 0, 1)
+ * base  = Accuracy × Coverage × Recency
+ * bonus = 1 + (retry × BONUS_RETRY) + (spread × BONUS_SPREAD)
  *
+ * 곱셈 구조로 Coverage가 낮으면 전체 점수가 낮아지는 필수 조건 역할을 한다.
  * 상태가 없는 순수 함수 묶음이므로 static 메서드로 노출한다.
  * DB / Spring Context 의존 없음 — 입력값을 모아서 서비스가 호출한다.
  */
@@ -29,7 +31,6 @@ public final class ReadinessCalculator {
      * @param topicCountMap       최근 14일 내 토픽별 제출 건수 (Spread 계산용)
      * @param wrongCount          전체 이력 중 한 번이라도 틀린 distinct 문제 수
      * @param retriedCount        틀렸다가 이후 정답을 낸 distinct 문제 수
-     * @param avgDifficulty       최근 50문제 평균 난이도 (없으면 null)
      * @param today               KST 기준 오늘 (테스트 용이성)
      */
     public static ReadinessResult calculate(
@@ -40,31 +41,25 @@ public final class ReadinessCalculator {
         Map<String, Long> topicCountMap,
         long wrongCount,
         long retriedCount,
-        Double avgDifficulty,
         LocalDate today
     ) {
-        double accuracy   = computeAccuracy(recentCorrectFlags);
-        double coverage   = computeCoverage(coveredTopicCount, activeTopicCount);
-        double recency    = computeRecency(lastStudiedAt, today);
-        double difficulty = computeDifficulty(avgDifficulty);
-        double retry      = computeRetry(wrongCount, retriedCount);
-        double spread     = computeSpread(topicCountMap, activeTopicCount);
+        double accuracy = computeAccuracy(recentCorrectFlags);
+        double coverage = computeCoverage(coveredTopicCount, activeTopicCount);
+        double recency  = computeRecency(lastStudiedAt, today);
+        double retry    = computeRetry(wrongCount, retriedCount);
+        double spread   = computeSpread(topicCountMap, activeTopicCount);
 
-        double score = round2(
-              accuracy   * ReadinessConstants.WEIGHT_ACCURACY
-            + coverage   * ReadinessConstants.WEIGHT_COVERAGE
-            + recency    * ReadinessConstants.WEIGHT_RECENCY
-            + difficulty * ReadinessConstants.WEIGHT_DIFFICULTY
-            + retry      * ReadinessConstants.WEIGHT_RETRY
-            + spread     * ReadinessConstants.WEIGHT_SPREAD
-        );
+        double base  = accuracy * coverage * recency;
+        double bonus = 1.0
+            + retry  * ReadinessConstants.BONUS_RETRY
+            + spread * ReadinessConstants.BONUS_SPREAD;
+        double score = round2(Math.min(1.0, Math.max(0.0, base * bonus)));
 
         return new ReadinessResult(
             score,
             round2(accuracy),
             round2(coverage),
             round2(recency),
-            round2(difficulty),
             round2(retry),
             round2(spread),
             recentCorrectFlags == null ? 0 : recentCorrectFlags.size()
@@ -103,24 +98,11 @@ public final class ReadinessCalculator {
     }
 
     /**
-     * difficulty 1~5 → 0.0~1.0 정규화.
-     * avgDifficulty null(이력 없음)이면 0.0.
-     */
-    static double computeDifficulty(Double avgDifficulty) {
-        if (avgDifficulty == null) return 0.0;
-        double range = ReadinessConstants.DIFFICULTY_MAX - ReadinessConstants.DIFFICULTY_MIN;
-        if (range <= 0) return 0.0;
-        return Math.min(1.0, Math.max(0.0,
-            (avgDifficulty - ReadinessConstants.DIFFICULTY_MIN) / range
-        ));
-    }
-
-    /**
-     * 틀린 적 없으면 1.0 (패널티 없음).
+     * 틀린 적 없으면 0.0 — 복습 시도 자체가 없으므로 보너스 없음.
      * wrongCount > 0이면 retriedCount / wrongCount.
      */
     static double computeRetry(long wrongCount, long retriedCount) {
-        if (wrongCount <= 0) return 1.0;
+        if (wrongCount <= 0) return 0.0;
         return Math.min(1.0, (double) retriedCount / wrongCount);
     }
 
@@ -160,7 +142,6 @@ public final class ReadinessCalculator {
         double accuracy,
         double coverage,
         double recency,
-        double difficulty,
         double retry,
         double spread,
         int recentAttemptCount

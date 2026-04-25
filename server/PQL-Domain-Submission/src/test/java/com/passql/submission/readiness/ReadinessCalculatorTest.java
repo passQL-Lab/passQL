@@ -15,25 +15,39 @@ class ReadinessCalculatorTest {
     private static final LocalDate TODAY = LocalDate.of(2026, 4, 13);
 
     @Test
-    void 이력없으면_recency_기본값과_retry_1점만_반영() {
-        // accuracy=0, coverage=0, recency=0.70, difficulty=0, retry=1.0, spread=0
-        // score = (0×0.35) + (0×0.25) + (0.70×0.20) + (0×0.10) + (1.0×0.05) + (0×0.05) = 0.19
+    void 이력없으면_score_0점() {
+        // accuracy=0, coverage=0 → base=0 → score=0
         ReadinessCalculator.ReadinessResult result = ReadinessCalculator.calculate(
             Collections.emptyList(),
             null,
             0, 9,
             Collections.emptyMap(),
             0L, 0L,
-            null,
             TODAY
         );
-        assertThat(result.score()).isCloseTo(0.19, within(0.01));
-        assertThat(result.retry()).isEqualTo(1.0);
+        assertThat(result.score()).isEqualTo(0.0);
+        assertThat(result.retry()).isEqualTo(0.0);  // 틀린 적 없으면 보너스 없음
         assertThat(result.spread()).isEqualTo(0.0);
     }
 
     @Test
+    void 1문제만_맞히면_coverage_비율만큼_score() {
+        // accuracy=1.0, coverage=1/9≈0.11, recency=1.0 → base≈0.11, bonus=1.0 → score≈0.11
+        ReadinessCalculator.ReadinessResult result = ReadinessCalculator.calculate(
+            List.of(true),
+            TODAY,
+            1, 9,
+            Map.of("t1", 1L),
+            0L, 0L,
+            TODAY
+        );
+        assertThat(result.score()).isCloseTo(0.11, within(0.02));
+    }
+
+    @Test
     void 모든요소_만점이면_score_1점() {
+        // accuracy=1.0, coverage=1.0, recency=1.0 → base=1.0
+        // retry=1.0, spread=1.0 → bonus=1+0.10+0.05=1.15 → clamp → 1.0
         List<Boolean> allCorrect = List.of(true, true, true, true, true);
         Map<String, Long> equalSpread = Map.of(
             "t1", 1L, "t2", 1L, "t3", 1L, "t4", 1L, "t5", 1L,
@@ -44,22 +58,10 @@ class ReadinessCalculatorTest {
             TODAY,
             9, 9,
             equalSpread,
-            0L, 0L,
-            5.0,  // max difficulty
+            4L, 4L,  // wrongCount=retriedCount → retry=1.0
             TODAY
         );
         assertThat(result.score()).isCloseTo(1.0, within(0.01));
-    }
-
-    @Test
-    void difficulty_정규화_3점은_0점5() {
-        // (3-1)/(5-1) = 0.5
-        assertThat(ReadinessCalculator.computeDifficulty(3.0)).isCloseTo(0.5, within(0.01));
-    }
-
-    @Test
-    void difficulty_null이면_0점() {
-        assertThat(ReadinessCalculator.computeDifficulty(null)).isEqualTo(0.0);
     }
 
     @Test
@@ -69,8 +71,9 @@ class ReadinessCalculatorTest {
     }
 
     @Test
-    void retry_틀린적_없으면_1점() {
-        assertThat(ReadinessCalculator.computeRetry(0L, 0L)).isEqualTo(1.0);
+    void retry_틀린적_없으면_0점_보너스없음() {
+        // 틀린 적 없으면 보너스 대상 자체가 없음 → 0
+        assertThat(ReadinessCalculator.computeRetry(0L, 0L)).isEqualTo(0.0);
     }
 
     @Test
@@ -86,5 +89,20 @@ class ReadinessCalculatorTest {
             "t6", 10L, "t7", 10L, "t8", 10L, "t9", 10L
         );
         assertThat(ReadinessCalculator.computeSpread(equal, 9)).isCloseTo(1.0, within(0.01));
+    }
+
+    @Test
+    void 보너스_최대치_clamp_1점_초과_안됨() {
+        // base=1.0, bonus=1.15 → clamp → 1.0
+        List<Boolean> allCorrect = List.of(true);
+        ReadinessCalculator.ReadinessResult result = ReadinessCalculator.calculate(
+            allCorrect,
+            TODAY,
+            1, 1,  // coverage=1.0
+            Map.of("t1", 1L),
+            1L, 1L,  // retry=1.0
+            TODAY
+        );
+        assertThat(result.score()).isLessThanOrEqualTo(1.0);
     }
 }

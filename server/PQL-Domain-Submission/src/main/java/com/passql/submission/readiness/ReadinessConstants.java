@@ -45,22 +45,16 @@ public final class ReadinessConstants {
 
     /** 15일+: RECENCY_DEFAULT 적용 */
 
-    // ── Difficulty 정규화 ────────────────────────────────────────────
+    // ── 보너스 계수 가중치 ───────────────────────────────────────────
+    // base = Accuracy × Coverage × Recency
+    // bonus = 1 + (retry × BONUS_RETRY) + (spread × BONUS_SPREAD)
+    // score = clamp(base × bonus, 0, 1)
 
-    /** 문제 난이도 최솟값 (question.difficulty 컬럼 기준) */
-    public static final double DIFFICULTY_MIN = 1.0;
+    /** 오답 복습 보너스 — 최대 +10% */
+    public static final double BONUS_RETRY  = 0.10;
 
-    /** 문제 난이도 최댓값 (app_setting.question.max_difficulty = 5) */
-    public static final double DIFFICULTY_MAX = 5.0;
-
-    // ── 가중 평균 가중치 ─────────────────────────────────────────────
-
-    public static final double WEIGHT_ACCURACY   = 0.35;
-    public static final double WEIGHT_COVERAGE   = 0.25;
-    public static final double WEIGHT_RECENCY    = 0.20;
-    public static final double WEIGHT_DIFFICULTY = 0.10;
-    public static final double WEIGHT_RETRY      = 0.05;
-    public static final double WEIGHT_SPREAD     = 0.05;
+    /** 고른 학습 보너스 — 최대 +5% */
+    public static final double BONUS_SPREAD = 0.05;
 
     /** 서버 기준 타임존 — Recency/D-day 계산에 사용 */
     public static final ZoneId ZONE = ZoneId.of("Asia/Seoul");
