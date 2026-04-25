@@ -1,11 +1,33 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-25T22:24:05Z",
-    "currentVersion": "0.0.165",
+    "lastUpdated": "2026-04-25T22:35:41Z",
+    "currentVersion": "0.0.167",
     "projectType": "basic",
-    "totalReleases": 77
+    "totalReleases": 78
   },
   "releases": [
+    {
+      "version": "0.0.167",
+      "project_type": "basic",
+      "date": "2026-04-25",
+      "pr_number": 294,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 추천 문제 조회 API 인터페이스 불일치로 인한 서버 빌드 실패 문제 해결\n\n* **문서**\n  * 이슈 283, 290, 291, 292 구현 보고서 추가",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "추천 문제 조회 API 인터페이스 불일치로 인한 서버 빌드 실패 문제 해결"
+          ]
+        },
+        "문서": {
+          "title": "문서",
+          "items": [
+            "이슈 283, 290, 291, 292 구현 보고서 추가"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.165",
       "project_type": "basic",
