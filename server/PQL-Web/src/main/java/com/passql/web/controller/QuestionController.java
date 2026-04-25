@@ -12,6 +12,7 @@ import com.passql.question.dto.ChoiceSetGenerateResponse;
 import com.passql.question.dto.ExecuteResult;
 import com.passql.question.dto.QuestionDetail;
 import com.passql.question.dto.QuestionSummary;
+import com.passql.question.dto.RecommendationsRequest;
 import com.passql.question.dto.RecommendationsResponse;
 import com.passql.question.dto.SseErrorEvent;
 import com.passql.question.dto.SseStatusEvent;
@@ -72,18 +73,17 @@ public class QuestionController implements QuestionControllerDocs {
         return ResponseEntity.ok(homeService.getToday(loginMember.memberUuid()));
     }
 
-    @GetMapping("/recommendations")
+    // GET → POST 전환: 제외 UUID 목록이 쿼리스트링으로 누적되면 Tomcat 8KB 헤더 한도 초과 → 400 발생
+    @PostMapping("/recommendations")
     public ResponseEntity<RecommendationsResponse> getRecommendations(
         @AuthMember LoginMember loginMember,
-        @RequestParam(defaultValue = "3") int size,
-        @RequestParam(required = false) List<String> excludeQuestionUuids
+        @RequestBody RecommendationsRequest request
     ) {
         // String → UUID 변환 — Controller는 변환만 담당
-        List<UUID> excludeUuids = excludeQuestionUuids == null ? List.of() :
-                excludeQuestionUuids.stream()
-                        .map(UUID::fromString)
-                        .toList();
-        return ResponseEntity.ok(recommendationService.recommend(size, excludeUuids, loginMember.memberUuid()));
+        List<UUID> excludeUuids = request.excludeQuestionUuids().stream()
+                .map(UUID::fromString)
+                .toList();
+        return ResponseEntity.ok(recommendationService.recommend(request.size(), excludeUuids, loginMember.memberUuid()));
     }
 
     @GetMapping("/{questionUuid}")
