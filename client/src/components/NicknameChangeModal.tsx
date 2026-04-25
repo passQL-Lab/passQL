@@ -1,10 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
-import {
-  useCheckNickname,
-  useChangeNickname,
-  useRegenerateNickname,
-} from "../hooks/useMember";
+import { useCheckNickname, useChangeNickname } from "../hooks/useMember";
+import { regenerateNickname as regenerateNicknameApi } from "../api/members";
 
 // lucide-react에 주사위 아이콘이 없어 SVG 인라인으로 정의
 function DiceIcon({ size = 20 }: { size?: number }) {
@@ -51,7 +48,7 @@ export default function NicknameChangeModal({
 
   const checkNickname = useCheckNickname();
   const changeNickname = useChangeNickname();
-  const regenerateNickname = useRegenerateNickname();
+  const [isRegenerating, setIsRegenerating] = useState(false);
 
   // 모달 열릴 때 상태 초기화 + input 포커스
   useEffect(() => {
@@ -105,16 +102,18 @@ export default function NicknameChangeModal({
     inputRef.current?.focus();
   };
 
-  // 주사위 버튼: 랜덤 닉네임 생성 후 input 채움
+  // 주사위 버튼: API 직접 호출로 랜덤 닉네임을 input에만 채움 — 전역 스토어 변경 없음
   const handleRegenerate = async () => {
+    setIsRegenerating(true);
     try {
-      const result = await regenerateNickname.mutateAsync(undefined);
+      const result = await regenerateNicknameApi();
       setValue(result.nickname);
-      // 새로 생성된 닉네임은 중복확인 초기화 — 서버 생성이지만 UI 일관성 유지
       setCheckResult(null);
       setErrorMsg(null);
     } catch (err) {
       setErrorMsg(err instanceof Error ? err.message : "닉네임 생성에 실패했어요");
+    } finally {
+      setIsRegenerating(false);
     }
   };
 
@@ -161,7 +160,7 @@ export default function NicknameChangeModal({
       : "btn btn-outline";
 
   const isLoading =
-    checkNickname.isPending || changeNickname.isPending || regenerateNickname.isPending;
+    checkNickname.isPending || changeNickname.isPending || isRegenerating;
 
   return (
     // 오버레이 — 클릭 시 닫힘
@@ -227,12 +226,12 @@ export default function NicknameChangeModal({
           {/* 주사위(랜덤) 버튼 */}
           <button
             type="button"
-            className="h-12 w-12 border border-border rounded-xl flex items-center justify-center text-text-secondary hover:bg-base-200 disabled:opacity-50 shrink-0"
+            className="btn btn-outline btn-square h-12 w-12 text-text-secondary shrink-0"
             onClick={handleRegenerate}
             disabled={isLoading}
             aria-label="랜덤 닉네임 생성"
           >
-            {regenerateNickname.isPending ? (
+            {isRegenerating ? (
               <span className="loading loading-spinner loading-xs" />
             ) : (
               <DiceIcon size={20} />
