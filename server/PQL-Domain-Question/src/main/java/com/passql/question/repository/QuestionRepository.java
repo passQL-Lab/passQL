@@ -49,9 +49,10 @@ public interface QuestionRepository extends JpaRepository<Question, UUID> {
     @Query(value = "SELECT * FROM question WHERE is_active = true ORDER BY RANDOM() LIMIT :size", nativeQuery = true)
     List<Question> findRandomActive(@Param("size") int size);
 
-    // PostgreSQL: CAST(:param AS uuid) 사용 (::uuid는 Hibernate 파라미터 파싱 오류 유발)
-    @Query(value = "SELECT * FROM question WHERE is_active = true AND question_uuid <> CAST(:excludeUuid AS uuid) ORDER BY RANDOM() LIMIT :size", nativeQuery = true)
-    List<Question> findRandomActiveExcluding(@Param("size") int size, @Param("excludeUuid") String excludeUuid);
+    // 복수 UUID 제외 — 세션 내 이미 추천된 문제를 제외할 때 사용
+    // CAST(... AS varchar): 프로젝트 기존 패턴 통일 (::text 캐스팅 대신)
+    @Query(value = "SELECT * FROM question WHERE is_active = true AND CAST(question_uuid AS varchar) NOT IN (:excludeUuids) ORDER BY RANDOM() LIMIT :size", nativeQuery = true)
+    List<Question> findRandomActiveExcludingList(@Param("size") int size, @Param("excludeUuids") List<String> excludeUuids);
 
     @Query("SELECT q.questionUuid FROM Question q WHERE q.isActive = true ORDER BY q.createdAt ASC")
     List<UUID> findActiveUuidsOrderedByCreatedAt();

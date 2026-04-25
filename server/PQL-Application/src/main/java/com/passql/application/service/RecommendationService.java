@@ -43,22 +43,22 @@ public class RecommendationService {
      *
      * memberUuid가 있으면 RAG 기반 추천을 시도하고, 실패하거나 결과가 없으면 RANDOM fallback.
      *
-     * @param size              추천 문제 수 (1~5)
-     * @param excludeQuestionUuid 제외할 문제 UUID (오늘의 문제 등)
-     * @param memberUuid        회원 UUID (없으면 RANDOM)
+     * @param size                  추천 문제 수 (1~5)
+     * @param excludeQuestionUuids  제외할 문제 UUID 목록 (세션 내 이미 노출된 문제 등)
+     * @param memberUuid            회원 UUID (없으면 RANDOM)
      * @return 추천 문제 목록
      */
-    public RecommendationsResponse recommend(int size, UUID excludeQuestionUuid, UUID memberUuid) {
+    public RecommendationsResponse recommend(int size, List<UUID> excludeQuestionUuids, UUID memberUuid) {
         // RAG/RANDOM 경로 모두 동일한 범위 적용
         int clamped = Math.max(1, Math.min(size, 5));
         if (memberUuid != null) {
-            RecommendationsResponse aiResult = tryAiRecommend(memberUuid, clamped, excludeQuestionUuid);
+            RecommendationsResponse aiResult = tryAiRecommend(memberUuid, clamped, excludeQuestionUuids);
             if (aiResult != null && !aiResult.questions().isEmpty()) {
                 return aiResult;
             }
             log.info("[recommendation] AI 추천 결과 없음, RANDOM fallback: memberUuid={}", memberUuid);
         }
-        return questionService.getRecommendations(clamped, excludeQuestionUuid);
+        return questionService.getRecommendations(clamped, excludeQuestionUuids);
     }
 
     /**
@@ -66,7 +66,7 @@ public class RecommendationService {
      *
      * @return 추천 결과 (AI 추천 불가 또는 결과 없으면 null → 호출부에서 RANDOM fallback)
      */
-    private RecommendationsResponse tryAiRecommend(UUID memberUuid, int size, UUID excludeQuestionUuid) {
+    private RecommendationsResponse tryAiRecommend(UUID memberUuid, int size, List<UUID> excludeQuestionUuids) {
         try {
             String memberUuidStr = memberUuid.toString();
 
@@ -83,10 +83,10 @@ public class RecommendationService {
             // 이미 푼 문제 UUID 목록 — Qdrant must_not 필터 (최근 N건만 전송)
             List<String> solved = submissionRepository.findSolvedQuestionUuids(memberUuidStr, SOLVED_QUESTION_LIMIT);
 
-            // excludeQuestionUuid도 제외 목록에 추가 (오늘의 문제 등)
+            // 세션 내 이미 노출된 문제도 전부 제외 (새로고침 시 중복 방지)
             List<String> mustNotIds = new ArrayList<>(solved);
-            if (excludeQuestionUuid != null) {
-                mustNotIds.add(excludeQuestionUuid.toString());
+            if (excludeQuestionUuids != null) {
+                excludeQuestionUuids.forEach(uuid -> mustNotIds.add(uuid.toString()));
             }
 
             RecommendResult result = aiGatewayClient.recommend(
