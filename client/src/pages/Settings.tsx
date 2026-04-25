@@ -251,7 +251,6 @@ export default function Settings() {
         onClose={() => setIsNicknameModalOpen(false)}
         onSuccess={() => {
           showToast("닉네임이 변경됐어요");
-          setIsNicknameModalOpen(false);
         }}
       />
     </div>
