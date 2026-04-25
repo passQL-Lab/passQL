@@ -9,7 +9,6 @@ import com.passql.member.dto.NicknameCheckResponse;
 import com.passql.member.dto.NicknameRegenerateResponse;
 import com.passql.member.service.MemberService;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -39,10 +38,11 @@ public class MemberController implements MemberControllerDocs {
     }
 
     // 닉네임 중복 확인 — 저장 없이 사용 가능 여부만 반환
+    // @Pattern은 인터페이스(MemberControllerDocs)에 선언 — 구현체 재정의 시 HV000151 오류 발생
     @GetMapping("/me/nickname/check")
     public NicknameCheckResponse checkNickname(
             @AuthMember LoginMember loginMember,
-            @RequestParam @Pattern(regexp = "^[가-힣a-zA-Z0-9]{2,10}$", message = "한글, 영문, 숫자만 사용 가능해요 (2~10자)") String nickname) {
+            @RequestParam String nickname) {
         return memberService.checkNickname(nickname);
     }
 

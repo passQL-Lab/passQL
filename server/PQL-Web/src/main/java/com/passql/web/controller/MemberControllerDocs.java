@@ -11,6 +11,7 @@ import com.passql.member.dto.NicknameRegenerateResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Pattern;
 import kr.suhsaechan.suhapilog.annotation.ApiLog;
 import kr.suhsaechan.suhapilog.annotation.ApiLogs;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -80,7 +81,8 @@ public interface MemberControllerDocs {
           - 저장 없이 사용 가능 여부만 확인한다.
           """
   )
-  NicknameCheckResponse checkNickname(@AuthMember LoginMember loginMember, @RequestParam String nickname);
+  NicknameCheckResponse checkNickname(@AuthMember LoginMember loginMember,
+      @RequestParam @Pattern(regexp = "^[가-힣a-zA-Z0-9]{2,10}$", message = "한글, 영문, 숫자만 사용 가능해요 (2~10자)") String nickname);
 
   @ApiLogs({
       @ApiLog(date = "2026.04.25", author = Author.SUHSAECHAN, issueNumber = 287, description = "닉네임 직접 변경 API 추가"),
