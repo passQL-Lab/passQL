@@ -5,16 +5,15 @@ import com.passql.submission.readiness.ToneKey;
 import java.time.LocalDateTime;
 
 /**
- * 합격 준비도(Readiness) 응답 블록 (v2).
+ * 합격 준비도(Readiness) 응답 블록 (v3).
  *
- * 6요소 원본값을 모두 공개해 FE가 팝오버에서 드릴다운할 수 있게 한다.
+ * base(Accuracy × Coverage × Recency) + bonus(retry, spread) 구조의 5요소 원본값 공개.
  */
 public record ReadinessResponse(
     double score,
     double accuracy,
     double coverage,
     double recency,
-    double difficulty,
     double retry,
     double spread,
     LocalDateTime lastStudiedAt,

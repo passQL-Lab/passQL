@@ -93,11 +93,6 @@ public class ProgressService {
         );
         int coveredTopicCount = (int) coveredLong;
 
-        // Difficulty — 최근 50문제 평균 난이도
-        Double avgDifficulty = submissionRepository.findAvgDifficultyOfRecentAttempts(
-            memberUuid.toString(), ReadinessConstants.RECENT_ATTEMPT_WINDOW
-        );
-
         // Retry — 전체 이력 기반 오답 복습 비율
         long wrongCount   = submissionRepository.countDistinctWrongQuestions(memberUuid.toString());
         long retriedCount = submissionRepository.countRetriedAndCorrectQuestions(memberUuid.toString());
@@ -119,7 +114,6 @@ public class ProgressService {
             topicCountMap,
             wrongCount,
             retriedCount,
-            avgDifficulty,
             today
         );
 
@@ -137,7 +131,6 @@ public class ProgressService {
             result.accuracy(),
             result.coverage(),
             result.recency(),
-            result.difficulty(),
             result.retry(),
             result.spread(),
             lastStudiedAt,

@@ -57,16 +57,15 @@ function ReadinessPopover({
       />
       <p className="text-xs font-bold mb-2">합격 준비도란?</p>
       <p className="text-xs text-gray-300 leading-relaxed mb-3">
-        정답률 · 학습 범위 · 최근 학습 빈도를 종합한 점수예요. 꾸준히 다양한 토픽을 풀수록 올라가요.
+        정답률 · 공부 범위를 곱한 기본 점수에, 오답 복습과 고른 학습 보너스를 더한 점수예요.
       </p>
       <div className="flex flex-col gap-1.5">
         {[
-          { label: "맞힌 비율",  value: readiness.accuracy },
-          { label: "공부 범위",  value: readiness.coverage },
-          { label: "꾸준함",     value: readiness.recency },
-          { label: "난이도 도전", value: readiness.difficulty },
-          { label: "오답 복습",  value: readiness.retry },
-          { label: "고른 학습",  value: readiness.spread },
+          { label: "맞힌 비율", value: readiness.accuracy },
+          { label: "공부 범위", value: readiness.coverage },
+          { label: "꾸준함",    value: readiness.recency },
+          { label: "오답 복습", value: readiness.retry },
+          { label: "고른 학습", value: readiness.spread },
         ].map(({ label, value }) => (
           <div key={label} className="flex items-center gap-2">
             <span className="text-[11px] text-gray-400 w-16 shrink-0">{label}</span>
