@@ -790,6 +790,7 @@ export function getMockResponse(
       isTestAccount: false,
       createdAt: "2026-04-07T12:00:00",
       lastSeenAt: "2026-04-08T01:00:00",
+      nicknameChangedAt: null,
     } satisfies MemberMeResponse;
   }
 

@@ -10,15 +10,9 @@ import AnswerFeedback from "./pages/AnswerFeedback";
 import RecommendationPractice from "./pages/RecommendationPractice";
 import Stats from "./pages/Stats";
 import Settings from "./pages/Settings";
-import DevPage from "./pages/DevPage";
 import SettingsFeedback from "./pages/SettingsFeedback";
 import Login from "./pages/Login";
 import { isAuthenticated } from "./stores/authStore";
-
-/** /dev route guard — sessionStorage에 잠금 해제 플래그가 없으면 설정 화면으로 redirect */
-function DevGuard() {
-  return sessionStorage.getItem("devUnlocked") ? <DevPage /> : <Navigate to="/settings" replace />;
-}
 
 /** 인증 필수 가드 — 미로그인 시 /login으로 redirect */
 function RequireAuth() {
@@ -76,11 +70,6 @@ const router = createBrowserRouter([
       {
         path: "recommendation/:questionUuid",
         element: <RecommendationPractice />,
-      },
-      // 개발자 전용 도구 — sessionStorage 잠금 해제 확인 후에만 접근 허용
-      {
-        path: "dev",
-        element: <DevGuard />,
       },
       // 건의사항 서브페이지 — AppLayout 밖 독립 라우트 (탭바 없는 몰입형)
       {
