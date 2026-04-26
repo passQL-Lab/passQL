@@ -8,12 +8,16 @@ import NicknameChangeModal from "../components/NicknameChangeModal";
 import { useStagger } from "../hooks/useStagger";
 import SettingsSection from "../components/SettingsSection";
 import SettingsRow from "../components/SettingsRow";
+import { useMember } from "../hooks/useMember";
+import { isNicknameCooldown, formatNicknameCooldownMessage } from "../lib/dateUtil";
 
 export default function Settings() {
   const navigate = useNavigate();
   const uuid = useAuthStore((s) => s.memberUuid ?? "");
   const nickname = useAuthStore((s) => s.nickname ?? "");
   const truncatedUuid = `${uuid.slice(0, 20)}...`;
+  // nicknameChangedAt을 /members/me 캐시에서 가져옴 — 쿨다운 체크에 사용
+  const { data: memberData } = useMember();
   const clearTokens = useAuthStore((s) => s.clearTokens);
   // 닉네임 변경 모달 열림 여부
   const [isNicknameModalOpen, setIsNicknameModalOpen] = useState(false);
@@ -61,6 +65,16 @@ export default function Settings() {
     }
   };
 
+  // 연필 클릭 시 쿨다운 중이면 토스트만 표시, 아니면 모달 오픈
+  const handleNicknameEditClick = () => {
+    const changedAt = memberData?.nicknameChangedAt ?? null;
+    if (isNicknameCooldown(changedAt)) {
+      showToast(formatNicknameCooldownMessage(changedAt!));
+      return;
+    }
+    setIsNicknameModalOpen(true);
+  };
+
   const handleCopy = () => {
     navigator.clipboard.writeText(uuid);
     setCopied(true);
@@ -92,7 +106,7 @@ export default function Settings() {
                   type="button"
                   className="w-8 h-8 flex items-center justify-center transition-colors text-text-caption hover:text-brand"
                   title="닉네임 변경"
-                  onClick={() => setIsNicknameModalOpen(true)}
+                  onClick={handleNicknameEditClick}
                 >
                   <Pencil size={15} />
                 </button>

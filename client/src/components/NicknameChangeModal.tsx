@@ -1,29 +1,15 @@
 import { useEffect, useRef, useState } from "react";
 import { X } from "lucide-react";
 import { useCheckNickname, useChangeNickname } from "../hooks/useMember";
-import { regenerateNickname as regenerateNicknameApi } from "../api/members";
+import { ApiError } from "../api/client";
 
-// lucide-react에 주사위 아이콘이 없어 SVG 인라인으로 정의
-function DiceIcon({ size = 20 }: { size?: number }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={1.8}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect x="2" y="2" width="20" height="20" rx="4" />
-      <circle cx="7.5" cy="7.5" r="1.3" fill="currentColor" stroke="none" />
-      <circle cx="16.5" cy="7.5" r="1.3" fill="currentColor" stroke="none" />
-      <circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none" />
-      <circle cx="7.5" cy="16.5" r="1.3" fill="currentColor" stroke="none" />
-      <circle cx="16.5" cy="16.5" r="1.3" fill="currentColor" stroke="none" />
-    </svg>
-  );
+// ApiError.body.message → 한국어 서버 메시지 우선, fallback은 기본 문구
+function extractErrorMessage(err: unknown, fallback: string): string {
+  if (err instanceof ApiError) {
+    const body = err.body as Record<string, unknown> | null;
+    if (typeof body?.message === "string") return body.message;
+  }
+  return fallback;
 }
 
 interface NicknameChangeModalProps {
@@ -45,10 +31,10 @@ export default function NicknameChangeModal({
   // null = 미확인, true = 사용가능, false = 사용불가
   const [checkResult, setCheckResult] = useState<boolean | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   const checkNickname = useCheckNickname();
   const changeNickname = useChangeNickname();
-  const [isRegenerating, setIsRegenerating] = useState(false);
 
   // 모달 열릴 때 상태 초기화 + input 포커스
   useEffect(() => {
@@ -57,8 +43,8 @@ export default function NicknameChangeModal({
     setValue(currentNickname);
     setCheckResult(null);
     setErrorMsg(null);
+    setSuccessMsg(null);
 
-    // 렌더 직후 포커스 — setTimeout으로 DOM 안정화 대기
     const timer = setTimeout(() => {
       inputRef.current?.focus();
     }, 50);
@@ -75,7 +61,6 @@ export default function NicknameChangeModal({
     };
     window.addEventListener("keydown", handleKeyDown);
 
-    // 이전 overflow 저장 후 복원 — 중첩 모달 대응
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
 
@@ -87,80 +72,76 @@ export default function NicknameChangeModal({
 
   if (!isOpen) return null;
 
-  // input 변경 시 중복확인 상태 리셋 — 변경된 닉네임은 재확인 필요
+  // input 변경 시 중복확인 상태 리셋 — 다시 확인 필요
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setValue(e.target.value);
     setCheckResult(null);
     setErrorMsg(null);
+    setSuccessMsg(null);
   };
 
-  // 클리어 버튼: 값 초기화 + 포커스 복귀
   const handleClear = () => {
     setValue("");
     setCheckResult(null);
     setErrorMsg(null);
+    setSuccessMsg(null);
     inputRef.current?.focus();
-  };
-
-  // 주사위 버튼: API 직접 호출로 랜덤 닉네임을 input에만 채움 — 전역 스토어 변경 없음
-  const handleRegenerate = async () => {
-    setIsRegenerating(true);
-    try {
-      const result = await regenerateNicknameApi();
-      setValue(result.nickname);
-      setCheckResult(null);
-      setErrorMsg(null);
-    } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : "닉네임 생성에 실패했어요");
-    } finally {
-      setIsRegenerating(false);
-    }
   };
 
   // 중복확인 버튼
   const handleCheck = async () => {
+    if (!value) return;
     setErrorMsg(null);
+    setSuccessMsg(null);
     try {
       const result = await checkNickname.mutateAsync(value);
       setCheckResult(result.available);
-      if (!result.available) {
+      if (result.available) {
+        setSuccessMsg("사용 가능한 닉네임이에요");
+      } else {
         setErrorMsg("이미 사용 중인 닉네임이에요");
       }
     } catch (err) {
       setCheckResult(false);
-      setErrorMsg(err instanceof Error ? err.message : "중복 확인에 실패했어요");
+      setErrorMsg(extractErrorMessage(err, "중복 확인에 실패했어요"));
     }
   };
 
-  // 저장 버튼: 닉네임 변경 후 콜백 호출
+  // 저장: 중복확인 통과 상태에서만 호출됨
   const handleSave = async () => {
     try {
       const result = await changeNickname.mutateAsync(value);
       onSuccess(result.nickname);
       onClose();
     } catch (err) {
-      setErrorMsg(err instanceof Error ? err.message : "닉네임 변경에 실패했어요");
+      setErrorMsg(extractErrorMessage(err, "닉네임 변경에 실패했어요"));
     }
   };
 
-  // 상태 메시지 색상: checkResult 기반 분기
-  const statusTextClass =
-    checkResult === true
-      ? "text-sem-success"
-      : checkResult === false
-      ? "text-sem-error"
-      : "text-text-caption";
+  const isLoading = checkNickname.isPending || changeNickname.isPending;
 
-  // 중복확인 버튼 색상: 확인 완료 시 success 테두리 표시
+  // 기존 닉네임과 동일하면 중복확인 버튼 비활성 + 저장 불가 안내
+  const isSameAsCurrent = value === currentNickname;
+  // 중복확인 통과했을 때만 저장 버튼 활성화
+  const canSave = checkResult === true;
+
+  // 중복확인 버튼: 미확인이면 primary, 통과면 success 테두리, 실패면 error 테두리
   const checkBtnClass =
     checkResult === true
-      ? "btn btn-outline border-sem-success text-sem-success"
+      ? "btn btn-sm h-12 px-3 shrink-0 border border-sem-success text-sem-success bg-transparent"
       : checkResult === false
-      ? "btn btn-outline border-sem-error text-sem-error"
-      : "btn btn-outline";
+      ? "btn btn-sm h-12 px-3 shrink-0 border border-sem-error text-sem-error bg-transparent"
+      : "btn btn-sm h-12 px-3 shrink-0 border border-brand bg-brand text-white";
 
-  const isLoading =
-    checkNickname.isPending || changeNickname.isPending || isRegenerating;
+  // 상태 메시지
+  const statusMsg = isSameAsCurrent
+    ? "닉네임을 변경해주세요"
+    : (errorMsg ?? successMsg);
+  const statusTextClass = isSameAsCurrent
+    ? "text-text-caption"
+    : errorMsg
+    ? "text-sem-error"
+    : "text-sem-success";
 
   return (
     // 오버레이 — 클릭 시 닫힘
@@ -196,9 +177,8 @@ export default function NicknameChangeModal({
           변경 후 3일간 다시 바꿀 수 없어요
         </p>
 
-        {/* 입력 영역 */}
+        {/* 입력 영역 — input + X 클리어 + 중복확인 */}
         <div className="flex gap-2">
-          {/* input + 클리어 버튼 묶음 */}
           <div className="relative flex-1">
             <input
               ref={inputRef}
@@ -210,7 +190,6 @@ export default function NicknameChangeModal({
               placeholder="닉네임 입력"
               disabled={isLoading}
             />
-            {/* value 있을 때만 클리어 버튼 표시 */}
             {value && (
               <button
                 type="button"
@@ -223,37 +202,12 @@ export default function NicknameChangeModal({
             )}
           </div>
 
-          {/* 주사위(랜덤) 버튼 */}
+          {/* 중복확인 버튼 — 미확인 시 primary로 강조 */}
           <button
             type="button"
-            className="btn btn-outline btn-square h-12 w-12 text-text-secondary shrink-0"
-            onClick={handleRegenerate}
-            disabled={isLoading}
-            aria-label="랜덤 닉네임 생성"
-          >
-            {isRegenerating ? (
-              <span className="loading loading-spinner loading-xs" />
-            ) : (
-              <DiceIcon size={20} />
-            )}
-          </button>
-        </div>
-
-        {/* 상태 메시지 */}
-        <p className={`text-sm min-h-[1.25rem] ${statusTextClass}`}>
-          {checkResult === true && "사용 가능한 닉네임이에요"}
-          {checkResult === false && (errorMsg ?? "사용할 수 없는 닉네임이에요")}
-          {checkResult === null && errorMsg}
-        </p>
-
-        {/* 버튼 행 */}
-        <div className="flex gap-2">
-          {/* 중복확인 버튼 */}
-          <button
-            type="button"
-            className={`${checkBtnClass} flex-1`}
+            className={checkBtnClass}
             onClick={handleCheck}
-            disabled={!value || isLoading}
+            disabled={!value || isSameAsCurrent || isLoading}
           >
             {checkNickname.isPending ? (
               <span className="loading loading-spinner loading-xs" />
@@ -263,21 +217,26 @@ export default function NicknameChangeModal({
               "중복확인"
             )}
           </button>
-
-          {/* 저장 버튼 — 중복확인 통과 후에만 활성화 */}
-          <button
-            type="button"
-            className="btn btn-primary flex-1"
-            onClick={handleSave}
-            disabled={checkResult !== true || isLoading}
-          >
-            {changeNickname.isPending ? (
-              <span className="loading loading-spinner loading-xs" />
-            ) : (
-              "저장"
-            )}
-          </button>
         </div>
+
+        {/* 상태 메시지 */}
+        <p className={`text-sm min-h-[1.25rem] ${statusTextClass}`}>
+          {statusMsg}
+        </p>
+
+        {/* 저장 버튼 — 중복확인 통과 전까지 disabled */}
+        <button
+          type="button"
+          className="btn btn-primary w-full"
+          onClick={handleSave}
+          disabled={!canSave || isLoading}
+        >
+          {changeNickname.isPending ? (
+            <span className="loading loading-spinner loading-xs" />
+          ) : (
+            "저장"
+          )}
+        </button>
       </div>
     </div>
   );

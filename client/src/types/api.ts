@@ -241,6 +241,8 @@ export interface MemberMeResponse {
   readonly isTestAccount: boolean;
   readonly createdAt: string;
   readonly lastSeenAt: string;
+  // null이면 닉네임을 한 번도 변경하지 않은 상태
+  readonly nicknameChangedAt: string | null;
 }
 
 export interface NicknameRegenerateResponse {

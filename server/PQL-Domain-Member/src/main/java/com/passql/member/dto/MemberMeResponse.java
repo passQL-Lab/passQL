@@ -18,6 +18,8 @@ public class MemberMeResponse {
     private Boolean isTestAccount;
     private LocalDateTime createdAt;
     private LocalDateTime lastSeenAt;
+    // 닉네임 쿨다운 계산 기준 — null이면 변경 이력 없음
+    private LocalDateTime nicknameChangedAt;
 
     public static MemberMeResponse from(Member m) {
         return new MemberMeResponse(
@@ -27,7 +29,8 @@ public class MemberMeResponse {
             m.getStatus().name(),
             m.getIsTestAccount(),
             m.getCreatedAt(),
-            m.getLastSeenAt()
+            m.getLastSeenAt(),
+            m.getNicknameChangedAt()
         );
     }
 }
