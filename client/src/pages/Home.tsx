@@ -183,13 +183,12 @@ export default function Home() {
             <p className="text-sm text-text-caption mt-1">선택된 일정 없음</p>
           </div>
         )}
-
         {today?.question ? (
           today.alreadySolvedToday ? (
             // 완료 상태: 회색 dimmed 카드 — 이미 끝난 항목임을 시각적으로 표현
             <div className="h-full flex flex-col gap-2 rounded-xl p-5 cursor-default bg-[#F3F4F6] border border-border">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-medium text-text-caption">
+                <p className="text-sm text-text-secondary">
                   오늘의 문제
                 </p>
                 {/* 완료 인디케이터: 원형 아이콘 대신 텍스트 레이블 */}
@@ -226,7 +225,7 @@ export default function Home() {
         ) : (
           <Link to="/questions" className="block">
             <div className="bg-surface-card border border-border rounded-2xl p-4 sm:p-6 h-full flex flex-col justify-center cursor-pointer hover:-translate-y-0.5 hover:border-brand transition-all duration-200">
-              <p className="text-sm text-text-caption">오늘의 문제</p>
+              <p className="text-sm text-text-secondary">오늘의 문제</p>
               <p className="text-sm text-text-primary mt-1">오늘은 등록된 문제가 없어요</p>
             </div>
           </Link>
@@ -236,7 +235,7 @@ export default function Home() {
       {/* ④ 학습 현황 섹션: heatmap 에러/로딩만 독립 처리 */}
       <section className={`bg-surface-card border border-border rounded-2xl p-4 sm:p-6 mb-4 ${s3.className}`}>
         <div className="flex items-center justify-between mb-3">
-          <h2 className="text-secondary text-sm">학습 현황</h2>
+          <h2 className="text-sm text-text-secondary">학습 현황</h2>
           {/* streak는 progress 에러 시 0 fallback → 뱃지 자연스럽게 미표시 */}
           {streak > 0 && (
             <span className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-bold bg-sem-warning-light text-sem-warning-text">
@@ -278,8 +277,9 @@ export default function Home() {
         </section>
       ) : progressError ? (
         /* progress 에러 — 로딩 skeleton과 동일한 2칸 그리드 자리에 배치해 레이아웃 안정 */
-        <section className={`grid grid-cols-2 gap-3 mb-4 ${s4.className}`}>
-          <div className="bg-surface-card border border-border rounded-2xl p-4 sm:p-6 flex flex-col items-center justify-center gap-2 text-center col-span-2 py-5">
+        <section className={`bg-surface-card border border-border rounded-2xl p-4 sm:p-6 mb-4 ${s4.className}`}>
+          <p className="text-sm text-text-secondary mb-3">합격 준비도</p>
+          <div className="flex flex-col items-center gap-2 py-2 text-center">
             <p className="text-sm text-text-caption">학습 데이터를 불러올 수 없습니다</p>
             <button
               type="button"
@@ -345,7 +345,7 @@ export default function Home() {
       {/* ⑥ 추천 문제 섹션: 에러 시 숨김, 초기 로딩 시 스켈레톤 표시 */}
       {!recommendationsError && (recommendationsLoading || (recommendations && recommendations.questions.length > 0)) && (
         <section className={`mt-6 ${s5.className}`}>
-          <h2 className="text-secondary text-sm mb-3 flex items-center gap-2">
+          <h2 className="text-sm text-text-secondary mb-3 flex items-center gap-2">
             <Sparkles size={14} fill="currentColor" />
             AI 추천문제
             {/* 다른 추천 문제 세트를 원할 때 재요청 — staleTime 내에도 강제 refetch */}

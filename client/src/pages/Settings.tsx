@@ -21,14 +21,6 @@ export default function Settings() {
   const [logoutLoading, setLogoutLoading] = useState(false);
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // 개발자 모드 Easter Egg — sessionStorage 복원으로 페이지 재진입 시에도 row 유지
-  const [devUnlocked, setDevUnlocked] = useState(
-    () => sessionStorage.getItem("devUnlocked") === "1",
-  );
-  const clickCountRef = useRef(0);
-  // 2초 안에 5번 클릭하지 않으면 카운터 리셋
-  const clickResetTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   // toast 메시지 — null이면 미표시
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -46,7 +38,6 @@ export default function Settings() {
     return () => {
       if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
       if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-      if (clickResetTimerRef.current) clearTimeout(clickResetTimerRef.current);
     };
   }, []);
 
@@ -75,31 +66,6 @@ export default function Settings() {
     setCopied(true);
     if (copyTimerRef.current) clearTimeout(copyTimerRef.current);
     copyTimerRef.current = setTimeout(() => setCopied(false), 2000);
-  };
-
-  // 버전 row 클릭 — 2초 안에 5번 연속 클릭 시 개발자 모드 잠금 해제
-  const handleVersionClick = () => {
-    if (devUnlocked) return;
-    clickCountRef.current += 1;
-    const count = clickCountRef.current;
-
-    // 마지막 클릭으로부터 2초 경과 시 카운터 리셋
-    if (clickResetTimerRef.current) clearTimeout(clickResetTimerRef.current);
-    clickResetTimerRef.current = setTimeout(() => {
-      clickCountRef.current = 0;
-    }, 2000);
-
-    if (count === 3) showToast("개발자 모드까지 2번 남았습니다");
-    else if (count === 4) showToast("개발자 모드까지 1번 남았습니다");
-    else if (count >= 5) {
-      // 카운터·타이머 정리 후 잠금 해제
-      clickCountRef.current = 0;
-      if (clickResetTimerRef.current) clearTimeout(clickResetTimerRef.current);
-      // sessionStorage에 저장 — route guard에서 접근 허용 여부 확인
-      sessionStorage.setItem("devUnlocked", "1");
-      setDevUnlocked(true);
-      showToast("개발자 모드가 활성화되었습니다");
-    }
   };
 
   return (
@@ -185,21 +151,7 @@ export default function Settings() {
               value={
                 <p className="text-sm text-text-caption">{__APP_VERSION__}</p>
               }
-              onClick={devUnlocked ? undefined : handleVersionClick}
             />
-            {/* 개발자 모드 row — Easter Egg 잠금 해제 시 노출 */}
-            {devUnlocked && (
-              <SettingsRow
-                label="개발자 모드"
-                value={
-                  <p className="text-sm text-text-caption">개발자 전용 도구</p>
-                }
-                action={
-                  <ChevronRight size={16} className="text-text-caption" />
-                }
-                onClick={() => navigate("/dev")}
-              />
-            )}
           </div>
         </SettingsSection>
       </section>
@@ -208,22 +160,21 @@ export default function Settings() {
       <section className={s4.className}>
         <SettingsSection label="계정 관리">
           <div className="bg-surface-card border-y border-border">
-            <SettingsRow
-              label="로그아웃"
-              value={
-                <p className="text-sm text-text-secondary">
-                  {logoutLoading ? "로그아웃 중..." : "현재 계정에서 로그아웃"}
-                </p>
-              }
-              action={
-                logoutLoading ? (
-                  <span className="w-4 h-4 inline-block border-2 border-text-caption border-t-transparent rounded-full animate-spin" />
-                ) : (
-                  <LogOut size={16} className="text-sem-error" />
-                )
-              }
-              onClick={logoutLoading ? undefined : handleLogout}
-            />
+            <button
+              type="button"
+              disabled={logoutLoading}
+              onClick={handleLogout}
+              className="flex items-center justify-between px-4 py-3.5 w-full text-left cursor-pointer hover:bg-surface active:bg-surface transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <span className="text-sm font-medium text-sem-error">
+                {logoutLoading ? "로그아웃 중..." : "로그아웃"}
+              </span>
+              {logoutLoading ? (
+                <span className="w-4 h-4 inline-block border-2 border-sem-error border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <LogOut size={16} className="text-sem-error" />
+              )}
+            </button>
           </div>
         </SettingsSection>
       </section>
