@@ -8,7 +8,7 @@
 > 당신은 SQLD 시험과 동일한 Oracle SQL 환경에서 직접 실행하며 검증합니다.
 
 <!-- AUTO-VERSION-SECTION: DO NOT EDIT MANUALLY -->
-## 최신 버전 : v0.0.182 (2026-04-27)
+## 최신 버전 : v0.0.183 (2026-04-27)
 
 [전체 버전 기록 보기](CHANGELOG.md)
 
