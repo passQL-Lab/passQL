@@ -547,7 +547,6 @@ const MOCK_PROGRESS: ProgressResponse = {
     accuracy: 0.685,
     coverage: 0.75,
     recency: 0.82,
-    difficulty: 0.50,
     retry: 0.80,
     spread: 0.70,
     lastStudiedAt: "2026-04-10T09:00:00",

@@ -1,5 +1,6 @@
 import { createBrowserRouter, RouterProvider, Navigate, Outlet } from "react-router-dom";
 import AppLayout from "./components/AppLayout";
+import { DevProvider } from "./dev/index";
 import Home from "./pages/Home";
 import CategoryCards from "./pages/CategoryCards";
 import DailyChallenge from "./pages/DailyChallenge";
@@ -81,5 +82,13 @@ const router = createBrowserRouter([
 ]);
 
 export default function App() {
-  return <RouterProvider router={router} />;
+  // prod 빌드에서는 DevProvider를 완전히 제외해 번들 크기 영향 없음
+  if (!import.meta.env.DEV) {
+    return <RouterProvider router={router} />;
+  }
+  return (
+    <DevProvider>
+      <RouterProvider router={router} />
+    </DevProvider>
+  );
 }

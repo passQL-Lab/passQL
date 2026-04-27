@@ -141,3 +141,36 @@ export async function apiFetch<T>(
     }
   }
 }
+
+// ────────────────────────────────────────────────────────
+// DevProvider가 API 호출 흐름을 가로채기 위한 hook 등록소
+// Task 2에서 apiFetch 내부에 실제 호출 로직이 추가될 예정
+// ────────────────────────────────────────────────────────
+type LogHook = (
+  type: "req" | "res" | "err",
+  method: string,
+  path: string,
+  data?: unknown,
+  meta?: { durationMs?: number; statusCode?: number; logId?: number }
+) => number | void;
+
+let _logHook: LogHook | null = null;
+
+export function registerApiLogHook(hook: LogHook): void {
+  _logHook = hook;
+}
+
+export function unregisterApiLogHook(): void {
+  _logHook = null;
+}
+
+/** 내부에서만 사용 — hook이 등록된 경우 호출 */
+export function _callLogHook(
+  type: "req" | "res" | "err",
+  method: string,
+  path: string,
+  data?: unknown,
+  meta?: { durationMs?: number; statusCode?: number; logId?: number }
+): number | void {
+  return _logHook?.(type, method, path, data, meta);
+}
