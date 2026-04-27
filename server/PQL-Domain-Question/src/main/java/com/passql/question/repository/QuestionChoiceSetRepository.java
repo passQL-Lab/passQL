@@ -30,6 +30,14 @@ public interface QuestionChoiceSetRepository extends JpaRepository<QuestionChoic
 
     List<QuestionChoiceSet> findByQuestionUuidOrderByCreatedAtDesc(UUID questionUuid);
 
+    /**
+     * 연습 모드 재사용 조회: 특정 문제에 대해 status=OK인 선택지 중 가장 최근 것.
+     * generatedForMemberUuid 무관 — 다른 사용자가 생성한 것도 재사용 가능.
+     */
+    Optional<QuestionChoiceSet>
+        findFirstByQuestionUuidAndStatusOrderByCreatedAtDesc(
+            UUID questionUuid, ChoiceSetStatus status);
+
     @Modifying
     @Transactional
     void deleteByQuestionUuid(UUID questionUuid);

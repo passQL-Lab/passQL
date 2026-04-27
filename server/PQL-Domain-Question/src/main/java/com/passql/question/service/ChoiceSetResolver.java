@@ -2,6 +2,9 @@ package com.passql.question.service;
 
 import com.passql.common.exception.CustomException;
 import com.passql.common.exception.constant.ErrorCode;
+import com.passql.member.constant.ChoiceGenerationMode;
+import com.passql.member.entity.Member;
+import com.passql.member.repository.MemberRepository;
 import com.passql.question.constant.ChoiceSetSource;
 import com.passql.question.constant.ChoiceSetStatus;
 import com.passql.question.constant.ExecutionMode;
@@ -28,30 +31,23 @@ public class ChoiceSetResolver {
     private final QuestionService questionService;
     private final QuestionChoiceSetRepository choiceSetRepository;
     private final ChoiceSetGenerationService choiceSetGenerationService;
+    private final MemberRepository memberRepository;
 
-    /**
-     * questionUuid + memberUuid 로 사용자에게 제공할 선택지 세트를 결정한다.
-     * <p>
-     * 비트랜잭션 — AI·샌드박스 호출이 수 초 걸리므로 긴 트랜잭션 금지.
-     * consumed_at 마킹은 markConsumed()에서 짧은 트랜잭션으로 처리.
-     *
-     * @return 사용 가능한 QuestionChoiceSet
-     */
     public QuestionChoiceSet resolveForUser(UUID questionUuid, UUID memberUuid) {
         Question question = questionService.getQuestionEntity(questionUuid);
+        ChoiceGenerationMode mode = getMemberMode(memberUuid);
 
-        // CONCEPT_ONLY 문제는 Sandbox 없이 텍스트 선택지를 AI로 생성
         if (question.getExecutionMode() == ExecutionMode.CONCEPT_ONLY) {
-            return resolveConcept(questionUuid, memberUuid);
+            return resolveConcept(questionUuid, memberUuid, mode);
         }
 
         switch (question.getChoiceSetPolicy()) {
             case AI_ONLY:
-                return resolveAiOnly(questionUuid, memberUuid);
+                return resolveAiOnly(questionUuid, memberUuid, mode);
             case ODD_ONE_OUT:
-                return resolveAiOnly(questionUuid, memberUuid);
+                return resolveAiOnly(questionUuid, memberUuid, mode);
             case RESULT_MATCH:
-                return resolveResultMatch(questionUuid, memberUuid);
+                return resolveResultMatch(questionUuid, memberUuid, mode);
             case CURATED_ONLY:
                 throw new CustomException(ErrorCode.CHOICE_SET_POLICY_NOT_IMPLEMENTED,
                         "CURATED_ONLY 정책은 아직 지원되지 않습니다.");
@@ -64,66 +60,88 @@ public class ChoiceSetResolver {
         }
     }
 
-    /**
-     * CONCEPT_ONLY 문제: 프리페치 캐시 조회 후 없으면 텍스트 선택지 실시간 생성.
-     * Sandbox 검증 없이 AI가 직접 정답/오답을 판별한다.
-     */
-    private QuestionChoiceSet resolveConcept(UUID questionUuid, UUID memberUuid) {
+    /** 멤버의 선택지 생성 모드 조회. 멤버 미존재 시 PRACTICE 폴백. */
+    private ChoiceGenerationMode getMemberMode(UUID memberUuid) {
+        return memberRepository.findById(memberUuid)
+                .map(Member::getChoiceGenerationMode)
+                .orElse(ChoiceGenerationMode.PRACTICE);
+    }
+
+    private QuestionChoiceSet resolveConcept(UUID questionUuid, UUID memberUuid, ChoiceGenerationMode mode) {
+        if (mode == ChoiceGenerationMode.REAL) {
+            log.info("[resolver] concept REAL mode, runtime generation: questionUuid={}", questionUuid);
+            return choiceSetGenerationService.generateConcept(questionUuid, memberUuid, ChoiceSetSource.AI_RUNTIME);
+        }
+
+        // 연습 모드: 1순위 본인 프리페치 → 2순위 전체 OK → 미스 시 생성
         Optional<QuestionChoiceSet> prefetched = choiceSetRepository
                 .findFirstByQuestionUuidAndGeneratedForMemberUuidAndSourceAndStatusAndConsumedAtIsNullOrderByCreatedAtDesc(
-                        questionUuid, memberUuid,
-                        ChoiceSetSource.AI_PREFETCH, ChoiceSetStatus.OK);
-
+                        questionUuid, memberUuid, ChoiceSetSource.AI_PREFETCH, ChoiceSetStatus.OK);
         if (prefetched.isPresent()) {
-            QuestionChoiceSet set = prefetched.get();
-            markConsumed(set);
-            log.info("[resolver] concept prefetch HIT: questionUuid={}, setUuid={}",
-                    questionUuid, set.getChoiceSetUuid());
-            return set;
+            markConsumed(prefetched.get());
+            log.info("[resolver] concept prefetch HIT: questionUuid={}", questionUuid);
+            return prefetched.get();
+        }
+
+        Optional<QuestionChoiceSet> reusable = choiceSetRepository
+                .findFirstByQuestionUuidAndStatusOrderByCreatedAtDesc(questionUuid, ChoiceSetStatus.OK);
+        if (reusable.isPresent()) {
+            log.info("[resolver] concept PRACTICE reuse HIT: questionUuid={}", questionUuid);
+            return reusable.get();
         }
 
         log.info("[resolver] concept MISS, runtime generation: questionUuid={}", questionUuid);
         return choiceSetGenerationService.generateConcept(questionUuid, memberUuid, ChoiceSetSource.AI_RUNTIME);
     }
 
-    private QuestionChoiceSet resolveAiOnly(UUID questionUuid, UUID memberUuid) {
-        // 1. 프리페치 캐시 조회
-        Optional<QuestionChoiceSet> prefetched = choiceSetRepository
-                .findFirstByQuestionUuidAndGeneratedForMemberUuidAndSourceAndStatusAndConsumedAtIsNullOrderByCreatedAtDesc(
-                        questionUuid, memberUuid,
-                        ChoiceSetSource.AI_PREFETCH, ChoiceSetStatus.OK);
-
-        if (prefetched.isPresent()) {
-            // 2. HIT: consumed_at 마킹 후 반환
-            QuestionChoiceSet set = prefetched.get();
-            markConsumed(set);
-            log.info("[resolver] prefetch HIT: questionUuid={}, setUuid={}",
-                    questionUuid, set.getChoiceSetUuid());
-            return set;
+    private QuestionChoiceSet resolveAiOnly(UUID questionUuid, UUID memberUuid, ChoiceGenerationMode mode) {
+        if (mode == ChoiceGenerationMode.REAL) {
+            log.info("[resolver] REAL mode, runtime generation: questionUuid={}", questionUuid);
+            return choiceSetGenerationService.generate(questionUuid, memberUuid, ChoiceSetSource.AI_RUNTIME);
         }
 
-        // 3. MISS: 실시간 생성
-        log.info("[resolver] prefetch MISS, runtime generation: questionUuid={}, memberUuid={}",
-                questionUuid, memberUuid);
+        // 연습 모드: 1순위 본인 프리페치 → 2순위 전체 OK → 미스 시 생성
+        Optional<QuestionChoiceSet> prefetched = choiceSetRepository
+                .findFirstByQuestionUuidAndGeneratedForMemberUuidAndSourceAndStatusAndConsumedAtIsNullOrderByCreatedAtDesc(
+                        questionUuid, memberUuid, ChoiceSetSource.AI_PREFETCH, ChoiceSetStatus.OK);
+        if (prefetched.isPresent()) {
+            markConsumed(prefetched.get());
+            log.info("[resolver] prefetch HIT: questionUuid={}", questionUuid);
+            return prefetched.get();
+        }
+
+        Optional<QuestionChoiceSet> reusable = choiceSetRepository
+                .findFirstByQuestionUuidAndStatusOrderByCreatedAtDesc(questionUuid, ChoiceSetStatus.OK);
+        if (reusable.isPresent()) {
+            log.info("[resolver] PRACTICE reuse HIT: questionUuid={}", questionUuid);
+            return reusable.get();
+        }
+
+        log.info("[resolver] MISS, runtime generation: questionUuid={}, memberUuid={}", questionUuid, memberUuid);
         return choiceSetGenerationService.generate(questionUuid, memberUuid, ChoiceSetSource.AI_RUNTIME);
     }
 
-    /**
-     * RESULT_MATCH 문제: 프리페치 캐시 조회 후 없으면 실시간 생성.
-     * AI가 answerSql 실행 결과를 기반으로 JSON 배열 선택지를 생성한다.
-     */
-    private QuestionChoiceSet resolveResultMatch(UUID questionUuid, UUID memberUuid) {
+    private QuestionChoiceSet resolveResultMatch(UUID questionUuid, UUID memberUuid, ChoiceGenerationMode mode) {
+        if (mode == ChoiceGenerationMode.REAL) {
+            log.info("[resolver] result-match REAL mode, runtime generation: questionUuid={}", questionUuid);
+            return choiceSetGenerationService.generateResultMatch(questionUuid, memberUuid, ChoiceSetSource.AI_RUNTIME);
+        }
+
+        // 연습 모드: 1순위 본인 프리페치 → 2순위 전체 OK → 미스 시 생성
         Optional<QuestionChoiceSet> prefetched = choiceSetRepository
                 .findFirstByQuestionUuidAndGeneratedForMemberUuidAndSourceAndStatusAndConsumedAtIsNullOrderByCreatedAtDesc(
-                        questionUuid, memberUuid,
-                        ChoiceSetSource.AI_PREFETCH, ChoiceSetStatus.OK);
-
+                        questionUuid, memberUuid, ChoiceSetSource.AI_PREFETCH, ChoiceSetStatus.OK);
         if (prefetched.isPresent()) {
-            QuestionChoiceSet set = prefetched.get();
-            markConsumed(set);
-            log.info("[resolver] result-match prefetch HIT: questionUuid={}, setUuid={}",
-                    questionUuid, set.getChoiceSetUuid());
-            return set;
+            markConsumed(prefetched.get());
+            log.info("[resolver] result-match prefetch HIT: questionUuid={}", questionUuid);
+            return prefetched.get();
+        }
+
+        Optional<QuestionChoiceSet> reusable = choiceSetRepository
+                .findFirstByQuestionUuidAndStatusOrderByCreatedAtDesc(questionUuid, ChoiceSetStatus.OK);
+        if (reusable.isPresent()) {
+            log.info("[resolver] result-match PRACTICE reuse HIT: questionUuid={}", questionUuid);
+            return reusable.get();
         }
 
         log.info("[resolver] result-match MISS, runtime generation: questionUuid={}", questionUuid);
