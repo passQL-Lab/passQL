@@ -45,6 +45,7 @@ async function fetchOnce<T>(
   const method = options.method ?? "GET";
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), TIMEOUT_MS);
+  const startedAt = Date.now(); // 소요시간 측정용
 
   const headers: Record<string, string> = {
     "Content-Type": "application/json",
@@ -56,7 +57,10 @@ async function fetchOnce<T>(
     headers["Authorization"] = `Bearer ${accessToken}`;
   }
 
-  log("REQ", method, path, options.body ? JSON.parse(options.body as string) : undefined);
+  const reqBody = options.body ? JSON.parse(options.body as string) : undefined;
+  log("REQ", method, path, reqBody);
+  // DEV HUD: req 로그 등록, 반환된 id로 res/err 업데이트
+  const logId = IS_DEV ? (_callLogHook("req", method, path, reqBody) as number | undefined) : undefined;
 
   try {
     const res = await fetch(`${BASE_URL}${path}`, {
@@ -67,7 +71,9 @@ async function fetchOnce<T>(
 
     if (!res.ok) {
       const body = await res.json().catch(() => null);
+      const durationMs = Date.now() - startedAt;
       log("ERR", method, path, { status: res.status, body });
+      if (IS_DEV) _callLogHook("err", method, path, body, { durationMs, statusCode: res.status, logId });
       throw new ApiError(res.status, body);
     }
 
@@ -75,7 +81,9 @@ async function fetchOnce<T>(
     const contentLength = res.headers.get("content-length");
     const hasBody = res.status !== 204 && contentLength !== "0";
     const data = hasBody ? ((await res.json()) as T) : (undefined as T);
+    const durationMs = Date.now() - startedAt;
     log("RES", method, path, data);
+    if (IS_DEV) _callLogHook("res", method, path, data, { durationMs, statusCode: res.status, logId });
     return data;
   } finally {
     clearTimeout(timer);
