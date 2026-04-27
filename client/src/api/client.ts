@@ -60,7 +60,7 @@ async function fetchOnce<T>(
   const reqBody = options.body ? JSON.parse(options.body as string) : undefined;
   log("REQ", method, path, reqBody);
   // DEV HUD: req 로그 등록, 반환된 id로 res/err 업데이트
-  const logId = IS_DEV ? (_callLogHook("req", method, path, reqBody) as number | undefined) : undefined;
+  const logId = IS_DEV ? _callLogHook("req", method, path, reqBody) : undefined;
 
   try {
     const res = await fetch(`${BASE_URL}${path}`, {
@@ -150,17 +150,13 @@ export async function apiFetch<T>(
   }
 }
 
-// ────────────────────────────────────────────────────────
-// DevProvider가 API 호출 흐름을 가로채기 위한 hook 등록소
-// Task 2에서 apiFetch 내부에 실제 호출 로직이 추가될 예정
-// ────────────────────────────────────────────────────────
 type LogHook = (
   type: "req" | "res" | "err",
   method: string,
   path: string,
   data?: unknown,
   meta?: { durationMs?: number; statusCode?: number; logId?: number }
-) => number | void;
+) => number | undefined;
 
 let _logHook: LogHook | null = null;
 
@@ -183,6 +179,6 @@ export function _callLogHook(
   path: string,
   data?: unknown,
   meta?: { durationMs?: number; statusCode?: number; logId?: number }
-): number | void {
+): number | undefined {
   return _logHook?.(type, method, path, data, meta);
 }
