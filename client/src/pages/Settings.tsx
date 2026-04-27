@@ -36,9 +36,9 @@ export default function Settings() {
   const stagger = useStagger();
   const s0 = stagger(0); // h1 "설정"
   const s1 = stagger(1); // 계정 섹션
-  const s2 = stagger(2); // 건의사항 row
-  const s3 = stagger(3); // 앱 정보 섹션
-  const s4 = stagger(4); // 문제풀이 섹션
+  const s2 = stagger(2); // 문제풀이 섹션
+  const s3 = stagger(3); // 이용안내 섹션
+  const s4 = stagger(4); // 앱 정보 섹션
   const s5 = stagger(5); // 로그아웃 섹션
   const s6 = stagger(6); // 로고 + 카피라이트
 
@@ -146,36 +146,8 @@ export default function Settings() {
         </SettingsSection>
       </section>
 
-      {/* ③ 이용안내 섹션 — 서브페이지 진입 row */}
+      {/* ③ 문제풀이 섹션 */}
       <section className={s2.className}>
-        <SettingsSection label="이용안내">
-          <div className="bg-surface-card border-y border-border divide-y divide-border">
-            <SettingsRow
-              label="건의사항"
-              value={<p className="text-sm text-text-secondary">의견 남기기</p>}
-              action={<ChevronRight size={16} className="text-text-caption" />}
-              onClick={() => navigate("/settings/feedback")}
-            />
-          </div>
-        </SettingsSection>
-      </section>
-
-      {/* ④ 앱 정보 섹션 */}
-      <section className={s3.className}>
-        <SettingsSection label="앱 정보">
-          <div className="bg-surface-card border-y border-border divide-y divide-border">
-            <SettingsRow
-              label="버전"
-              value={
-                <p className="text-sm text-text-caption">{__APP_VERSION__}</p>
-              }
-            />
-          </div>
-        </SettingsSection>
-      </section>
-
-      {/* ③-1 문제풀이 섹션 */}
-      <section className={s4.className}>
         <SettingsSection label="문제풀이">
           <div className="bg-surface-card border-y border-border">
             <div className="px-4 py-3.5">
@@ -186,7 +158,7 @@ export default function Settings() {
                     type="button"
                     disabled={isModeUpdating}
                     onClick={() => updateMode("PRACTICE")}
-                    className={`text-xs px-3 py-1 rounded-md font-semibold transition-colors ${
+                    className={`text-xs px-3 py-1 rounded-md font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                       currentMode === "PRACTICE"
                         ? "bg-brand text-white"
                         : "text-text-caption hover:text-text-secondary"
@@ -198,7 +170,7 @@ export default function Settings() {
                     type="button"
                     disabled={isModeUpdating}
                     onClick={() => updateMode("REAL")}
-                    className={`text-xs px-3 py-1 rounded-md font-semibold transition-colors ${
+                    className={`text-xs px-3 py-1 rounded-md font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                       currentMode === "REAL"
                         ? "bg-brand text-white"
                         : "text-text-caption hover:text-text-secondary"
@@ -218,7 +190,35 @@ export default function Settings() {
         </SettingsSection>
       </section>
 
-      {/* ⑤ 로그아웃 */}
+      {/* ④ 이용안내 섹션 — 서브페이지 진입 row */}
+      <section className={s3.className}>
+        <SettingsSection label="이용안내">
+          <div className="bg-surface-card border-y border-border divide-y divide-border">
+            <SettingsRow
+              label="건의사항"
+              value={<p className="text-sm text-text-secondary">의견 남기기</p>}
+              action={<ChevronRight size={16} className="text-text-caption" />}
+              onClick={() => navigate("/settings/feedback")}
+            />
+          </div>
+        </SettingsSection>
+      </section>
+
+      {/* ⑤ 앱 정보 섹션 */}
+      <section className={s4.className}>
+        <SettingsSection label="앱 정보">
+          <div className="bg-surface-card border-y border-border divide-y divide-border">
+            <SettingsRow
+              label="버전"
+              value={
+                <p className="text-sm text-text-caption">{__APP_VERSION__}</p>
+              }
+            />
+          </div>
+        </SettingsSection>
+      </section>
+
+      {/* ⑥ 로그아웃 */}
       <section className={s5.className}>
         <SettingsSection label="계정 관리">
           <div className="bg-surface-card border-y border-border">
@@ -241,7 +241,7 @@ export default function Settings() {
         </SettingsSection>
       </section>
 
-      {/* ⑥ 로고 + 카피라이트 */}
+      {/* ⑦ 로고 + 카피라이트 */}
       <section className={`text-center mt-12 space-y-2 ${s6.className}`}>
         <img src={logo} alt="passQL" className="h-5 w-auto mx-auto" />
         <p className="text-xs text-text-caption">
