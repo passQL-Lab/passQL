@@ -39,8 +39,9 @@ export default function Settings() {
   const s1 = stagger(1); // 계정 섹션
   const s2 = stagger(2); // 건의사항 row
   const s3 = stagger(3); // 앱 정보 섹션
-  const s4 = stagger(4); // 로그아웃 섹션
-  const s5 = stagger(5); // 로고 + 카피라이트
+  const s4 = stagger(4); // 개발자 모드 섹션 (DEV 빌드) / 로그아웃 섹션 (prod)
+  const s5 = stagger(5); // 로그아웃 섹션 (DEV 빌드) / 로고+카피라이트 (prod)
+  const s6 = stagger(6); // 로고 + 카피라이트 (DEV 빌드)
 
   useEffect(() => {
     return () => {
@@ -176,7 +177,7 @@ export default function Settings() {
 
       {/* ⑤ 개발자 모드 — DEV 빌드에서만 표시, prod에서는 import.meta.env.DEV가 false로 평가되어 렌더링 안 됨 */}
       {import.meta.env.DEV && (
-        <section>
+        <section className={s4.className}>
           <SettingsSection label="개발자">
             <div className="bg-surface-card border-y border-border">
               <SettingsRow
@@ -201,7 +202,7 @@ export default function Settings() {
       )}
 
       {/* ⑥ 로그아웃 */}
-      <section className={s4.className}>
+      <section className={s5.className}>
         <SettingsSection label="계정 관리">
           <div className="bg-surface-card border-y border-border">
             <button
@@ -224,7 +225,7 @@ export default function Settings() {
       </section>
 
       {/* ⑦ 로고 + 카피라이트 */}
-      <section className={`text-center mt-12 space-y-2 ${s5.className}`}>
+      <section className={`text-center mt-12 space-y-2 ${s6.className}`}>
         <img src={logo} alt="passQL" className="h-5 w-auto mx-auto" />
         <p className="text-xs text-text-caption">
           © 2026 passQL. All rights reserved.
