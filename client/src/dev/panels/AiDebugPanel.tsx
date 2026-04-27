@@ -27,8 +27,14 @@ export function AiDebugPanel() {
               className="px-3 py-2 border-b border-border last:border-0 space-y-1"
             >
               <div className="flex items-center gap-2">
-                <span className="font-mono text-xs font-bold text-sem-warning">
-                  POST
+                <span className={`font-mono text-xs font-bold ${
+                  entry.method === "GET"
+                    ? "text-brand"
+                    : entry.method === "POST"
+                      ? "text-sem-warning"
+                      : "text-text-secondary"
+                }`}>
+                  {entry.method}
                 </span>
                 <span className="font-mono text-xs text-text-primary">
                   {entry.path}

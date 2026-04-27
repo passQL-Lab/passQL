@@ -3,31 +3,40 @@ import { useAuthStore } from "../../stores/authStore";
 import { usePracticeStore } from "../../stores/practiceStore";
 
 export function StorePanel() {
-  // 전체 상태를 구독 — Zustand 변경 시 자동 리렌더
-  const auth = useAuthStore();
-  const practice = usePracticeStore();
+  // Selector를 활용해 필요한 필드만 구독 — 불필요한 리렌더 방지
+  const memberUuid = useAuthStore((s) => s.memberUuid);
+  const nickname = useAuthStore((s) => s.nickname);
+  const hasAccessToken = useAuthStore((s) => !!s.accessToken);
+  const hasRefreshToken = useAuthStore((s) => !!s.refreshToken);
+  const isRefreshing = useAuthStore((s) => s.isRefreshing);
+
+  const sessionId = usePracticeStore((s) => s.sessionId);
+  const topicCode = usePracticeStore((s) => s.topicCode);
+  const currentIndex = usePracticeStore((s) => s.currentIndex);
+  const questionsCount = usePracticeStore((s) => s.questions.length);
+  const resultsCount = usePracticeStore((s) => s.results.length);
+  const startedAt = usePracticeStore((s) => s.startedAt);
 
   const sections = [
     {
       name: "authStore",
       data: {
-        memberUuid: auth.memberUuid,
-        nickname: auth.nickname,
-        // 토큰 원문 대신 존재 여부만 표시 — 보안 정보 노출 방지
-        hasAccessToken: !!auth.accessToken,
-        hasRefreshToken: !!auth.refreshToken,
-        isRefreshing: auth.isRefreshing,
+        memberUuid,
+        nickname,
+        hasAccessToken,
+        hasRefreshToken,
+        isRefreshing,
       },
     },
     {
       name: "practiceStore",
       data: {
-        sessionId: practice.sessionId,
-        topicCode: practice.topicCode,
-        currentIndex: practice.currentIndex,
-        questionsCount: practice.questions.length,
-        resultsCount: practice.results.length,
-        startedAt: practice.startedAt,
+        sessionId,
+        topicCode,
+        currentIndex,
+        questionsCount,
+        resultsCount,
+        startedAt,
       },
     },
   ];
