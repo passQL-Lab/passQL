@@ -157,6 +157,10 @@ type LogHook = (
 let _logHook: LogHook | null = null;
 
 export function registerApiLogHook(hook: LogHook): void {
+  // 중복 등록 시 개발 환경에서 경고 — 두 컴포넌트가 동시에 훅을 점유하는 버그를 조기 탐지
+  if (import.meta.env.DEV && _logHook !== null) {
+    console.warn("[DevMode] registerApiLogHook: 이미 등록된 hook을 덮어씁니다");
+  }
   _logHook = hook;
 }
 
