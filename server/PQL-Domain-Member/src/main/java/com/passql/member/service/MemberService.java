@@ -5,6 +5,8 @@ import com.passql.common.exception.constant.ErrorCode;
 import com.passql.common.util.NicknameGenerator;
 import com.passql.member.constant.MemberStatus;
 import com.passql.member.dto.MemberMeResponse;
+import com.passql.member.dto.ChoiceGenerationModeUpdateRequest;
+import com.passql.member.dto.ChoiceGenerationModeUpdateResponse;
 import com.passql.member.dto.NicknameChangeRequest;
 import com.passql.member.dto.NicknameChangeResponse;
 import com.passql.member.dto.NicknameCheckResponse;
@@ -99,6 +101,15 @@ public class MemberService {
     public NicknameCheckResponse checkNickname(String nickname) {
         boolean available = !memberRepository.existsByNicknameAndIsDeletedFalse(nickname);
         return new NicknameCheckResponse(available);
+    }
+
+    /** 선택지 생성 모드 변경 — 트랜잭션 내 즉시 반영. */
+    @Transactional
+    public ChoiceGenerationModeUpdateResponse updateChoiceGenerationMode(
+            UUID memberUuid, ChoiceGenerationModeUpdateRequest request) {
+        Member member = findActiveMember(memberUuid);
+        member.setChoiceGenerationMode(request.getChoiceGenerationMode());
+        return new ChoiceGenerationModeUpdateResponse(member.getChoiceGenerationMode());
     }
 
     // 닉네임 직접 변경 — 쿨다운, 중복 검증 포함
