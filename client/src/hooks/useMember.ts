@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { fetchMe, regenerateNickname, checkNickname, changeNickname } from "../api/members";
+import { fetchMe, regenerateNickname, checkNickname, changeNickname, updateChoiceGenerationMode } from "../api/members";
 import { useAuthStore } from "../stores/authStore";
-import type { NicknameCheckResponse, NicknameChangeResponse } from "../types/api";
+import type { NicknameCheckResponse, NicknameChangeResponse, ChoiceGenerationMode } from "../types/api";
 
 export function useMember() {
   const accessToken = useAuthStore((s) => s.accessToken);
@@ -51,6 +51,22 @@ export function useChangeNickname() {
     mutationFn: (nickname: string) => changeNickname(nickname),
     onSuccess: (result) => {
       setNickname(result.nickname);
+      queryClient.invalidateQueries({ queryKey: ["member"] });
+    },
+  });
+}
+
+// 선택지 생성 모드 변경 뮤테이션 — 성공 시 member 쿼리 무효화
+export function useUpdateChoiceGenerationMode() {
+  const queryClient = useQueryClient();
+
+  return useMutation<
+    { choiceGenerationMode: ChoiceGenerationMode },
+    Error,
+    ChoiceGenerationMode
+  >({
+    mutationFn: (mode: ChoiceGenerationMode) => updateChoiceGenerationMode(mode),
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["member"] });
     },
   });

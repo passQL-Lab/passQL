@@ -233,6 +233,9 @@ export interface MemberRegisterResponse {
   readonly nickname: string;
 }
 
+// 선택지 생성 모드
+export type ChoiceGenerationMode = "PRACTICE" | "REAL";
+
 export interface MemberMeResponse {
   readonly memberUuid: string;
   readonly nickname: string;
@@ -243,6 +246,7 @@ export interface MemberMeResponse {
   readonly lastSeenAt: string;
   // null이면 닉네임을 한 번도 변경하지 않은 상태
   readonly nicknameChangedAt: string | null;
+  readonly choiceGenerationMode: ChoiceGenerationMode;
 }
 
 export interface NicknameRegenerateResponse {
