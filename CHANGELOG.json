@@ -1,11 +1,27 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-26T07:31:34Z",
-    "currentVersion": "0.0.181",
+    "lastUpdated": "2026-04-27T07:19:59Z",
+    "currentVersion": "0.0.182",
     "projectType": "basic",
-    "totalReleases": 87
+    "totalReleases": 88
   },
   "releases": [
+    {
+      "version": "0.0.182",
+      "project_type": "basic",
+      "date": "2026-04-27",
+      "pr_number": 316,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **개선**\n  * 토픽별 분석 레이더 차트에서 미학습 토픽이 있어도 거미줄 형태로 표시되도록 개선",
+      "parsed_changes": {
+        "개선": {
+          "title": "개선",
+          "items": [
+            "토픽별 분석 레이더 차트에서 미학습 토픽이 있어도 거미줄 형태로 표시되도록 개선"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.181",
       "project_type": "basic",
