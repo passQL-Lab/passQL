@@ -5,6 +5,7 @@ import com.passql.common.exception.constant.ErrorCode;
 import com.passql.common.util.NicknameGenerator;
 import com.passql.member.constant.MemberStatus;
 import com.passql.member.dto.MemberMeResponse;
+import com.passql.member.constant.ChoiceGenerationMode;
 import com.passql.member.dto.ChoiceGenerationModeUpdateRequest;
 import com.passql.member.dto.ChoiceGenerationModeUpdateResponse;
 import com.passql.member.dto.NicknameChangeRequest;
@@ -101,6 +102,16 @@ public class MemberService {
     public NicknameCheckResponse checkNickname(String nickname) {
         boolean available = !memberRepository.existsByNicknameAndIsDeletedFalse(nickname);
         return new NicknameCheckResponse(available);
+    }
+
+    /** 선택지 생성 모드 조회 — 미존재·탈퇴 회원은 PRACTICE 폴백. */
+    public ChoiceGenerationMode getChoiceGenerationMode(UUID memberUuid) {
+        return memberRepository.findByMemberUuidAndIsDeletedFalse(memberUuid)
+                .map(Member::getChoiceGenerationMode)
+                .orElseGet(() -> {
+                    log.warn("[member] choiceGenerationMode 조회 실패, PRACTICE 폴백: memberUuid={}", memberUuid);
+                    return ChoiceGenerationMode.PRACTICE;
+                });
     }
 
     /** 선택지 생성 모드 변경 — 트랜잭션 내 즉시 반영. */

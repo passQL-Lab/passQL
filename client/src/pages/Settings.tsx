@@ -156,7 +156,7 @@ export default function Settings() {
                 <div className="flex gap-1 bg-surface rounded-lg p-0.5">
                   <button
                     type="button"
-                    disabled={isModeUpdating}
+                    disabled={isModeUpdating || currentMode === "PRACTICE"}
                     onClick={() => updateMode("PRACTICE")}
                     className={`text-xs px-3 py-1 rounded-md font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                       currentMode === "PRACTICE"
@@ -168,7 +168,7 @@ export default function Settings() {
                   </button>
                   <button
                     type="button"
-                    disabled={isModeUpdating}
+                    disabled={isModeUpdating || currentMode === "REAL"}
                     onClick={() => updateMode("REAL")}
                     className={`text-xs px-3 py-1 rounded-md font-semibold transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${
                       currentMode === "REAL"

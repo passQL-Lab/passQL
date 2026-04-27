@@ -3,8 +3,6 @@ package com.passql.question.service;
 import com.passql.common.exception.CustomException;
 import com.passql.common.exception.constant.ErrorCode;
 import com.passql.member.constant.ChoiceGenerationMode;
-import com.passql.member.entity.Member;
-import com.passql.member.repository.MemberRepository;
 import com.passql.question.constant.ChoiceSetSource;
 import com.passql.question.constant.ChoiceSetStatus;
 import com.passql.question.constant.ExecutionMode;
@@ -14,7 +12,6 @@ import com.passql.question.repository.QuestionChoiceSetRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -22,6 +19,9 @@ import java.util.UUID;
 
 /**
  * 정책에 따라 사용자에게 제공할 선택지 세트를 resolve 한다.
+ * <p>
+ * 호출자(QuestionController)가 memberUuid로 ChoiceGenerationMode를 조회해 전달한다.
+ * 이 컴포넌트는 Member 도메인에 의존하지 않는다.
  */
 @Slf4j
 @Component
@@ -31,11 +31,12 @@ public class ChoiceSetResolver {
     private final QuestionService questionService;
     private final QuestionChoiceSetRepository choiceSetRepository;
     private final ChoiceSetGenerationService choiceSetGenerationService;
-    private final MemberRepository memberRepository;
 
-    public QuestionChoiceSet resolveForUser(UUID questionUuid, UUID memberUuid) {
+    /**
+     * @param mode 호출자가 조회한 사용자의 선택지 생성 모드
+     */
+    public QuestionChoiceSet resolveForUser(UUID questionUuid, UUID memberUuid, ChoiceGenerationMode mode) {
         Question question = questionService.getQuestionEntity(questionUuid);
-        ChoiceGenerationMode mode = getMemberMode(memberUuid);
 
         if (question.getExecutionMode() == ExecutionMode.CONCEPT_ONLY) {
             return resolveConcept(questionUuid, memberUuid, mode);
@@ -43,7 +44,6 @@ public class ChoiceSetResolver {
 
         switch (question.getChoiceSetPolicy()) {
             case AI_ONLY:
-                return resolveAiOnly(questionUuid, memberUuid, mode);
             case ODD_ONE_OUT:
                 return resolveAiOnly(questionUuid, memberUuid, mode);
             case RESULT_MATCH:
@@ -60,13 +60,6 @@ public class ChoiceSetResolver {
         }
     }
 
-    /** 멤버의 선택지 생성 모드 조회. 미존재·탈퇴 회원은 PRACTICE 폴백. */
-    private ChoiceGenerationMode getMemberMode(UUID memberUuid) {
-        return memberRepository.findByMemberUuidAndIsDeletedFalse(memberUuid)
-                .map(Member::getChoiceGenerationMode)
-                .orElse(ChoiceGenerationMode.PRACTICE);
-    }
-
     private QuestionChoiceSet resolveConcept(UUID questionUuid, UUID memberUuid, ChoiceGenerationMode mode) {
         if (mode == ChoiceGenerationMode.REAL) {
             log.info("[resolver] concept REAL mode, runtime generation: questionUuid={}", questionUuid);
@@ -78,9 +71,10 @@ public class ChoiceSetResolver {
                 .findFirstByQuestionUuidAndGeneratedForMemberUuidAndSourceAndStatusAndConsumedAtIsNullOrderByCreatedAtDesc(
                         questionUuid, memberUuid, ChoiceSetSource.AI_PREFETCH, ChoiceSetStatus.OK);
         if (prefetched.isPresent()) {
-            markConsumed(prefetched.get());
-            log.info("[resolver] concept prefetch HIT: questionUuid={}", questionUuid);
-            return prefetched.get();
+            QuestionChoiceSet set = prefetched.get();
+            choiceSetRepository.markConsumed(set.getChoiceSetUuid(), LocalDateTime.now());
+            log.info("[resolver] concept prefetch HIT: questionUuid={}, setUuid={}", questionUuid, set.getChoiceSetUuid());
+            return set;
         }
 
         Optional<QuestionChoiceSet> reusable = choiceSetRepository
@@ -96,7 +90,7 @@ public class ChoiceSetResolver {
 
     private QuestionChoiceSet resolveAiOnly(UUID questionUuid, UUID memberUuid, ChoiceGenerationMode mode) {
         if (mode == ChoiceGenerationMode.REAL) {
-            log.info("[resolver] REAL mode, runtime generation: questionUuid={}", questionUuid);
+            log.info("[resolver] ai-only REAL mode, runtime generation: questionUuid={}", questionUuid);
             return choiceSetGenerationService.generate(questionUuid, memberUuid, ChoiceSetSource.AI_RUNTIME);
         }
 
@@ -105,19 +99,20 @@ public class ChoiceSetResolver {
                 .findFirstByQuestionUuidAndGeneratedForMemberUuidAndSourceAndStatusAndConsumedAtIsNullOrderByCreatedAtDesc(
                         questionUuid, memberUuid, ChoiceSetSource.AI_PREFETCH, ChoiceSetStatus.OK);
         if (prefetched.isPresent()) {
-            markConsumed(prefetched.get());
-            log.info("[resolver] prefetch HIT: questionUuid={}", questionUuid);
-            return prefetched.get();
+            QuestionChoiceSet set = prefetched.get();
+            choiceSetRepository.markConsumed(set.getChoiceSetUuid(), LocalDateTime.now());
+            log.info("[resolver] ai-only prefetch HIT: questionUuid={}, setUuid={}", questionUuid, set.getChoiceSetUuid());
+            return set;
         }
 
         Optional<QuestionChoiceSet> reusable = choiceSetRepository
                 .findFirstByQuestionUuidAndStatusOrderByCreatedAtDesc(questionUuid, ChoiceSetStatus.OK);
         if (reusable.isPresent()) {
-            log.info("[resolver] PRACTICE reuse HIT: questionUuid={}", questionUuid);
+            log.info("[resolver] ai-only PRACTICE reuse HIT: questionUuid={}", questionUuid);
             return reusable.get();
         }
 
-        log.info("[resolver] MISS, runtime generation: questionUuid={}, memberUuid={}", questionUuid, memberUuid);
+        log.info("[resolver] ai-only MISS, runtime generation: questionUuid={}, memberUuid={}", questionUuid, memberUuid);
         return choiceSetGenerationService.generate(questionUuid, memberUuid, ChoiceSetSource.AI_RUNTIME);
     }
 
@@ -132,9 +127,10 @@ public class ChoiceSetResolver {
                 .findFirstByQuestionUuidAndGeneratedForMemberUuidAndSourceAndStatusAndConsumedAtIsNullOrderByCreatedAtDesc(
                         questionUuid, memberUuid, ChoiceSetSource.AI_PREFETCH, ChoiceSetStatus.OK);
         if (prefetched.isPresent()) {
-            markConsumed(prefetched.get());
-            log.info("[resolver] result-match prefetch HIT: questionUuid={}", questionUuid);
-            return prefetched.get();
+            QuestionChoiceSet set = prefetched.get();
+            choiceSetRepository.markConsumed(set.getChoiceSetUuid(), LocalDateTime.now());
+            log.info("[resolver] result-match prefetch HIT: questionUuid={}, setUuid={}", questionUuid, set.getChoiceSetUuid());
+            return set;
         }
 
         Optional<QuestionChoiceSet> reusable = choiceSetRepository
@@ -146,14 +142,5 @@ public class ChoiceSetResolver {
 
         log.info("[resolver] result-match MISS, runtime generation: questionUuid={}", questionUuid);
         return choiceSetGenerationService.generateResultMatch(questionUuid, memberUuid, ChoiceSetSource.AI_RUNTIME);
-    }
-
-    /**
-     * 프리페치 캐시 소비 마킹 — 짧은 트랜잭션으로 처리.
-     */
-    @Transactional
-    protected void markConsumed(QuestionChoiceSet set) {
-        set.setConsumedAt(LocalDateTime.now());
-        choiceSetRepository.save(set);
     }
 }
