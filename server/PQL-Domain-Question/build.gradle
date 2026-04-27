@@ -11,6 +11,7 @@ dependencies {
     api project(':PQL-Common')
     api project(':PQL-Domain-Meta')
     api project(':PQL-Domain-AI')
+    implementation project(':PQL-Domain-Member')
 
     // 테스트
     testImplementation project(':PQL-Web')

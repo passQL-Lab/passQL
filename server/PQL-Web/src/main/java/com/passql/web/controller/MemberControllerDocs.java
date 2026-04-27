@@ -3,6 +3,8 @@ package com.passql.web.controller;
 import com.passql.common.dto.Author;
 import com.passql.member.auth.presentation.annotation.AuthMember;
 import com.passql.member.auth.presentation.security.LoginMember;
+import com.passql.member.dto.ChoiceGenerationModeUpdateRequest;
+import com.passql.member.dto.ChoiceGenerationModeUpdateResponse;
 import com.passql.member.dto.MemberMeResponse;
 import com.passql.member.dto.NicknameChangeRequest;
 import com.passql.member.dto.NicknameChangeResponse;
@@ -17,7 +19,7 @@ import kr.suhsaechan.suhapilog.annotation.ApiLogs;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@Tag(name = "Member", description = "회원 조회 / 닉네임 재생성 / 닉네임 직접 변경")
+@Tag(name = "Member", description = "회원 조회 / 닉네임 재생성 / 닉네임 직접 변경 / 선택지 생성 모드 변경")
 public interface MemberControllerDocs {
 
   @ApiLogs({
@@ -104,4 +106,27 @@ public interface MemberControllerDocs {
           """
   )
   NicknameChangeResponse changeNickname(@AuthMember LoginMember loginMember, @Valid @RequestBody NicknameChangeRequest request);
+
+  @ApiLogs({
+      @ApiLog(date = "2026.04.27", author = Author.SUHSAECHAN, issueNumber = 313, description = "선택지 생성 모드 변경 API 추가"),
+  })
+  @Operation(
+      summary = "선택지 생성 모드 변경",
+      description = """
+          ## 인증(JWT): **필요**
+
+          ## 요청 바디 (ChoiceGenerationModeUpdateRequest)
+          - **`choiceGenerationMode`**: PRACTICE(재사용) / REAL(항상 새로 생성)
+
+          ## 반환값 (ChoiceGenerationModeUpdateResponse)
+          - **`choiceGenerationMode`**: 변경된 모드
+
+          ## 설명
+          - PRACTICE: 기존 검증된 선택지 재사용 우선 (없을 때만 AI 실시간 생성)
+          - REAL: 기존 선택지 유무와 무관하게 항상 AI 실시간 생성
+          """
+  )
+  ChoiceGenerationModeUpdateResponse updateChoiceGenerationMode(
+      @AuthMember LoginMember loginMember,
+      @Valid @RequestBody ChoiceGenerationModeUpdateRequest request);
 }

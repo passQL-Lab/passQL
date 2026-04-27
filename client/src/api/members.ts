@@ -4,6 +4,7 @@ import type {
   NicknameRegenerateResponse,
   NicknameCheckResponse,
   NicknameChangeResponse,
+  ChoiceGenerationMode,
 } from "../types/api";
 
 export function fetchMe(): Promise<MemberMeResponse> {
@@ -25,5 +26,15 @@ export function changeNickname(nickname: string): Promise<NicknameChangeResponse
   return apiFetch("/members/me/nickname", {
     method: "PATCH",
     body: JSON.stringify({ nickname }),
+  });
+}
+
+// 선택지 생성 모드 변경
+export function updateChoiceGenerationMode(
+  mode: ChoiceGenerationMode
+): Promise<{ choiceGenerationMode: ChoiceGenerationMode }> {
+  return apiFetch("/members/me/settings/choice-generation-mode", {
+    method: "PATCH",
+    body: JSON.stringify({ choiceGenerationMode: mode }),
   });
 }

@@ -8,6 +8,8 @@ import com.passql.common.exception.CustomException;
 import com.passql.common.exception.constant.ErrorCode;
 import com.passql.member.auth.presentation.annotation.AuthMember;
 import com.passql.member.auth.presentation.security.LoginMember;
+import com.passql.member.constant.ChoiceGenerationMode;
+import com.passql.member.service.MemberService;
 import com.passql.question.dto.ChoiceSetGenerateResponse;
 import com.passql.question.dto.ExecuteResult;
 import com.passql.question.dto.QuestionDetail;
@@ -54,6 +56,7 @@ public class QuestionController implements QuestionControllerDocs {
     private final ChoiceSetResolver choiceSetResolver;
     private final QuestionChoiceSetItemRepository choiceSetItemRepository;
     private final ObjectMapper objectMapper;
+    private final MemberService memberService;
 
     @GetMapping
     public ResponseEntity<Page<QuestionSummary>> getQuestions(
@@ -121,8 +124,9 @@ public class QuestionController implements QuestionControllerDocs {
                         .data(objectMapper.writeValueAsString(
                                 new SseStatusEvent("generating", "선택지 생성 중..."))));
 
-                // ChoiceSetResolver: 프리페치 캐시 히트 → 없으면 실시간 AI 생성
-                QuestionChoiceSet choiceSet = choiceSetResolver.resolveForUser(questionUuid, memberUuid);
+                // ChoiceSetResolver: 모드 조회 후 프리페치 캐시 히트 → 없으면 실시간 AI 생성
+                ChoiceGenerationMode mode = memberService.getChoiceGenerationMode(memberUuid);
+                QuestionChoiceSet choiceSet = choiceSetResolver.resolveForUser(questionUuid, memberUuid, mode);
                 log.info("[generate-choices] resolveForUser 완료: questionUuid={}, choiceSetUuid={}",
                         questionUuid, choiceSet.getChoiceSetUuid());
 
