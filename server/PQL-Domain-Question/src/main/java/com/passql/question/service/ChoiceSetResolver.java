@@ -60,9 +60,9 @@ public class ChoiceSetResolver {
         }
     }
 
-    /** 멤버의 선택지 생성 모드 조회. 멤버 미존재 시 PRACTICE 폴백. */
+    /** 멤버의 선택지 생성 모드 조회. 미존재·탈퇴 회원은 PRACTICE 폴백. */
     private ChoiceGenerationMode getMemberMode(UUID memberUuid) {
-        return memberRepository.findById(memberUuid)
+        return memberRepository.findByMemberUuidAndIsDeletedFalse(memberUuid)
                 .map(Member::getChoiceGenerationMode)
                 .orElse(ChoiceGenerationMode.PRACTICE);
     }
