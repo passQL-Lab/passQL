@@ -35,7 +35,7 @@ export function DevFab() {
           PANELS.map(({ type, icon, label }) => (
             <div key={type} className="flex items-center gap-2">
               {/* 패널 이름 툴팁 레이블 */}
-              <span className="text-xs bg-[#1F2937] text-white px-2 py-1 rounded-lg whitespace-nowrap shadow-md">
+              <span className="text-xs bg-toast-bg text-white px-2 py-1 rounded-lg whitespace-nowrap shadow-md">
                 {label}
               </span>
               <button
@@ -53,7 +53,7 @@ export function DevFab() {
           type="button"
           className={`btn btn-circle shadow-lg transition-colors ${
             open
-              ? "bg-[#1F2937] text-white border-[#1F2937]"
+              ? "bg-toast-bg text-white border-toast-bg"
               : "bg-brand text-white border-brand"
           }`}
           onClick={() => setOpen((v) => !v)}
@@ -65,7 +65,7 @@ export function DevFab() {
 
       {/* 패널 슬라이드업 오버레이 — 하단에서 50vh 높이로 표시 */}
       {activePanel && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-border shadow-lg rounded-t-2xl h-[50vh]">
+        <div className="fixed bottom-0 left-0 right-0 z-40 bg-surface-card border-t border-border shadow-lg rounded-t-2xl h-[50vh] animate-slide-up">
           <div className="flex items-center justify-between px-4 py-3 border-b border-border">
             <span className="text-sm font-semibold text-text-primary">
               {PANELS.find((p) => p.type === activePanel)?.label}
