@@ -8,7 +8,8 @@ import NicknameChangeModal from "../components/NicknameChangeModal";
 import { useStagger } from "../hooks/useStagger";
 import SettingsSection from "../components/SettingsSection";
 import SettingsRow from "../components/SettingsRow";
-import { useMember } from "../hooks/useMember";
+import { useMember, useUpdateChoiceGenerationMode } from "../hooks/useMember";
+import type { ChoiceGenerationMode } from "../types/api";
 import { isNicknameCooldown, formatNicknameCooldownMessage } from "../lib/dateUtil";
 
 export default function Settings() {
@@ -23,6 +24,8 @@ export default function Settings() {
   const [isNicknameModalOpen, setIsNicknameModalOpen] = useState(false);
   const [copied, setCopied] = useState(false);
   const [logoutLoading, setLogoutLoading] = useState(false);
+  const { mutate: updateMode, isPending: isModeUpdating } = useUpdateChoiceGenerationMode();
+  const currentMode: ChoiceGenerationMode = memberData?.choiceGenerationMode ?? "PRACTICE";
   const copyTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // toast 메시지 — null이면 미표시
@@ -35,8 +38,9 @@ export default function Settings() {
   const s1 = stagger(1); // 계정 섹션
   const s2 = stagger(2); // 건의사항 row
   const s3 = stagger(3); // 앱 정보 섹션
-  const s4 = stagger(4); // 로그아웃 섹션
-  const s5 = stagger(5); // 로고 + 카피라이트
+  const s4 = stagger(4); // 문제풀이 섹션
+  const s5 = stagger(5); // 로그아웃 섹션
+  const s6 = stagger(6); // 로고 + 카피라이트
 
   useEffect(() => {
     return () => {
@@ -170,8 +174,52 @@ export default function Settings() {
         </SettingsSection>
       </section>
 
-      {/* ⑤ 로그아웃 */}
+      {/* ③-1 문제풀이 섹션 */}
       <section className={s4.className}>
+        <SettingsSection label="문제풀이">
+          <div className="bg-surface-card border-y border-border">
+            <div className="px-4 py-3.5">
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="text-sm font-medium text-text-primary">선택지 생성 모드</span>
+                <div className="flex gap-1 bg-surface rounded-lg p-0.5">
+                  <button
+                    type="button"
+                    disabled={isModeUpdating}
+                    onClick={() => updateMode("PRACTICE")}
+                    className={`text-xs px-3 py-1 rounded-md font-semibold transition-colors ${
+                      currentMode === "PRACTICE"
+                        ? "bg-brand text-white"
+                        : "text-text-caption hover:text-text-secondary"
+                    }`}
+                  >
+                    연습
+                  </button>
+                  <button
+                    type="button"
+                    disabled={isModeUpdating}
+                    onClick={() => updateMode("REAL")}
+                    className={`text-xs px-3 py-1 rounded-md font-semibold transition-colors ${
+                      currentMode === "REAL"
+                        ? "bg-brand text-white"
+                        : "text-text-caption hover:text-text-secondary"
+                    }`}
+                  >
+                    실전
+                  </button>
+                </div>
+              </div>
+              <p className="text-xs text-text-caption">
+                {currentMode === "PRACTICE"
+                  ? "기존 검증된 선택지 재사용 → 빠르게 시작"
+                  : "매번 새 선택지 AI 생성 → 대기 있음"}
+              </p>
+            </div>
+          </div>
+        </SettingsSection>
+      </section>
+
+      {/* ⑤ 로그아웃 */}
+      <section className={s5.className}>
         <SettingsSection label="계정 관리">
           <div className="bg-surface-card border-y border-border">
             <button
@@ -194,7 +242,7 @@ export default function Settings() {
       </section>
 
       {/* ⑥ 로고 + 카피라이트 */}
-      <section className={`text-center mt-12 space-y-2 ${s5.className}`}>
+      <section className={`text-center mt-12 space-y-2 ${s6.className}`}>
         <img src={logo} alt="passQL" className="h-5 w-auto mx-auto" />
         <p className="text-xs text-text-caption">
           © 2026 passQL. All rights reserved.
