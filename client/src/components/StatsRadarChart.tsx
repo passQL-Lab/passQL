@@ -2,6 +2,7 @@ import {
   RadarChart,
   PolarGrid,
   PolarAngleAxis,
+  PolarRadiusAxis,
   Radar,
   ResponsiveContainer,
 } from "recharts";
@@ -14,7 +15,8 @@ interface StatsRadarChartProps {
 export default function StatsRadarChart({ topicStats }: StatsRadarChartProps) {
   const data = topicStats.map((stat) => ({
     subject: stat.displayName,
-    value: Math.round(stat.correctRate * 100),
+    // 미학습(0%) 토픽을 10으로 표시 — 튀지 않게 낮추되 그물 형태 유지
+    value: stat.correctRate === 0 ? 10 : Math.round(stat.correctRate * 100),
   }));
 
   return (
@@ -28,6 +30,8 @@ export default function StatsRadarChart({ topicStats }: StatsRadarChartProps) {
               dataKey="subject"
               tick={{ fontSize: 12, fill: "#6B7280" }}
             />
+            {/* domain 고정: 데이터 기반 자동 축소를 막아 항상 0~100 스케일 유지 */}
+            <PolarRadiusAxis domain={[0, 100]} tick={false} axisLine={false} />
             <Radar
               dataKey="value"
               stroke="#4F46E5"
