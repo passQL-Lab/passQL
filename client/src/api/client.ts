@@ -1,4 +1,3 @@
-import { getMockResponse } from "./mock-data";
 import { getAccessToken, getRefreshToken, useAuthStore } from "../stores/authStore";
 import { reissue } from "./auth";
 
@@ -7,8 +6,6 @@ export const BASE_URL = import.meta.env.VITE_API_BASE_URL
   ?? (import.meta.env.DEV ? "/api" : "https://api.passql.suhsaechan.kr/api");
 const TIMEOUT_MS = 25_000;
 const IS_DEV = import.meta.env.DEV;
-// env 미설정 시 prod 기본값은 false
-const USE_MOCK = (import.meta.env.VITE_USE_MOCK ?? "false") === "true";
 
 // auth 관련 경로는 토큰 자동 주입 및 401 재시도에서 제외
 const AUTH_PATHS = ["/auth/login", "/auth/reissue", "/auth/logout"];
@@ -86,20 +83,6 @@ export async function apiFetch<T>(
   path: string,
   options: RequestInit = {},
 ): Promise<T> {
-  const method = options.method ?? "GET";
-
-  // Mock mode: return mock data without network request
-  if (USE_MOCK) {
-    log("MOCK", method, path);
-    await new Promise((r) => setTimeout(r, 200));
-    const mock = getMockResponse(path, method, options.body as string | undefined);
-    if (mock !== null) {
-      log("RES", method, path, mock);
-      return mock as T;
-    }
-    if (IS_DEV) console.warn(`[MOCK MISS] ${method} ${path} — mock 핸들러 없음, 실제 API로 fallthrough`);
-  }
-
   const isAuthPath = AUTH_PATHS.some((p) => path.startsWith(p));
 
   try {
