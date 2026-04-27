@@ -1,11 +1,34 @@
 {
   "metadata": {
-    "lastUpdated": "2026-04-27T07:19:59Z",
-    "currentVersion": "0.0.182",
+    "lastUpdated": "2026-04-27T07:33:59Z",
+    "currentVersion": "0.0.183",
     "projectType": "basic",
-    "totalReleases": 88
+    "totalReleases": 89
   },
   "releases": [
+    {
+      "version": "0.0.183",
+      "project_type": "basic",
+      "date": "2026-04-27",
+      "pr_number": 318,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 빌드 오류를 유발하던 미사용 mock 데이터 파일 제거\n\n* **개선**\n  * 통계 페이지 레이더 차트에서 미학습 토픽이 있어도 거미줄 형태로 표시되도록 개선\n  * 앱 아이콘 및 브라우저 파비콘 교체",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "빌드 오류를 유발하던 미사용 mock 데이터 파일 제거"
+          ]
+        },
+        "개선": {
+          "title": "개선",
+          "items": [
+            "통계 페이지 레이더 차트에서 미학습 토픽이 있어도 거미줄 형태로 표시되도록 개선",
+            "앱 아이콘 및 브라우저 파비콘 교체"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.182",
       "project_type": "basic",
