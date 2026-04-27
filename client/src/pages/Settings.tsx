@@ -10,6 +10,7 @@ import SettingsSection from "../components/SettingsSection";
 import SettingsRow from "../components/SettingsRow";
 import { useMember } from "../hooks/useMember";
 import { isNicknameCooldown, formatNicknameCooldownMessage } from "../lib/dateUtil";
+import { useDevContext } from "../dev/index";
 
 export default function Settings() {
   const navigate = useNavigate();
@@ -28,6 +29,9 @@ export default function Settings() {
   // toast 메시지 — null이면 미표시
   const [toastMsg, setToastMsg] = useState<string | null>(null);
   const toastTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // DEV 빌드에서 렌더링되는 개발자 모드 토글용 context — prod 번들에서는 tree-shake됨
+  const { devEnabled, toggleDev } = useDevContext();
 
   // 섹션별 순차 페이드인 (50ms 간격)
   const stagger = useStagger();
@@ -170,7 +174,33 @@ export default function Settings() {
         </SettingsSection>
       </section>
 
-      {/* ⑤ 로그아웃 */}
+      {/* ⑤ 개발자 모드 — DEV 빌드에서만 표시, prod에서는 import.meta.env.DEV가 false로 평가되어 렌더링 안 됨 */}
+      {import.meta.env.DEV && (
+        <section>
+          <SettingsSection label="개발자">
+            <div className="bg-surface-card border-y border-border">
+              <SettingsRow
+                label="개발자 모드"
+                value={
+                  <p className="text-sm text-text-secondary">
+                    {devEnabled ? "디버그 FAB 활성화됨" : "비활성화"}
+                  </p>
+                }
+                action={
+                  <input
+                    type="checkbox"
+                    className="toggle toggle-sm toggle-primary"
+                    checked={devEnabled}
+                    onChange={toggleDev}
+                  />
+                }
+              />
+            </div>
+          </SettingsSection>
+        </section>
+      )}
+
+      {/* ⑥ 로그아웃 */}
       <section className={s4.className}>
         <SettingsSection label="계정 관리">
           <div className="bg-surface-card border-y border-border">
@@ -193,7 +223,7 @@ export default function Settings() {
         </SettingsSection>
       </section>
 
-      {/* ⑥ 로고 + 카피라이트 */}
+      {/* ⑦ 로고 + 카피라이트 */}
       <section className={`text-center mt-12 space-y-2 ${s5.className}`}>
         <img src={logo} alt="passQL" className="h-5 w-auto mx-auto" />
         <p className="text-xs text-text-caption">

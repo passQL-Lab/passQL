@@ -13,8 +13,21 @@ const USE_MOCK = (import.meta.env.VITE_USE_MOCK ?? "false") === "true";
 // auth 관련 경로는 토큰 자동 주입 및 401 재시도에서 제외
 const AUTH_PATHS = ["/auth/login", "/auth/reissue", "/auth/logout"];
 
+// log 함수에서 _logHook을 참조하므로 타입/변수 선언을 먼저 배치
+type LogHook = (
+  type: "req" | "res" | "err",
+  method: string,
+  path: string,
+  data?: unknown,
+  meta?: { durationMs?: number; statusCode?: number; logId?: number }
+) => number | undefined;
+
+let _logHook: LogHook | null = null;
+
 function log(label: string, method: string, path: string, data?: unknown) {
   if (!IS_DEV) return;
+  // HUD 훅이 활성화된 경우 콘솔 중복 출력 방지 — HUD 패널에서 직접 표시하므로 불필요
+  if (_logHook) return;
   const style = label === "REQ"
     ? "color:#4F46E5;font-weight:bold"
     : label === "RES"
@@ -149,16 +162,6 @@ export async function apiFetch<T>(
     }
   }
 }
-
-type LogHook = (
-  type: "req" | "res" | "err",
-  method: string,
-  path: string,
-  data?: unknown,
-  meta?: { durationMs?: number; statusCode?: number; logId?: number }
-) => number | undefined;
-
-let _logHook: LogHook | null = null;
 
 export function registerApiLogHook(hook: LogHook): void {
   // 중복 등록 시 개발 환경에서 경고 — 두 컴포넌트가 동시에 훅을 점유하는 버그를 조기 탐지
