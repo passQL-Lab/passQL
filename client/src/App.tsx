@@ -1,6 +1,6 @@
 import { createBrowserRouter, RouterProvider, Navigate, Outlet } from "react-router-dom";
 import AppLayout from "./components/AppLayout";
-import { DevProvider } from "./dev/index";
+import { DevProvider, DevFab } from "./dev/index";
 import Home from "./pages/Home";
 import CategoryCards from "./pages/CategoryCards";
 import DailyChallenge from "./pages/DailyChallenge";
@@ -89,6 +89,7 @@ export default function App() {
   return (
     <DevProvider>
       <RouterProvider router={router} />
+      <DevFab />
     </DevProvider>
   );
 }
