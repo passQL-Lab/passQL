@@ -5,11 +5,10 @@
       layout:decorate="~{admin/layout}">
 
 <head>
-    <title layout:fragment="title">일일 챌린지</title>
+    <title layout:fragment="title">데일리 세트</title>
 </head>
 
 <th:block layout:fragment="css">
-    <!-- FullCalendar 6 -->
     <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.css" rel="stylesheet"/>
     <style>
         #calendar .fc-daygrid-day { cursor: pointer; }
@@ -20,75 +19,47 @@
 
 <th:block layout:fragment="content">
 
-    <!-- 헤더 -->
     <div class="flex items-center justify-between mb-6">
         <div>
-            <h2 class="text-xl font-bold">일일 챌린지 관리</h2>
-            <p class="text-base-content/60 text-sm mt-1">날짜를 클릭해 오늘의 챌린지 문제를 배정하세요</p>
+            <h2 class="text-xl font-bold">데일리 세트 관리</h2>
+            <p class="text-base-content/60 text-sm mt-1">날짜를 클릭하면 배정 현황을 확인하고 자동 배정할 수 있어요</p>
         </div>
     </div>
 
-    <!-- 캘린더 카드 -->
     <div class="card bg-base-100 shadow-sm">
         <div class="card-body p-4">
             <div id="calendar"></div>
         </div>
     </div>
 
-    <!-- 배정 모달 -->
+    <!-- 배정 현황 모달 -->
     <dialog id="assignModal" class="modal">
         <div class="modal-box w-11/12 max-w-2xl">
-            <h3 class="font-bold text-lg mb-1">문제 배정</h3>
+            <h3 class="font-bold text-lg mb-1">데일리 세트 배정</h3>
             <p class="text-base-content/60 text-sm mb-4">
                 날짜: <span id="modalDate" class="font-mono font-bold"></span>
             </p>
 
-            <!-- 검색 -->
-            <input id="questionSearch" type="text" placeholder="지문 검색..."
-                   class="input input-bordered w-full mb-3" oninput="filterQuestions()"/>
-
-            <!-- 문제 목록 -->
-            <div class="overflow-y-auto max-h-64 border border-base-300 rounded-lg">
+            <!-- 현재 배정된 문제 목록 -->
+            <div class="overflow-y-auto max-h-64 border border-base-300 rounded-lg mb-4">
                 <table class="table table-sm">
                     <thead class="sticky top-0 bg-base-100">
-                    <tr>
-                        <th>토픽</th>
-                        <th>난이도</th>
-                        <th class="w-1/2">지문 미리보기</th>
-                        <th></th>
-                    </tr>
+                        <tr><th>#</th><th>토픽</th><th>지문 미리보기</th></tr>
                     </thead>
-                    <tbody id="questionList">
-                    <tr th:each="q : ${activeQuestions}" class="question-row hover">
-                        <td>
-                            <span class="badge badge-outline badge-sm" th:text="${q.topicName}">-</span>
-                        </td>
-                        <td>
-                            <span class="badge badge-sm"
-                                  th:classappend="${q.difficulty <= 2} ? 'badge-success' : (${q.difficulty == 3} ? 'badge-warning' : 'badge-error')"
-                                  th:text="${q.difficulty}">3</span>
-                        </td>
-                        <td class="text-xs text-base-content/80 question-stem"
-                            th:text="${#strings.length(q.stemPreview) > 60 ? #strings.substring(q.stemPreview,0,60)+'...' : q.stemPreview}">지문</td>
-                        <td>
-                            <button class="btn btn-xs btn-primary"
-                                    th:attr="data-uuid=${q.questionUuid}"
-                                    onclick="selectQuestion(this)">배정</button>
-                        </td>
-                    </tr>
-                    </tbody>
+                    <tbody id="assignedList"></tbody>
                 </table>
             </div>
 
-            <!-- 현재 배정 해제 버튼 -->
-            <div class="mt-3 flex justify-between items-center">
+            <div class="flex justify-between items-center">
                 <button id="unassignBtn" class="btn btn-sm btn-outline btn-error hidden"
                         onclick="unassignChallenge()">
                     <i data-lucide="trash-2" class="size-4"></i>
-                    배정 해제 (폴백 복귀)
+                    배정 해제
                 </button>
-                <div class="flex-1"></div>
-                <button class="btn btn-sm" onclick="closeModal()">닫기</button>
+                <button class="btn btn-sm btn-primary ml-auto" onclick="autoAssign()">
+                    자동 배정
+                </button>
+                <button class="btn btn-sm ml-2" onclick="closeModal()">닫기</button>
             </div>
         </div>
         <form method="dialog" class="modal-backdrop"><button>close</button></form>
@@ -119,41 +90,54 @@
                     fetch(`/admin/daily-challenges/api?from=${from}&to=${to}`)
                         .then(r => r.json())
                         .then(items => {
-                            successCallback(items.map(item => ({
-                                title: `D${item.difficulty} ${item.stemPreview ? item.stemPreview.substring(0, 20) : ''}`,
-                                start: item.challengeDate,
-                                extendedProps: {
-                                    questionUuid: item.questionUuid,
-                                    topicName: item.topicName,
-                                    difficulty: item.difficulty,
-                                    stemPreview: item.stemPreview
-                                },
-                                color: item.difficulty <= 2 ? '#22c55e' : item.difficulty === 3 ? '#f59e0b' : '#ef4444'
+                            // 날짜별 그룹핑: 같은 날짜 여러 문제를 1개 이벤트로 표시
+                            const byDate = {};
+                            items.forEach(item => {
+                                if (!byDate[item.challengeDate]) byDate[item.challengeDate] = [];
+                                byDate[item.challengeDate].push(item);
+                            });
+                            successCallback(Object.entries(byDate).map(([date, challenges]) => ({
+                                title: `${challenges.length}문제 배정`,
+                                start: date,
+                                extendedProps: { challenges },
+                                color: '#6366f1'
                             })));
                         })
                         .catch(failureCallback);
                 },
                 dateClick: function (info) {
-                    openModal(info.dateStr, null);
+                    const from = info.dateStr;
+                    fetch(`/admin/daily-challenges/api?from=${from}&to=${from}`)
+                        .then(r => r.json())
+                        .then(items => openModal(info.dateStr, items));
                 },
                 eventClick: function (info) {
-                    openModal(info.event.startStr, info.event.extendedProps.questionUuid);
+                    const from = info.event.startStr;
+                    fetch(`/admin/daily-challenges/api?from=${from}&to=${from}`)
+                        .then(r => r.json())
+                        .then(items => openModal(info.event.startStr, items));
                 }
             });
             calendar.render();
         });
 
-        function openModal(dateStr, currentQuestionUuid) {
+        function openModal(dateStr, challenges) {
             selectedDate = dateStr;
             document.getElementById('modalDate').textContent = dateStr;
-            const unassignBtn = document.getElementById('unassignBtn');
-            if (currentQuestionUuid) {
-                unassignBtn.classList.remove('hidden');
+
+            const listEl = document.getElementById('assignedList');
+            listEl.innerHTML = '';
+            if (challenges && challenges.length > 0) {
+                challenges.forEach((c, i) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `<td>${i + 1}</td><td><span class="badge badge-outline badge-sm">${c.topicName || ''}</span></td><td class="text-xs">${c.stemPreview ? c.stemPreview.substring(0, 50) : ''}</td>`;
+                    listEl.appendChild(row);
+                });
+                document.getElementById('unassignBtn').classList.remove('hidden');
             } else {
-                unassignBtn.classList.add('hidden');
+                listEl.innerHTML = '<tr><td colspan="3" class="text-center text-base-content/50 py-4">배정 없음 (자동 배정 버튼으로 선정)</td></tr>';
+                document.getElementById('unassignBtn').classList.add('hidden');
             }
-            document.getElementById('questionSearch').value = '';
-            filterQuestions();
             document.getElementById('assignModal').showModal();
             lucide.createIcons();
         }
@@ -162,28 +146,19 @@
             document.getElementById('assignModal').close();
         }
 
-        function filterQuestions() {
-            const keyword = document.getElementById('questionSearch').value.toLowerCase();
-            document.querySelectorAll('.question-row').forEach(row => {
-                const stem = row.querySelector('.question-stem').textContent.toLowerCase();
-                row.style.display = stem.includes(keyword) ? '' : 'none';
-            });
-        }
-
-        function selectQuestion(btn) {
-            const questionUuid = btn.getAttribute('data-uuid');
+        function autoAssign() {
             fetch(`/admin/daily-challenges/${selectedDate}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ questionUuid })
+                body: JSON.stringify({ questionUuids: [] })
             })
             .then(r => {
                 if (!r.ok) return r.json().then(e => { throw new Error(e.message || '배정 실패'); });
                 return r.json();
             })
-            .then(() => {
+            .then(items => {
                 calendar.refetchEvents();
-                closeModal();
+                openModal(selectedDate, items);
             })
             .catch(err => alert(err.message));
         }

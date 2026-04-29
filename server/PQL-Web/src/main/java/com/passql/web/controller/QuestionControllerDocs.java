@@ -10,7 +10,6 @@ import com.passql.question.dto.RecommendationsRequest;
 import com.passql.question.dto.RecommendationsResponse;
 import com.passql.question.dto.SubmitRequest;
 import com.passql.question.dto.SubmitResult;
-import com.passql.question.dto.TodayQuestionResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import kr.suhsaechan.suhapilog.annotation.ApiLog;
@@ -40,18 +39,6 @@ public interface QuestionControllerDocs {
       @RequestParam(required = false) Integer difficulty,
       @RequestParam(required = false) String mode,
       Pageable pageable
-  );
-
-  @ApiLogs({
-      @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 5, description = "오늘의 문제 조회 API 추가"),
-      @ApiLog(date = "2026.04.08", author = Author.SUHSAECHAN, issueNumber = 22, description = "HomeService Facade 로 이동 (Controller 직접 의존 제거, 응답 스키마 동일)"),
-  })
-  @Operation(summary = "오늘의 문제 조회",
-      description = "오늘의 데일리 챌린지 문제를 반환. 큐레이션 행(daily_challenge)이 있으면 그 문제, 없으면 활성 문제 풀에서 날짜 시드 기반 결정적 폴백. " +
-          "JWT 인증 회원 기준으로 오늘(00:00~24:00) 해당 문제 제출 여부를 alreadySolvedToday 로 함께 반환. " +
-          "활성 문제가 0개면 { question: null, alreadySolvedToday: false }.")
-  ResponseEntity<TodayQuestionResponse> getToday(
-      @AuthMember LoginMember loginMember
   );
 
   @ApiLogs({

@@ -1,7 +1,6 @@
 package com.passql.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.passql.application.service.HomeService;
 import com.passql.application.service.QuestionExecutionService;
 import com.passql.application.service.RecommendationService;
 import com.passql.common.exception.CustomException;
@@ -18,7 +17,6 @@ import com.passql.question.dto.SseErrorEvent;
 import com.passql.question.dto.SseStatusEvent;
 import com.passql.question.dto.SubmitRequest;
 import com.passql.question.dto.SubmitResult;
-import com.passql.question.dto.TodayQuestionResponse;
 import com.passql.question.entity.QuestionChoiceSet;
 import com.passql.question.entity.QuestionChoiceSetItem;
 import com.passql.question.repository.QuestionChoiceSetItemRepository;
@@ -46,7 +44,6 @@ import java.util.UUID;
 public class QuestionController implements QuestionControllerDocs {
 
     private final QuestionService questionService;
-    private final HomeService homeService;
     private final RecommendationService recommendationService;
     private final SandboxExecutor sandboxExecutor;
     private final QuestionExecutionService questionExecutionService;
@@ -64,13 +61,6 @@ public class QuestionController implements QuestionControllerDocs {
         Pageable pageable
     ) {
         return ResponseEntity.ok(questionService.getQuestions(topic, subtopic, difficulty, mode, pageable));
-    }
-
-    @GetMapping("/today")
-    public ResponseEntity<TodayQuestionResponse> getToday(
-        @AuthMember LoginMember loginMember
-    ) {
-        return ResponseEntity.ok(homeService.getToday(loginMember.memberUuid()));
     }
 
     // GET → POST 전환: 제외 UUID 목록이 쿼리스트링으로 누적되면 Tomcat 8KB 헤더 한도 초과 → 400 발생
