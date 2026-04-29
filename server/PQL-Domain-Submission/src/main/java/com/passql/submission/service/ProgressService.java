@@ -11,6 +11,8 @@ import com.passql.submission.dto.HeatmapResponse;
 import com.passql.submission.dto.ProgressResponse;
 import com.passql.submission.dto.ReadinessResponse;
 import com.passql.submission.dto.RecentAttemptProjection;
+import com.passql.submission.dto.WrongQuestionItem;
+import com.passql.submission.dto.WrongQuestionsResponse;
 import com.passql.submission.readiness.ReadinessCalculator;
 import com.passql.submission.readiness.ReadinessConstants;
 import com.passql.submission.readiness.ToneKey;
@@ -178,5 +180,36 @@ public class ProgressService {
             .toList();
 
         return new HeatmapResponse(entries);
+    }
+
+    public WrongQuestionsResponse getWrongQuestions(UUID memberUuid, int size) {
+        if (!memberRepository.existsByMemberUuidAndIsDeletedFalse(memberUuid)) {
+            throw new CustomException(ErrorCode.MEMBER_NOT_FOUND);
+        }
+
+        List<Object[]> rows = submissionRepository.findWrongQuestionsWithMeta(memberUuid.toString(), size);
+
+        List<WrongQuestionItem> items = rows.stream()
+            .map(row -> new WrongQuestionItem(
+                UUID.fromString((String) row[0]),
+                buildStemPreview((String) row[1]),
+                (String) row[2],
+                ((java.sql.Timestamp) row[3]).toLocalDateTime()
+            ))
+            .toList();
+
+        long totalCount = submissionRepository.countDistinctWrongQuestions(memberUuid.toString());
+
+        return new WrongQuestionsResponse(items, totalCount);
+    }
+
+    // 마크다운 코드 블록/줄바꿈 제거 후 50자 미리보기
+    private String buildStemPreview(String stem) {
+        if (stem == null) return "";
+        String cleaned = stem
+            .replaceAll("```[\\s\\S]*?```", "[SQL]")
+            .replaceAll("\n", " ")
+            .trim();
+        return cleaned.length() > 50 ? cleaned.substring(0, 50) + "..." : cleaned;
     }
 }
