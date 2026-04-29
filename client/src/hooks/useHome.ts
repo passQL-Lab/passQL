@@ -4,7 +4,9 @@ import { fetchGreeting } from "../api/home";
 import { fetchTodayQuestion, fetchRecommendations } from "../api/questions";
 import { fetchSelectedSchedule } from "../api/examSchedules";
 import { fetchHeatmap } from "../api/progress";
+import { fetchDailySet, fetchLeaderboard } from "../api/dailySet";
 import { useAuthStore } from "../stores/authStore";
+import type { DailySetTodayResponse, LeaderboardResponse } from "../types/api";
 
 export function useGreeting() {
   const accessToken = useAuthStore((s) => s.accessToken);
@@ -88,6 +90,28 @@ export function useHeatmap() {
     queryFn: () => fetchHeatmap(from, today),
     enabled: !!accessToken,
     staleTime: 1000 * 60 * 5,
+    retry: false,
+  });
+}
+
+export function useDailySet() {
+  const accessToken = useAuthStore((s) => s.accessToken);
+  return useQuery<DailySetTodayResponse>({
+    queryKey: ["dailySet", accessToken],
+    queryFn: fetchDailySet,
+    enabled: !!accessToken,
+    staleTime: 1000 * 60 * 5,
+    retry: false,
+  });
+}
+
+export function useLeaderboard() {
+  const accessToken = useAuthStore((s) => s.accessToken);
+  return useQuery<LeaderboardResponse>({
+    queryKey: ["leaderboard", accessToken],
+    queryFn: fetchLeaderboard,
+    enabled: !!accessToken,
+    staleTime: 1000 * 60,
     retry: false,
   });
 }
