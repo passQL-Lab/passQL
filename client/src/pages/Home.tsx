@@ -9,7 +9,7 @@ import { StarRating } from "../components/StarRating";
 import { HeatmapCalendar } from "../components/HeatmapCalendar";
 import {
   useGreeting,
-  useTodayQuestion,
+  useDailySet,
   useRecommendations,
   useRefreshRecommendations,
   useSelectedSchedule,
@@ -56,7 +56,7 @@ export default function Home() {
   } = useProgress();
   useMember();
   const { data: greeting } = useGreeting();
-  const { data: today } = useTodayQuestion();
+  const { data: dailySet } = useDailySet();
   // 버튼 1회전 트리거 — 애니메이션 클래스를 뗐다 붙이기 위해 별도 state 사용
   const [spinning, setSpinning] = useState(false);
   // 카드 페이드인 재트리거 — key가 바뀌면 카드 목록이 재마운트되어 애니메이션 재실행
@@ -183,50 +183,43 @@ export default function Home() {
             <p className="text-sm text-text-caption mt-1">선택된 일정 없음</p>
           </div>
         )}
-        {today?.question ? (
-          today.alreadySolvedToday ? (
+        {dailySet?.questions && dailySet.questions.length > 0 ? (
+          dailySet.alreadyCompleted ? (
             // 완료 상태: 회색 dimmed 카드 — 이미 끝난 항목임을 시각적으로 표현
             <div className="h-full flex flex-col gap-2 rounded-xl p-5 cursor-default bg-[#F3F4F6] border border-border">
               <div className="flex items-center justify-between">
-                <p className="text-sm text-text-secondary">
-                  오늘의 문제
-                </p>
-                {/* 완료 인디케이터: 원형 아이콘 대신 텍스트 레이블 */}
+                <p className="text-sm text-text-secondary">오늘의 데일리 세트</p>
                 <span className="flex items-center gap-1 text-xs font-semibold text-sem-success-text">
                   <Check size={11} strokeWidth={3} />
                   완료
                 </span>
               </div>
-              <p className="text-text-caption text-sm truncate">
-                {today.question.stemPreview}
+              <p className="text-xs text-text-caption">
+                {dailySet.correctCount !== null ? `${dailySet.correctCount} / ${dailySet.questions.length} 정답` : ""}
               </p>
-              <div className="flex items-center gap-2 mt-auto">
-                <span className="badge-topic opacity-50">{today.question.topicName}</span>
-                <span className="opacity-40"><StarRating level={today.question.difficulty} /></span>
-              </div>
+              <Link to="/leaderboard" className="mt-auto">
+                <span className="text-xs text-brand font-semibold">순위 확인하기 →</span>
+              </Link>
             </div>
           ) : (
-            // 미완료 상태: 데일리 챌린지 페이지로 이동
-            <Link to="/daily-challenge" className="block">
+            // 미완료 상태: 데일리 세트 페이지로 이동
+            <Link to="/daily-set" className="block">
               <div className="bg-surface-card border border-border rounded-2xl p-4 sm:p-6 h-full flex flex-col gap-2 cursor-pointer hover:-translate-y-0.5 hover:border-brand transition-all duration-200">
-                <p className="text-sm text-text-secondary">오늘의 문제</p>
-                <p className="text-sm text-text-primary truncate">
-                  {today.question.stemPreview}
-                </p>
+                <p className="text-sm text-text-secondary">오늘의 데일리 세트</p>
+                <p className="text-sm text-text-primary">{dailySet.questions.length}문제 도전하기</p>
                 <div className="flex items-center gap-2 mt-auto">
-                  <span className="badge-topic">
-                    {today.question.topicName}
-                  </span>
-                  <StarRating level={today.question.difficulty} />
+                  <span className="badge-topic">{dailySet.questions[0]?.topicName}</span>
+                  <span className="text-xs text-text-caption">외 {dailySet.questions.length - 1}개 토픽</span>
                 </div>
               </div>
             </Link>
           )
         ) : (
+          // 오늘 데일리 세트 없음 — 문제 목록으로 유도
           <Link to="/questions" className="block">
             <div className="bg-surface-card border border-border rounded-2xl p-4 sm:p-6 h-full flex flex-col justify-center cursor-pointer hover:-translate-y-0.5 hover:border-brand transition-all duration-200">
-              <p className="text-sm text-text-secondary">오늘의 문제</p>
-              <p className="text-sm text-text-primary mt-1">오늘은 등록된 문제가 없어요</p>
+              <p className="text-sm text-text-secondary">오늘의 데일리 세트</p>
+              <p className="text-sm text-text-primary mt-1">오늘은 준비 중이에요</p>
             </div>
           </Link>
         )}

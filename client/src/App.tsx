@@ -2,13 +2,16 @@ import { createBrowserRouter, RouterProvider, Navigate, Outlet } from "react-rou
 import AppLayout from "./components/AppLayout";
 import Home from "./pages/Home";
 import CategoryCards from "./pages/CategoryCards";
-import DailyChallenge from "./pages/DailyChallenge";
+import DailySet from "./pages/DailySet";
+import DailySetResult from "./pages/DailySetResult";
+import Leaderboard from "./pages/Leaderboard";
 import PracticeSet from "./pages/PracticeSet";
 import PracticeResult from "./pages/PracticeResult";
 import QuestionDetail from "./pages/QuestionDetail";
 import AnswerFeedback from "./pages/AnswerFeedback";
 import RecommendationPractice from "./pages/RecommendationPractice";
 import Stats from "./pages/Stats";
+import MyPage from "./pages/MyPage";
 import Settings from "./pages/Settings";
 import SettingsFeedback from "./pages/SettingsFeedback";
 import Login from "./pages/Login";
@@ -42,7 +45,7 @@ const router = createBrowserRouter([
           { index: true, element: <Home /> },
           { path: "questions", element: <CategoryCards /> },
           { path: "stats", element: <Stats /> },
-          { path: "settings", element: <Settings /> },
+          { path: "mypage", element: <MyPage /> },
         ],
       },
       // AppLayout 밖: 전체화면 몰입형 화면 (문제 풀이는 집중 모드)
@@ -50,9 +53,22 @@ const router = createBrowserRouter([
         path: "questions/:questionUuid",
         element: <QuestionDetail />,
       },
+      // 구 라우트 — /daily-set으로 redirect (북마크/외부 링크 호환)
       {
         path: "daily-challenge",
-        element: <DailyChallenge />,
+        element: <Navigate to="/daily-set" replace />,
+      },
+      {
+        path: "daily-set",
+        element: <DailySet />,
+      },
+      {
+        path: "daily-set/result",
+        element: <DailySetResult />,
+      },
+      {
+        path: "leaderboard",
+        element: <Leaderboard />,
       },
       {
         path: "questions/:questionUuid/result",
@@ -70,6 +86,11 @@ const router = createBrowserRouter([
       {
         path: "recommendation/:questionUuid",
         element: <RecommendationPractice />,
+      },
+      // 설정 서브페이지 — 마이페이지 톱니바퀴 진입 (탭바 없는 몰입형)
+      {
+        path: "settings",
+        element: <Settings />,
       },
       // 건의사항 서브페이지 — AppLayout 밖 독립 라우트 (탭바 없는 몰입형)
       {
