@@ -108,6 +108,11 @@ public class QuestionService {
                 .orElseThrow(() -> new CustomException(ErrorCode.QUESTION_NOT_FOUND));
     }
 
+    /** 존재하지 않는 UUID면 null 반환 — HomeService의 데일리 세트 조회 시 소프트 폴백용 */
+    public Question getQuestionEntityOrNull(UUID questionUuid) {
+        return questionRepository.findById(questionUuid).orElse(null);
+    }
+
     /**
      * Resolve today's question (from DailyChallenge or deterministic fallback).
      * 폴백으로 선택된 경우 daily_challenge 테이블에 즉시 저장한다 (스케줄러 실패 백업).
