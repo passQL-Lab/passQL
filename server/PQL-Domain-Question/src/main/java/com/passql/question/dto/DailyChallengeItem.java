@@ -5,6 +5,7 @@ import java.util.UUID;
 
 public record DailyChallengeItem(
     LocalDate challengeDate,
+    int sortOrder,
     UUID questionUuid,
     String topicName,
     Integer difficulty,

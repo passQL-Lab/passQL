@@ -45,6 +45,8 @@ public enum ErrorCode {
     EXAM_SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, "시험 일정을 찾을 수 없습니다."),
     EXAM_SCHEDULE_DUPLICATE(HttpStatus.CONFLICT, "이미 등록된 시험 회차입니다."),
     DAILY_CHALLENGE_QUESTION_INACTIVE(HttpStatus.UNPROCESSABLE_ENTITY, "비활성 문제는 일일 챌린지로 배정할 수 없습니다."),
+    DAILY_SET_ALREADY_COMPLETED(HttpStatus.CONFLICT, "오늘의 데일리 세트를 이미 완료했습니다."),
+    DAILY_SET_NOT_FOUND(HttpStatus.NOT_FOUND, "오늘의 데일리 세트가 준비되지 않았습니다."),
 
     // Member
     MEMBER_NOT_FOUND(HttpStatus.NOT_FOUND, "회원을 찾을 수 없습니다."),

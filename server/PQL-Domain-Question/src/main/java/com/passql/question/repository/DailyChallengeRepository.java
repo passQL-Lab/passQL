@@ -7,14 +7,23 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 public interface DailyChallengeRepository extends JpaRepository<DailyChallenge, UUID> {
 
-    Optional<DailyChallenge> findByChallengeDate(LocalDate challengeDate);
+    List<DailyChallenge> findByChallengeDateOrderBySortOrderAsc(LocalDate challengeDate);
 
-    List<DailyChallenge> findByChallengeDateBetweenOrderByChallengeDateAsc(LocalDate from, LocalDate to);
+    List<DailyChallenge> findByChallengeDateBetweenOrderByChallengeDateAscSortOrderAsc(LocalDate from, LocalDate to);
+
+    boolean existsByChallengeDateAndSortOrder(LocalDate challengeDate, int sortOrder);
+
+    @Modifying
+    @Transactional
+    void deleteByChallengeDateAndSortOrder(LocalDate challengeDate, int sortOrder);
+
+    @Modifying
+    @Transactional
+    void deleteByChallengeDate(LocalDate challengeDate);
 
     @Modifying
     @Transactional
