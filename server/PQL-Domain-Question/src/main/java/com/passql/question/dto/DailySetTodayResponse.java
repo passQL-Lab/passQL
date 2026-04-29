@@ -4,6 +4,6 @@ import java.util.List;
 
 public record DailySetTodayResponse(
     List<QuestionSummary> questions,
-    boolean alreadyCompleted,
+    Boolean alreadyCompleted,
     Integer correctCount
 ) {}
