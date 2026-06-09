@@ -1,6 +1,6 @@
 # API 연동 가이드
 
-> **스키마 원본**: `docs/be-api-docs.json` (OpenAPI 3.1 스펙). API가 자주 변동되므로 필드 목록·enum 값은 이 파일이 최신 정보. 이 가이드는 **사용 방법 + 비즈니스 규칙**에 집중하며, 새 필드가 생기면 `be-api-docs.json`과 `src/types/api.ts`를 먼저 확인할 것.
+> **스키마 원본**: 같은 레포의 `server/` 코드가 단일 원천(SSOT). 필드 목록·enum 값은 server DTO/엔티티 또는 런타임 Swagger(`/docs/swagger-ui/index.html`)에서 확인한다. 이 가이드는 **사용 방법 + 비즈니스 규칙**에 집중하며, 새 필드가 생기면 server 코드와 `src/types/api.ts`를 먼저 확인할 것.
 
 ## 아키텍처
 
@@ -16,7 +16,7 @@ Frontend ──(/api)──> Backend(Spring) ──(x-api-key)──> AI Server(
 
 ## 엔드포인트 전체 목록 (24개)
 
-> 구현 상태: [O] = be-api-docs.json에 정의됨, [미구현] = 화면 명세에 필요하나 백엔드 미구현
+> 구현 상태: [O] = server 코드에 구현됨, [미구현] = 화면 명세에 필요하나 백엔드 미구현
 
 ### Members (`src/api/members.ts`)
 

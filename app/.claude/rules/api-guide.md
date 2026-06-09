@@ -14,7 +14,7 @@ Frontend ──(/api)──> Backend(Spring) ──(x-api-key)──> AI Server(
 
 ## 엔드포인트 전체 목록 (18개)
 
-> 구현 상태: [O] = be-api-docs.json에 정의됨, [미구현] = 화면 명세에 필요하나 백엔드 미구현
+> 구현 상태: [O] = server 코드에 구현됨, [미구현] = 화면 명세에 필요하나 백엔드 미구현
 
 ### Members (`src/api/members.ts`)
 

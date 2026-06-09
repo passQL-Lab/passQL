@@ -103,3 +103,7 @@ coverage/
 .gstack/
 # suh-template 로컬 설정(민감 정보 PAT 포함 — 추적 금지)
 .suh-template/
+
+# IDE 실행 설정 / 임시 다운로드 (AI 탐색 노이즈 — 추적 제외)
+.run/
+.template_download_temp
