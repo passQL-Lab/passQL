@@ -1,0 +1,118 @@
+name: passql_app
+description: "passQL - SQL 학습 앱"
+publish_to: none
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+  go_router: ^17.0.1
+
+  # 상태관리
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+
+  # 로컬 저장소
+  shared_preferences: ^2.3.4
+
+  # 네트워크 & 인증
+  dio: ^5.9.0
+  retrofit: 4.7.3
+  flutter_secure_storage: ^9.2.4
+  flutter_dotenv: ^6.0.0
+  uuid: ^4.5.2
+
+  # UI/UX
+  flutter_screenutil: ^5.9.3
+  smooth_page_indicator: ^1.2.1
+  toggle_switch: ^2.3.0
+  flutter_svg: ^2.2.1
+  animations: ^2.1.1
+  shimmer: ^3.0.0
+  font_awesome_flutter: ^11.0.0
+
+  # 차트
+  fl_chart: ^0.70.0
+
+  # 외부 링크
+  url_launcher: ^6.3.2
+  share_plus: ^12.0.1
+
+  # 알림
+  flutter_local_notifications: ^19.4.2
+
+  # 실시간 통신
+  stomp_dart_client: ^3.0.1
+
+  # 기기 & 앱 정보
+  vibration: ^3.1.8
+  package_info_plus: ^9.0.0
+  device_info_plus: ^10.1.2
+  app_settings: ^7.0.0
+
+  # 유틸리티
+  yaml: ^3.1.3
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+  flutter_lints: ^6.0.0
+  build_runner: ^2.4.14
+  riverpod_generator: ^2.6.2
+  freezed: ^2.5.7
+  json_serializable: ^6.9.2
+  retrofit_generator: ^9.1.8
+  flutter_launcher_icons: ^0.14.4
+  change_app_package_name: ^1.5.0
+
+flutter:
+  uses-material-design: true
+
+  assets:
+    - .env
+    - assets/logo.png
+
+  fonts:
+    - family: Pretendard-Thin
+      fonts:
+        - asset: assets/fonts/Pretendard-Thin.ttf
+    - family: Pretendard-ExtraLight
+      fonts:
+        - asset: assets/fonts/Pretendard-ExtraLight.ttf
+    - family: Pretendard-Light
+      fonts:
+        - asset: assets/fonts/Pretendard-Light.ttf
+    - family: Pretendard-Regular
+      fonts:
+        - asset: assets/fonts/Pretendard-Regular.ttf
+    - family: Pretendard-Medium
+      fonts:
+        - asset: assets/fonts/Pretendard-Medium.ttf
+    - family: Pretendard-SemiBold
+      fonts:
+        - asset: assets/fonts/Pretendard-SemiBold.ttf
+    - family: Pretendard-Bold
+      fonts:
+        - asset: assets/fonts/Pretendard-Bold.ttf
+    - family: Pretendard-ExtraBold
+      fonts:
+        - asset: assets/fonts/Pretendard-ExtraBold.ttf
+    - family: Pretendard-Black
+      fonts:
+        - asset: assets/fonts/Pretendard-Black.ttf
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/app_icon_512.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/app_icon_512.png"
+  remove_alpha_ios: true
