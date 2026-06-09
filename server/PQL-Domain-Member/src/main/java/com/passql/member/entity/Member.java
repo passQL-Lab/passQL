@@ -2,6 +2,7 @@ package com.passql.member.entity;
 
 import com.passql.common.entity.SoftDeletableBaseEntity;
 import com.passql.member.constant.AuthProvider;
+import com.passql.member.constant.ChoiceGenerationMode;
 import com.passql.member.constant.MemberRole;
 import com.passql.member.constant.MemberStatus;
 import jakarta.persistence.*;
@@ -92,6 +93,11 @@ public class Member extends SoftDeletableBaseEntity {
 
     @Column(length = 45)
     private String lastLoginIp;
+
+    // 선택지 생성 모드 — PRACTICE: 기존 재사용, REAL: 항상 새로 생성
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20, nullable = false)
+    private ChoiceGenerationMode choiceGenerationMode = ChoiceGenerationMode.PRACTICE;
 
     // === 정적 팩토리 ===
 

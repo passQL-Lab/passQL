@@ -2,6 +2,8 @@ package com.passql.web.controller;
 
 import com.passql.member.auth.presentation.annotation.AuthMember;
 import com.passql.member.auth.presentation.security.LoginMember;
+import com.passql.member.dto.ChoiceGenerationModeUpdateRequest;
+import com.passql.member.dto.ChoiceGenerationModeUpdateResponse;
 import com.passql.member.dto.MemberMeResponse;
 import com.passql.member.dto.NicknameChangeRequest;
 import com.passql.member.dto.NicknameChangeResponse;
@@ -52,5 +54,13 @@ public class MemberController implements MemberControllerDocs {
             @AuthMember LoginMember loginMember,
             @Valid @RequestBody NicknameChangeRequest request) {
         return memberService.changeNickname(loginMember.memberUuid(), request);
+    }
+
+    // 선택지 생성 모드 변경 — PRACTICE(재사용) / REAL(항상 새로 생성)
+    @PatchMapping("/me/settings/choice-generation-mode")
+    public ChoiceGenerationModeUpdateResponse updateChoiceGenerationMode(
+            @AuthMember LoginMember loginMember,
+            @Valid @RequestBody ChoiceGenerationModeUpdateRequest request) {
+        return memberService.updateChoiceGenerationMode(loginMember.memberUuid(), request);
     }
 }
