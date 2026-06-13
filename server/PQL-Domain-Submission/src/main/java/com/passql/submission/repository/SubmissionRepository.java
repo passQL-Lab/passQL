@@ -301,4 +301,32 @@ public interface SubmissionRepository extends JpaRepository<Submission, UUID> {
         @Param("memberUuid") String memberUuid,
         @Param("since") LocalDateTime since
     );
+
+    /**
+     * 마이페이지 오답 노트용 — 최근 틀린 문제 목록 (문제 제목 미리보기 + 토픽명 포함).
+     *
+     * 동일 문제를 여러 번 틀렸어도 1건만 반환 (GROUP BY question_uuid).
+     * 최신 오답 시각 기준 정렬.
+     *
+     * Object[] = { String questionUuid, String stem, String topicName, LocalDateTime lastWrongAt }
+     */
+    @Query(value =
+        "SELECT CAST(s.question_uuid AS varchar), " +
+        "       q.stem, " +
+        "       t.display_name, " +
+        "       MAX(s.submitted_at) AS last_wrong_at " +
+        "FROM submission s " +
+        "JOIN question q ON q.question_uuid = s.question_uuid " +
+        "JOIN topic t ON t.topic_uuid = q.topic_uuid " +
+        "WHERE s.member_uuid = CAST(:memberUuid AS uuid) " +
+        "  AND s.is_correct = false " +
+        "  AND q.is_active = true " +
+        "GROUP BY s.question_uuid, q.stem, t.display_name " +
+        "ORDER BY last_wrong_at DESC " +
+        "LIMIT :limit",
+        nativeQuery = true)
+    List<Object[]> findWrongQuestionsWithMeta(
+        @Param("memberUuid") String memberUuid,
+        @Param("limit") int limit
+    );
 }

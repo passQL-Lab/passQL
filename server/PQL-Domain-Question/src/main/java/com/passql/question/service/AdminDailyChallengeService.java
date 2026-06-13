@@ -13,9 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,7 +27,7 @@ public class AdminDailyChallengeService {
 
     public List<DailyChallengeItem> getChallenges(LocalDate from, LocalDate to) {
         List<DailyChallenge> challenges = dailyChallengeRepository
-                .findByChallengeDateBetweenOrderByChallengeDateAsc(from, to);
+                .findByChallengeDateBetweenOrderByChallengeDateAscSortOrderAsc(from, to);
 
         List<UUID> uuids = challenges.stream().map(DailyChallenge::getQuestionUuid).toList();
         Map<UUID, Question> questionMap = questionRepository.findAllById(uuids)
@@ -41,81 +39,111 @@ public class AdminDailyChallengeService {
                     if (q == null) return null;
                     return new DailyChallengeItem(
                             dc.getChallengeDate(),
+                            dc.getSortOrder(),
                             q.getQuestionUuid(),
                             questionService.toSummary(q).topicName(),
                             q.getDifficulty(),
                             q.getStem() == null ? "" : (q.getStem().length() > 80 ? q.getStem().substring(0, 80) : q.getStem())
                     );
                 })
-                .filter(item -> item != null)
+                .filter(Objects::nonNull)
                 .toList();
     }
 
+    /** 날짜에 10문제 일괄 배정 (기존 배정 전부 삭제 후 재삽입) */
     @Transactional
-    public DailyChallengeItem assign(LocalDate date, UUID questionUuid) {
-        Question question = questionRepository.findById(questionUuid)
-                .orElseThrow(() -> new CustomException(ErrorCode.QUESTION_NOT_FOUND));
-        if (!Boolean.TRUE.equals(question.getIsActive())) {
-            throw new CustomException(ErrorCode.DAILY_CHALLENGE_QUESTION_INACTIVE);
+    public List<DailyChallengeItem> assign(LocalDate date, List<UUID> questionUuids) {
+        if (questionUuids == null || questionUuids.isEmpty()) {
+            throw new CustomException(ErrorCode.QUESTION_NOT_FOUND);
         }
 
-        DailyChallenge dc = dailyChallengeRepository.findByChallengeDate(date)
-                .map(existing -> {
-                    existing.setQuestionUuid(questionUuid);
-                    return existing;
-                })
-                .orElseGet(() -> DailyChallenge.builder()
-                        .challengeDate(date)
-                        .questionUuid(questionUuid)
-                        .build());
+        List<Question> questions = questionUuids.stream()
+                .map(uuid -> questionRepository.findById(uuid)
+                        .orElseThrow(() -> new CustomException(ErrorCode.QUESTION_NOT_FOUND)))
+                .toList();
 
-        dailyChallengeRepository.save(dc);
+        questions.forEach(q -> {
+            if (!Boolean.TRUE.equals(q.getIsActive())) {
+                throw new CustomException(ErrorCode.DAILY_CHALLENGE_QUESTION_INACTIVE);
+            }
+        });
 
-        return new DailyChallengeItem(
-                date,
-                question.getQuestionUuid(),
-                questionService.toSummary(question).topicName(),
-                question.getDifficulty(),
-                question.getStem() == null ? "" : (question.getStem().length() > 80 ? question.getStem().substring(0, 80) : question.getStem())
-        );
+        dailyChallengeRepository.deleteByChallengeDate(date);
+
+        List<DailyChallenge> saved = new ArrayList<>();
+        for (int i = 0; i < questions.size(); i++) {
+            saved.add(dailyChallengeRepository.save(
+                    DailyChallenge.builder()
+                            .challengeDate(date)
+                            .sortOrder(i)
+                            .questionUuid(questions.get(i).getQuestionUuid())
+                            .build()));
+        }
+
+        return saved.stream().map(dc -> {
+            Question q = questions.get(dc.getSortOrder());
+            return new DailyChallengeItem(
+                    date, dc.getSortOrder(), q.getQuestionUuid(),
+                    questionService.toSummary(q).topicName(),
+                    q.getDifficulty(),
+                    q.getStem() == null ? "" : (q.getStem().length() > 80 ? q.getStem().substring(0, 80) : q.getStem())
+            );
+        }).toList();
     }
 
     @Transactional
     public void unassign(LocalDate date) {
-        dailyChallengeRepository.findByChallengeDate(date)
-                .ifPresent(dailyChallengeRepository::delete);
+        dailyChallengeRepository.deleteByChallengeDate(date);
     }
 
     /**
-     * 폴백 결과를 daily_challenge 테이블에 확정 저장한다.
-     * 이미 배정된 날짜는 스킵한다. 활성 문제가 없으면 저장하지 않는다.
-     * DailyChallengeScheduler(자정 cron)에서 호출한다.
+     * 자정 스케줄러 폴백. 이미 배정된 날짜 스킵.
+     * 토픽 round-robin으로 10문제 선정.
      */
     @Transactional
     public void confirmFallback(LocalDate date) {
-        // 이미 배정된 날짜면 스킵
-        if (dailyChallengeRepository.findByChallengeDate(date).isPresent()) {
-            return;
-        }
+        List<DailyChallenge> existing = dailyChallengeRepository
+                .findByChallengeDateOrderBySortOrderAsc(date);
+        if (!existing.isEmpty()) return;
 
-        List<UUID> active = questionRepository.findActiveUuidsOrderedByCreatedAt();
-        if (active.isEmpty()) {
-            return;
-        }
+        List<Question> active = questionRepository.findByIsActiveTrue();
+        if (active.isEmpty()) return;
+
+        Map<UUID, List<Question>> byTopic = active.stream()
+                .collect(Collectors.groupingBy(Question::getTopicUuid));
+        List<List<Question>> groups = new ArrayList<>(byTopic.values());
 
         long seed = date.toEpochDay();
-        UUID pick = active.get((int) Math.floorMod(seed, active.size()));
+        groups.forEach(g -> Collections.shuffle(g, new Random(seed)));
+        Collections.shuffle(groups, new Random(seed + 1));
+
+        List<UUID> picks = new ArrayList<>();
+        int groupIdx = 0;
+        int target = Math.min(10, active.size());
+        Set<UUID> seen = new HashSet<>();
+        while (picks.size() < target) {
+            List<Question> group = groups.get(groupIdx % groups.size());
+            for (Question q : group) {
+                if (!seen.contains(q.getQuestionUuid())) {
+                    picks.add(q.getQuestionUuid());
+                    seen.add(q.getQuestionUuid());
+                    break;
+                }
+            }
+            groupIdx++;
+            if (groupIdx > groups.size() * target) break;
+        }
 
         try {
-            // saveAndFlush: 트랜잭션 커밋 전에 즉시 flush하여 UNIQUE 위반을 여기서 감지
-            dailyChallengeRepository.saveAndFlush(
-                    DailyChallenge.builder()
-                            .challengeDate(date)
-                            .questionUuid(pick)
-                            .build()
-            );
+            for (int i = 0; i < picks.size(); i++) {
+                dailyChallengeRepository.saveAndFlush(
+                        DailyChallenge.builder()
+                                .challengeDate(date)
+                                .sortOrder(i)
+                                .questionUuid(picks.get(i))
+                                .build());
+            }
         } catch (DataIntegrityViolationException ignored) {
-            // 동시 호출로 다른 스레드가 먼저 저장 완료 — 결정론적 알고리즘이므로 동일한 pick 사용
         }
     }
 }

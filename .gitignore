@@ -101,3 +101,14 @@ coverage/
 # Firebase 서비스 계정 키 (민감 정보)
 **/firebase-service-account*.json
 .gstack/
+# suh-template 로컬 설정(민감 정보 PAT 포함 — 추적 금지)
+.suh-template/
+
+# IDE 실행 설정 / 임시 다운로드 (AI 탐색 노이즈 — 추적 제외)
+.run/
+.template_download_temp
+
+# ====================================================================
+# SUH-DEVOPS-TEMPLATE: Auto-added entries
+# ====================================================================
+/.claude/settings.local.json

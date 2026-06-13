@@ -47,13 +47,17 @@ public class AdminDailyChallengeController {
         return ResponseEntity.ok(adminDailyChallengeService.getChallenges(from, to));
     }
 
-    /** 배정/교체 (upsert) */
+    /** 날짜에 10문제 자동 배정 (questionUuids 없으면 폴백 로직으로 자동 선정) */
     @PutMapping("/{date}")
     @ResponseBody
-    public ResponseEntity<DailyChallengeItem> assign(
+    public ResponseEntity<?> assign(
             @PathVariable @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
             @RequestBody DailyChallengeAssignRequest request) {
-        return ResponseEntity.ok(adminDailyChallengeService.assign(date, request.questionUuid()));
+        if (request.questionUuids() == null || request.questionUuids().isEmpty()) {
+            adminDailyChallengeService.confirmFallback(date);
+            return ResponseEntity.ok(adminDailyChallengeService.getChallenges(date, date));
+        }
+        return ResponseEntity.ok(adminDailyChallengeService.assign(date, request.questionUuids()));
     }
 
     /** 배정 해제 */

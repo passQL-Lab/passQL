@@ -1,13 +1,14 @@
 package com.passql.web.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.passql.application.service.HomeService;
 import com.passql.application.service.QuestionExecutionService;
 import com.passql.application.service.RecommendationService;
 import com.passql.common.exception.CustomException;
 import com.passql.common.exception.constant.ErrorCode;
 import com.passql.member.auth.presentation.annotation.AuthMember;
 import com.passql.member.auth.presentation.security.LoginMember;
+import com.passql.member.constant.ChoiceGenerationMode;
+import com.passql.member.service.MemberService;
 import com.passql.question.dto.ChoiceSetGenerateResponse;
 import com.passql.question.dto.ExecuteResult;
 import com.passql.question.dto.QuestionDetail;
@@ -18,7 +19,6 @@ import com.passql.question.dto.SseErrorEvent;
 import com.passql.question.dto.SseStatusEvent;
 import com.passql.question.dto.SubmitRequest;
 import com.passql.question.dto.SubmitResult;
-import com.passql.question.dto.TodayQuestionResponse;
 import com.passql.question.entity.QuestionChoiceSet;
 import com.passql.question.entity.QuestionChoiceSetItem;
 import com.passql.question.repository.QuestionChoiceSetItemRepository;
@@ -46,7 +46,6 @@ import java.util.UUID;
 public class QuestionController implements QuestionControllerDocs {
 
     private final QuestionService questionService;
-    private final HomeService homeService;
     private final RecommendationService recommendationService;
     private final SandboxExecutor sandboxExecutor;
     private final QuestionExecutionService questionExecutionService;
@@ -54,6 +53,7 @@ public class QuestionController implements QuestionControllerDocs {
     private final ChoiceSetResolver choiceSetResolver;
     private final QuestionChoiceSetItemRepository choiceSetItemRepository;
     private final ObjectMapper objectMapper;
+    private final MemberService memberService;
 
     @GetMapping
     public ResponseEntity<Page<QuestionSummary>> getQuestions(
@@ -64,13 +64,6 @@ public class QuestionController implements QuestionControllerDocs {
         Pageable pageable
     ) {
         return ResponseEntity.ok(questionService.getQuestions(topic, subtopic, difficulty, mode, pageable));
-    }
-
-    @GetMapping("/today")
-    public ResponseEntity<TodayQuestionResponse> getToday(
-        @AuthMember LoginMember loginMember
-    ) {
-        return ResponseEntity.ok(homeService.getToday(loginMember.memberUuid()));
     }
 
     // GET → POST 전환: 제외 UUID 목록이 쿼리스트링으로 누적되면 Tomcat 8KB 헤더 한도 초과 → 400 발생
@@ -121,8 +114,9 @@ public class QuestionController implements QuestionControllerDocs {
                         .data(objectMapper.writeValueAsString(
                                 new SseStatusEvent("generating", "선택지 생성 중..."))));
 
-                // ChoiceSetResolver: 프리페치 캐시 히트 → 없으면 실시간 AI 생성
-                QuestionChoiceSet choiceSet = choiceSetResolver.resolveForUser(questionUuid, memberUuid);
+                // ChoiceSetResolver: 모드 조회 후 프리페치 캐시 히트 → 없으면 실시간 AI 생성
+                ChoiceGenerationMode mode = memberService.getChoiceGenerationMode(memberUuid);
+                QuestionChoiceSet choiceSet = choiceSetResolver.resolveForUser(questionUuid, memberUuid, mode);
                 log.info("[generate-choices] resolveForUser 완료: questionUuid={}, choiceSetUuid={}",
                         questionUuid, choiceSet.getChoiceSetUuid());
 

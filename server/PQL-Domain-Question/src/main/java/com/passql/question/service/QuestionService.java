@@ -27,7 +27,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -108,6 +107,11 @@ public class QuestionService {
                 .orElseThrow(() -> new CustomException(ErrorCode.QUESTION_NOT_FOUND));
     }
 
+    /** 존재하지 않는 UUID면 null 반환 — HomeService의 데일리 세트 조회 시 소프트 폴백용 */
+    public Question getQuestionEntityOrNull(UUID questionUuid) {
+        return questionRepository.findById(questionUuid).orElse(null);
+    }
+
     /**
      * Resolve today's question (from DailyChallenge or deterministic fallback).
      * 폴백으로 선택된 경우 daily_challenge 테이블에 즉시 저장한다 (스케줄러 실패 백업).
@@ -116,32 +120,12 @@ public class QuestionService {
      */
     @Transactional(propagation = Propagation.REQUIRES_NEW)
     public Question resolveTodayQuestion() {
-        DailyChallenge dc = dailyChallengeRepository.findByChallengeDate(LocalDate.now()).orElse(null);
-        if (dc != null) {
-            return questionRepository.findById(dc.getQuestionUuid()).orElse(null);
+        // 데일리 세트 첫 번째 문제를 단건 챌린지 대표로 반환 (레거시 호환)
+        List<DailyChallenge> challenges = dailyChallengeRepository.findByChallengeDateOrderBySortOrderAsc(LocalDate.now());
+        if (!challenges.isEmpty()) {
+            return questionRepository.findById(challenges.get(0).getQuestionUuid()).orElse(null);
         }
-
-        List<UUID> active = questionRepository.findActiveUuidsOrderedByCreatedAt();
-        if (active.isEmpty()) {
-            return null;
-        }
-
-        long seed = LocalDate.now().toEpochDay();
-        UUID pick = active.get((int) Math.floorMod(seed, active.size()));
-
-        try {
-            // saveAndFlush: 트랜잭션 커밋 전에 즉시 flush하여 UNIQUE 위반을 여기서 감지
-            dailyChallengeRepository.saveAndFlush(
-                    DailyChallenge.builder()
-                            .challengeDate(LocalDate.now())
-                            .questionUuid(pick)
-                            .build()
-            );
-        } catch (DataIntegrityViolationException ignored) {
-            // 동시 요청으로 다른 스레드가 먼저 저장 완료 — 결정론적 알고리즘이므로 동일한 pick 사용
-        }
-
-        return questionRepository.findById(pick).orElse(null);
+        return null;
     }
 
     public TodayQuestionResponse getTodayResponse(boolean alreadySolved) {
@@ -159,16 +143,14 @@ public class QuestionService {
     public RecommendationsResponse getRecommendations(int size, List<UUID> excludeQuestionUuids) {
         int clamped = Math.max(1, Math.min(size, 5));
 
-        // 오늘의 문제도 제외 목록에 추가
+        // 오늘 데일리 세트 문제들을 추천 제외 목록에 추가
         List<String> excludeList = new ArrayList<>(
                 excludeQuestionUuids != null
                         ? excludeQuestionUuids.stream().map(UUID::toString).toList()
                         : List.of()
         );
-        DailyChallenge dc = dailyChallengeRepository.findByChallengeDate(LocalDate.now()).orElse(null);
-        if (dc != null) {
-            excludeList.add(dc.getQuestionUuid().toString());
-        }
+        dailyChallengeRepository.findByChallengeDateOrderBySortOrderAsc(LocalDate.now())
+                .forEach(dc -> excludeList.add(dc.getQuestionUuid().toString()));
 
         List<Question> list = excludeList.isEmpty()
                 ? questionRepository.findRandomActive(clamped)

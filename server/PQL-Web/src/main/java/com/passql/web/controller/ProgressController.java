@@ -7,6 +7,7 @@ import com.passql.member.auth.presentation.security.LoginMember;
 import com.passql.submission.dto.HeatmapResponse;
 import com.passql.submission.dto.ProgressResponse;
 import com.passql.submission.dto.TopicAnalysisResponse;
+import com.passql.submission.dto.WrongQuestionsResponse;
 import com.passql.submission.service.ProgressService;
 import com.passql.submission.service.TopicAnalysisService;
 import lombok.RequiredArgsConstructor;
@@ -55,5 +56,13 @@ public class ProgressController implements ProgressControllerDocs {
         @RequestParam(required = false) UUID sessionUuid
     ) {
         return ResponseEntity.ok(aiCommentService.getAiComment(loginMember.memberUuid(), sessionUuid));
+    }
+
+    @GetMapping("/wrong-questions")
+    public ResponseEntity<WrongQuestionsResponse> getWrongQuestions(
+        @AuthMember LoginMember loginMember,
+        @RequestParam(defaultValue = "20") int size
+    ) {
+        return ResponseEntity.ok(progressService.getWrongQuestions(loginMember.memberUuid(), size));
     }
 }

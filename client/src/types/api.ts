@@ -147,6 +147,19 @@ export interface ProgressResponse {
   readonly readiness: ReadinessResponse | null;
 }
 
+// === 마이페이지 오답 노트 ===
+export interface WrongQuestionItem {
+  readonly questionUuid: string;
+  readonly stemPreview: string;
+  readonly topicName: string;
+  readonly lastWrongAt: string;
+}
+
+export interface WrongQuestionsResponse {
+  readonly items: readonly WrongQuestionItem[];
+  readonly totalCount: number;
+}
+
 export interface CategoryStats {
   readonly code: string;
   readonly displayName: string;
@@ -233,6 +246,9 @@ export interface MemberRegisterResponse {
   readonly nickname: string;
 }
 
+// 선택지 생성 모드
+export type ChoiceGenerationMode = "PRACTICE" | "REAL";
+
 export interface MemberMeResponse {
   readonly memberUuid: string;
   readonly nickname: string;
@@ -243,6 +259,7 @@ export interface MemberMeResponse {
   readonly lastSeenAt: string;
   // null이면 닉네임을 한 번도 변경하지 않은 상태
   readonly nicknameChangedAt: string | null;
+  readonly choiceGenerationMode: ChoiceGenerationMode;
 }
 
 export interface NicknameRegenerateResponse {
@@ -273,6 +290,31 @@ export interface DiffExplainPayload {
 export interface TodayQuestionResponse {
   readonly question: QuestionSummary | null;
   readonly alreadySolvedToday: boolean;
+}
+
+// === Daily Set ===
+export interface DailySetTodayResponse {
+  readonly questions: readonly QuestionSummary[];
+  readonly alreadyCompleted: boolean;
+  readonly correctCount: number | null;
+}
+
+export interface DailySetCompleteResponse {
+  readonly correctCount: number;
+  readonly rank: number;
+  readonly totalParticipants: number;
+}
+
+export interface LeaderboardEntry {
+  readonly rank: number;
+  readonly nickname: string;
+  readonly correctCount: number;
+}
+
+export interface LeaderboardResponse {
+  readonly date: string;
+  readonly entries: readonly LeaderboardEntry[];
+  readonly myEntry: LeaderboardEntry | null;
 }
 
 export interface RecommendationsResponse {

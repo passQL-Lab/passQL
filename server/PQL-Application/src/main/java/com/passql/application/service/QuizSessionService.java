@@ -13,6 +13,8 @@ import com.passql.question.entity.QuizSession;
 import com.passql.question.repository.QuestionChoiceSetItemRepository;
 import com.passql.question.repository.QuestionRepository;
 import com.passql.question.repository.QuizSessionRepository;
+import com.passql.member.constant.ChoiceGenerationMode;
+import com.passql.member.service.MemberService;
 import com.passql.question.service.ChoiceSetResolver;
 import com.passql.question.service.QuestionService;
 import com.passql.submission.entity.Submission;
@@ -43,6 +45,7 @@ public class QuizSessionService {
     private final ChoiceSetResolver choiceSetResolver;
     private final PrefetchService prefetchService;
     private final ObjectMapper objectMapper;
+    private final MemberService memberService;
 
     /**
      * 퀴즈 세션을 생성한다. 활성 AI_ONLY 문제 중 최대 10개를 무작위 픽.
@@ -92,7 +95,8 @@ public class QuizSessionService {
         UUID questionUuid = order.get(index);
 
         Question question = questionService.getQuestionEntity(questionUuid);
-        QuestionChoiceSet choiceSet = choiceSetResolver.resolveForUser(questionUuid, session.getMemberUuid());
+        ChoiceGenerationMode mode = memberService.getChoiceGenerationMode(session.getMemberUuid());
+        QuestionChoiceSet choiceSet = choiceSetResolver.resolveForUser(questionUuid, session.getMemberUuid(), mode);
         List<QuestionChoiceSetItem> items = choiceSetItemRepository
                 .findByChoiceSetUuidOrderBySortOrderAsc(choiceSet.getChoiceSetUuid());
 

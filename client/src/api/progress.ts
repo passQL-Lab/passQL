@@ -1,5 +1,5 @@
 import { apiFetch } from "./client";
-import type { ProgressResponse, HeatmapResponse, TopicAnalysisResponse, AiCommentResponse } from "../types/api";
+import type { ProgressResponse, HeatmapResponse, TopicAnalysisResponse, AiCommentResponse, WrongQuestionsResponse } from "../types/api";
 
 export function fetchProgress(): Promise<ProgressResponse> {
   return apiFetch("/progress");
@@ -21,4 +21,8 @@ export function fetchTopicAnalysis(): Promise<TopicAnalysisResponse> {
 export function fetchAiComment(sessionUuid?: string): Promise<AiCommentResponse> {
   const qs = sessionUuid ? `?sessionUuid=${sessionUuid}` : "";
   return apiFetch(`/progress/ai-comment${qs}`);
+}
+
+export function fetchWrongQuestions(size = 20): Promise<WrongQuestionsResponse> {
+  return apiFetch(`/progress/wrong-questions?size=${size}`);
 }
