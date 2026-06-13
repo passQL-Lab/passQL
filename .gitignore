@@ -107,3 +107,8 @@ coverage/
 # IDE 실행 설정 / 임시 다운로드 (AI 탐색 노이즈 — 추적 제외)
 .run/
 .template_download_temp
+
+# ====================================================================
+# SUH-DEVOPS-TEMPLATE: Auto-added entries
+# ====================================================================
+/.claude/settings.local.json
