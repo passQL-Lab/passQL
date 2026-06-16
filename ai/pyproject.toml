@@ -1,6 +1,6 @@
 [project]
 name = "passql-ai"
-version = "0.0.188"
+version = "0.0.189"
 description = "passQL AI Server - SQL 오류 설명, diff 해설, 유사 문제 검색"
 readme = "README.md"
 requires-python = ">=3.13"
