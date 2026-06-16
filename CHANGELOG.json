@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "lastUpdated": "2026-06-13T14:12:13Z",
-    "currentVersion": "0.0.188",
+    "lastUpdated": "2026-06-16T14:44:45Z",
+    "currentVersion": "0.0.189",
     "projectType": "spring",
-    "totalReleases": 92,
+    "totalReleases": 93,
     "projectTypes": [
       "spring",
       "flutter",
@@ -12,6 +12,28 @@
     ]
   },
   "releases": [
+    {
+      "version": "0.0.189",
+      "project_type": "spring",
+      "project_types": [
+        "spring",
+        "flutter",
+        "react",
+        "python"
+      ],
+      "date": "2026-06-16",
+      "pr_number": 325,
+      "raw_summary": "## Summary by CodeRabbit\n\n## 릴리스 노트\n\n* **버그 수정**\n  * 서버가 시작되지 않던 문제를 해결했습니다",
+      "parsed_changes": {
+        "버그_수정": {
+          "title": "버그 수정",
+          "items": [
+            "서버가 시작되지 않던 문제를 해결했습니다"
+          ]
+        }
+      },
+      "parse_method": "markdown"
+    },
     {
       "version": "0.0.188",
       "project_type": "spring",
