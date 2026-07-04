@@ -32,7 +32,7 @@ on:
   workflow_dispatch:
 
 env:
-  PROJECT_NAME: "project"
+  PROJECT_NAME: "passQL"
   NODE_VERSION: "20.15.0"
   ENV_FILE: ".env"
 
