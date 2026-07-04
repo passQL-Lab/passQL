@@ -22,10 +22,11 @@ on:
   push:
     branches:
       - deploy
+    paths: ['client/**']
   workflow_dispatch:
 
 env:
-  PROJECT_NAME: "project"
+  PROJECT_NAME: "passQL"
   DOCKER_IMAGE_PREFIX: "front-container"
   NODE_VERSION: "20.15.0"
   ENV_FILE_NAME: ".env"
